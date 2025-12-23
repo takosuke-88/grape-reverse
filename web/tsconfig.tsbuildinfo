@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/compute.ts","./src/main.tsx","./src/presets.ts","./src/run.ts","./src/smoke.ts","./src/vite-env.d.ts","./src/lib/reverse.ts","./src/pages/grapereverse.tsx","./src/pages/home.tsx"],"errors":true,"version":"5.8.3"}
