@@ -437,7 +437,7 @@ export default function GrapeReverse() {
         {/* 上部：入力カード ＋ 結果カード */}
         <div className="w-full max-w-2xl space-y-4 rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 sm:p-6 dark:bg-slate-900 dark:ring-slate-800">
           <h2 className="text-center text-[22px] font-bold tracking-tight sm:text-3xl">
-            【DEBUG】この画面は GrapeReverse.tsx です (更新確認用)
+            【DEBUG】この画面は GrapeReverse.tsx です
           </h2>
 
           {/* 機種 */}
