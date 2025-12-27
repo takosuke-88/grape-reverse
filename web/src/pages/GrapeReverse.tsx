@@ -485,7 +485,7 @@ export default function GrapeReverse() {
         {/* 上部：入力カード ＋ 結果カード */}
         <div className="w-full max-w-2xl space-y-4 rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 sm:p-6 dark:bg-slate-900 dark:ring-slate-800">
           <h2 className="text-center text-[22px] font-bold tracking-tight sm:text-3xl">
-            ぶどう確率 逆算
+            【DEBUG】この画面は GrapeReverse.tsx です (更新確認用)
           </h2>
 
           {/* 機種 */}
@@ -496,7 +496,7 @@ export default function GrapeReverse() {
             <select
               value={machineKey}
               onChange={e => setMachineKey(e.target.value as MachineKey)}
-              className="mt-1 h-14 w-full rounded-xl border border-slate-400 bg-white px-4 text-right text-xl tracking-wide tabular-nums focus:ring-blue-500 focus:outline-none sm:text-lg dark:border-slate-500 dark:bg-slate-700 dark:text-white"
+              className="mt-1 h-14 w-full rounded-xl border border-slate-400 bg-white px-4 text-left text-xl tracking-wide tabular-nums focus:ring-blue-500 focus:outline-none sm:text-lg dark:border-slate-500 dark:bg-slate-700 dark:text-white"
             >
               {Object.entries(MACHINES).map(([key, v]) => (
                 <option key={key} value={key}>
@@ -541,6 +541,10 @@ export default function GrapeReverse() {
             <span>入力をすべてリセット</span>
           </button>
         </div>
+        
+        {/* ぶどう逆算の簡易評価カード */}
+        {grapeEval && <GrapeEvalCard eval={grapeEval} />}
+        
         {ready && (
           <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
             <span className="inline-flex items-center gap-1">
@@ -557,9 +561,7 @@ export default function GrapeReverse() {
           highlightCombined={highlightCombinedSetting}
           highlightGrape={highlightGrapeSetting}
         />
-        {/* ぶどう逆算の簡易評価カード */}
-        {grapeEval && <GrapeEvalCard eval={grapeEval} />}
-        /* ---- 注意書き（ミスタージャグラー以外） ---- */
+        {/* ---- 注意書き（ミスタージャグラー以外） ---- */}
         {machineKey !== 'mister' && (
           <div className="mt-6 w-full max-w-md text-center text-[11px] text-slate-500 dark:text-slate-400">
             ※計算前提：チェリーは設定3の確率を使用。フリー打ちは奪取率66.7%（2/3）、ベル／ピエロは非奪取として無視。
@@ -607,7 +609,7 @@ function Field({
         onChange={e => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className="mt-0.5 h-10 w-full rounded-xl border border-slate-400 bg-white px-3 text-right text-lg tracking-wide tabular-nums focus:ring-blue-500 focus:outline-none sm:text-base dark:border-slate-500 dark:bg-slate-700 dark:text-white"
+        className="mt-0.5 h-10 w-full rounded-xl border border-slate-400 bg-white px-3 text-left text-lg tracking-wide tabular-nums focus:ring-blue-500 focus:outline-none sm:text-base dark:border-slate-500 dark:bg-slate-700 dark:text-white"
       />
     </label>
   )
@@ -684,10 +686,19 @@ function ResultCard({
 */}
         </div>
       ) : (
-        <p className="mt-3 text-center text-[12px] text-slate-500 sm:text-sm dark:text-slate-400">
-          BIG / REG / 差枚 / 総回転数を入力すると自動で表示します。
-        </p>
-      )}
+  <p className="mt-3 text-center text-[12px] text-slate-500 sm:text-sm dark:text-slate-400">
+    {res.reason === 'not_ready' ? (
+      <>BIG / REG / 差枚 / 総回転数を入力すると自動で表示します。</>
+    ) : res.reason === 'no_grape' ? (
+      <>ぶどう分の払い出しが0以下になりました（差枚の符号や入力値の整合性を確認してください）。</>
+    ) : res.reason === 'grape_error' ? (
+      <>ぶどう回数の算出に失敗しました（入力値の整合性を確認してください）。</>
+    ) : (
+      <>計算できませんでした（入力値を確認してください）。</>
+    )}
+  </p>
+)
+}
     </div>
   )
 }
@@ -799,13 +810,13 @@ function GrapeTable({
                 const isCombinedHit = highlightCombined === r.s
                 const isGrapeHit = highlightGrape === r.s
 
-                const clsBig = isBigHit ? 'text-blue-700 dark:text-blue-300' : ''
-                const clsReg = isRegHit ? 'text-rose-700 dark:text-rose-300' : ''
+                const clsBig = isBigHit ? 'font-extrabold text-blue-900 bg-blue-200/60 dark:text-blue-100 dark:bg-blue-800/60' : ''
+                const clsReg = isRegHit ? 'font-extrabold text-rose-900 bg-rose-200/60 dark:text-rose-100 dark:bg-rose-800/60' : ''
                 const clsCombined = isCombinedHit
-                  ? 'font-bold text-purple-700 dark:text-purple-300'
+                  ? 'font-extrabold text-purple-900 bg-purple-200/60 dark:text-purple-100 dark:bg-purple-800/60'
                   : ''
                 const clsGrape = isGrapeHit
-                  ? 'font-bold text-emerald-700 dark:text-emerald-300'
+                  ? 'font-extrabold text-emerald-900 bg-emerald-200/60 dark:text-emerald-100 dark:bg-emerald-800/60'
                   : ''
 
                 return (
