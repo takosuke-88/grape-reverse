@@ -513,7 +513,6 @@ export default function GrapeReverse() {
           highlightCombined={highlightCombinedSetting}
           highlightGrape={highlightGrapeSetting}
         />
-<<<<<<< HEAD
 
         {/* 全機種一覧 */}
         {listRows.length > 0 && (
@@ -579,8 +578,6 @@ export default function GrapeReverse() {
           </div>
         )}
 
-=======
->>>>>>> ad4eb1c23b8b4bab0c3fdcfbbcec242b1c9e63c7
         {/* ---- 注意書き（ミスタージャグラー以外） ---- */}
         {machineKey !== 'mister' && (
           <div className="mt-6 w-full max-w-md text-center text-[11px] text-slate-500 dark:text-slate-400">
@@ -821,7 +818,6 @@ function GrapeTable({
                 const isCombinedHit = highlightCombined === r.s
                 const isGrapeHit = highlightGrape === r.s
 
-<<<<<<< HEAD
                 const clsBig = isBigHit ? 'text-blue-600 dark:text-blue-300' : ''
                 const clsReg = isRegHit ? 'text-red-600 dark:text-red-300' : ''
                 const clsCombined = isCombinedHit
@@ -829,15 +825,6 @@ function GrapeTable({
                   : ''
                 const clsGrape = isGrapeHit
                   ? 'font-bold text-green-600 dark:text-green-300'
-=======
-                const clsBig = isBigHit ? 'font-extrabold text-blue-900 bg-blue-200/60 dark:text-blue-100 dark:bg-blue-800/60' : ''
-                const clsReg = isRegHit ? 'font-extrabold text-rose-900 bg-rose-200/60 dark:text-rose-100 dark:bg-rose-800/60' : ''
-                const clsCombined = isCombinedHit
-                  ? 'font-extrabold text-purple-900 bg-purple-200/60 dark:text-purple-100 dark:bg-purple-800/60'
-                  : ''
-                const clsGrape = isGrapeHit
-                  ? 'font-extrabold text-emerald-900 bg-emerald-200/60 dark:text-emerald-100 dark:bg-emerald-800/60'
->>>>>>> ad4eb1c23b8b4bab0c3fdcfbbcec242b1c9e63c7
                   : ''
 
                 return (
