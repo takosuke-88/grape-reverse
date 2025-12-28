@@ -170,13 +170,6 @@ const GRAPE_RATE_TABLE: Partial<Record<MachineKey, GrapeRates>> = {
 /** 設定番号の型（1〜6固定） */
 type Setting = 1 | 2 | 3 | 4 | 5 | 6
 
-/** 1設定あたりのボーナス確率（分母）セット */
-type BonusRatesPerSetting = {
-  big: number // BIGボーナス確率の分母
-  reg: number // REGボーナス確率の分母
-  combined: number // 合成確率の分母
-}
-
 /** 機種ごとのボーナス確率テーブル（分母） */
 const BONUS_RATE_TABLE: Record<
   MachineKey,
@@ -271,10 +264,6 @@ const nf2 = new Intl.NumberFormat('ja-JP', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 })
-const nf4 = new Intl.NumberFormat('ja-JP', {
-  minimumFractionDigits: 4,
-  maximumFractionDigits: 4,
-})
 
 /** 計算結果型 */
 type CalcResult =
@@ -340,8 +329,6 @@ export default function GrapeReverse() {
     Number.isFinite(parsed.total) &&
     parsed.total > 0
 
-  const hasAnyInput = bigCount !== '' || regCount !== '' || diffCoins !== '' || totalGames !== ''
-
   /** 選択機種の逆算（上部カード） */
   const CHERRY_RATE = m.cherryRateBySetting[3]
   const compute = (cherryGetRate: number): CalcResult => {
@@ -395,6 +382,7 @@ export default function GrapeReverse() {
     if (!ready || resFree.ok === false) return null
     const actualGrape = resFree.denom
     const grape = GRAPE_RATE_TABLE[machineKey]
+    if (!grape) return null
     return findNearestSetting(actualGrape, grape)
   }, [ready, resFree, machineKey])
 
@@ -549,6 +537,8 @@ export default function GrapeReverse() {
             </span>
           </div>
         )}
+        {/* ぶどう逆算の簡易評価カード */}
+        {grapeEval && <GrapeEvalCard eval={grapeEval} />}
         {/* 機種別：設定ごとのボーナス＆ぶどう確率（分母） */}
         <GrapeTable
           machineKey={machineKey}
@@ -557,9 +547,72 @@ export default function GrapeReverse() {
           highlightCombined={highlightCombinedSetting}
           highlightGrape={highlightGrapeSetting}
         />
-        {/* ぶどう逆算の簡易評価カード */}
-        {grapeEval && <GrapeEvalCard eval={grapeEval} />}
-        /* ---- 注意書き（ミスタージャグラー以外） ---- */
+
+        {/* 全機種一覧 */}
+        {listRows.length > 0 && (
+          <div className="mt-4 w-full max-w-4xl">
+            <div className="overflow-hidden rounded-2xl shadow-lg ring-1 ring-slate-300 dark:ring-slate-700">
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-3 dark:from-indigo-600 dark:to-purple-700">
+                <h3 className="text-center text-base font-bold text-white sm:text-lg">
+                  全機種：逆算ぶどう確率一覧
+                </h3>
+              </div>
+              <div className="overflow-x-auto bg-white dark:bg-slate-900">
+                <table className="min-w-full text-xs sm:text-sm">
+                  <thead className="bg-slate-100 text-slate-700 dark:bg-slate-800/70 dark:text-slate-200">
+                    <tr>
+                      <th className="px-3 py-2.5 text-left font-semibold sm:px-4">機種名</th>
+                      <th className="px-3 py-2.5 text-right font-semibold sm:px-4">
+                        チェリー狙い
+                      </th>
+                      <th className="px-3 py-2.5 text-right font-semibold sm:px-4">
+                        フリー打ち
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                    {listRows.map(row => {
+                      const isSelected = row.key === machineKey
+                      const rowClass = isSelected
+                        ? 'bg-indigo-50 dark:bg-indigo-950/30'
+                        : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
+
+                      return (
+                        <tr key={row.key} className={rowClass}>
+                          <td
+                            className={`px-3 py-2.5 sm:px-4 ${isSelected ? 'font-semibold text-indigo-900 dark:text-indigo-200' : ''}`}
+                          >
+                            {row.label}
+                          </td>
+                          <td className="px-3 py-2.5 text-right tabular-nums sm:px-4">
+                            {row.denomAim != null ? (
+                              <span className="text-emerald-700 dark:text-emerald-300">
+                                1/{nf2.format(row.denomAim)}
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 dark:text-slate-600">—</span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2.5 text-right tabular-nums sm:px-4">
+                            {row.denomFree != null ? (
+                              <span className="text-blue-700 dark:text-blue-300">
+                                1/{nf2.format(row.denomFree)}
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 dark:text-slate-600">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ---- 注意書き（ミスタージャグラー以外） ---- */}
         {machineKey !== 'mister' && (
           <div className="mt-6 w-full max-w-md text-center text-[11px] text-slate-500 dark:text-slate-400">
             ※計算前提：チェリーは設定3の確率を使用。フリー打ちは奪取率66.7%（2/3）、ベル／ピエロは非奪取として無視。
