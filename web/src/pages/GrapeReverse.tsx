@@ -170,13 +170,6 @@ const GRAPE_RATE_TABLE: Partial<Record<MachineKey, GrapeRates>> = {
 /** 設定番号の型（1〜6固定） */
 type Setting = 1 | 2 | 3 | 4 | 5 | 6
 
-/** 1設定あたりのボーナス確率（分母）セット */
-type BonusRatesPerSetting = {
-  big: number // BIGボーナス確率の分母
-  reg: number // REGボーナス確率の分母
-  combined: number // 合成確率の分母
-}
-
 /** 機種ごとのボーナス確率テーブル（分母） */
 const BONUS_RATE_TABLE: Record<
   MachineKey,
@@ -271,10 +264,6 @@ const nf2 = new Intl.NumberFormat('ja-JP', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 })
-const nf4 = new Intl.NumberFormat('ja-JP', {
-  minimumFractionDigits: 4,
-  maximumFractionDigits: 4,
-})
 
 /** 計算結果型 */
 type CalcResult =
@@ -340,8 +329,6 @@ export default function GrapeReverse() {
     Number.isFinite(parsed.total) &&
     parsed.total > 0
 
-  const hasAnyInput = bigCount !== '' || regCount !== '' || diffCoins !== '' || totalGames !== ''
-
   /** 選択機種の逆算（上部カード） */
   const CHERRY_RATE = m.cherryRateBySetting[3]
   const compute = (cherryGetRate: number): CalcResult => {
@@ -395,6 +382,7 @@ export default function GrapeReverse() {
     if (!ready || resFree.ok === false) return null
     const actualGrape = resFree.denom
     const grape = GRAPE_RATE_TABLE[machineKey]
+    if (!grape) return null
     return findNearestSetting(actualGrape, grape)
   }, [ready, resFree, machineKey])
 
@@ -443,42 +431,6 @@ export default function GrapeReverse() {
     return { ...best, confidence }
   }, [ready, resAim, machineKey, parsed.total])
 
-  /** 一覧（全機種） */
-  type Row = { key: MachineKey; label: string; denomAim?: number; denomFree?: number }
-  const listRows: Row[] = useMemo(() => {
-    if (!ready) return []
-    const { big, reg, diff, total } = parsed
-    const rows: Row[] = []
-
-    for (const [key, mm] of Object.entries(MACHINES) as [MachineKey, MachinePreset][]) {
-      const cherryRate = mm.cherryRateBySetting[3]
-      const baseInvest = total * 3
-      const baseBR = big * mm.big + reg * mm.reg
-      const baseReplay = total * CONSTS.REPLAY_RATE * CONSTS.REPLAY_PAYOUT
-
-      const calcDenom = (getRate: number): number | undefined => {
-        const payoutCherry = total * cherryRate * CONSTS.CHERRY_PAYOUT * getRate
-        const nonGrape = baseBR + baseReplay + payoutCherry
-        const grapePay = diff + baseInvest - nonGrape
-        if (grapePay <= 0) return undefined
-        const grapeCount = grapePay / CONSTS.GRAPE_PAYOUT
-        if (grapeCount <= 0) return undefined
-        return total / grapeCount
-      }
-
-      rows.push({
-        key,
-        label: mm.label,
-        denomAim: calcDenom(CONSTS.CHERRY_GET_AIM),
-        denomFree: calcDenom(CONSTS.CHERRY_GET_FREE),
-      })
-    }
-
-    return rows.sort((a, b) =>
-      a.key === machineKey ? -1 : b.key === machineKey ? 1 : a.label.localeCompare(b.label),
-    )
-  }, [ready, parsed, machineKey])
-
   return (
     <div className="min-h-[calc(100vh-4rem)] w-full bg-slate-50 px-4 py-6 sm:py-10 dark:bg-slate-950">
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-6 sm:gap-8">
@@ -496,7 +448,7 @@ export default function GrapeReverse() {
             <select
               value={machineKey}
               onChange={e => setMachineKey(e.target.value as MachineKey)}
-              className="mt-1 h-14 w-full rounded-xl border border-slate-400 bg-white px-4 text-right text-xl tracking-wide tabular-nums focus:ring-blue-500 focus:outline-none sm:text-lg dark:border-slate-500 dark:bg-slate-700 dark:text-white"
+              className="mt-1 h-14 w-full rounded-xl border border-slate-400 bg-white px-4 text-left text-xl tracking-wide tabular-nums focus:ring-blue-500 focus:outline-none sm:text-lg dark:border-slate-500 dark:bg-slate-700 dark:text-white"
             >
               {Object.entries(MACHINES).map(([key, v]) => (
                 <option key={key} value={key}>
@@ -541,6 +493,10 @@ export default function GrapeReverse() {
             <span>入力をすべてリセット</span>
           </button>
         </div>
+        
+        {/* ぶどう逆算の簡易評価カード */}
+        {grapeEval && <GrapeEvalCard eval={grapeEval} />}
+        
         {ready && (
           <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
             <span className="inline-flex items-center gap-1">
@@ -557,9 +513,7 @@ export default function GrapeReverse() {
           highlightCombined={highlightCombinedSetting}
           highlightGrape={highlightGrapeSetting}
         />
-        {/* ぶどう逆算の簡易評価カード */}
-        {grapeEval && <GrapeEvalCard eval={grapeEval} />}
-        /* ---- 注意書き（ミスタージャグラー以外） ---- */
+        {/* ---- 注意書き（ミスタージャグラー以外） ---- */}
         {machineKey !== 'mister' && (
           <div className="mt-6 w-full max-w-md text-center text-[11px] text-slate-500 dark:text-slate-400">
             ※計算前提：チェリーは設定3の確率を使用。フリー打ちは奪取率66.7%（2/3）、ベル／ピエロは非奪取として無視。
@@ -607,7 +561,7 @@ function Field({
         onChange={e => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className="mt-0.5 h-10 w-full rounded-xl border border-slate-400 bg-white px-3 text-right text-lg tracking-wide tabular-nums focus:ring-blue-500 focus:outline-none sm:text-base dark:border-slate-500 dark:bg-slate-700 dark:text-white"
+        className="mt-0.5 h-10 w-full rounded-xl border border-slate-400 bg-white px-3 text-left text-lg tracking-wide tabular-nums focus:ring-blue-500 focus:outline-none sm:text-base dark:border-slate-500 dark:bg-slate-700 dark:text-white"
       />
     </label>
   )
@@ -808,13 +762,13 @@ function GrapeTable({
                 const isCombinedHit = highlightCombined === r.s
                 const isGrapeHit = highlightGrape === r.s
 
-                const clsBig = isBigHit ? 'text-blue-700 dark:text-blue-300' : ''
-                const clsReg = isRegHit ? 'text-rose-700 dark:text-rose-300' : ''
+                const clsBig = isBigHit ? 'font-extrabold text-blue-900 bg-blue-200/60 dark:text-blue-100 dark:bg-blue-800/60' : ''
+                const clsReg = isRegHit ? 'font-extrabold text-rose-900 bg-rose-200/60 dark:text-rose-100 dark:bg-rose-800/60' : ''
                 const clsCombined = isCombinedHit
-                  ? 'font-bold text-purple-700 dark:text-purple-300'
+                  ? 'font-extrabold text-purple-900 bg-purple-200/60 dark:text-purple-100 dark:bg-purple-800/60'
                   : ''
                 const clsGrape = isGrapeHit
-                  ? 'font-bold text-emerald-700 dark:text-emerald-300'
+                  ? 'font-extrabold text-emerald-900 bg-emerald-200/60 dark:text-emerald-100 dark:bg-emerald-800/60'
                   : ''
 
                 return (

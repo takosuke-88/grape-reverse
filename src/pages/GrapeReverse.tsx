@@ -431,42 +431,6 @@ export default function GrapeReverse() {
     return { ...best, confidence }
   }, [ready, resAim, machineKey, parsed.total])
 
-  /** 一覧（全機種） */
-  type Row = { key: MachineKey; label: string; denomAim?: number; denomFree?: number }
-  const listRows: Row[] = useMemo(() => {
-    if (!ready) return []
-    const { big, reg, diff, total } = parsed
-    const rows: Row[] = []
-
-    for (const [key, mm] of Object.entries(MACHINES) as [MachineKey, MachinePreset][]) {
-      const cherryRate = mm.cherryRateBySetting[3]
-      const baseInvest = total * 3
-      const baseBR = big * mm.big + reg * mm.reg
-      const baseReplay = total * CONSTS.REPLAY_RATE * CONSTS.REPLAY_PAYOUT
-
-      const calcDenom = (getRate: number): number | undefined => {
-        const payoutCherry = total * cherryRate * CONSTS.CHERRY_PAYOUT * getRate
-        const nonGrape = baseBR + baseReplay + payoutCherry
-        const grapePay = diff + baseInvest - nonGrape
-        if (grapePay <= 0) return undefined
-        const grapeCount = grapePay / CONSTS.GRAPE_PAYOUT
-        if (grapeCount <= 0) return undefined
-        return total / grapeCount
-      }
-
-      rows.push({
-        key,
-        label: mm.label,
-        denomAim: calcDenom(CONSTS.CHERRY_GET_AIM),
-        denomFree: calcDenom(CONSTS.CHERRY_GET_FREE),
-      })
-    }
-
-    return rows.sort((a, b) =>
-      a.key === machineKey ? -1 : b.key === machineKey ? 1 : a.label.localeCompare(b.label),
-    )
-  }, [ready, parsed, machineKey])
-
   return (
     <div className="min-h-[calc(100vh-4rem)] w-full bg-slate-50 px-4 py-6 sm:py-10 dark:bg-slate-950">
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-6 sm:gap-8">
@@ -529,6 +493,8 @@ export default function GrapeReverse() {
             <span>入力をすべてリセット</span>
           </button>
         </div>
+        {/* ぶどう逆算の簡易評価カード */}
+        {grapeEval && <GrapeEvalCard eval={grapeEval} />}
         {ready && (
           <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
             <span className="inline-flex items-center gap-1">
@@ -547,6 +513,7 @@ export default function GrapeReverse() {
           highlightCombined={highlightCombinedSetting}
           highlightGrape={highlightGrapeSetting}
         />
+<<<<<<< HEAD
 
         {/* 全機種一覧 */}
         {listRows.length > 0 && (
@@ -612,6 +579,8 @@ export default function GrapeReverse() {
           </div>
         )}
 
+=======
+>>>>>>> ad4eb1c23b8b4bab0c3fdcfbbcec242b1c9e63c7
         {/* ---- 注意書き（ミスタージャグラー以外） ---- */}
         {machineKey !== 'mister' && (
           <div className="mt-6 w-full max-w-md text-center text-[11px] text-slate-500 dark:text-slate-400">
@@ -852,6 +821,7 @@ function GrapeTable({
                 const isCombinedHit = highlightCombined === r.s
                 const isGrapeHit = highlightGrape === r.s
 
+<<<<<<< HEAD
                 const clsBig = isBigHit ? 'text-blue-600 dark:text-blue-300' : ''
                 const clsReg = isRegHit ? 'text-red-600 dark:text-red-300' : ''
                 const clsCombined = isCombinedHit
@@ -859,6 +829,15 @@ function GrapeTable({
                   : ''
                 const clsGrape = isGrapeHit
                   ? 'font-bold text-green-600 dark:text-green-300'
+=======
+                const clsBig = isBigHit ? 'font-extrabold text-blue-900 bg-blue-200/60 dark:text-blue-100 dark:bg-blue-800/60' : ''
+                const clsReg = isRegHit ? 'font-extrabold text-rose-900 bg-rose-200/60 dark:text-rose-100 dark:bg-rose-800/60' : ''
+                const clsCombined = isCombinedHit
+                  ? 'font-extrabold text-purple-900 bg-purple-200/60 dark:text-purple-100 dark:bg-purple-800/60'
+                  : ''
+                const clsGrape = isGrapeHit
+                  ? 'font-extrabold text-emerald-900 bg-emerald-200/60 dark:text-emerald-100 dark:bg-emerald-800/60'
+>>>>>>> ad4eb1c23b8b4bab0c3fdcfbbcec242b1c9e63c7
                   : ''
 
                 return (
