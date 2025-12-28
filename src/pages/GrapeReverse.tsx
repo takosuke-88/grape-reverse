@@ -830,19 +830,19 @@ function GrapeTable({
     <div className="mt-4 w-full max-w-md sm:mt-2 sm:max-w-lg">
       <div className="overflow-hidden rounded-2xl shadow ring-1 ring-slate-300 dark:ring-slate-800">
         <div className="bg-white px-4 py-3 dark:bg-slate-900">
-          <h3 className="text-sm font-semibold sm:text-base">
+          <h3 className="text-base font-semibold sm:text-lg">
             {MACHINES[machineKey].label}：設定別 ボーナス＆ぶどう確率
           </h3>
         </div>
         <div className="overflow-x-auto bg-white dark:bg-slate-900">
-          <table className="min-w-full text-xs sm:text-sm">
+          <table className="min-w-full text-sm sm:text-base">
             <thead className="bg-slate-50 text-slate-600 dark:bg-slate-800/50 dark:text-slate-300">
               <tr>
-                <th className="w-14 px-3 py-2 text-left whitespace-nowrap sm:w-16 sm:px-4">設定</th>
-                <th className="px-3 py-2 text-left whitespace-nowrap sm:px-4">B確率</th>
-                <th className="px-3 py-2 text-left whitespace-nowrap sm:px-4">R確率</th>
-                <th className="px-3 py-2 text-left whitespace-nowrap sm:px-4">合成</th>
-                <th className="px-3 py-2 text-left whitespace-nowrap sm:px-4">ぶ確率</th>
+                <th className="w-14 px-3 py-2.5 text-left whitespace-nowrap sm:w-16 sm:px-4 sm:py-3">設定</th>
+                <th className="px-3 py-2.5 text-left whitespace-nowrap sm:px-4 sm:py-3">B確率</th>
+                <th className="px-3 py-2.5 text-left whitespace-nowrap sm:px-4 sm:py-3">R確率</th>
+                <th className="px-3 py-2.5 text-left whitespace-nowrap sm:px-4 sm:py-3">合成</th>
+                <th className="px-3 py-2.5 text-left whitespace-nowrap sm:px-4 sm:py-3">ぶ確率</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
@@ -852,25 +852,25 @@ function GrapeTable({
                 const isCombinedHit = highlightCombined === r.s
                 const isGrapeHit = highlightGrape === r.s
 
-                const clsBig = isBigHit ? 'text-blue-700 dark:text-blue-300' : ''
-                const clsReg = isRegHit ? 'text-rose-700 dark:text-rose-300' : ''
+                const clsBig = isBigHit ? 'text-blue-600 dark:text-blue-300' : ''
+                const clsReg = isRegHit ? 'text-red-600 dark:text-red-300' : ''
                 const clsCombined = isCombinedHit
-                  ? 'font-bold text-purple-700 dark:text-purple-300'
+                  ? 'font-bold text-purple-600 dark:text-purple-300'
                   : ''
                 const clsGrape = isGrapeHit
-                  ? 'font-bold text-emerald-700 dark:text-emerald-300'
+                  ? 'font-bold text-green-600 dark:text-green-300'
                   : ''
 
                 return (
                   <tr key={r.s}>
-                    <td className="px-4 py-2">{r.s}</td>
+                    <td className="px-4 py-2.5 sm:py-3">{r.s}</td>
 
-                    <td className={`px-4 py-2 tabular-nums ${clsBig}`}>1/{nf1.format(r.big)}</td>
-                    <td className={`px-4 py-2 tabular-nums ${clsReg}`}>1/{nf1.format(r.reg)}</td>
-                    <td className={`px-4 py-2 tabular-nums ${clsCombined}`}>
+                    <td className={`px-4 py-2.5 sm:py-3 tabular-nums ${clsBig}`}>1/{nf1.format(r.big)}</td>
+                    <td className={`px-4 py-2.5 sm:py-3 tabular-nums ${clsReg}`}>1/{nf1.format(r.reg)}</td>
+                    <td className={`px-4 py-2.5 sm:py-3 tabular-nums ${clsCombined}`}>
                       1/{nf1.format(r.combined)}
                     </td>
-                    <td className={`px-4 py-2 tabular-nums ${clsGrape}`}>
+                    <td className={`px-4 py-2.5 sm:py-3 tabular-nums ${clsGrape}`}>
                       1/{nf2.format(r.grape)}
                     </td>
                   </tr>
@@ -898,37 +898,37 @@ function GrapeEvalCard({ eval: e }: { eval: GrapeEval }) {
 
   return (
     <div className="mt-3 w-full max-w-md sm:mt-3 sm:max-w-lg">
-      <div className="rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-xs shadow-sm sm:text-sm dark:border-amber-700 dark:bg-amber-900/30">
-        <div className="mb-1 flex items-center justify-between gap-2">
-          <span className="font-semibold text-amber-900 dark:text-amber-100">
+      <div className="rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-4 text-sm shadow-sm sm:px-5 sm:py-5 sm:text-base dark:border-amber-700 dark:bg-amber-900/30">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <span className="text-base font-semibold sm:text-lg text-amber-900 dark:text-amber-100">
             ぶどう推定の簡易評価（チェリー狙い）
           </span>
-          <span className="text-[11px] text-amber-800/80 dark:text-amber-200/80">
+          <span className="text-xs sm:text-sm text-amber-800/80 dark:text-amber-200/80">
             {confidenceLabel}
           </span>
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <div className="text-[11px] text-slate-600 dark:text-slate-300">逆算ぶどう</div>
-            <div className="text-sm font-semibold tabular-nums dark:text-slate-50">
+            <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">逆算ぶどう</div>
+            <div className="text-base sm:text-lg font-semibold tabular-nums dark:text-slate-50">
               1/{nf2.format(e.actualDenom)}
             </div>
           </div>
           <div>
-            <div className="text-[11px] text-slate-600 dark:text-slate-300">
+            <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
               最も近い設定（公称値）
             </div>
-            <div className="text-sm font-semibold tabular-nums dark:text-slate-50">
+            <div className="text-base sm:text-lg font-semibold tabular-nums dark:text-slate-50">
               設定{e.nearestSetting}：1/{nf2.format(e.nearestSettingDenom)}
             </div>
           </div>
         </div>
-        <div className="mt-1 flex flex-wrap items-baseline justify-between gap-2">
-          <div className="text-[11px] text-slate-700 dark:text-slate-200">
+        <div className="mt-2 flex flex-wrap items-baseline justify-between gap-2">
+          <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-200">
             差分：{e.diff >= 0 ? '+' : ''}
             {nf2.format(e.diff)}（{diffLabel}）
           </div>
-          <div className="text-[11px] text-slate-600 dark:text-slate-300">
+          <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
             総回転数：{e.totalGames.toLocaleString('ja-JP')}G
           </div>
         </div>
