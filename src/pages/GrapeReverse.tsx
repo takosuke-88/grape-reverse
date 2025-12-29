@@ -436,9 +436,14 @@ export default function GrapeReverse() {
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-6 sm:gap-8">
         {/* 上部：入力カード ＋ 結果カード */}
         <div className="w-full max-w-2xl space-y-4 rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 sm:p-6 dark:bg-slate-900 dark:ring-slate-800">
-          <h2 className="text-center text-[22px] font-bold tracking-tight sm:text-3xl">
-            ぶどう確率 逆算
-          </h2>
+          <div className="text-center">
+            <h2 className="text-[22px] font-bold tracking-tight leading-tight sm:text-3xl">
+              6号機ジャグラーぶどう確率 逆算
+            </h2>
+            <p className="text-[18px] font-bold tracking-tight sm:text-2xl">
+              設定推測ツール
+            </p>
+          </div>
 
           {/* 機種 */}
           <label className="block">
@@ -493,8 +498,6 @@ export default function GrapeReverse() {
             <span>入力をすべてリセット</span>
           </button>
         </div>
-        {/* ぶどう逆算の簡易評価カード */}
-        {grapeEval && <GrapeEvalCard eval={grapeEval} />}
         {ready && (
           <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
             <span className="inline-flex items-center gap-1">
@@ -513,70 +516,6 @@ export default function GrapeReverse() {
           highlightCombined={highlightCombinedSetting}
           highlightGrape={highlightGrapeSetting}
         />
-
-        {/* 全機種一覧 */}
-        {listRows.length > 0 && (
-          <div className="mt-4 w-full max-w-4xl">
-            <div className="overflow-hidden rounded-2xl shadow-lg ring-1 ring-slate-300 dark:ring-slate-700">
-              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-3 dark:from-indigo-600 dark:to-purple-700">
-                <h3 className="text-center text-base font-bold text-white sm:text-lg">
-                  全機種：逆算ぶどう確率一覧
-                </h3>
-              </div>
-              <div className="overflow-x-auto bg-white dark:bg-slate-900">
-                <table className="min-w-full text-xs sm:text-sm">
-                  <thead className="bg-slate-100 text-slate-700 dark:bg-slate-800/70 dark:text-slate-200">
-                    <tr>
-                      <th className="px-3 py-2.5 text-left font-semibold sm:px-4">機種名</th>
-                      <th className="px-3 py-2.5 text-right font-semibold sm:px-4">
-                        チェリー狙い
-                      </th>
-                      <th className="px-3 py-2.5 text-right font-semibold sm:px-4">
-                        フリー打ち
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                    {listRows.map(row => {
-                      const isSelected = row.key === machineKey
-                      const rowClass = isSelected
-                        ? 'bg-indigo-50 dark:bg-indigo-950/30'
-                        : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
-
-                      return (
-                        <tr key={row.key} className={rowClass}>
-                          <td
-                            className={`px-3 py-2.5 sm:px-4 ${isSelected ? 'font-semibold text-indigo-900 dark:text-indigo-200' : ''}`}
-                          >
-                            {row.label}
-                          </td>
-                          <td className="px-3 py-2.5 text-right tabular-nums sm:px-4">
-                            {row.denomAim != null ? (
-                              <span className="text-emerald-700 dark:text-emerald-300">
-                                1/{nf2.format(row.denomAim)}
-                              </span>
-                            ) : (
-                              <span className="text-slate-400 dark:text-slate-600">—</span>
-                            )}
-                          </td>
-                          <td className="px-3 py-2.5 text-right tabular-nums sm:px-4">
-                            {row.denomFree != null ? (
-                              <span className="text-blue-700 dark:text-blue-300">
-                                1/{nf2.format(row.denomFree)}
-                              </span>
-                            ) : (
-                              <span className="text-slate-400 dark:text-slate-600">—</span>
-                            )}
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* ---- 注意書き（ミスタージャグラー以外） ---- */}
         {machineKey !== 'mister' && (
@@ -626,7 +565,7 @@ function Field({
         onChange={e => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className="mt-0.5 h-10 w-full rounded-xl border border-slate-400 bg-white px-3 text-right text-lg tracking-wide tabular-nums focus:ring-blue-500 focus:outline-none sm:text-base dark:border-slate-500 dark:bg-slate-700 dark:text-white"
+        className="mt-0.5 h-10 w-full rounded-xl border border-slate-400 bg-white px-3 text-left text-lg tracking-wide tabular-nums focus:ring-blue-500 focus:outline-none sm:text-base dark:border-slate-500 dark:bg-slate-700 dark:text-white"
       />
     </label>
   )
