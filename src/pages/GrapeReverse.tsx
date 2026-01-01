@@ -523,7 +523,26 @@ export default function GrapeReverse() {
             ※計算前提：チェリーは設定3の確率を使用。フリー打ちは奪取率66.7%（2/3）、ベル／ピエロは非奪取として無視。
           </div>
         )}
+
+        {/* フッター */}
+        <footer className="mt-12 w-full text-center text-xs text-gray-400 dark:text-gray-600">
+          <p>Copyright(c) 2026 GrapeReverse All Rights Reserved.</p>
+          <p className="mt-1">当サイトのコード・タグ等の無断転載・使用は固く禁じます。</p>
+        </footer>
       </div>
+
+      {/* 管理者設定（GA除外）- 右下隅固定 */}
+      <button
+        type="button"
+        onClick={() => {
+          localStorage.setItem('is_admin_user', 'true')
+          alert('管理者のアクセス除外設定をONにしました。以降のアクセスは計測されません。')
+          window.location.reload()
+        }}
+        className="fixed bottom-0 right-0 text-[10px] text-gray-500 opacity-20 hover:opacity-40 p-2"
+      >
+        Admin Settings
+      </button>
     </div>
   )
 }
