@@ -3,6 +3,6 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  base: '/grape-reverse/', // ← GitHub Pages（Project Pages）用のベースパス
+  base: '/', // ← 独自ドメイン（grape-reverse.com）用のベースパス
   plugins: [react()],
 })
