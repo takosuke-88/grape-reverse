@@ -27,7 +27,7 @@ export default function HomePage() {
   }, [])
 
   return (
-    <div className="min-h-screen w-full bg-slate-50 px-4 py-8 dark:bg-slate-950">
+    <div className="min-h-screen w-full bg-slate-50 px-6 py-8 sm:px-8 dark:bg-slate-950">
       <div className="mx-auto flex max-w-2xl flex-col items-center gap-6">
         {/* ヘッダー */}
         <div className="text-center space-y-2">
@@ -40,7 +40,7 @@ export default function HomePage() {
         </div>
 
         {/* 機種一覧リスト */}
-        <div className="w-full space-y-3">
+        <div className="w-full space-y-3 px-1 sm:px-0">
           {ALL_MACHINES.map(machine => {
             const urlPath = getUrlPathForMachine(machine.key)
             const themeClass = MACHINE_THEMES[machine.key] || 'bg-gradient-to-r from-slate-600 to-slate-800 text-white'

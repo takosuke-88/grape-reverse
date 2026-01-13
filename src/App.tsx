@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Header from './components/Header'
+import Breadcrumbs from './components/Breadcrumbs'
 import HomePage from './pages/HomePage'
 import AllMachinesPage from './pages/AllMachinesPage'
 import AimEX6Page from './pages/AimEX6Page'
@@ -16,6 +17,9 @@ export default function App() {
     <BrowserRouter>
       {/* 全ページ共通のヘッダー */}
       <Header />
+      
+      {/* パンくずリスト */}
+      <Breadcrumbs />
       
       <Routes>
         {/* トップページ（機種一覧） */}
