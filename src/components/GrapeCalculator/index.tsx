@@ -97,10 +97,20 @@ export default function GrapeCalculator({
     return null
   }, [machine, machines, selectedKey])
 
+  // モード切替（シンプル/プロ）
+  const [isProMode, setIsProMode] = useState(false)
+
+  // シンプルモード用
   const [bigCount, setBigCount] = useState('')
   const [regCount, setRegCount] = useState('')
   const [diffCoins, setDiffCoins] = useState('')
   const [totalGames, setTotalGames] = useState('')
+
+  // プロモード用（詳細入力）
+  const [soloBig, setSoloBig] = useState('')
+  const [cherryBig, setCherryBig] = useState('')
+  const [soloReg, setSoloReg] = useState('')
+  const [cherryReg, setCherryReg] = useState('')
 
   // localStorage自動保存・復元（機種ごとに異なるキーを使用）
   const STORAGE_KEY = machine ? `grape-reverse-form-${machine.key}` : 'grape-reverse-form-all'
@@ -112,10 +122,16 @@ export default function GrapeCalculator({
         const parsed = JSON.parse(saved)
         // 複数機種モードの場合のみselectedKeyを復元
         if (parsed.selectedKey && !machine) setSelectedKey(parsed.selectedKey)
+        if (parsed.isProMode !== undefined) setIsProMode(parsed.isProMode)
         if (parsed.bigCount) setBigCount(String(parsed.bigCount))
         if (parsed.regCount) setRegCount(String(parsed.regCount))
         if (parsed.diffCoins) setDiffCoins(String(parsed.diffCoins))
         if (parsed.totalGames) setTotalGames(String(parsed.totalGames))
+        // プロモード用
+        if (parsed.soloBig) setSoloBig(String(parsed.soloBig))
+        if (parsed.cherryBig) setCherryBig(String(parsed.cherryBig))
+        if (parsed.soloReg) setSoloReg(String(parsed.soloReg))
+        if (parsed.cherryReg) setCherryReg(String(parsed.cherryReg))
       }
     } catch {}
   }, [STORAGE_KEY, machine])
@@ -123,15 +139,16 @@ export default function GrapeCalculator({
   useEffect(() => {
     try {
       const dataToSave = machine
-        ? { bigCount, diffCoins, regCount, totalGames }
-        : { selectedKey, bigCount, diffCoins, regCount, totalGames }
+        ? { isProMode, bigCount, diffCoins, regCount, totalGames, soloBig, cherryBig, soloReg, cherryReg }
+        : { selectedKey, isProMode, bigCount, diffCoins, regCount, totalGames, soloBig, cherryBig, soloReg, cherryReg }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave))
     } catch {}
-  }, [STORAGE_KEY, selectedKey, bigCount, regCount, diffCoins, totalGames, machine])
+  }, [STORAGE_KEY, selectedKey, isProMode, bigCount, regCount, diffCoins, totalGames, soloBig, cherryBig, soloReg, cherryReg, machine])
 
+  // プロモード時は詳細入力を合算
   const parsed = {
-    big: Number(bigCount),
-    reg: Number(regCount),
+    big: isProMode ? Number(soloBig || 0) + Number(cherryBig || 0) : Number(bigCount),
+    reg: isProMode ? Number(soloReg || 0) + Number(cherryReg || 0) : Number(regCount),
     diff: Number(diffCoins),
     total: Number(totalGames),
   }
@@ -324,18 +341,79 @@ export default function GrapeCalculator({
             </div>
           )}
 
+          {/* モード切替 */}
+          <div className="flex items-center justify-center gap-2 border-b border-slate-200 pb-4 dark:border-slate-700">
+            <button
+              type="button"
+              onClick={() => setIsProMode(false)}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all sm:px-5 sm:py-2.5 sm:text-base ${
+                !isProMode
+                  ? 'bg-blue-600 text-white shadow-md dark:bg-blue-500'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
+              }`}
+            >
+              シンプル
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsProMode(true)}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all sm:px-5 sm:py-2.5 sm:text-base ${
+                isProMode
+                  ? 'bg-gradient-to-r from-purple-600 to-amber-500 text-white shadow-md'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
+              }`}
+            >
+              プロモード
+            </button>
+          </div>
+
           {/* 入力フォーム */}
-          <form className="grid grid-cols-2 gap-3">
-            <Field label="BIG回数" value={bigCount} onChange={setBigCount} />
-            <Field label="REG回数" value={regCount} onChange={setRegCount} />
-            <Field
-              label="差枚数（±）"
-              value={diffCoins}
-              onChange={setDiffCoins}
-              placeholder="例: 500 / -300"
-            />
-            <Field label="総回転数" value={totalGames} onChange={setTotalGames} placeholder="G数" />
-          </form>
+          {!isProMode ? (
+            // シンプルモード
+            <form className="grid grid-cols-2 gap-3">
+              <Field label="BIG回数" value={bigCount} onChange={setBigCount} />
+              <Field label="REG回数" value={regCount} onChange={setRegCount} />
+              <Field
+                label="差枚数（±）"
+                value={diffCoins}
+                onChange={setDiffCoins}
+                placeholder="例: 500 / -300"
+              />
+              <Field label="総回転数" value={totalGames} onChange={setTotalGames} placeholder="G数" />
+            </form>
+          ) : (
+            // プロモード（詳細入力）
+            <form className="space-y-4">
+              {/* BIGグループ */}
+              <div className="space-y-2">
+                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200">BIG回数</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="単独BIG" value={soloBig} onChange={setSoloBig} placeholder="0" />
+                  <Field label="チェリー重複BIG" value={cherryBig} onChange={setCherryBig} placeholder="0" />
+                </div>
+              </div>
+              
+              {/* REGグループ */}
+              <div className="space-y-2">
+                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200">REG回数</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="単独REG" value={soloReg} onChange={setSoloReg} placeholder="0" />
+                  <Field label="チェリー重複REG" value={cherryReg} onChange={setCherryReg} placeholder="0" />
+                </div>
+              </div>
+              
+              {/* 差枚数・総回転数 */}
+              <div className="grid grid-cols-2 gap-3">
+                <Field
+                  label="差枚数（±）"
+                  value={diffCoins}
+                  onChange={setDiffCoins}
+                  placeholder="例: 500 / -300"
+                />
+                <Field label="総回転数" value={totalGames} onChange={setTotalGames} placeholder="G数" />
+              </div>
+            </form>
+          )}
 
           {/* 結果（選択機種） */}
           <div className="mt-1.5 grid grid-cols-2 gap-2.5 sm:gap-3">
@@ -349,6 +427,10 @@ export default function GrapeCalculator({
               setRegCount('')
               setDiffCoins('')
               setTotalGames('')
+              setSoloBig('')
+              setCherryBig('')
+              setSoloReg('')
+              setCherryReg('')
               localStorage.removeItem(STORAGE_KEY)
             }}
             className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-rose-500 bg-rose-500/90 text-sm font-semibold tracking-wide text-white shadow-md hover:bg-rose-500 focus:ring-2 focus:ring-rose-500/70 focus:outline-none active:scale-[0.98] dark:border-rose-300 dark:bg-rose-400/90 dark:text-slate-900 dark:hover:bg-rose-300"
