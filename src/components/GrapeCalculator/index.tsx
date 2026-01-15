@@ -694,12 +694,29 @@ function GrapeTable({
                 const isCombinedHit = highlightCombined === r.s
                 const isGrapeHit = highlightGrape === r.s
 
-                const clsBig = isBigHit ? 'text-blue-600 dark:text-blue-300' : ''
-                const clsReg = isRegHit ? 'text-red-600 dark:text-red-300' : ''
-                const clsCombined = isCombinedHit
-                  ? 'font-bold text-purple-600 dark:text-purple-300'
-                  : ''
-                const clsGrape = isGrapeHit ? 'font-bold text-green-600 dark:text-green-300' : ''
+                // ハイライトスタイルの定義
+                // 通常ハイライト（設定1～5）: 赤文字・太字・サイズ大
+                const styleNormal = 'text-red-600 dark:text-red-500 font-bold text-lg'
+                // プレミアムハイライト（設定6）: レインボー文字・極太・サイズ特大
+                const stylePremium =
+                  'bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 to-blue-500 bg-clip-text text-transparent font-extrabold text-xl'
+
+                // 判定ロジック関数
+                const getStyle = (isHit: boolean) => {
+                  if (!isHit) return '' // ヒットなし（デフォルト色）
+                  return r.s === 6 ? stylePremium : styleNormal
+                }
+
+                // 各セルのスタイル決定
+                // ヒットしていない場合は、標準色（Slate）を使用
+                // ※元々Step79ではヒット時以外クラス指定なし（親継承）だったが、
+                //   ダークモード視認性確保のため明示的に指定する
+                const baseText = 'text-slate-900 dark:text-slate-200'
+
+                const clsBig = isBigHit ? getStyle(true) : baseText
+                const clsReg = isRegHit ? getStyle(true) : baseText
+                const clsCombined = isCombinedHit ? getStyle(true) : baseText
+                const clsGrape = isGrapeHit ? getStyle(true) : baseText
 
                 return (
                   <tr key={r.s}>
