@@ -17,15 +17,19 @@ type CalcResult =
   | { ok: true; p: number; denom: number; percent: number; grapeCount: number }
   | { ok: false; reason: string }
 
-// ぶどう評価用の型
+// ぶどう評価用の型（拡張版：ぶどう・REG・合成の3要素）
 type GrapeConfidence = 'low' | 'mid' | 'high'
 
-type GrapeEval = {
+type EvalItem = {
+  actualDenom: number
   nearestSetting: Setting
   nearestSettingDenom: number
-  actualDenom: number
-  diff: number
-  diffAbs: number
+}
+
+type GrapeEval = {
+  grape: EvalItem
+  reg: EvalItem
+  combined: EvalItem
   confidence: GrapeConfidence
   totalGames: number
 }
@@ -227,36 +231,94 @@ export default function GrapeCalculator({
   }, [ready, resFree, currentMachine])
 
   // ぶどう設定マッチ＋簡易評価（チェリー狙いを基準に判定）
+  // 拡張：REG、合成も同様に最近似設定を求める
   const grapeEval: GrapeEval | null = useMemo(() => {
     if (!ready) return null
     if (!resAim.ok) return null
 
+    // 1. ぶどう (既存ロジック)
     const grapeData = currentMachine.grapeRateBySetting
-    const actualDenom = resAim.denom
-    const settings: Setting[] = [1, 2, 3, 4, 5, 6]
-
-    let best: GrapeEval | null = null
-
-    for (const s of settings) {
-      const official = grapeData[s]
-      if (!official) continue
-      const diff = actualDenom - official
-      const diffAbs = Math.abs(diff)
-
-      if (!best || diffAbs < best.diffAbs) {
-        best = {
-          nearestSetting: s,
-          nearestSettingDenom: official,
-          actualDenom,
-          diff,
-          diffAbs,
-          confidence: 'low',
-          totalGames: parsed.total,
+    const actualGrape = resAim.denom
+    let bestGrape: EvalItem | null = null
+    {
+      let minDiff = Infinity
+      for (let s = 1; s <= 6; s++) {
+        const setting = s as Setting
+        const val = grapeData[setting]
+        if (!val) continue
+        const diff = Math.abs(actualGrape - val)
+        if (diff < minDiff) {
+          minDiff = diff
+          bestGrape = {
+            actualDenom: actualGrape,
+            nearestSetting: setting,
+            nearestSettingDenom: val,
+          }
         }
       }
     }
 
-    if (!best) return null
+    // 2. REG
+    const actualReg = parsed.total / parsed.reg // regが0の場合はInfinity
+    let bestReg: EvalItem | null = null
+    {
+       // regが0の場合は計算不能 -> nearestSetting=1, nearestSettingDenom=0 (便宜上)
+       if (parsed.reg <= 0) {
+         bestReg = {
+           actualDenom: Infinity,
+           nearestSetting: 1,
+           nearestSettingDenom: currentMachine.bonusRateBySetting[1].reg, // 便宜上設定1
+         }
+       } else {
+        let minDiff = Infinity
+        for (let s = 1; s <= 6; s++) {
+          const setting = s as Setting
+          const val = currentMachine.bonusRateBySetting[setting].reg
+          if (!val) continue
+          const diff = Math.abs(actualReg - val)
+           if (diff < minDiff) {
+             minDiff = diff
+             bestReg = {
+               actualDenom: actualReg,
+               nearestSetting: setting,
+               nearestSettingDenom: val,
+             }
+           }
+        }
+       }
+    }
+
+    // 3. 合成
+    const hitCount = parsed.big + parsed.reg
+    const actualCombined = parsed.total / hitCount
+    let bestCombined: EvalItem | null = null
+    {
+       if (hitCount <= 0) {
+          bestCombined = {
+             actualDenom: Infinity,
+             nearestSetting: 1,
+             nearestSettingDenom: currentMachine.bonusRateBySetting[1].combined
+          }
+       } else {
+          let minDiff = Infinity
+          for (let s = 1; s <= 6; s++) {
+             const setting = s as Setting
+             const val = currentMachine.bonusRateBySetting[setting].combined
+             if (!val) continue
+             const diff = Math.abs(actualCombined - val)
+             if (diff < minDiff) {
+                minDiff = diff
+                bestCombined = {
+                   actualDenom: actualCombined,
+                   nearestSetting: setting,
+                   nearestSettingDenom: val,
+                }
+             }
+          }
+       }
+    }
+
+    if (!bestGrape || !bestReg || !bestCombined) return null
 
     // 総回転数から信頼度をざっくり決める
     let confidence: GrapeConfidence = 'low'
@@ -266,8 +328,14 @@ export default function GrapeCalculator({
       confidence = 'mid'
     }
 
-    return { ...best, confidence }
-  }, [ready, resAim, currentMachine, parsed.total])
+    return {
+       grape: bestGrape,
+       reg: bestReg,
+       combined: bestCombined,
+       confidence,
+       totalGames: parsed.total
+    }
+  }, [ready, resAim, currentMachine, parsed.total, parsed.reg, parsed.big])
 
   return (
     <div className="min-h-[calc(100vh-4rem)] w-full bg-slate-50 px-4 py-6 sm:py-10 dark:bg-slate-950">
@@ -746,54 +814,53 @@ function GrapeTable({
 }
 
 /* ---- ぶどう評価カード ---- */
+/* ---- ぶどう評価カード（拡張版） ---- */
 function GrapeEvalCard({ eval: e }: { eval: GrapeEval }) {
-  const diffLabel =
-    e.diff < 0
-      ? '公称値よりぶどう良好'
-      : e.diff > 0
-        ? '公称値よりぶどうやや弱め'
-        : '公称値とほぼ一致'
-
   const confidenceLabel =
     e.confidence === 'high' ? '信頼度：高' : e.confidence === 'mid' ? '信頼度：中' : '信頼度：低'
 
+  // 行コンポーネント
+  const Row = ({ label, item }: { label: string; item: EvalItem }) => {
+     // Infinityハンドリング
+     const actualText = item.actualDenom === Infinity ? '-' : `1/${nf2.format(item.actualDenom)}`
+     
+     return (
+        <div className="grid grid-cols-[80px_1fr_1fr] items-center gap-2 border-b border-amber-200/50 py-2 last:border-0 dark:border-amber-700/50">
+           <div className="text-xs font-bold text-slate-600 dark:text-slate-300 sm:text-sm">
+              {label}
+           </div>
+           {/* 実戦値 */}
+           <div className="text-right text-base font-bold tabular-nums text-slate-800 dark:text-slate-100 sm:text-lg">
+              {actualText}
+           </div>
+           {/* 近似設定 */}
+           <div className="text-right text-sm font-bold text-slate-600 dark:text-slate-300 sm:text-base">
+              設定{item.nearestSetting}：1/{nf2.format(item.nearestSettingDenom)}
+           </div>
+        </div>
+     )
+  }
+
   return (
     <div className="mt-3 w-full max-w-md sm:mt-3 sm:max-w-lg">
-      <div className="rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-4 text-sm shadow-sm sm:px-5 sm:py-5 sm:text-base dark:border-amber-700 dark:bg-amber-900/30">
-        <div className="mb-2 flex items-center justify-between gap-2">
-          <span className="text-base font-semibold sm:text-lg text-amber-900 dark:text-amber-100">
-            ぶどう推定の簡易評価（チェリー狙い）
+      <div className="rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-3 shadow-sm sm:px-5 sm:py-4 dark:border-amber-700 dark:bg-amber-900/30">
+        <div className="mb-2 flex items-center justify-between border-b-2 border-amber-200 pb-2 dark:border-amber-700/50">
+          <span className="text-base font-bold text-amber-900 sm:text-lg dark:text-amber-100">
+            簡易設定評価（チェリー狙い）
           </span>
-          <span className="text-xs sm:text-sm text-amber-800/80 dark:text-amber-200/80">
+          <span className="text-xs font-semibold text-amber-800/80 sm:text-sm dark:text-amber-200/80">
             {confidenceLabel}
           </span>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
-              逆算ぶどう
-            </div>
-            <div className="text-base sm:text-lg font-semibold tabular-nums dark:text-slate-50">
-              1/{nf2.format(e.actualDenom)}
-            </div>
-          </div>
-          <div>
-            <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
-              最も近い設定（公称値）
-            </div>
-            <div className="text-base sm:text-lg font-semibold tabular-nums dark:text-slate-50">
-              設定{e.nearestSetting}：1/{nf2.format(e.nearestSettingDenom)}
-            </div>
-          </div>
+        
+        <div className="flex flex-col">
+           <Row label="ぶどう" item={e.grape} />
+           <Row label="REG確率" item={e.reg} />
+           <Row label="合成確率" item={e.combined} />
         </div>
-        <div className="mt-2 flex flex-wrap items-baseline justify-between gap-2">
-          <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-200">
-            差分：{e.diff >= 0 ? '+' : ''}
-            {nf2.format(e.diff)}（{diffLabel}）
-          </div>
-          <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
-            総回転数：{e.totalGames.toLocaleString('ja-JP')}G
-          </div>
+
+        <div className="mt-2 text-right text-xs font-medium text-slate-500 dark:text-slate-400">
+           総回転数：{e.totalGames.toLocaleString('ja-JP')}G
         </div>
       </div>
     </div>
