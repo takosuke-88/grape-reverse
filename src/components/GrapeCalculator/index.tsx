@@ -28,6 +28,7 @@ type EvalItem = {
 
 type GrapeEval = {
   grape: EvalItem
+  soloReg?: EvalItem // Pro Mode Only
   reg: EvalItem
   combined: EvalItem
   confidence: GrapeConfidence
@@ -258,7 +259,37 @@ export default function GrapeCalculator({
       }
     }
 
-    // 2. REG
+    // 2. REG単独確率 (Proモードかつデータがある場合のみ)
+    let bestSoloReg: EvalItem | undefined = undefined
+    if (isProMode && currentMachine.soloReg) {
+      // soloReg (string state) を数値変換
+      const soloRegNum = Number(soloReg || 0)
+      if (soloRegNum > 0 && parsed.total > 0) {
+        const actualSoloReg = parsed.total / soloRegNum
+        const soloRegData = currentMachine.soloReg
+        
+        let minDiff = Infinity
+        for (let s = 1; s <= 6; s++) {
+          const setting = s as Setting
+          const val = soloRegData[setting]
+          if (!val) continue
+          const diff = Math.abs(actualSoloReg - val)
+          if (diff < minDiff) {
+            minDiff = diff
+            bestSoloReg = {
+              actualDenom: actualSoloReg,
+              nearestSetting: setting,
+              nearestSettingDenom: val,
+            }
+          }
+        }
+      } else {
+        // データ不足時は便宜上設定1付近の値をセットするか、undefinedのままにして表示側でハンドリング
+        // ここではundefinedのままとし、表示側で「-」とする
+      }
+    }
+
+    // 3. REG (トータル)
     const actualReg = parsed.total / parsed.reg // regが0の場合はInfinity
     let bestReg: EvalItem | null = null
     {
@@ -288,7 +319,7 @@ export default function GrapeCalculator({
        }
     }
 
-    // 3. 合成
+    // 4. 合成
     const hitCount = parsed.big + parsed.reg
     const actualCombined = parsed.total / hitCount
     let bestCombined: EvalItem | null = null
@@ -330,12 +361,13 @@ export default function GrapeCalculator({
 
     return {
        grape: bestGrape,
+       soloReg: bestSoloReg,
        reg: bestReg,
        combined: bestCombined,
        confidence,
        totalGames: parsed.total
     }
-  }, [ready, resAim, currentMachine, parsed.total, parsed.reg, parsed.big])
+  }, [ready, resAim, currentMachine, parsed.total, parsed.reg, parsed.big, isProMode, soloReg]) // 依存配列に isProMode, soloReg を追加
 
   return (
     <div className="min-h-[calc(100vh-4rem)] w-full bg-slate-50 px-4 py-6 sm:py-10 dark:bg-slate-950">
@@ -815,6 +847,7 @@ function GrapeTable({
 
 /* ---- ぶどう評価カード ---- */
 /* ---- ぶどう評価カード（拡張版） ---- */
+/* ---- ぶどう評価カード（拡張版） ---- */
 function GrapeEvalCard({ eval: e }: { eval: GrapeEval }) {
   const confidenceLabel =
     e.confidence === 'high' ? '信頼度：高' : e.confidence === 'mid' ? '信頼度：中' : '信頼度：低'
@@ -854,7 +887,8 @@ function GrapeEvalCard({ eval: e }: { eval: GrapeEval }) {
         </div>
         
         <div className="flex flex-col">
-           <Row label="ぶどう" item={e.grape} />
+           <Row label="ぶどう確率" item={e.grape} />
+           {e.soloReg && <Row label="単独REG" item={e.soloReg} />}
            <Row label="REG確率" item={e.reg} />
            <Row label="合成確率" item={e.combined} />
         </div>

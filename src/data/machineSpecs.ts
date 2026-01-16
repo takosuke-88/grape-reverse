@@ -27,6 +27,8 @@ export type MachineSpec = {
     5: { big: number; reg: number; combined: number }
     6: { big: number; reg: number; combined: number }
   }
+  /** 単独REG確率 (Proモード評価用) */
+  soloReg?: SettingRates
 }
 
 /** 共通定数 */
@@ -70,6 +72,14 @@ export const aimEX6: MachineSpec = {
     5: { big: 259.0, reg: 255.0, combined: 128.5 },
     6: { big: 255.0, reg: 255.0, combined: 127.5 },
   },
+  soloReg: {
+    1: 630.15,
+    2: 574.88,
+    3: 474.90,
+    4: 448.88,
+    5: 364.09,
+    6: 327.68,
+  },
 }
 
 /** マイジャグラーV */
@@ -101,6 +111,14 @@ export const myJuggler5: MachineSpec = {
     4: { big: 254.0, reg: 290.0, combined: 135.4 },
     5: { big: 240.1, reg: 268.6, combined: 126.8 },
     6: { big: 229.1, reg: 229.1, combined: 114.6 },
+  },
+  soloReg: {
+    1: 655.36,
+    2: 601.25,
+    3: 492.75,
+    4: 407.06,
+    5: 390.10,
+    6: 327.68,
   },
 }
 
@@ -134,6 +152,14 @@ export const funkyJuggler2: MachineSpec = {
     5: { big: 240.1, reg: 299.3, combined: 133.2 },
     6: { big: 219.9, reg: 262.1, combined: 119.6 },
   },
+  soloReg: {
+    1: 621.1,
+    2: 567.5,
+    3: 513.4,
+    4: 450.9,
+    5: 406.8,
+    6: 355.9,
+  },
 }
 
 /** ゴーゴージャグラー3 */
@@ -165,6 +191,14 @@ export const gogoJuggler3: MachineSpec = {
     4: { big: 254.0, reg: 268.6, combined: 130.5 },
     5: { big: 247.3, reg: 247.3, combined: 123.7 },
     6: { big: 234.9, reg: 234.9, combined: 117.4 },
+  },
+  soloReg: {
+    1: 485.45,
+    2: 451.97,
+    3: 434.01,
+    4: 383.25,
+    5: 341.33,
+    6: 320.03,
   },
 }
 
@@ -198,6 +232,14 @@ export const jugglerGirlsSS: MachineSpec = {
     5: { big: 243.6, reg: 270.8, combined: 128.3 },
     6: { big: 226.0, reg: 252.1, combined: 119.2 },
   },
+  soloReg: {
+    1: 520.1,
+    2: 481.9,
+    3: 436.9,
+    4: 397.2,
+    5: 358.1, // 推定値
+    6: 269.8, // 実戦値・推定値
+  },
 }
 
 /** ウルトラミラクルジャグラー */
@@ -229,6 +271,14 @@ export const ultraMiracleJuggler: MachineSpec = {
     4: { big: 242.7, reg: 322.8, combined: 138.6 },
     5: { big: 233.2, reg: 297.9, combined: 130.8 },
     6: { big: 216.3, reg: 277.7, combined: 121.6 },
+  },
+  soloReg: {
+    1: 630.0, // 推定
+    2: 590.0, // 推定
+    3: 490.0, // 推定
+    4: 450.0, // 推定
+    5: 414.8, // 予測値
+    6: 379.9, // 予測値
   },
 }
 
@@ -262,6 +312,14 @@ export const misterJuggler: MachineSpec = {
     5: { big: 240.9, reg: 257.0, combined: 124.4 },
     6: { big: 237.4, reg: 237.4, combined: 118.7 },
   },
+  soloReg: {
+    1: 512.00,
+    2: 478.37,
+    3: 439.84,
+    4: 378.82,
+    5: 327.68,
+    6: 297.89,
+  },
 }
 
 /** ハッピージャグラーVⅢ（ブイスリー） */
@@ -293,6 +351,14 @@ export const happyJugglerV3: MachineSpec = {
     4: { big: 254.0, reg: 300.6, combined: 137.7 },
     5: { big: 239.2, reg: 273.1, combined: 127.5 },
     6: { big: 226.0, reg: 256.0, combined: 120.0 },
+  },
+  soloReg: {
+    1: 682.67,
+    2: 612.49,
+    3: 574.88,
+    4: 496.49,
+    5: 455.11,
+    6: 439.84,
   },
 }
 
