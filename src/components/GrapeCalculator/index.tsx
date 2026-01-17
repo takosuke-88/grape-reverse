@@ -549,8 +549,8 @@ export default function GrapeCalculator({
             </span>
           </div>
         )}
-        {/* ぶどう逆算の簡易評価カード */}
-        {grapeEval && <GrapeEvalCard eval={grapeEval} />}
+        {/* ぶどう逆算の簡易評価カード（常時表示） */}
+        <GrapeEvalCard eval={grapeEval} />
         {/* 機種別：設定ごとのボーナス＆ぶどう確率（分母） */}
         <GrapeTable
           machine={currentMachine}
@@ -775,16 +775,16 @@ function GrapeTable({
           </h3>
         </div>
         <div className="overflow-x-auto bg-white dark:bg-slate-900">
-          <table className="min-w-full text-sm sm:text-base">
+          <table className="min-w-full text-xs sm:text-base">
             <thead className="bg-slate-50 text-slate-600 dark:bg-slate-800/50 dark:text-slate-300">
               <tr>
-                <th className="w-14 px-3 py-2.5 text-left whitespace-nowrap sm:w-16 sm:px-4 sm:py-3">
+                <th className="w-12 px-2 py-2 text-left whitespace-nowrap sm:w-16 sm:px-4 sm:py-3">
                   設定
                 </th>
-                <th className="px-3 py-2.5 text-left whitespace-nowrap sm:px-4 sm:py-3">B確率</th>
-                <th className="px-3 py-2.5 text-left whitespace-nowrap sm:px-4 sm:py-3">R確率</th>
-                <th className="px-3 py-2.5 text-left whitespace-nowrap sm:px-4 sm:py-3">合成</th>
-                <th className="px-3 py-2.5 text-left whitespace-nowrap sm:px-4 sm:py-3">ぶ確率</th>
+                <th className="px-2 py-2 text-left whitespace-nowrap sm:px-4 sm:py-3">B確率</th>
+                <th className="px-2 py-2 text-left whitespace-nowrap sm:px-4 sm:py-3">R確率</th>
+                <th className="px-2 py-2 text-left whitespace-nowrap sm:px-4 sm:py-3">合成</th>
+                <th className="px-2 py-2 text-left whitespace-nowrap sm:px-4 sm:py-3">ぶ確率</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
@@ -795,11 +795,11 @@ function GrapeTable({
                 const isGrapeHit = highlightGrape === r.s
 
                 // ハイライトスタイルの定義
-                // 通常ハイライト（設定1～5）: 赤文字・太字・サイズ大
-                const styleNormal = 'text-red-600 dark:text-red-500 font-bold text-lg'
-                // プレミアムハイライト（設定6）: レインボー文字・極太・サイズ特大
+                // 通常ハイライト（設定1～5）: 赤文字・太字・サイズ大(PCのみ)
+                const styleNormal = 'text-red-600 dark:text-red-500 font-bold text-sm sm:text-lg'
+                // プレミアムハイライト（設定6）: レインボー文字・極太・サイズ特大(PCのみ)
                 const stylePremium =
-                  'bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 to-blue-500 bg-clip-text text-transparent font-extrabold text-xl'
+                  'bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 to-blue-500 bg-clip-text text-transparent font-extrabold text-base sm:text-xl'
 
                 // 判定ロジック関数
                 const getStyle = (isHit: boolean) => {
@@ -809,8 +809,6 @@ function GrapeTable({
 
                 // 各セルのスタイル決定
                 // ヒットしていない場合は、標準色（Slate）を使用
-                // ※元々Step79ではヒット時以外クラス指定なし（親継承）だったが、
-                //   ダークモード視認性確保のため明示的に指定する
                 const baseText = 'text-slate-900 dark:text-slate-200'
 
                 const clsBig = isBigHit ? getStyle(true) : baseText
@@ -820,18 +818,18 @@ function GrapeTable({
 
                 return (
                   <tr key={r.s}>
-                    <td className="px-4 py-2.5 sm:py-3">{r.s}</td>
+                    <td className="px-2 py-2 sm:px-4 sm:py-3">{r.s}</td>
 
-                    <td className={`px-4 py-2.5 sm:py-3 tabular-nums ${clsBig}`}>
+                    <td className={`px-2 py-2 sm:px-4 sm:py-3 tabular-nums ${clsBig}`}>
                       1/{nf1.format(r.big)}
                     </td>
-                    <td className={`px-4 py-2.5 sm:py-3 tabular-nums ${clsReg}`}>
+                    <td className={`px-2 py-2 sm:px-4 sm:py-3 tabular-nums ${clsReg}`}>
                       1/{nf1.format(r.reg)}
                     </td>
-                    <td className={`px-4 py-2.5 sm:py-3 tabular-nums ${clsCombined}`}>
+                    <td className={`px-2 py-2 sm:px-4 sm:py-3 tabular-nums ${clsCombined}`}>
                       1/{nf1.format(r.combined)}
                     </td>
-                    <td className={`px-4 py-2.5 sm:py-3 tabular-nums ${clsGrape}`}>
+                    <td className={`px-2 py-2 sm:px-4 sm:py-3 tabular-nums ${clsGrape}`}>
                       1/{nf2.format(r.grape)}
                     </td>
                   </tr>
@@ -848,15 +846,29 @@ function GrapeTable({
 /* ---- ぶどう評価カード ---- */
 /* ---- ぶどう評価カード（拡張版） ---- */
 /* ---- ぶどう評価カード（拡張版） ---- */
-function GrapeEvalCard({ eval: e }: { eval: GrapeEval }) {
+
+function GrapeEvalCard({ eval: e }: { eval: GrapeEval | null }) {
+  // データがない（null）場合のデフォルト表示
+  const isReady = e !== null
+  
   const confidenceLabel =
-    e.confidence === 'high' ? '信頼度：高' : e.confidence === 'mid' ? '信頼度：中' : '信頼度：低'
+    isReady && e.confidence === 'high'
+      ? '信頼度：高'
+      : isReady && e.confidence === 'mid'
+      ? '信頼度：中'
+      : isReady && e.confidence === 'low'
+      ? '信頼度：低'
+      : '信頼度：-'
 
   // 行コンポーネント
-  const Row = ({ label, item }: { label: string; item: EvalItem }) => {
-     // Infinityハンドリング
-     const actualText = item.actualDenom === Infinity ? '-' : `1/${nf2.format(item.actualDenom)}`
+  const Row = ({ label, item }: { label: string; item: EvalItem | null }) => {
+     // Infinityハンドリング & nullハンドリング
+     const actualText = !item || item.actualDenom === Infinity ? '-' : `1/${nf2.format(item.actualDenom)}`
      
+     const settingText = !item 
+        ? '設定 -：-'
+        : `設定${item.nearestSetting}：1/${nf2.format(item.nearestSettingDenom)}`
+
      return (
         <div className="grid grid-cols-[80px_1fr_1fr] items-center gap-2 border-b border-amber-200/50 py-2 last:border-0 dark:border-amber-700/50">
            <div className="text-xs font-bold text-slate-600 dark:text-slate-300 sm:text-sm">
@@ -868,7 +880,7 @@ function GrapeEvalCard({ eval: e }: { eval: GrapeEval }) {
            </div>
            {/* 近似設定 */}
            <div className="text-right text-sm font-bold text-slate-600 dark:text-slate-300 sm:text-base">
-              設定{item.nearestSetting}：1/{nf2.format(item.nearestSettingDenom)}
+              {settingText}
            </div>
         </div>
      )
@@ -887,14 +899,19 @@ function GrapeEvalCard({ eval: e }: { eval: GrapeEval }) {
         </div>
         
         <div className="flex flex-col">
-           <Row label="ぶどう確率" item={e.grape} />
-           {e.soloReg && <Row label="単独REG" item={e.soloReg} />}
-           <Row label="REG確率" item={e.reg} />
-           <Row label="合成確率" item={e.combined} />
+           <Row label="ぶどう確率" item={isReady ? e.grape : null} />
+           {/* プロモードの単独REGは、データがあるときだけ表示（未入力なら非表示のままでOK、あるいは-表示も可だが、行数が増えるので既存ロジックに従いnullなら出さない手もあるが、
+               「常に表示」の意図を汲むと、既存枠があるものは出すべき。
+               ただしe.soloRegはプロモード限定の要素なので、isReadyがfalseのときはデフォルトでは出さない方が自然（モード不明なため）。
+               いったん isReady && e.soloReg の既存判定を踏襲し、未入力時は非表示とする。
+            */}
+           {isReady && e.soloReg && <Row label="単独REG" item={e.soloReg} />}
+           <Row label="REG確率" item={isReady ? e.reg : null} />
+           <Row label="合成確率" item={isReady ? e.combined : null} />
         </div>
 
         <div className="mt-2 text-right text-xs font-medium text-slate-500 dark:text-slate-400">
-           総回転数：{e.totalGames.toLocaleString('ja-JP')}G
+           総回転数：{isReady ? e.totalGames.toLocaleString('ja-JP') : 0}G
         </div>
       </div>
     </div>
