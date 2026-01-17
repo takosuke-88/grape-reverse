@@ -568,7 +568,7 @@ export default function GrapeCalculator({
         )}
 
         {/* フッター */}
-        <footer className="mt-12 w-full text-center text-xs text-gray-400 dark:text-gray-600">
+        <footer className="mt-12 w-full text-center text-xs text-gray-400 dark:text-gray-400">
           <p>Copyright(c) 2026 GrapeReverse All Rights Reserved.</p>
           <p className="mt-1">当サイトのコード・タグ等の無断転載・使用は固く禁じます。</p>
         </footer>
@@ -627,7 +627,7 @@ function Field({
         onChange={e => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className="mt-0.5 h-10 w-full rounded-xl border border-slate-400 bg-white px-3 text-left text-lg tracking-wide tabular-nums focus:ring-blue-500 focus:outline-none sm:text-base dark:border-slate-500 dark:bg-slate-700 dark:text-white"
+        className="mt-0.5 h-10 w-full rounded-xl border border-slate-400 bg-white px-3 text-left text-lg tracking-wide tabular-nums focus:ring-blue-500 focus:outline-none sm:text-base dark:border-slate-500 dark:bg-slate-800 dark:text-white"
       />
     </label>
   )

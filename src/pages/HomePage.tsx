@@ -93,7 +93,7 @@ export default function HomePage() {
         </div>
 
         {/* フッター */}
-        <footer className="mt-8 w-full text-center text-xs text-gray-400 dark:text-gray-600">
+        <footer className="mt-8 w-full text-center text-xs text-gray-400 dark:text-gray-400">
           <p>Copyright(c) 2026 GrapeReverse All Rights Reserved.</p>
           <p className="mt-1">当サイトのコード・タグ等の無断転載・使用は固く禁じます。</p>
         </footer>
