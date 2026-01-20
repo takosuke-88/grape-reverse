@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, Link } from 'react-router-dom'
 import type { MachineSpec, Setting } from '../../data/machineSpecs'
 import { CONSTS, ALL_MACHINES } from '../../data/machineSpecs'
 
@@ -568,6 +568,24 @@ export default function GrapeCalculator({
         )}
 
 
+
+
+        {/* ▼▼▼ 追加するコラムリンク ▼▼▼ */}
+        <div className="mt-8 mb-6 mx-4">
+          <div className="bg-blue-50 dark:bg-gray-800 border border-blue-200 dark:border-gray-700 rounded-lg p-4 shadow-sm text-center">
+            <div className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">
+              💡 攻略情報のヒント
+            </div>
+            <Link
+              to="/columns/myjuggler5-setting6-behavior"
+              className="text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center justify-center gap-1"
+            >
+              <span>【必読】設定6はこう動く！ボーナスより「ぶどう」を信じるべき理由</span>
+              <span>→</span>
+            </Link>
+          </div>
+        </div>
+        {/* ▲▲▲ ここまで ▲▲▲ */}
 
         {/* フッター */}
         <footer className="mt-12 w-full text-center text-xs text-gray-400 dark:text-gray-400">
