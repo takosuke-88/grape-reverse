@@ -11,6 +11,7 @@ import JugglerGirlsSSPage from './pages/JugglerGirlsSSPage'
 import UltraMiracleJugglerPage from './pages/UltraMiracleJugglerPage'
 import MisterJugglerPage from './pages/MisterJugglerPage'
 import HappyJugglerV3Page from './pages/HappyJugglerV3Page'
+import MyJugglerColumn from './pages/columns/myjuggler5-setting6-behavior'
 
 export default function App() {
   return (
@@ -37,6 +38,9 @@ export default function App() {
         <Route path="/ultramiracle" element={<UltraMiracleJugglerPage />} />
         <Route path="/mister" element={<MisterJugglerPage />} />
         <Route path="/happyv3" element={<HappyJugglerV3Page />} />
+        
+        {/* コラム記事 */}
+        <Route path="/columns/myjuggler5-setting6-behavior" element={<MyJugglerColumn />} />
 
         {/* 404 - トップページにリダイレクト */}
         <Route path="*" element={<Navigate to="/" replace />} />

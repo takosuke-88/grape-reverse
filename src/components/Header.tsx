@@ -26,6 +26,16 @@ export default function Header() {
               ジャグラー設定判別ツール
             </p>
           </div>
+          
+          {/* 右側のナビゲーション */}
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 sm:right-6">
+            <button
+              onClick={() => navigate('/columns/myjuggler5-setting6-behavior')}
+              className="rounded-full bg-white/20 px-4 py-1.5 text-xs font-bold text-white transition hover:bg-white/30 sm:text-sm"
+            >
+              攻略コラム
+            </button>
+          </div>
         </div>
       </div>
     </header>

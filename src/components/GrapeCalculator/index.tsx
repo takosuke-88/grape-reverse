@@ -567,6 +567,8 @@ export default function GrapeCalculator({
           </div>
         )}
 
+
+
         {/* フッター */}
         <footer className="mt-12 w-full text-center text-xs text-gray-400 dark:text-gray-400">
           <p>Copyright(c) 2026 GrapeReverse All Rights Reserved.</p>
