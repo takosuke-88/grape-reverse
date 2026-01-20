@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
+
 import GrapeCalculator from '../components/GrapeCalculator'
 import { myJuggler5 } from '../data/machineSpecs'
 
