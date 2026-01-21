@@ -9,9 +9,10 @@
     
     <!-- Google Analytics (GA4) with Admin Exclusion -->
     <script>
-      // 管理者アクセス除外チェック
+      // UIで設定された管理者フラグをチェック
       if (localStorage.getItem('is_admin_user') === 'true') {
         window['ga-disable-G-40PZGCDP8H'] = true;
+        console.log('Analytics disabled by admin flag');
       }
     </script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-40PZGCDP8H"></script>
