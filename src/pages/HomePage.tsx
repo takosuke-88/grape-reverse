@@ -125,6 +125,19 @@ export default function HomePage() {
           <p className="mt-1">当サイトのコード・タグ等の無断転載・使用は固く禁じます。</p>
         </footer>
       </div>
+
+      {/* 管理者設定（GA除外）- 右下隅固定 */}
+      <button
+        type="button"
+        onClick={() => {
+          localStorage.setItem('is_admin_user', 'true')
+          alert('管理者のアクセス除外設定をONにしました。以降のアクセスは計測されません。')
+          window.location.reload()
+        }}
+        className="fixed bottom-0 right-0 text-[10px] text-gray-500 opacity-20 hover:opacity-40 p-2"
+      >
+        Admin Settings
+      </button>
     </div>
   )
 }
