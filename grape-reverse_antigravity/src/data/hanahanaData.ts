@@ -8,6 +8,8 @@ export type HanaHanaMachine = {
   regProbabilities: number[];
   hasBigSuika?: boolean; // BIG中スイカの概念があるか
   bigSuikaProbabilities?: number[]; // 設定1~6の分母 (ある場合)
+  payoutRatios?: number[]; // 設定1~6の機械割(%)
+  coinPayout?: { big: number; reg: number }; // BIG/REGの払い出し枚数
 };
 
 export const hanahanaData: Record<string, HanaHanaMachine> = {
@@ -41,7 +43,9 @@ export const hanahanaData: Record<string, HanaHanaMachine> = {
     bigProbabilities: [292, 280, 268, 256, 244, 232],
     regProbabilities: [489, 460, 430, 399, 369, 339],
     hasBigSuika: true,
-    bigSuikaProbabilities: [40.06, 38.0, 36.0, 34.0, 32.0, 31.4] // 補完値含む
+    bigSuikaProbabilities: [40.06, 38.0, 36.0, 34.0, 32.0, 31.4], // 補完値含む
+    payoutRatios: [97.8, 99.9, 102.0, 104.2, 107.0, 110.0], // 設定1〜6の機械割
+    coinPayout: { big: 252, reg: 96 } // BIG252枚、REG96枚
   },
   'houoh-tensho': {
     id: 'houoh-tensho',

@@ -1,6 +1,9 @@
-import React, { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { hanahanaData, type HanaHanaMachine } from '../../data/hanahanaData'
 import { HANAHANA_PAYOUTS, REPLAY_RATE, CHERRY_RATE_APPROX, SUIKA_RATE_APPROX } from './payouts'
+import ExpectedIncomeSimulator from './ExpectedIncomeSimulator'
+import SlumpGraphSimulator from './SlumpGraphSimulator'
+import AdviceCard from './AdviceCard'
 
 type CalcResult =
   | { ok: true; p: number; denom: number; percent: number; count: number }
@@ -331,6 +334,20 @@ export default function HanaHanaCalculator({ machineId }: { machineId?: string }
                </table>
             </div>
         )}
+
+        {/* アドバイスカード */}
+        {ready && evalResult && (
+          <AdviceCard
+            nearestSetting={evalResult.bell.nearestSetting}
+            totalGames={evalResult.totalGames}
+          />
+        )}
+
+        {/* 期待収支シミュレーター */}
+        <ExpectedIncomeSimulator machine={currentMachine} />
+
+        {/* スランプグラフ シミュレーター */}
+        <SlumpGraphSimulator machine={currentMachine} />
 
       </div>
      </div>
