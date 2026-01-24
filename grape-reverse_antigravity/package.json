@@ -6,7 +6,7 @@
   "homepage": "https://grape-reverse.com",
   "scripts": {
     "dev": "vite --host",
-    "build": "tsc -b && vite build && shx cp dist/index.html dist/404.html",
+    "build": "vite build && shx cp dist/index.html dist/404.html",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
