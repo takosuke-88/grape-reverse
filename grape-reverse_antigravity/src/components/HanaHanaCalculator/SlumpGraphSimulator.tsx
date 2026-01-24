@@ -153,7 +153,7 @@ export default function SlumpGraphSimulator({ machine }: Props) {
                   {stats.bigCount}回
                 </div>
                 <div className="text-xs text-red-500 dark:text-red-400">
-                  1/{(8000 / stats.bigCount).toFixed(0)}
+                  {stats.bigCount > 0 ? `1/${(8000 / stats.bigCount).toFixed(0)}` : '-'}
                 </div>
               </div>
               <div className="rounded-xl bg-blue-100 p-3 text-center dark:bg-blue-900/40">
@@ -162,7 +162,7 @@ export default function SlumpGraphSimulator({ machine }: Props) {
                   {stats.regCount}回
                 </div>
                 <div className="text-xs text-blue-500 dark:text-blue-400">
-                  1/{(8000 / stats.regCount).toFixed(0)}
+                  {stats.regCount > 0 ? `1/${(8000 / stats.regCount).toFixed(0)}` : '-'}
                 </div>
               </div>
               <div
