@@ -7,6 +7,6 @@ export default function KingHanaPage() {
   }, [])
 
   return (
-    <HanaHanaCalculator machineId="king-hanahana" />
+    <HanaHanaCalculator machineId="king-hanahana" showMachineSelector={true} />
   )
 }

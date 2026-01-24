@@ -7,6 +7,6 @@ export default function StarHanaPage() {
   }, [])
 
   return (
-    <HanaHanaCalculator machineId="star-hanahana" />
+    <HanaHanaCalculator machineId="star-hanahana" showMachineSelector={true} />
   )
 }

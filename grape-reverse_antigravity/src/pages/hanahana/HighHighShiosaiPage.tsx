@@ -7,6 +7,6 @@ export default function HighHighShiosaiPage() {
   }, [])
 
   return (
-    <HanaHanaCalculator machineId="high-high-shiosai" />
+    <HanaHanaCalculator machineId="high-high-shiosai" showMachineSelector={true} />
   )
 }

@@ -7,6 +7,6 @@ export default function HouohHanaPage() {
   }, [])
 
   return (
-    <HanaHanaCalculator machineId="houoh-tensho" />
+    <HanaHanaCalculator machineId="houoh-tensho" showMachineSelector={true} />
   )
 }

@@ -7,6 +7,6 @@ export default function DragonHanaPage() {
   }, [])
 
   return (
-    <HanaHanaCalculator machineId="dragon-hanahana" />
+    <HanaHanaCalculator machineId="dragon-hanahana" showMachineSelector={true} />
   )
 }

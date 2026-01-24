@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { hanahanaData, type HanaHanaMachine } from '../../data/hanahanaData'
 import { HANAHANA_PAYOUTS, REPLAY_RATE, CHERRY_RATE_APPROX, SUIKA_RATE_APPROX } from './payouts'
 import ExpectedIncomeSimulator from './ExpectedIncomeSimulator'
@@ -51,12 +52,36 @@ const findNearest = (val: number, settings: number[], machine: HanaHanaMachine, 
   return { nearestSetting: bestSetting, nearestSettingDenom: bestDenom, actualDenom: val }
 }
 
-export default function HanaHanaCalculator({ machineId }: { machineId?: string }) {
-  // Default to first machine or select based on some logic if needed
-  // If machineId provided, use that.
+type Props = {
+  machineId?: string
+  showMachineSelector?: boolean
+}
+
+const pathToKey: Record<string, string> = {
+  '/hanahana/star': 'star-hanahana',
+  '/hanahana/dragon': 'dragon-hanahana',
+  '/hanahana/king': 'king-hanahana',
+  '/hanahana/houoh': 'houoh-tensho',
+  '/hanahana/shiosai': 'high-high-shiosai',
+}
+
+const keyToPath: Record<string, string> = {
+  'star-hanahana': '/hanahana/star',
+  'dragon-hanahana': '/hanahana/dragon',
+  'king-hanahana': '/hanahana/king',
+  'houoh-tensho': '/hanahana/houoh',
+  'high-high-shiosai': '/hanahana/shiosai',
+}
+
+export default function HanaHanaCalculator({ machineId, showMachineSelector = false }: Props) {
+  const navigate = useNavigate()
+  const location = useLocation()
+
   const machines = Object.values(hanahanaData)
   const isSingleMode = !!machineId
-  const [selectedId, setSelectedId] = useState<string>(machineId || machines[0].id)
+
+  const currentKeyFromPath = pathToKey[location.pathname] || machines[0].id
+  const [selectedId, setSelectedId] = useState<string>(machineId || currentKeyFromPath || machines[0].id)
 
   const currentMachine = hanahanaData[selectedId]
   const currentPayouts = HANAHANA_PAYOUTS[selectedId]
@@ -233,25 +258,35 @@ export default function HanaHanaCalculator({ machineId }: { machineId?: string }
         
         <div className="w-full max-w-2xl text-center space-y-2">
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl dark:text-white">
-              ハナハナシリーズ 設定判別ツール
+              6号機ハナハナ ベル確率 逆算
             </h1>
             <p className="text-sm text-slate-600 sm:text-base dark:text-slate-300">
-               {currentMachine.name} 対応・ベル確率逆算
+              設定推測ツール
             </p>
         </div>
 
         <div className="w-full max-w-2xl space-y-4 rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 sm:p-6 dark:bg-slate-900 dark:ring-slate-800">
              {/* Machine Selector */}
-             {!isSingleMode && (
+             {showMachineSelector && (
              <div className="border-b border-slate-200 pb-4 dark:border-slate-700">
                <label className="block">
                  <span className="block text-sm font-semibold text-slate-700 mb-2 sm:text-base dark:text-slate-200">
                    機種を選択
                  </span>
                  <select
-                   value={selectedId}
-                   onChange={e => setSelectedId(e.target.value)}
-                   className="h-12 w-full rounded-xl border-2 border-slate-300 bg-white px-4 text-base font-medium text-slate-900 shadow-sm transition-all focus:border-red-500 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                   value={isSingleMode ? currentKeyFromPath : selectedId}
+                   onChange={e => {
+                     const newKey = e.target.value
+                     if (isSingleMode) {
+                       const newPath = keyToPath[newKey]
+                       if (newPath) {
+                         navigate(newPath)
+                       }
+                     } else {
+                       setSelectedId(newKey)
+                     }
+                   }}
+                   className="h-12 w-full max-w-full rounded-xl border-2 border-slate-300 bg-white px-4 text-base font-medium text-center text-slate-900 shadow-sm transition-all hover:border-red-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-300 sm:h-14 sm:text-lg dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                  >
                    {machines.map(m => (
                      <option key={m.id} value={m.id}>{m.name}</option>
