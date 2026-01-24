@@ -4,6 +4,8 @@ import { HANAHANA_PAYOUTS, REPLAY_RATE, CHERRY_RATE_APPROX, SUIKA_RATE_APPROX } 
 import ExpectedIncomeSimulator from './ExpectedIncomeSimulator'
 import SlumpGraphSimulator from './SlumpGraphSimulator'
 import AdviceCard from './AdviceCard'
+import HanaHanaEvalCard from './HanaHanaEvalCard'
+import HanaHanaSpecTable from './HanaHanaSpecTable'
 
 type CalcResult =
   | { ok: true; p: number; denom: number; percent: number; count: number }
@@ -17,8 +19,8 @@ type EvalItem = {
 
 type HanaHanaEval = {
   bell: EvalItem
-  big: EvalItem
-  reg: EvalItem
+  big?: EvalItem
+  reg?: EvalItem
   bigSuika?: EvalItem
   confidence: 'low' | 'mid' | 'high'
   totalGames: number
@@ -194,11 +196,17 @@ export default function HanaHanaCalculator({ machineId }: { machineId?: string }
     
     const bellEval = findNearest(resBell.denom, currentMachine.settings, currentMachine, 'bell')
     
-    const actualBigDenom = parsed.total / (parsed.big || 1) // Avoid div 0
-    const bigEval = findNearest(actualBigDenom, currentMachine.settings, currentMachine, 'big')
+    let bigEval: EvalItem | undefined = undefined
+    if (parsed.big > 0) {
+      const actualBigDenom = parsed.total / parsed.big
+      bigEval = findNearest(actualBigDenom, currentMachine.settings, currentMachine, 'big')
+    }
 
-    const actualRegDenom = parsed.total / (parsed.reg || 1)
-    const regEval = findNearest(actualRegDenom, currentMachine.settings, currentMachine, 'reg')
+    let regEval: EvalItem | undefined = undefined
+    if (parsed.reg > 0) {
+      const actualRegDenom = parsed.total / parsed.reg
+      regEval = findNearest(actualRegDenom, currentMachine.settings, currentMachine, 'reg')
+    }
 
     let bigSuikaEval: EvalItem | undefined = undefined
     if (currentMachine.hasBigSuika && resBigSuika.ok) {
@@ -300,40 +308,24 @@ export default function HanaHanaCalculator({ machineId }: { machineId?: string }
              </button>
         </div>
 
-        {/* Spec Table */}
-        {ready && (
-            <div className="w-full max-w-2xl overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-               <table className="w-full text-center text-sm sm:text-base">
-                 <thead className="bg-slate-50 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                   <tr>
-                     <th className="py-3 px-2 font-semibold">設定</th>
-                     <th className="py-3 px-2 font-semibold">{currentMachine.bellLabel}</th>
-                     <th className="py-3 px-2 font-semibold">BIG</th>
-                     <th className="py-3 px-2 font-semibold">REG</th>
-                     {currentMachine.hasBigSuika && <th className="py-3 px-2 font-semibold">BIGスイカ</th>}
-                   </tr>
-                 </thead>
-                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {currentMachine.settings.map((s, idx) => {
-                        const isBellMatch = s === evalResult?.bell.nearestSetting
-                        const isBg = isBellMatch ? 'bg-red-50 dark:bg-red-900/20 font-bold' : ''
-                        
-                        return (
-                            <tr key={s} className={isBg}>
-                                <td className="py-3 px-2 dark:text-slate-200">Setting {s}</td>
-                                <td className="py-3 px-2 text-slate-700 dark:text-slate-200">1/{currentMachine.bellProbabilities[idx].toFixed(2)}</td>
-                                <td className="py-3 px-2 text-slate-500 dark:text-slate-400">1/{currentMachine.bigProbabilities[idx]}</td>
-                                <td className="py-3 px-2 text-slate-500 dark:text-slate-400">1/{currentMachine.regProbabilities[idx]}</td>
-                                {currentMachine.hasBigSuika && <td className="py-3 px-2 text-emerald-600 dark:text-emerald-400">
-                                   {currentMachine.bigSuikaProbabilities?.[idx] ? `1/${currentMachine.bigSuikaProbabilities[idx].toFixed(1)}` : '-'}
-                                </td>}
-                            </tr>
-                        )
-                    })}
-                 </tbody>
-               </table>
-            </div>
-        )}
+        {/* 簡易設定評価カード */}
+        <HanaHanaEvalCard
+          eval={evalResult}
+          hasBigSuika={!!currentMachine.hasBigSuika}
+        />
+
+        {/* 設定別ボーナス＆ベル確率テーブル */}
+        <HanaHanaSpecTable
+          machine={currentMachine}
+          bellMatch={evalResult?.bell.nearestSetting ?? null}
+          bigMatch={evalResult?.big?.nearestSetting ?? null}
+          regMatch={evalResult?.reg?.nearestSetting ?? null}
+          bigSuikaMatch={evalResult?.bigSuika?.nearestSetting ?? null}
+          actualBell={resBell.ok ? resBell.denom : null}
+          actualBig={ready && parsed.big > 0 ? parsed.total / parsed.big : null}
+          actualReg={ready && parsed.reg > 0 ? parsed.total / parsed.reg : null}
+          actualBigSuika={resBigSuika.ok ? resBigSuika.denom : null}
+        />
 
         {/* アドバイスカード */}
         {ready && evalResult && (
