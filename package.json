@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "npm run dev --prefix grape-reverse_antigravity",
+    "build": "npm run build --prefix grape-reverse_antigravity",
+    "lint": "npm run lint --prefix grape-reverse_antigravity",
+    "preview": "npm run preview --prefix grape-reverse_antigravity",
+    "install-app": "npm install --prefix grape-reverse_antigravity"
   },
   "keywords": [],
   "author": "",

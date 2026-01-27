@@ -1,0 +1,14 @@
+0000000000000000000000000000000000000000 14136173b4d9b5a0b1249b82e09e56a9d193f916 takosuke-88 <takosuke-88@users.noreply.github.com> 1761184731 +0900	commit (initial): initial commit for gh-pages deploy
+14136173b4d9b5a0b1249b82e09e56a9d193f916 ca8a57588db8099a2c9f93f1b53ade2782c0695a takosuke-88 <takosuke-88@users.noreply.github.com> 1761186152 +0900	pull --rebase origin main (start): checkout ca8a57588db8099a2c9f93f1b53ade2782c0695a
+ca8a57588db8099a2c9f93f1b53ade2782c0695a f6045f7a5fd740608418d4256fa1160078d0ffeb takosuke-88 <takosuke-88@users.noreply.github.com> 1761268591 +0900	commit: initial commit for gh-pages deploy
+f6045f7a5fd740608418d4256fa1160078d0ffeb 81724be864c914fac4c0a4df9e8bd7e94d72c566 takosuke-88 <takosuke-88@users.noreply.github.com> 1765249587 +0900	commit: 全機種確率表実装とボーナス確率協調表示
+81724be864c914fac4c0a4df9e8bd7e94d72c566 d4bf28a20e582939ecdd776fe9439bf5ee0b6654 takosuke-88 <takosuke-88@users.noreply.github.com> 1765519489 +0900	commit: Add calculation premise note (except Mister Juggler)
+d4bf28a20e582939ecdd776fe9439bf5ee0b6654 d4bf28a20e582939ecdd776fe9439bf5ee0b6654 takosuke-88 <takosuke-88@users.noreply.github.com> 1765519672 +0900	rebase (finish): returning to refs/heads/main
+d4bf28a20e582939ecdd776fe9439bf5ee0b6654 aa19e670b6cd20cb033f07098020070949383e63 takosuke-88 <takosuke-88@users.noreply.github.com> 1765519794 +0900	pull --rebase origin main (start): checkout aa19e670b6cd20cb033f07098020070949383e63
+aa19e670b6cd20cb033f07098020070949383e63 39a85775cccac0d7c20370ac6104e33ab5d0bee4 takosuke-88 <takosuke-88@users.noreply.github.com> 1765520378 +0900	rebase (continue): Add calculation premise note (except Mister Juggler)
+39a85775cccac0d7c20370ac6104e33ab5d0bee4 39a85775cccac0d7c20370ac6104e33ab5d0bee4 takosuke-88 <takosuke-88@users.noreply.github.com> 1765520596 +0900	rebase (finish): returning to refs/heads/main
+39a85775cccac0d7c20370ac6104e33ab5d0bee4 fbe3f4c61e04afae568a4a3bb5048157dcd22b11 takosuke-88 <takosuke-88@users.noreply.github.com> 1765520780 +0900	commit: Ignore tsconfig.tsbuildinfo
+fbe3f4c61e04afae568a4a3bb5048157dcd22b11 6eac3df0c14614ed73168a09d05a763eeaf69e2c takosuke-88 <takosuke-88@users.noreply.github.com> 1765937544 +0900	reset: moving to 6eac3df
+6eac3df0c14614ed73168a09d05a763eeaf69e2c ca59d866332d7ebf2925e915cc72eb59931bbbcb takosuke-88 <takosuke-88@users.noreply.github.com> 1766108026 +0900	checkout: moving from main to gh-pages-snapshot
+ca59d866332d7ebf2925e915cc72eb59931bbbcb ca59d866332d7ebf2925e915cc72eb59931bbbcb takosuke-88 <takosuke-88@users.noreply.github.com> 1766465362 +0900	checkout: moving from gh-pages-snapshot to wip/broken-snapshot
+ca59d866332d7ebf2925e915cc72eb59931bbbcb 1c6b4647a15b0d4aa17e4af3081f3792656aad54 takosuke-88 <takosuke-88@users.noreply.github.com> 1766465381 +0900	commit: WIP(broken): snapshot before recovery
