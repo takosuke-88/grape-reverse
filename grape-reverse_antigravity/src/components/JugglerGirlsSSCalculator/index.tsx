@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   BarChart,
   Bar,
@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  LabelList,
 } from 'recharts'
 
 // ジャグラーガールズSSのスペック定義
@@ -20,7 +21,7 @@ const MACHINE_SPECS = {
   6: { big: 1 / 226.0, reg: 1 / 270.8, grape: 1 / 5.72 },
 }
 
-// 設定ごとのカラー定義（Rechartsで使用）
+// 設定ごとのカラー定義
 const SETTING_COLORS = [
   '#94a3b8', // 1: slate-400
   '#94a3b8', // 2: slate-400
@@ -30,32 +31,49 @@ const SETTING_COLORS = [
   '#ef4444', // 6: red-500
 ]
 
-export default function JugglerGirlsSSEstimator() {
-  const [totalGames, setTotalGames] = useState('')
-  const [bigCount, setBigCount] = useState('')
-  const [regCount, setRegCount] = useState('')
-  const [grapeCount, setGrapeCount] = useState('')
+type Props = {
+  totalGames: number
+  bigCount: number
+  regCount: number
+  calculatedGrapeCount: number
+}
 
-  // 確率計算ロジック (ベイズ推定の簡易実装)
+export default function JugglerGirlsSSEstimator({
+  totalGames,
+  bigCount,
+  regCount,
+  calculatedGrapeCount,
+}: Props) {
+  // マニュアルモード（ブドウ回数手動入力）
+  const [isManualMode, setIsManualMode] = useState(false)
+  const [manualGrapeCount, setManualGrapeCount] = useState('')
+
+  // 実際に計算に使用するブドウ回数
+  const grapeCount = useMemo(() => {
+    if (isManualMode && manualGrapeCount !== '') {
+      return Number(manualGrapeCount)
+    }
+    // 自動読み込み（逆算値）
+    // 逆算値がない場合は0
+    return calculatedGrapeCount || 0
+  }, [isManualMode, manualGrapeCount, calculatedGrapeCount])
+
+  // 確率計算ロジック
   const probabilities = useMemo(() => {
-    const t = Number(totalGames)
-    const b = Number(bigCount)
-    const r = Number(regCount)
-    const g = Number(grapeCount)
+    const t = totalGames
+    const b = bigCount
+    const r = regCount
+    const g = grapeCount
 
     if (!t || t <= 0) return []
 
-    // 各設定の尤度を計算
     const likelihoods = Object.entries(MACHINE_SPECS).map(([setting, spec]) => {
-      // 確率の対数をとって計算（アンダーフロー防止）
       // log(P) = k * log(p) + (n-k) * log(1-p)
-      
       const bigLog = b * Math.log(spec.big) + (t - b) * Math.log(1 - spec.big)
       const regLog = r * Math.log(spec.reg) + (t - r) * Math.log(1 - spec.reg)
       
       let grapeLog = 0
       if (g > 0) {
-        // ブドウカウントがある場合のみ加算
         grapeLog = g * Math.log(spec.grape) + (t - g) * Math.log(1 - spec.grape)
       }
 
@@ -65,18 +83,13 @@ export default function JugglerGirlsSSEstimator() {
       }
     })
 
-    // 最大の対数尤度を見つける（正規化のため）
     const maxLog = Math.max(...likelihoods.map((l) => l.logLikelihood))
-
-    // 尤度を実数に戻す（最大値を基準にしてオーバーフロー/アンダーフローを防ぐ）
     const pureLikelihoods = likelihoods.map((l) => ({
       setting: l.setting,
       value: Math.exp(l.logLikelihood - maxLog),
     }))
-
     const totalLikelihood = pureLikelihoods.reduce((sum, item) => sum + item.value, 0)
 
-    // パーセンテージに変換
     return pureLikelihoods.map((item, index) => ({
       name: `設定${item.setting}`,
       percent: parseFloat(((item.value / totalLikelihood) * 100).toFixed(1)),
@@ -84,7 +97,7 @@ export default function JugglerGirlsSSEstimator() {
     }))
   }, [totalGames, bigCount, regCount, grapeCount])
 
-  const hasData = probabilities.length > 0 && Number(totalGames) > 0
+  const hasData = probabilities.length > 0 && totalGames > 0
 
   return (
     <div className="w-full max-w-2xl space-y-6 rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 sm:p-6 dark:bg-slate-900 dark:ring-slate-800">
@@ -92,80 +105,55 @@ export default function JugglerGirlsSSEstimator() {
         <h2 className="text-xl font-bold text-slate-800 dark:text-white">
           詳細設定判別ツール
         </h2>
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-          ブドウ回数も含めて各設定の期待度を算出します
-        </p>
+        <div className="mt-2 flex items-center justify-center gap-4">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              ブドウ逆算値
+            </span>
+            <div 
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                isManualMode ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'
+              }`}
+              onClick={() => setIsManualMode(!isManualMode)}
+            >
+               <span 
+                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                   isManualMode ? 'translate-x-6' : 'translate-x-1'
+                 }`} 
+               />
+            </div>
+            <span className={`text-xs font-medium ${isManualMode ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500'}`}>
+              手動入力
+            </span>
+          </label>
+        </div>
       </div>
 
-      {/* 入力フォーム */}
-      <div className="grid grid-cols-2 gap-4">
-        <label className="block space-y-1">
-          <span className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
-            総回転数
-          </span>
-          <input
-            type="number"
-            value={totalGames}
-            onChange={(e) => setTotalGames(e.target.value)}
-            placeholder="例: 3000"
-            className="w-full rounded-lg border border-slate-300 p-2.5 text-center text-lg font-bold focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-            inputMode="numeric"
-          />
-        </label>
-        <label className="block space-y-1">
-          <span className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
-            ブドウ回数
-            <span className="ml-1 text-[10px] font-normal text-slate-400">
-              (任意)
-            </span>
-          </span>
-          <input
-            type="number"
-            value={grapeCount}
-            onChange={(e) => setGrapeCount(e.target.value)}
-            placeholder="例: 500"
-            className="w-full rounded-lg border border-slate-300 p-2.5 text-center text-lg font-bold focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-            inputMode="numeric"
-          />
-        </label>
-        <label className="block space-y-1">
-          <span className="block text-sm font-semibold text-red-600 dark:text-red-400">
-            BIG回数
-          </span>
-          <input
-            type="number"
-            value={bigCount}
-            onChange={(e) => setBigCount(e.target.value)}
-            placeholder="例: 10"
-            className="w-full rounded-lg border border-slate-300 p-2.5 text-center text-lg font-bold focus:border-red-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-            inputMode="numeric"
-          />
-        </label>
-        <label className="block space-y-1">
-          <span className="block text-sm font-semibold text-blue-600 dark:text-blue-400">
-            REG回数
-          </span>
-          <input
-            type="number"
-            value={regCount}
-            onChange={(e) => setRegCount(e.target.value)}
-            placeholder="例: 10"
-            className="w-full rounded-lg border border-slate-300 p-2.5 text-center text-lg font-bold focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-            inputMode="numeric"
-          />
-        </label>
-      </div>
+      {/* 手動入力フォーム（ON時のみ表示） */}
+      {isManualMode && (
+        <div className="bg-slate-50 p-4 rounded-xl border border-dashed border-slate-300 dark:bg-slate-800/50 dark:border-slate-700">
+           <label className="block max-w-xs mx-auto text-center">
+             <span className="block text-sm font-semibold text-slate-700 mb-1 dark:text-slate-300">
+               ブドウ回数 (実際の数値)
+             </span>
+             <input
+               type="number"
+               value={manualGrapeCount}
+               onChange={(e) => setManualGrapeCount(e.target.value)}
+               placeholder="カウント値を入力"
+               className="w-full rounded-lg border border-slate-300 p-2 text-center text-lg font-bold focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+             />
+           </label>
+        </div>
+      )}
 
       {/* グラフ描画エリア */}
       {hasData ? (
-        <div className="mt-6 h-64 w-full">
-          <p className="mb-2 text-center text-sm font-bold text-slate-600 dark:text-slate-300">
-            設定期待度 (%)
-          </p>
+        <div className="mt-4 h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={probabilities}
-              margin={{ top: 5, right: 10, left: 10, bottom: 5 }}
+              margin={{ top: 20, right: 10, left: 10, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
               <XAxis
@@ -174,10 +162,7 @@ export default function JugglerGirlsSSEstimator() {
                 axisLine={false}
                 tickLine={false}
               />
-              <YAxis
-                hide
-                domain={[0, 100]}
-              />
+              <YAxis hide domain={[0, 100]} />
               <Tooltip
                 cursor={{ fill: 'transparent' }}
                 contentStyle={{
@@ -187,6 +172,7 @@ export default function JugglerGirlsSSEstimator() {
                   border: 'none',
                   color: '#1e293b',
                 }}
+                formatter={(value: number) => [`${value}%`, '期待度']}
               />
               <Bar
                 dataKey="percent"
@@ -197,28 +183,24 @@ export default function JugglerGirlsSSEstimator() {
                 {probabilities.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />
                 ))}
+                <LabelList 
+                  dataKey="percent" 
+                  position="top" 
+                  formatter={(val: number) => `${val}%`}
+                  style={{ fontSize: '11px', fontWeight: 'bold', fill: '#64748b' }}
+                />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
+           <div className="mt-2 text-center text-[10px] text-slate-400">
+             ブドウ確率: 1/{grapeCount > 0 ? (totalGames / grapeCount).toFixed(2) : '-'} ({grapeCount.toFixed(0)}回)
+           </div>
         </div>
       ) : (
         <div className="mt-8 flex h-40 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/50">
-           <p className="text-sm text-slate-400">データを入力するとグラフが表示されます</p>
+           <p className="text-sm text-slate-400">データ入力待ち...</p>
         </div>
       )}
-      
-      {/* リセットボタン */}
-      <button
-        onClick={() => {
-            setTotalGames('')
-            setBigCount('')
-            setRegCount('')
-            setGrapeCount('')
-        }}
-        className="w-full rounded-xl bg-slate-100 py-3 text-sm font-bold text-slate-500 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
-      >
-        入力をリセット
-      </button>
     </div>
   )
 }

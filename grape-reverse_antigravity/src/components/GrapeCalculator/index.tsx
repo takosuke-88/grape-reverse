@@ -48,7 +48,12 @@ export type GrapeCalculatorProps = {
   /** ページ固有のタイトルと説明 */
   pageTitle?: string
   pageDescription?: string
-  children?: React.ReactNode
+  children?: React.ReactNode | ((data: {
+    totalGames: number
+    bigCount: number
+    regCount: number
+    grapeCount: number
+  }) => React.ReactNode)
 }
 
 export default function GrapeCalculator({
@@ -473,19 +478,30 @@ export default function GrapeCalculator({
           {!isProMode ? (
             // シンプルモード
             <form className="grid grid-cols-2 gap-3">
-              <Field label="BIG回数" value={bigCount} onChange={setBigCount} />
-              <Field label="REG回数" value={regCount} onChange={setRegCount} />
+              <Field label="総回転数" value={totalGames} onChange={setTotalGames} placeholder="G数" />
               <Field
                 label="差枚数（±）"
                 value={diffCoins}
                 onChange={setDiffCoins}
                 placeholder="例: 500 / -300"
               />
-              <Field label="総回転数" value={totalGames} onChange={setTotalGames} placeholder="G数" />
+              <Field label="BIG回数" value={bigCount} onChange={setBigCount} />
+              <Field label="REG回数" value={regCount} onChange={setRegCount} />
             </form>
           ) : (
             // プロモード（詳細入力）
             <form className="space-y-4">
+              {/* 差枚数・総回転数 -> 上に移動 */ }
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="総回転数" value={totalGames} onChange={setTotalGames} placeholder="G数" />
+                <Field
+                  label="差枚数（±）"
+                  value={diffCoins}
+                  onChange={setDiffCoins}
+                  placeholder="例: 500 / -300"
+                />
+              </div>
+
               {/* BIGグループ */}
               <div className="space-y-2">
                 <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200">BIG回数</h4>
@@ -502,17 +518,6 @@ export default function GrapeCalculator({
                   <Field label="単独REG" value={soloReg} onChange={setSoloReg} placeholder="0" />
                   <Field label="チェリー重複REG" value={cherryReg} onChange={setCherryReg} placeholder="0" />
                 </div>
-              </div>
-              
-              {/* 差枚数・総回転数 */}
-              <div className="grid grid-cols-2 gap-3">
-                <Field
-                  label="差枚数（±）"
-                  value={diffCoins}
-                  onChange={setDiffCoins}
-                  placeholder="例: 500 / -300"
-                />
-                <Field label="総回転数" value={totalGames} onChange={setTotalGames} placeholder="G数" />
               </div>
             </form>
           )}
@@ -545,7 +550,12 @@ export default function GrapeCalculator({
         </div>
 
         {/* 外部から挿入されたコンテンツ (追加機能用) */}
-        {children}
+        {typeof children === 'function' ? children({
+          totalGames: parsed.total,
+          bigCount: parsed.big,
+          regCount: parsed.reg,
+          grapeCount: resFree.ok ? resFree.grapeCount : 0
+        }) : children}
 
         {ready && (
           <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
