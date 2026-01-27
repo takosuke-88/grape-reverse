@@ -48,6 +48,7 @@ export type GrapeCalculatorProps = {
   /** ページ固有のタイトルと説明 */
   pageTitle?: string
   pageDescription?: string
+  children?: React.ReactNode
 }
 
 export default function GrapeCalculator({
@@ -57,6 +58,7 @@ export default function GrapeCalculator({
   showMachineSelector = true,
   pageTitle,
   pageDescription,
+  children,
 }: GrapeCalculatorProps) {
   const location = useLocation()
   const navigate = useNavigate()
@@ -541,6 +543,10 @@ export default function GrapeCalculator({
             <span>入力をすべてリセット</span>
           </button>
         </div>
+
+        {/* 外部から挿入されたコンテンツ (追加機能用) */}
+        {children}
+
         {ready && (
           <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
             <span className="inline-flex items-center gap-1">

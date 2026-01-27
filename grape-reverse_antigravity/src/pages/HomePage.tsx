@@ -42,6 +42,28 @@ export default function HomePage() {
         {/* 新着コラム (コンパクトバナー) */}
         <div className="w-full px-1 sm:px-0 space-y-3">
           <Link
+            to="/columns/juggler-strategy"
+            className="group flex w-full items-center justify-between rounded-lg bg-yellow-50 px-4 py-3 shadow-sm border border-yellow-100 transition-all hover:shadow-md hover:bg-yellow-100 dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700"
+          >
+            <div className="flex items-center gap-3 overflow-hidden">
+              <span className="flex-shrink-0 rounded bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">
+                NEW
+              </span>
+              <span className="truncate text-sm font-bold text-yellow-800 dark:text-yellow-300 group-hover:underline">
+                【コラム】パチスロで月10万稼ぐなら、結局ジャグラーが最強説
+              </span>
+            </div>
+            <svg 
+              className="h-4 w-4 flex-shrink-0 text-yellow-500 dark:text-gray-500" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+
+          <Link
             to="/columns/myjuggler5-setting6-behavior"
             className="group flex w-full items-center justify-between rounded-lg bg-blue-50 px-4 py-3 shadow-sm border border-blue-100 transition-all hover:shadow-md hover:bg-blue-100 dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700"
           >

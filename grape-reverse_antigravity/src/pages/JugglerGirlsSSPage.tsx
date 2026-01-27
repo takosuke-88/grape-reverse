@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import GrapeCalculator from '../components/GrapeCalculator'
+import JugglerGirlsSSEstimator from '../components/JugglerGirlsSSCalculator'
 import { jugglerGirlsSS } from '../data/machineSpecs'
 
 export default function JugglerGirlsSSPage() {
@@ -20,7 +21,12 @@ export default function JugglerGirlsSSPage() {
       showMachineSelector={true}
       pageTitle="ジャグラーガールズSS 設定判別ツール"
       pageDescription="総回転数・ボーナス回数・差枚数から、ぶどう確率を逆算して設定を推測します。"
-    />
+    >
+      {/* 追加機能：推測グラフ */}
+      <div className="flex w-full justify-center mt-8">
+        <JugglerGirlsSSEstimator />
+      </div>
+    </GrapeCalculator>
   )
 }
 

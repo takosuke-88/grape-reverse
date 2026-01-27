@@ -19,6 +19,7 @@ import DragonHanaPage from './pages/hanahana/DragonHanaPage'
 import HouohHanaPage from './pages/hanahana/HouohHanaPage'
 import StarHanaPage from './pages/hanahana/StarHanaPage'
 import HighHighShiosaiPage from './pages/hanahana/HighHighShiosaiPage'
+import JugglerStrategyColumn from './pages/columns/JugglerStrategyColumn'
 
 export default function App() {
   return (
@@ -57,6 +58,7 @@ export default function App() {
         {/* コラム記事 */}
         <Route path="/columns/myjuggler5-setting6-behavior" element={<MyJugglerColumn />} />
         <Route path="/columns/funky2-setting6-behavior" element={<Funky2Column />} />
+        <Route path="/columns/juggler-strategy" element={<JugglerStrategyColumn />} />
 
         {/* 404 - トップページにリダイレクト */}
         <Route path="*" element={<Navigate to="/" replace />} />
