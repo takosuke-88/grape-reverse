@@ -20,6 +20,7 @@ import HouohHanaPage from './pages/hanahana/HouohHanaPage'
 import StarHanaPage from './pages/hanahana/StarHanaPage'
 import HighHighShiosaiPage from './pages/hanahana/HighHighShiosaiPage'
 import JugglerStrategyColumn from './pages/columns/JugglerStrategyColumn'
+import BayesExplanation from './pages/columns/BayesExplanation'
 
 export default function App() {
   return (
@@ -59,6 +60,7 @@ export default function App() {
         <Route path="/columns/myjuggler5-setting6-behavior" element={<MyJugglerColumn />} />
         <Route path="/columns/funky2-setting6-behavior" element={<Funky2Column />} />
         <Route path="/columns/juggler-strategy" element={<JugglerStrategyColumn />} />
+        <Route path="/columns/bayes-theorem" element={<BayesExplanation />} />
 
         {/* 404 - トップページにリダイレクト */}
         <Route path="*" element={<Navigate to="/" replace />} />

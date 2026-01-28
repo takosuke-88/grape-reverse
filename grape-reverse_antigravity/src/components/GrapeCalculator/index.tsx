@@ -554,7 +554,7 @@ export default function GrapeCalculator({
           totalGames: parsed.total,
           bigCount: parsed.big,
           regCount: parsed.reg,
-          grapeCount: resFree.ok ? resFree.grapeCount : 0
+          grapeCount: resAim.ok ? resAim.grapeCount : 0 // チェリー狙いの算出値を渡す
         }) : children}
 
         {ready && (
