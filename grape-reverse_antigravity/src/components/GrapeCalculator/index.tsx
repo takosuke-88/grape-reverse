@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
 import type { MachineSpec, Setting } from '../../data/machineSpecs'
 import { CONSTS, ALL_MACHINES } from '../../data/machineSpecs'
+import JugglerSettingEstimator from '../JugglerSettingEstimator'
 
 const nf1 = new Intl.NumberFormat('ja-JP', {
   minimumFractionDigits: 1,
@@ -549,6 +550,17 @@ export default function GrapeCalculator({
           </button>
         </div>
 
+        {/* 詳細設定判別（ベイズ推定）カード */}
+        <div className="w-full max-w-2xl">
+           <JugglerSettingEstimator
+             machine={currentMachine}
+             totalGames={parsed.total}
+             bigCount={parsed.big}
+             regCount={parsed.reg}
+             calculatedGrapeCount={resAim.ok ? resAim.grapeCount : 0}
+           />
+        </div>
+
         {/* 外部から挿入されたコンテンツ (追加機能用) */}
         {typeof children === 'function' ? children({
           totalGames: parsed.total,
@@ -621,6 +633,9 @@ export default function GrapeCalculator({
           </div>
         )}
         {/* ▲▲▲ ここまで ▲▲▲ */}
+
+
+
 
         {/* フッター */}
         <footer className="mt-12 w-full text-center text-xs text-gray-400 dark:text-gray-400">

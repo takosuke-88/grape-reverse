@@ -11,16 +11,7 @@ import {
   Cell,
   LabelList,
 } from 'recharts'
-
-// ジャグラーガールズSSのスペック定義
-const MACHINE_SPECS = {
-  1: { big: 1 / 273.1, reg: 1 / 409.6, combined: 1 / 163.8, grape: 1 / 5.98 },
-  2: { big: 1 / 270.8, reg: 1 / 385.5, combined: 1 / 159.1, grape: 1 / 5.98 },
-  3: { big: 1 / 266.4, reg: 1 / 336.1, combined: 1 / 148.6, grape: 1 / 5.98 },
-  4: { big: 1 / 258.0, reg: 1 / 315.1, combined: 1 / 141.9, grape: 1 / 5.98 },
-  5: { big: 1 / 250.0, reg: 1 / 280.1, combined: 1 / 132.1, grape: 1 / 5.88 },
-  6: { big: 1 / 226.0, reg: 1 / 270.8, combined: 1 / 123.2, grape: 1 / 5.83 },
-}
+import type { MachineSpec, Setting } from '../../data/machineSpecs'
 
 // 設定ごとのカラー定義
 const SETTING_COLORS = [
@@ -33,6 +24,7 @@ const SETTING_COLORS = [
 ]
 
 type Props = {
+  machine: MachineSpec
   totalGames: number
   bigCount: number
   regCount: number
@@ -47,7 +39,8 @@ type ApproxResult = {
   probability: number // その設定である事後確率（簡易的に尤度の正規化値）
 }
 
-export default function JugglerGirlsSSEstimator({
+export default function JugglerSettingEstimator({
+  machine,
   totalGames,
   bigCount,
   regCount,
@@ -73,12 +66,24 @@ export default function JugglerGirlsSSEstimator({
   ): ApproxResult => {
     // 尤度を計算: L = p^k * (1-p)^(n-k)
     // 対数尤度: ln(L) = k * ln(p) + (n-k) * ln(1-p)
-    const likelihoods = Object.entries(MACHINE_SPECS).map(([setting, spec]) => {
-      const p = spec[type]
+    const likelihoods = Object.entries(machine.bonusRateBySetting).map(([s, bonusSpec]) => {
+      const setting = Number(s) as Setting
+      let p = 0
+      
+      if (type === 'big') {
+        p = 1 / bonusSpec.big
+      } else if (type === 'reg') {
+        p = 1 / bonusSpec.reg
+      } else if (type === 'combined') {
+        p = 1 / bonusSpec.combined
+      } else if (type === 'grape') {
+        p = 1 / machine.grapeRateBySetting[setting]
+      }
+
       const logLikelihood =
         count * Math.log(p) + (games - count) * Math.log(1 - p)
       return {
-        setting: Number(setting),
+        setting,
         logLikelihood,
       }
     })
@@ -94,7 +99,6 @@ export default function JugglerGirlsSSEstimator({
     }))
 
     // 最も高い値を持つ設定を選択
-    // 複数ある場合は高設定寄りを優先するなど細工できるが、基本は最大値
     const bestMatch = posteriors.reduce((prev, current) => 
       current.val > prev.val ? current : prev
     )
@@ -137,9 +141,9 @@ export default function JugglerGirlsSSEstimator({
         approx: grapeCount > 0 ? getBayesApproxSetting('grape', grapeCount, totalGames) : null,
       },
     }
-  }, [totalGames, bigCount, regCount, grapeCount])
+  }, [totalGames, bigCount, regCount, grapeCount, machine])
 
-  // 確率計算ロジック（グラフ用 - 既存ロジック維持）
+  // 確率計算ロジック（グラフ用）
   const probabilities = useMemo(() => {
     const t = totalGames
     const b = bigCount
@@ -148,17 +152,23 @@ export default function JugglerGirlsSSEstimator({
 
     if (!t || t <= 0) return []
 
-    const likelihoods = Object.entries(MACHINE_SPECS).map(([setting, spec]) => {
-      const bigLog = b * Math.log(spec.big) + (t - b) * Math.log(1 - spec.big)
-      const regLog = r * Math.log(spec.reg) + (t - r) * Math.log(1 - spec.reg)
+    const likelihoods = Object.entries(machine.bonusRateBySetting).map(([s, bonusSpec]) => {
+      const setting = Number(s) as Setting
+      // 確率に変換 (分母から逆数へ)
+      const pBig = 1 / bonusSpec.big
+      const pReg = 1 / bonusSpec.reg
+      const pGrape = 1 / machine.grapeRateBySetting[setting]
+
+      const bigLog = b * Math.log(pBig) + (t - b) * Math.log(1 - pBig)
+      const regLog = r * Math.log(pReg) + (t - r) * Math.log(1 - pReg)
       
       let grapeLog = 0
       if (g > 0) {
-        grapeLog = g * Math.log(spec.grape) + (t - g) * Math.log(1 - spec.grape)
+        grapeLog = g * Math.log(pGrape) + (t - g) * Math.log(1 - pGrape)
       }
 
       return {
-        setting: Number(setting),
+        setting,
         logLikelihood: bigLog + regLog + grapeLog,
       }
     })
@@ -175,12 +185,12 @@ export default function JugglerGirlsSSEstimator({
       percent: parseFloat(((item.value / totalLikelihood) * 100).toFixed(1)),
       fill: SETTING_COLORS[index],
     }))
-  }, [totalGames, bigCount, regCount, grapeCount])
+  }, [totalGames, bigCount, regCount, grapeCount, machine])
 
   const hasData = probabilities.length > 0 && totalGames > 0
 
   return (
-    <div className="w-full max-w-2xl space-y-4 rounded-xl bg-white p-3 shadow-lg ring-1 ring-slate-200 sm:p-5 dark:bg-slate-900 dark:ring-slate-800">
+    <div className="w-full max-w-2xl space-y-4 rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 sm:p-6 dark:bg-slate-900 dark:ring-slate-800">
       
       {/* ヘッダー＆手動スイッチ */}
       <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
