@@ -233,10 +233,10 @@ export default function GrapeCalculator({
   }, [ready, parsed.big, parsed.reg, parsed.total, currentMachine])
 
   const highlightGrapeSetting = useMemo(() => {
-    if (!ready || resFree.ok === false) return null
-    const actualGrape = resFree.denom
+    if (!ready || resAim.ok === false) return null
+    const actualGrape = resAim.denom
     return findNearestSetting(actualGrape, currentMachine.grapeRateBySetting)
-  }, [ready, resFree, currentMachine])
+  }, [ready, resAim, currentMachine])
 
   // ぶどう設定マッチ＋簡易評価（チェリー狙いを基準に判定）
   // 拡張：REG、合成も同様に最近似設定を求める

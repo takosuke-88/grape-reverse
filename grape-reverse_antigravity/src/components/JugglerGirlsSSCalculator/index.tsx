@@ -14,12 +14,12 @@ import {
 
 // ジャグラーガールズSSのスペック定義
 const MACHINE_SPECS = {
-  1: { big: 1 / 273.1, reg: 1 / 409.6, combined: 1 / 163.8, grape: 1 / 5.96 },
-  2: { big: 1 / 270.8, reg: 1 / 385.5, combined: 1 / 159.1, grape: 1 / 5.93 },
-  3: { big: 1 / 266.4, reg: 1 / 336.1, combined: 1 / 148.6, grape: 1 / 5.88 },
-  4: { big: 1 / 258.0, reg: 1 / 315.1, combined: 1 / 141.9, grape: 1 / 5.83 },
-  5: { big: 1 / 250.0, reg: 1 / 280.1, combined: 1 / 132.1, grape: 1 / 5.76 },
-  6: { big: 1 / 226.0, reg: 1 / 270.8, combined: 1 / 123.2, grape: 1 / 5.72 },
+  1: { big: 1 / 273.1, reg: 1 / 409.6, combined: 1 / 163.8, grape: 1 / 5.98 },
+  2: { big: 1 / 270.8, reg: 1 / 385.5, combined: 1 / 159.1, grape: 1 / 5.98 },
+  3: { big: 1 / 266.4, reg: 1 / 336.1, combined: 1 / 148.6, grape: 1 / 5.98 },
+  4: { big: 1 / 258.0, reg: 1 / 315.1, combined: 1 / 141.9, grape: 1 / 5.98 },
+  5: { big: 1 / 250.0, reg: 1 / 280.1, combined: 1 / 132.1, grape: 1 / 5.88 },
+  6: { big: 1 / 226.0, reg: 1 / 270.8, combined: 1 / 123.2, grape: 1 / 5.83 },
 }
 
 // 設定ごとのカラー定義
