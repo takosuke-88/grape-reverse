@@ -12,7 +12,10 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.0"
+    "react-router-dom": "^6.22.0",
+    "@anthropic-ai/sdk": "^0.71.2",
+    "@google/generative-ai": "^0.21.0",
+    "@vercel/kv": "^3.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.56",
