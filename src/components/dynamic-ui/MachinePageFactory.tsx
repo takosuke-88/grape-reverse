@@ -44,8 +44,15 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     }));
   };
 
+  /* エラー状態の管理を追加 */
+  const [error, setError] = useState<string | null>(null);
+
+  const themeColor = config.themeColor || "bg-blue-600";
+  const totalGames = Number(inputValues["total-games"]) || 0;
+
   const handleCalculate = () => {
     setIsCalculating(true);
+    setError(null); // エラーリセット
 
     // デバッグ用
     console.log("=== 設定判別実行 ===");
@@ -53,10 +60,18 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     console.log("総ゲーム数:", totalGames);
 
     setTimeout(() => {
-      const results = calculateEstimation(config, inputValues);
-      console.log("計算結果:", results);
-      setEstimationResults(results);
-      setIsCalculating(false);
+      try {
+        console.log("計算開始: Config=", config.id);
+        const results = calculateEstimation(config, inputValues);
+        console.log("計算結果:", results);
+        setEstimationResults(results);
+      } catch (err) {
+        console.error("設定判別エラー:", err);
+        setError("計算中にエラーが発生しました。入力値を確認してください。");
+        setEstimationResults(null);
+      } finally {
+        setIsCalculating(false);
+      }
     }, 300);
   };
 
@@ -75,10 +90,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     });
     setInputValues(resetValues);
     setEstimationResults(null);
+    setError(null);
   };
-
-  const themeColor = config.themeColor || "bg-blue-600";
-  const totalGames = Number(inputValues["total-games"]) || 0;
 
   // 判別要素のみ抽出
   const discriminationElements = useMemo(() => {
@@ -158,25 +171,32 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
         ))}
 
         {/* 計算ボタン（テーマカラー適用） */}
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={handleCalculate}
-            disabled={isCalculating}
-            className={`flex-1 rounded-xl ${themeColor} px-6 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80 disabled:cursor-not-allowed disabled:opacity-50`}
-          >
-            {isCalculating ? "計算中..." : "設定判別する"}
-          </button>
-
-          {estimationResults && (
+        <div className="flex flex-col gap-2">
+          {error && (
+            <div className="mb-2 rounded-lg bg-red-100 p-3 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-400">
+              {error}
+            </div>
+          )}
+          <div className="flex gap-2">
             <button
               type="button"
-              onClick={handleReset}
-              className="rounded-xl bg-slate-200 px-5 py-4 font-medium text-slate-700 transition-colors hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              onClick={handleCalculate}
+              disabled={isCalculating}
+              className={`flex-1 rounded-xl ${themeColor} px-6 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80 disabled:cursor-not-allowed disabled:opacity-50`}
             >
-              リセット
+              {isCalculating ? "計算中..." : "設定判別する"}
             </button>
-          )}
+
+            {estimationResults && (
+              <button
+                type="button"
+                onClick={handleReset}
+                className="rounded-xl bg-slate-200 px-5 py-4 font-medium text-slate-700 transition-colors hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              >
+                リセット
+              </button>
+            )}
+          </div>
         </div>
 
         {/* 結果表示（常時表示） */}
@@ -216,42 +236,49 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 </div>
               )}
 
-              {/* グラフ描画エリア（縦棒グラフ） */}
-              <div className="flex items-end justify-around gap-1 h-40 border-b border-slate-200 dark:border-slate-700">
+              {/* グラフ描画エリア（縦棒グラフ） - h-48に拡大して視認性向上 */}
+              <div className="flex items-end justify-around gap-2 h-48 border-b border-slate-200 pb-1 dark:border-slate-700">
                 {estimationResults.map((result, index) => {
                   const colors = [
-                    "#94a3b8",
-                    "#94a3b8",
-                    "#94a3b8",
-                    "#60a5fa",
-                    "#f59e0b",
-                    "#ef4444",
+                    "#94a3b8", // 設定1: グレー
+                    "#94a3b8", // 設定2
+                    "#94a3b8", // 設定3
+                    "#60a5fa", // 設定4: 青
+                    "#f59e0b", // 設定5: 黄
+                    "#ef4444", // 設定6: 赤
                   ];
+                  const barColor = colors[index] || "#94a3b8";
+                  const percentage = Math.max(result.probability, 1); // 最小1%確保
 
                   return (
                     <div
                       key={result.setting}
-                      className="flex flex-col items-center flex-1"
+                      className="flex flex-col items-center flex-1 h-full justify-end group"
                     >
-                      <div className="relative w-full flex-1 flex items-end justify-center">
+                      <div className="relative w-full flex-1 flex items-end justify-center px-1">
                         <div
-                          className="w-full rounded-t transition-all duration-700"
+                          className="w-full rounded-t-sm transition-all duration-700 hover:opacity-80"
                           style={{
-                            height: `${Math.max(result.probability, 2)}%`,
-                            backgroundColor: colors[index],
+                            height: `${percentage}%`,
+                            backgroundColor: barColor,
                           }}
-                        />
-                        {result.probability > 10 && (
-                          <span className="absolute bottom-1 text-[10px] font-bold text-white">
-                            {result.probability.toFixed(1)}%
-                          </span>
-                        )}
+                        >
+                          {/* ツールチップ的な数値表示（バーの上） */}
+                          {result.probability > 5 && (
+                            <span className="block text-center text-[10px] font-bold text-white pt-1">
+                              {result.probability.toFixed(0)}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div className="mt-1 text-[10px] font-medium text-slate-700 dark:text-slate-300">
-                        設定{result.setting}
+                      <div className="mt-2 text-xs font-bold text-slate-600 dark:text-slate-300">
+                        {result.setting}
                       </div>
-                      <div className="text-[9px] text-slate-500 dark:text-slate-400">
-                        {result.probability.toFixed(1)}%
+                      <div className="text-[10px] text-slate-400 dark:text-slate-500">
+                        {result.probability < 1
+                          ? "<1"
+                          : result.probability.toFixed(0)}
+                        %
                       </div>
                     </div>
                   );
@@ -259,15 +286,17 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
               </div>
             </>
           ) : (
-            <div className="flex h-48 items-center justify-center">
-              <p className="text-sm text-slate-400">
-                データを入力して「設定判別する」を押してください
+            <div className="flex h-48 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800/50">
+              <p className="text-sm text-slate-400 text-center">
+                データを入力して
+                <br />
+                「設定判別する」を押してください
               </p>
             </div>
           )}
 
-          <div className="mt-4 text-xs text-slate-500 dark:text-slate-400">
-            ※ベイズの定理による推定値です。試行回数が多いほど精度が向上します。
+          <div className="mt-4 text-xs text-slate-500 dark:text-slate-400 text-center">
+            ※ベイズ推定による確率分布
           </div>
         </div>
 

@@ -1,7 +1,8 @@
-import { useParams } from 'react-router-dom';
-import MachinePageFactory from '../components/dynamic-ui/MachinePageFactory';
-import { hanaHoohConfig } from '../data/machines/hana-hooh';
-import type { MachineConfig } from '../types/machine-schema';
+import { useParams } from "react-router-dom";
+import MachinePageFactory from "../components/dynamic-ui/MachinePageFactory";
+import { hanaHoohConfig } from "../data/machines/hana-hooh";
+import { funkyJuggler2Config } from "../data/machines/funky-juggler-2";
+import type { MachineConfig } from "../types/machine-schema";
 
 /**
  * 動的UIファクトリーのプレビューページ
@@ -12,7 +13,8 @@ export default function MachinePagePreview() {
 
   // 機種IDと設定ファイルのマッピング
   const configMap: Record<string, MachineConfig> = {
-    'hana-hooh': hanaHoohConfig,
+    "hana-hooh": hanaHoohConfig,
+    "funky-juggler-2": funkyJuggler2Config,
   };
 
   const config = machineId ? configMap[machineId] : null;
@@ -26,14 +28,18 @@ export default function MachinePagePreview() {
             Config not found
           </h1>
           <p className="text-slate-600 mb-4">
-            機種ID <code className="px-2 py-1 bg-slate-100 rounded text-sm font-mono">{machineId}</code> に対応する設定ファイルが見つかりません。
+            機種ID{" "}
+            <code className="px-2 py-1 bg-slate-100 rounded text-sm font-mono">
+              {machineId}
+            </code>{" "}
+            に対応する設定ファイルが見つかりません。
           </p>
           <div className="text-left bg-slate-50 rounded-lg p-4 text-sm">
             <p className="font-bold text-slate-700 mb-2">利用可能な機種ID:</p>
             <ul className="list-disc list-inside text-slate-600 space-y-1">
               {Object.keys(configMap).map((id) => (
                 <li key={id}>
-                  <a 
+                  <a
                     href={`/v2/preview/${id}`}
                     className="text-blue-600 hover:underline"
                   >
