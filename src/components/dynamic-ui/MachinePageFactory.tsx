@@ -1,16 +1,26 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import type {
   MachineConfig,
   EstimationResult,
 } from "../../types/machine-schema";
 import DynamicInput from "./DynamicInput";
 import { calculateEstimation } from "../../logic/bayes-estimator";
+import { AVAILABLE_MACHINES } from "../../data/machine-list";
 
 interface MachinePageFactoryProps {
   config: MachineConfig;
 }
 
 const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
+  const navigate = useNavigate();
+
+  // 現在の機種のカテゴリを取得
+  const currentCategory = useMemo(() => {
+    const current = AVAILABLE_MACHINES.find((m) => m.id === config.id);
+    return current ? current.category : "juggler";
+  }, [config.id]);
+
   const [inputValues, setInputValues] = useState<
     Record<string, number | boolean | string>
   >(() => {
@@ -32,7 +42,6 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   const [estimationResults, setEstimationResults] = useState<
     EstimationResult[] | null
   >(null);
-  const [isCalculating, setIsCalculating] = useState(false);
 
   const handleValueChange = (
     elementId: string,
@@ -50,30 +59,48 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   const themeColor = config.themeColor || "bg-blue-600";
   const totalGames = Number(inputValues["total-games"]) || 0;
 
-  const handleCalculate = () => {
-    setIsCalculating(true);
-    setError(null); // エラーリセット
-
-    // デバッグ用
-    console.log("=== 設定判別実行 ===");
-    console.log("入力値:", inputValues);
-    console.log("総ゲーム数:", totalGames);
-
-    setTimeout(() => {
-      try {
-        console.log("計算開始: Config=", config.id);
-        const results = calculateEstimation(config, inputValues);
-        console.log("計算結果:", results);
-        setEstimationResults(results);
-      } catch (err) {
-        console.error("設定判別エラー:", err);
-        setError("計算中にエラーが発生しました。入力値を確認してください。");
+  /* 自動計算: 入力値が変更されたら自動的に計算を実行 */
+  useEffect(() => {
+    // デバウンス用のタイマー
+    const timer = setTimeout(() => {
+      // 総ゲーム数が入力されている場合のみ自動計算
+      if (totalGames > 0) {
+        setError(null);
+        console.log("🔄 自動計算開始:", {
+          機種: config.name,
+          総ゲーム数: totalGames,
+          入力値: inputValues,
+        });
+        try {
+          const results = calculateEstimation(config, inputValues);
+          console.log(
+            "✅ 計算完了:",
+            results.map((r) => ({
+              設定: r.setting,
+              確率: `${r.probability.toFixed(1)}%`,
+            })),
+          );
+          const mostLikely = results.reduce((max, current) =>
+            current.probability > max.probability ? current : max,
+          );
+          console.log(
+            `📊 最有力設定: 設定${mostLikely.setting} (${mostLikely.probability.toFixed(1)}%)`,
+          );
+          setEstimationResults(results);
+        } catch (err) {
+          console.error("❌ 自動計算エラー:", err);
+          setError("計算中にエラーが発生しました。入力値を確認してください。");
+          setEstimationResults(null);
+        }
+      } else {
+        console.log("⏸️ 総ゲーム数が0のため計算をスキップ");
+        // 総ゲーム数が0の場合は結果をクリア
         setEstimationResults(null);
-      } finally {
-        setIsCalculating(false);
       }
-    }, 300);
-  };
+    }, 500); // 500ms のデバウンス
+
+    return () => clearTimeout(timer);
+  }, [inputValues, totalGames, config]);
 
   const handleReset = () => {
     const resetValues: Record<string, number | boolean | string> = {};
@@ -130,6 +157,11 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
       .reduce((sum, r) => sum + r.probability, 0);
   }, [estimationResults]);
 
+  // currentMode State
+  const [currentMode, setCurrentMode] = useState<"simple" | "detail" | "grape">(
+    "simple",
+  );
+
   return (
     <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950">
       {/* ヘッダー（テーマカラー適用） */}
@@ -145,58 +177,124 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-md space-y-4 p-4">
-        {/* 入力フォーム */}
-        {config.sections.map((section) => (
-          <div
-            key={section.id}
-            className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6"
+      {/* 機種選択ナビゲーション（カテゴリ一致のみ表示） */}
+      <div className="sticky top-0 z-10 bg-slate-100/95 backdrop-blur-sm py-3 px-4 shadow-md border-b border-slate-200 dark:bg-slate-900/95 dark:border-slate-800">
+        <div className="mx-auto max-w-md text-center">
+          <label className="block text-xs font-bold text-slate-500 mb-1 dark:text-slate-400">
+            ▼ 機種選択
+          </label>
+          <select
+            value={config.id}
+            onChange={(e) => {
+              const machineId = e.target.value;
+              if (machineId) {
+                navigate(`/v2/preview/${machineId}`);
+              }
+            }}
+            className="w-full text-center font-bold text-lg py-3 rounded-xl border-2 border-slate-300 bg-white text-slate-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"
           >
-            <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
-              {section.title}
-            </h2>
+            {AVAILABLE_MACHINES.filter(
+              (m) => m.category === currentCategory,
+            ).map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
 
-            <div className="space-y-4">
-              {section.elements.map((element) => (
-                <DynamicInput
-                  key={element.id}
-                  element={element}
-                  value={inputValues[element.id]}
-                  onChange={(value) => handleValueChange(element.id, value)}
-                  totalGames={totalGames}
-                />
-              ))}
+      <div className="mx-auto w-full max-w-md space-y-4 p-4">
+        {/* 入力モード切り替えタブ */}
+        <div className="flex rounded-xl bg-slate-200 p-1 dark:bg-slate-800">
+          {(["simple", "detail", "grape"] as const).map((mode) => (
+            <button
+              key={mode}
+              onClick={() => setCurrentMode(mode)}
+              className={`flex-1 rounded-lg py-2 text-sm font-bold transition-all ${
+                currentMode === mode
+                  ? "bg-white text-slate-800 shadow-sm dark:bg-slate-700 dark:text-white"
+                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              }`}
+            >
+              {mode === "simple" && "通常入力"}
+              {mode === "detail" && "詳細入力"}
+              {mode === "grape" && "ぶどう逆算"}
+            </button>
+          ))}
+        </div>
+
+        {/* 入力フォーム */}
+        {config.sections.map((section) => {
+          // 現在のモードに基づいて表示すべき要素をフィルタリング
+          const visibleElements = section.elements.filter((element) => {
+            const visibility = element.visibility || "always";
+
+            if (currentMode === "simple") {
+              return visibility === "always" || visibility === "simple";
+            }
+            if (currentMode === "detail") {
+              return (
+                visibility === "always" ||
+                visibility === "simple" ||
+                visibility === "detail"
+              );
+            }
+            if (currentMode === "grape") {
+              return visibility === "always" || visibility === "grape-calc";
+            }
+            return true;
+          });
+
+          if (visibleElements.length === 0) return null;
+
+          return (
+            <div
+              key={section.id}
+              className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6"
+            >
+              <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
+                {section.title}
+              </h2>
+
+              <div className="space-y-4">
+                {visibleElements.map((element) => (
+                  <DynamicInput
+                    key={element.id}
+                    element={element}
+                    value={inputValues[element.id]}
+                    onChange={(value) => handleValueChange(element.id, value)}
+                    totalGames={totalGames}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
-        {/* 計算ボタン（テーマカラー適用） */}
+        {/* 自動計算の説明とリセットボタン */}
         <div className="flex flex-col gap-2">
           {error && (
             <div className="mb-2 rounded-lg bg-red-100 p-3 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-400">
               {error}
             </div>
           )}
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={handleCalculate}
-              disabled={isCalculating}
-              className={`flex-1 rounded-xl ${themeColor} px-6 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80 disabled:cursor-not-allowed disabled:opacity-50`}
-            >
-              {isCalculating ? "計算中..." : "設定判別する"}
-            </button>
 
-            {estimationResults && (
-              <button
-                type="button"
-                onClick={handleReset}
-                className="rounded-xl bg-slate-200 px-5 py-4 font-medium text-slate-700 transition-colors hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-              >
-                リセット
-              </button>
-            )}
+          {/* 自動計算の説明 */}
+          <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-3 text-center">
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              💡 数値を入力すると自動で判別結果が更新されます
+            </p>
           </div>
+
+          {/* リセットボタン（常時表示） */}
+          <button
+            type="button"
+            onClick={handleReset}
+            className={`w-full rounded-xl ${themeColor} px-6 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80`}
+          >
+            入力を全てリセット
+          </button>
         </div>
 
         {/* 結果表示（常時表示） */}
@@ -365,10 +463,27 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                               ? totalGames / currentValue
                               : null;
                           const expectedValue = element.settingValues[setting];
-                          const isClose =
-                            currentProb &&
-                            Math.abs(currentProb - expectedValue) <
-                              expectedValue * 0.15;
+
+                          // 最も近い設定を判定するロジック
+                          let isClosest = false;
+                          if (currentProb !== null) {
+                            // 全設定との差分を計算し、最小の差分を持つ設定を探す
+                            let minDiff = Infinity;
+                            let closestSetting = -1;
+
+                            [1, 2, 3, 4, 5, 6].forEach((s) => {
+                              const val = element.settingValues[s];
+                              const diff = Math.abs(currentProb - val);
+                              if (diff < minDiff) {
+                                minDiff = diff;
+                                closestSetting = s;
+                              }
+                            });
+
+                            if (closestSetting === setting) {
+                              isClosest = true;
+                            }
+                          }
 
                           // フォーマット処理
                           let formattedValue: string;
@@ -387,8 +502,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                             <td
                               key={element.id}
                               className={`px-2 py-2 text-center text-xs tabular-nums ${
-                                isClose
-                                  ? "bg-blue-100 font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                                isClosest
+                                  ? "bg-red-100 font-extrabold text-red-600 dark:bg-red-900/30 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800"
                                   : "text-slate-600 dark:text-slate-400"
                               }`}
                             >
