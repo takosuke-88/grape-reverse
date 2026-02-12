@@ -29,33 +29,17 @@ export const funkyJuggler2Config: MachineConfig = {
           isDiscriminationFactor: false,
           discriminationWeight: 0,
         },
-        {
-          id: "diff-coins",
-          label: "差枚数",
-          type: "counter",
-          visibility: "grape-calc",
-          context: {},
-          settingValues: {
-            1: 0,
-            2: 0,
-            3: 0,
-            4: 0,
-            5: 0,
-            6: 0,
-          },
-          isDiscriminationFactor: false,
-          discriminationWeight: 0,
-        },
       ],
     },
     {
       id: "bonus-section",
-      title: "ボーナス確率",
+      title: "ボーナス回数",
       elements: [
         {
           id: "big-count",
           label: "BIG回数",
           type: "counter",
+          visibility: "always",
           context: {
             duringBonus: "big",
           },
@@ -70,6 +54,31 @@ export const funkyJuggler2Config: MachineConfig = {
           isDiscriminationFactor: true,
           discriminationWeight: 1.0,
         },
+        {
+          id: "reg-count",
+          label: "REG回数",
+          type: "counter",
+          visibility: "always",
+          context: {
+            duringBonus: "reg",
+          },
+          settingValues: {
+            1: 439.8,
+            2: 407.1,
+            3: 366.1,
+            4: 322.8,
+            5: 299.3,
+            6: 262.1,
+          },
+          isDiscriminationFactor: true,
+          discriminationWeight: 2.5,
+        },
+      ],
+    },
+    {
+      id: "bonus-detail-section",
+      title: "ボーナス詳細",
+      elements: [
         {
           id: "single-big-count",
           label: "単独BIG",
@@ -87,24 +96,6 @@ export const funkyJuggler2Config: MachineConfig = {
           isDiscriminationFactor: false,
         },
         {
-          id: "reg-count",
-          label: "REG回数",
-          type: "counter",
-          context: {
-            duringBonus: "reg",
-          },
-          settingValues: {
-            1: 439.8,
-            2: 407.1,
-            3: 366.1,
-            4: 322.8,
-            5: 299.3,
-            6: 262.1,
-          },
-          isDiscriminationFactor: true,
-          discriminationWeight: 2.5,
-        },
-        {
           id: "single-reg-count",
           label: "単独REG",
           type: "counter",
@@ -119,6 +110,29 @@ export const funkyJuggler2Config: MachineConfig = {
           visibility: "detail",
           settingValues: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
           isDiscriminationFactor: false,
+        },
+      ],
+    },
+    {
+      id: "other-section",
+      title: "その他",
+      elements: [
+        {
+          id: "diff-coins",
+          label: "差枚数",
+          type: "counter",
+          visibility: "grape-calc",
+          context: {},
+          settingValues: {
+            1: 0,
+            2: 0,
+            3: 0,
+            4: 0,
+            5: 0,
+            6: 0,
+          },
+          isDiscriminationFactor: false,
+          discriminationWeight: 0,
         },
       ],
     },
