@@ -17,9 +17,7 @@ export const funkyJuggler2Config: MachineConfig = {
           id: "total-games",
           label: "総ゲーム数",
           type: "counter",
-          context: {
-            description: "実際に回した総ゲーム数",
-          },
+          context: {},
           settingValues: {
             1: 0,
             2: 0,
@@ -36,9 +34,7 @@ export const funkyJuggler2Config: MachineConfig = {
           label: "差枚数",
           type: "counter",
           visibility: "grape-calc",
-          context: {
-            description: "現在の差枚数（プラスは正、マイナスは負の数）",
-          },
+          context: {},
           settingValues: {
             1: 0,
             2: 0,
@@ -62,7 +58,6 @@ export const funkyJuggler2Config: MachineConfig = {
           type: "counter",
           context: {
             duringBonus: "big",
-            description: "BIGボーナスの回数を入力",
           },
           settingValues: {
             1: 266.4,
@@ -97,7 +92,6 @@ export const funkyJuggler2Config: MachineConfig = {
           type: "counter",
           context: {
             duringBonus: "reg",
-            description: "REGボーナスの回数を入力",
           },
           settingValues: {
             1: 439.8,
@@ -136,9 +130,7 @@ export const funkyJuggler2Config: MachineConfig = {
           id: "grape-count",
           label: "ブドウ回数",
           type: "counter",
-          context: {
-            description: "ブドウの成立回数",
-          },
+          context: {},
           settingValues: {
             1: 5.95,
             2: 5.92,

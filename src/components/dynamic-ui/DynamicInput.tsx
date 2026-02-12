@@ -1,5 +1,5 @@
-import React from 'react';
-import type { DiscriminationElement } from '../../types/machine-schema';
+import React from "react";
+import type { DiscriminationElement } from "../../types/machine-schema";
 
 interface DynamicInputProps {
   element: DiscriminationElement;
@@ -8,10 +8,16 @@ interface DynamicInputProps {
   totalGames?: number; // 総ゲーム数（確率計算用）
 }
 
-const DynamicInput: React.FC<DynamicInputProps> = ({ element, value, onChange, totalGames }) => {
+const DynamicInput: React.FC<DynamicInputProps> = ({
+  element,
+  value,
+  onChange,
+  totalGames,
+}) => {
   // リアルタイム確率計算
   const calculateProbability = () => {
-    if (element.type !== 'counter' || !totalGames || totalGames === 0) return null;
+    if (element.type !== "counter" || !totalGames || totalGames === 0)
+      return null;
     const count = Number(value) || 0;
     if (count === 0) return null;
     const denominator = totalGames / count;
@@ -22,7 +28,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({ element, value, onChange, t
 
   const renderInput = () => {
     switch (element.type) {
-      case 'counter':
+      case "counter":
         return (
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -37,13 +43,13 @@ const DynamicInput: React.FC<DynamicInputProps> = ({ element, value, onChange, t
               >
                 ＋
               </button>
-              
+
               <input
                 type="number"
-                value={value === '' ? '' : value}
+                value={value === "" ? "" : value}
                 onChange={(e) => {
-                  if (e.target.value === '') {
-                    onChange('');
+                  if (e.target.value === "") {
+                    onChange("");
                   } else {
                     const newValue = parseInt(e.target.value) || 0;
                     onChange(Math.max(0, newValue));
@@ -53,7 +59,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({ element, value, onChange, t
                 min="0"
                 placeholder="0"
               />
-              
+
               <button
                 type="button"
                 onClick={() => {
@@ -65,19 +71,23 @@ const DynamicInput: React.FC<DynamicInputProps> = ({ element, value, onChange, t
               >
                 －
               </button>
-              
+
               {/* リアルタイム確率表示（常時表示） */}
               <div className="ml-2 text-right min-w-[60px]">
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">現在</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                  現在
+                </div>
                 <div className="text-sm font-bold text-slate-600 dark:text-slate-300">
-                  {currentProbability ? `1/${currentProbability.toFixed(1)}` : '---'}
+                  {currentProbability
+                    ? `1/${currentProbability.toFixed(1)}`
+                    : "---"}
                 </div>
               </div>
             </div>
           </div>
         );
 
-      case 'select':
+      case "select":
         return (
           <select
             value={String(value)}
@@ -90,13 +100,13 @@ const DynamicInput: React.FC<DynamicInputProps> = ({ element, value, onChange, t
           </select>
         );
 
-      case 'flag':
+      case "flag":
         return (
           <button
             type="button"
             onClick={() => onChange(!value)}
             className={`relative inline-flex h-11 w-20 items-center rounded-full transition-colors ${
-              value ? 'bg-blue-600' : 'bg-slate-300'
+              value ? "bg-blue-600" : "bg-slate-300"
             }`}
             role="switch"
             aria-checked={!!value}
@@ -104,30 +114,28 @@ const DynamicInput: React.FC<DynamicInputProps> = ({ element, value, onChange, t
           >
             <span
               className={`inline-block h-8 w-8 transform rounded-full bg-white shadow-md transition-transform ${
-                value ? 'translate-x-10' : 'translate-x-1'
+                value ? "translate-x-10" : "translate-x-1"
               }`}
             />
             <span
               className={`absolute text-xs font-bold ${
-                value 
-                  ? 'left-2 text-white' 
-                  : 'right-2 text-slate-600'
+                value ? "left-2 text-white" : "right-2 text-slate-600"
               }`}
             >
-              {value ? 'ON' : 'OFF'}
+              {value ? "ON" : "OFF"}
             </span>
           </button>
         );
 
-      case 'ratio':
+      case "ratio":
         return (
           <div className="flex items-center gap-2">
             <input
               type="number"
-              value={value === '' ? '' : value}
+              value={value === "" ? "" : value}
               onChange={(e) => {
-                if (e.target.value === '') {
-                  onChange('');
+                if (e.target.value === "") {
+                  onChange("");
                 } else {
                   const newValue = parseFloat(e.target.value) || 0;
                   onChange(Math.max(0, newValue));
@@ -148,17 +156,10 @@ const DynamicInput: React.FC<DynamicInputProps> = ({ element, value, onChange, t
 
   return (
     <div className="space-y-2">
-      <label className="block text-center text-sm font-medium text-slate-700 dark:text-slate-300">
+      <label className="block text-center text-sm font-bold text-gray-800 dark:text-slate-200">
         {element.label}
-        {element.context?.description && (
-          <span className="ml-2 text-xs text-slate-500 dark:text-slate-400">
-            ({element.context.description})
-          </span>
-        )}
       </label>
-      <div className="flex justify-center">
-        {renderInput()}
-      </div>
+      <div className="flex justify-center">{renderInput()}</div>
     </div>
   );
 };
