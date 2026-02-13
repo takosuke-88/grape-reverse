@@ -1,5 +1,10 @@
 export type InputType = "counter" | "ratio" | "select" | "flag";
-export type InputVisibility = "always" | "simple" | "detail" | "grape-calc";
+export type InputVisibility =
+  | "always"
+  | "simple"
+  | "detail"
+  | "grape-calc"
+  | "table-only";
 
 /**
  * 判別要素が有効になる「状況・状態」を定義

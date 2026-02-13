@@ -73,6 +73,22 @@ export const funkyJuggler2Config: MachineConfig = {
           isDiscriminationFactor: true,
           discriminationWeight: 2.5,
         },
+        {
+          id: "bonus-combined",
+          label: "合算",
+          type: "counter",
+          visibility: "table-only",
+          settingValues: {
+            1: 165.9,
+            2: 158.3,
+            3: 150.7,
+            4: 140.6,
+            5: 133.2,
+            6: 119.6,
+          },
+          isDiscriminationFactor: true,
+          discriminationWeight: 0,
+        },
       ],
     },
     {
@@ -142,7 +158,7 @@ export const funkyJuggler2Config: MachineConfig = {
       elements: [
         {
           id: "grape-count",
-          label: "ブドウ回数",
+          label: "ブドウ",
           type: "counter",
           context: {},
           settingValues: {
