@@ -75,7 +75,7 @@ export const funkyJuggler2Config: MachineConfig = {
         },
         {
           id: "bonus-combined",
-          label: "合算",
+          label: "合成",
           type: "counter",
           visibility: "table-only",
           settingValues: {

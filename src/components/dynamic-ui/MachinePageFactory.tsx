@@ -268,6 +268,30 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   />
                 ))}
               </div>
+
+              {/* ボーナス合算確率（BIG/REGが含まれるセクションのみ） */}
+              {section.elements.some((e) => e.id === "big-count") &&
+                section.elements.some((e) => e.id === "reg-count") &&
+                (() => {
+                  const bigCount = Number(inputValues["big-count"]) || 0;
+                  const regCount = Number(inputValues["reg-count"]) || 0;
+                  const bonusTotal = bigCount + regCount;
+                  const prob =
+                    totalGames > 0 && bonusTotal > 0
+                      ? (totalGames / bonusTotal).toFixed(1)
+                      : "---";
+
+                  return (
+                    <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-800">
+                      <span className="text-base font-bold text-slate-800 dark:text-slate-200">
+                        ボーナス合成
+                      </span>
+                      <span className="text-xl font-bold text-slate-800 dark:text-white">
+                        1/{prob}
+                      </span>
+                    </div>
+                  );
+                })()}
             </div>
           );
         })}
@@ -429,7 +453,12 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                     {discriminationElements.map((element) => (
                       <th
                         key={element.id}
-                        className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400"
+                        className={`px-2 py-2 text-center text-xs font-medium ${
+                          element.label.includes("合成") ||
+                          element.label.includes("合算")
+                            ? "text-slate-800 dark:text-slate-200 font-bold"
+                            : "text-slate-500 dark:text-slate-400"
+                        }`}
                       >
                         {element.label.replace("回数", "確率")}
                       </th>
@@ -456,8 +485,20 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                           設定{setting}
                         </td>
                         {discriminationElements.map((element) => {
-                          const currentValue =
+                          let currentValue =
                             Number(inputValues[element.id]) || 0;
+
+                          // 合成確率計算のための特例処理
+                          if (
+                            element.id === "bonus-combined" ||
+                            element.label.includes("合成") ||
+                            element.label.includes("合算")
+                          ) {
+                            const big = Number(inputValues["big-count"]) || 0;
+                            const reg = Number(inputValues["reg-count"]) || 0;
+                            currentValue = big + reg;
+                          }
+
                           const currentProb =
                             totalGames > 0 && currentValue > 0
                               ? totalGames / currentValue
@@ -504,7 +545,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                               className={`px-2 py-2 text-center text-xs tabular-nums ${
                                 isClosest
                                   ? "bg-red-100 font-extrabold text-red-600 dark:bg-red-900/30 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800"
-                                  : "text-slate-600 dark:text-slate-400"
+                                  : element.label.includes("合成") ||
+                                      element.label.includes("合算")
+                                    ? "text-slate-900 dark:text-slate-100 font-bold bg-slate-100/50 dark:bg-slate-800/50"
+                                    : "text-slate-600 dark:text-slate-400"
                               }`}
                             >
                               1/{formattedValue}
