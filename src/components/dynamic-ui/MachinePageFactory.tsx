@@ -536,11 +536,115 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                       {highSettingProb.toFixed(1)}%
                     </div>
                     <div className="text-[11px] font-bold text-red-500 dark:text-red-400">
-                      (設定5・6合算)
+                      (設定5・6の可能性)
                     </div>
                   </div>
                 </div>
               )}
+
+              {/* 4大指標 (現在確率) */}
+              <div className="mb-4 grid grid-cols-2 gap-2">
+                {[
+                  {
+                    label: "BIG確率",
+                    val: (() => {
+                      const count = Number(inputValues["big-count"]) || 0;
+                      return count > 0 ? totalGames / count : 0;
+                    })(),
+                    format: (v: number) => v.toFixed(1),
+                    settingValues: (() => {
+                      const el = config.sections
+                        .flatMap((s) => s.elements)
+                        .find((e) => e.id === "big-count");
+                      return el?.settingValues;
+                    })(),
+                  },
+                  {
+                    label: "REG確率",
+                    val: (() => {
+                      const count = Number(inputValues["reg-count"]) || 0;
+                      return count > 0 ? totalGames / count : 0;
+                    })(),
+                    format: (v: number) => v.toFixed(1),
+                    settingValues: (() => {
+                      const el = config.sections
+                        .flatMap((s) => s.elements)
+                        .find((e) => e.id === "reg-count");
+                      return el?.settingValues;
+                    })(),
+                  },
+                  {
+                    label: "合算確率",
+                    val: (() => {
+                      const big = Number(inputValues["big-count"]) || 0;
+                      const reg = Number(inputValues["reg-count"]) || 0;
+                      const total = big + reg;
+                      return total > 0 ? totalGames / total : 0;
+                    })(),
+                    format: (v: number) => v.toFixed(1),
+                    settingValues: (() => {
+                      const el = config.sections
+                        .flatMap((s) => s.elements)
+                        .find((e) => e.id === "bonus-combined");
+                      return el?.settingValues;
+                    })(),
+                  },
+                  {
+                    label: "ブドウ確率",
+                    val: (() => {
+                      const count = Number(inputValues["grape-count"]) || 0;
+                      return count > 0 ? totalGames / count : 0;
+                    })(),
+                    format: (v: number) => v.toFixed(2),
+                    settingValues: (() => {
+                      const el = config.sections
+                        .flatMap((s) => s.elements)
+                        .find((e) => e.id === "grape-count");
+                      return el?.settingValues;
+                    })(),
+                  },
+                ].map((item, idx) => {
+                  let approxSetting: number | null = null;
+                  if (item.val > 0 && item.settingValues) {
+                    let minDiff = Infinity;
+                    ([1, 2, 3, 4, 5, 6] as const).forEach((setting) => {
+                      const settingVal = item.settingValues![setting];
+                      if (settingVal) {
+                        const diff = Math.abs(item.val - settingVal);
+                        if (diff < minDiff) {
+                          minDiff = diff;
+                          approxSetting = setting;
+                        }
+                      }
+                    });
+                  }
+
+                  return (
+                    <div
+                      key={idx}
+                      className="flex flex-col items-center justify-center rounded-lg border border-slate-100 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-800"
+                    >
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                        {item.label}
+                      </div>
+                      <div className="text-xl font-bold text-slate-800 dark:text-white">
+                        {item.val > 0 ? `1/${item.format(item.val)}` : "---"}
+                      </div>
+                      {approxSetting && (
+                        <div
+                          className={`text-[10px] font-bold ${
+                            approxSetting >= 5
+                              ? "text-red-500 dark:text-red-400"
+                              : "text-blue-500 dark:text-blue-400"
+                          }`}
+                        >
+                          (設定{approxSetting}近似)
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
 
               {/* グラフ描画エリア（縦棒グラフ） - h-48に拡大して視認性向上 */}
               <div className="flex items-end justify-around gap-2 h-48 border-b border-slate-200 pb-1 dark:border-slate-700">
@@ -568,23 +672,17 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                             height: `${percentage}%`,
                             backgroundColor: barColor,
                           }}
+                        ></div>
+                        {/* 確率表示（バーの上） */}
+                        <span
+                          className="absolute text-[9px] font-bold text-slate-700 dark:text-slate-200 mb-0.5"
+                          style={{ bottom: `${percentage}%` }}
                         >
-                          {/* ツールチップ的な数値表示（バーの上） */}
-                          {result.probability > 5 && (
-                            <span className="block text-center text-[10px] font-bold text-white pt-1">
-                              {result.probability.toFixed(0)}
-                            </span>
-                          )}
-                        </div>
+                          {result.probability.toFixed(1)}%
+                        </span>
                       </div>
-                      <div className="mt-2 text-xs font-bold text-slate-600 dark:text-slate-300">
-                        {result.setting}
-                      </div>
-                      <div className="text-[10px] text-slate-400 dark:text-slate-500">
-                        {result.probability < 1
-                          ? "<1"
-                          : result.probability.toFixed(0)}
-                        %
+                      <div className="mt-2 text-[10px] text-slate-500 dark:text-slate-400">
+                        設定{result.setting}
                       </div>
                     </div>
                   );
