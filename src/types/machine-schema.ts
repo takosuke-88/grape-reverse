@@ -57,6 +57,11 @@ export interface MachineConfig {
     baseGamesPerMedal?: number; // ベース: 50枚あたりの回転数
     payoutRatio?: number[]; // 機械割（設定1〜6）
     netIncreasePerART?: number; // ART純増（AT/ART機のみ）
+    payouts?: {
+      big: number;
+      reg: number;
+      grape: number;
+    };
   };
 }
 

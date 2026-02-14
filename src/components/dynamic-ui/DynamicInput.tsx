@@ -52,11 +52,10 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                     onChange("");
                   } else {
                     const newValue = parseInt(e.target.value) || 0;
-                    onChange(Math.max(0, newValue));
+                    onChange(newValue);
                   }
                 }}
                 className="w-24 h-[44px] text-center text-xl font-bold border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-                min="0"
                 placeholder="0"
               />
 
@@ -64,7 +63,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 type="button"
                 onClick={() => {
                   const numValue = Number(value) || 0;
-                  onChange(Math.max(0, numValue - 1));
+                  onChange(numValue - 1);
                 }}
                 className="min-w-[44px] min-h-[44px] rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-bold text-lg transition-colors flex items-center justify-center dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
                 aria-label="減らす"
@@ -138,11 +137,10 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                   onChange("");
                 } else {
                   const newValue = parseFloat(e.target.value) || 0;
-                  onChange(Math.max(0, newValue));
+                  onChange(newValue);
                 }
               }}
               className="w-full h-[44px] px-4 text-center text-xl font-bold border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-              min="0"
               step="0.01"
               placeholder="1/○○○"
             />

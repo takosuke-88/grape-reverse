@@ -178,5 +178,10 @@ export const funkyJuggler2Config: MachineConfig = {
   specs: {
     baseGamesPerMedal: 42, // 推定コイン持ち
     payoutRatio: [97.0, 98.5, 99.8, 102.0, 104.3, 109.0], // 設定1〜6の機械割
+    payouts: {
+      big: 240,
+      reg: 96,
+      grape: 8,
+    },
   },
 };
