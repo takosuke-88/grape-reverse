@@ -284,7 +284,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   return (
                     <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-800">
                       <span className="text-base font-bold text-slate-800 dark:text-slate-200">
-                        ボーナス合成
+                        ボーナス合成確率
                       </span>
                       <span className="text-xl font-bold text-slate-800 dark:text-white">
                         1/{prob}
