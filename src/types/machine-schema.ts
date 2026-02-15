@@ -33,6 +33,7 @@ export interface DiscriminationElement {
   settingValues: { [setting: number]: number };
   isDiscriminationFactor: boolean;
   discriminationWeight?: number; // デフォルト1.0
+  conflictsWith?: string[]; // 他の要素と競合する場合（例: REG詳細入力時はREGトータルを除外）
 }
 
 /**

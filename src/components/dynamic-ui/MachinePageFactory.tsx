@@ -18,12 +18,18 @@ interface MachinePageFactoryProps {
 const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   const navigate = useNavigate();
 
+  // モード管理
+  const [currentMode, setCurrentMode] = useState<"simple" | "detail" | "grape">(
+    "simple",
+  );
+
   // 現在の機種のカテゴリを取得
   const currentCategory = useMemo(() => {
     const current = AVAILABLE_MACHINES.find((m) => m.id === config.id);
     return current ? current.category : "juggler";
   }, [config.id]);
 
+  // ユーザー入力State (通常・詳細)
   const [inputValues, setInputValues] = useState<
     Record<string, number | boolean | string>
   >(() => {
@@ -42,25 +48,41 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     return initialValues;
   });
 
+  // ブドウ逆算用入力State (独立)
+  const [grapeInputValues, setGrapeInputValues] = useState<
+    Record<string, number | boolean | string>
+  >({});
+
   const [estimationResults, setEstimationResults] = useState<
     EstimationResult[] | null
   >(null);
+
+  // 現在のモードに応じた入力値を参照
+  const currentInputs =
+    currentMode === "grape" ? grapeInputValues : inputValues;
 
   const handleValueChange = (
     elementId: string,
     value: number | boolean | string,
   ) => {
-    setInputValues((prev) => ({
-      ...prev,
-      [elementId]: value,
-    }));
+    if (currentMode === "grape") {
+      setGrapeInputValues((prev) => ({
+        ...prev,
+        [elementId]: value,
+      }));
+    } else {
+      setInputValues((prev) => ({
+        ...prev,
+        [elementId]: value,
+      }));
+    }
   };
 
   /* エラー状態の管理を追加 */
   const [error, setError] = useState<string | null>(null);
 
   const themeColor = config.themeColor || "bg-blue-600";
-  const totalGames = Number(inputValues["total-games"]) || 0;
+  const totalGames = Number(currentInputs["total-games"]) || 0;
 
   /* 自動計算: 入力値が変更されたら自動的に計算を実行 */
   // 依存値の変更を追跡するためのRef
@@ -72,10 +94,11 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   });
 
   useEffect(() => {
-    const currentTotalGames = Number(inputValues["total-games"]) || 0;
-    const currentDiffCoins = inputValues["diff-coins"];
-    const currentBig = Number(inputValues["big-count"]) || 0;
-    const currentReg = Number(inputValues["reg-count"]) || 0;
+    // currentInputsを使用
+    const currentTotalGames = Number(currentInputs["total-games"]) || 0;
+    const currentDiffCoins = currentInputs["diff-coins"];
+    const currentBig = Number(currentInputs["big-count"]) || 0;
+    const currentReg = Number(currentInputs["reg-count"]) || 0;
 
     const prev = prevDepsRef.current;
 
@@ -122,7 +145,6 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
         const CHERRY_ACQUISITION_RATE = 1.0;
 
         // 1. IN枚数 = 総ゲーム数 * 3
-        // (差枚数計算の基準として、通常時のIN枚数3枚/Gを使用)
         const coinIn = currentTotalGames * 3;
 
         // 2. 総払い出し(OUT) = IN + 差枚数
@@ -147,23 +169,20 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
         // 7. ブドウ回数
         const calculatedGrapeCount = Math.round(grapeOut / PAYOUT.GRAPE);
 
-        // 計算結果が0以上、かつ現在の値と異なる場合のみ更新
-        if (
-          calculatedGrapeCount >= 0 &&
-          String(inputValues["grape-count"]) !== String(calculatedGrapeCount)
-        ) {
-          console.log("🍇 ブドウ逆算実行 (Smart Auto-Calc - Cherry Aim):", {
-            Trigger: "Dependency Changed",
-            Calculated: calculatedGrapeCount,
-          });
-          setInputValues((state) => ({
-            ...state,
-            "grape-count": calculatedGrapeCount,
-          }));
-        }
+        console.log("🍇 ブドウ逆算実行 (Smart Auto-Calc - Cherry Aim):", {
+          Trigger: "Dependency Changed",
+          Calculated: calculatedGrapeCount,
+        });
+        setGrapeInputValues((state) => ({
+          ...state,
+          "grape-count": calculatedGrapeCount,
+        }));
       }
     }
+  }, [currentInputs, totalGames, config, currentMode]);
 
+  // 設定推測の自動計算
+  useEffect(() => {
     // デバウンス用のタイマー
     const timer = setTimeout(() => {
       // 総ゲーム数が入力されている場合のみ自動計算
@@ -171,23 +190,19 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
         setError(null);
         console.log("🔄 自動計算開始:", {
           機種: config.name,
+          モード: currentMode,
           総ゲーム数: totalGames,
-          入力値: inputValues,
+          入力値: currentInputs,
         });
         try {
-          const results = calculateEstimation(config, inputValues);
+          // モードに関わらず、表示中の入力値で推定を行う
+          const results = calculateEstimation(config, currentInputs);
           console.log(
             "✅ 計算完了:",
             results.map((r) => ({
               設定: r.setting,
               確率: `${r.probability.toFixed(1)}%`,
             })),
-          );
-          const mostLikely = results.reduce((max, current) =>
-            current.probability > max.probability ? current : max,
-          );
-          console.log(
-            `📊 最有力設定: 設定${mostLikely.setting} (${mostLikely.probability.toFixed(1)}%)`,
           );
           setEstimationResults(results);
         } catch (err) {
@@ -196,14 +211,13 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           setEstimationResults(null);
         }
       } else {
-        console.log("⏸️ 総ゲーム数が0のため計算をスキップ");
         // 総ゲーム数が0の場合は結果をクリア
         setEstimationResults(null);
       }
     }, 500); // 500ms のデバウンス
 
     return () => clearTimeout(timer);
-  }, [inputValues, totalGames, config]);
+  }, [currentInputs, totalGames, config, currentMode]);
 
   const handleReset = () => {
     const resetValues: Record<string, number | boolean | string> = {};
@@ -218,12 +232,16 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
         }
       });
     });
-    setInputValues(resetValues);
+
+    if (currentMode === "grape") {
+      setGrapeInputValues(resetValues);
+    } else {
+      setInputValues(resetValues);
+    }
     setEstimationResults(null);
     setError(null);
   };
 
-  // 判別要素のみ抽出
   // 判別要素のみ抽出
   const discriminationElements = useMemo(() => {
     return config.sections.flatMap((section) =>
@@ -255,10 +273,12 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
       .reduce((sum, r) => sum + r.probability, 0);
   }, [estimationResults]);
 
-  // currentMode State
-  const [currentMode, setCurrentMode] = useState<"simple" | "detail" | "grape">(
-    "simple",
-  );
+  // 詳細判別モードかどうか
+  const isDetailMode = useMemo(() => {
+    const soloReg = Number(inputValues["reg-solo-count"]) || 0;
+    const cherryReg = Number(inputValues["reg-cherry-count"]) || 0;
+    return soloReg > 0 || cherryReg > 0;
+  }, [inputValues]);
 
   return (
     <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950">
@@ -269,6 +289,11 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             <span className="rounded-md bg-white/20 px-2.5 py-1 text-xs font-medium">
               {config.type}
             </span>
+            {isDetailMode && (
+              <span className="animate-pulse rounded-md bg-yellow-400/90 px-2.5 py-1 text-xs font-bold text-slate-900">
+                ⚡️詳細フラグ判別中
+              </span>
+            )}
           </div>
           <h1 className="text-2xl font-bold sm:text-3xl">{config.name}</h1>
           <p className="mt-1 text-sm opacity-90">設定判別ツール</p>
@@ -348,11 +373,11 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
           // ブドウ逆算モードかつ通常時小役セクションの場合、特別な結果カードを表示
           if (currentMode === "grape" && section.id === "normal-role-section") {
-            const diffCoins = Number(inputValues["diff-coins"]);
+            const diffCoins = Number(currentInputs["diff-coins"]);
             const hasDiffCoins =
-              inputValues["diff-coins"] !== "" && !isNaN(diffCoins);
-            const bigCount = Number(inputValues["big-count"]) || 0;
-            const regCount = Number(inputValues["reg-count"]) || 0;
+              currentInputs["diff-coins"] !== "" && !isNaN(diffCoins);
+            const bigCount = Number(currentInputs["big-count"]) || 0;
+            const regCount = Number(currentInputs["reg-count"]) || 0;
 
             if (totalGames > 0 && hasDiffCoins) {
               // --- 定数定義 ---
@@ -406,27 +431,27 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
                   <div className="space-y-3">
                     {/* チェリー狙い */}
-                    <div className="rounded-xl bg-emerald-50 p-4 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/30">
-                      <div className="text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-1">
+                    <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 dark:border-emerald-800/30 dark:bg-emerald-900/20">
+                      <div className="mb-1 text-xs font-bold text-emerald-700 dark:text-emerald-400">
                         チェリー狙い
                       </div>
-                      <div className="text-2xl font-bold text-slate-800 dark:text-white text-center">
+                      <div className="text-center text-2xl font-bold text-slate-800 dark:text-white">
                         {grapeProbA > 0 ? `1/${grapeProbA.toFixed(2)}` : "---"}
                       </div>
-                      <div className="text-[10px] text-center text-slate-400 mt-1">
+                      <div className="mt-1 text-center text-[10px] text-slate-400">
                         推計回数: {Math.round(grapeCountA)}回
                       </div>
                     </div>
 
                     {/* フリー打ち */}
-                    <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
-                      <div className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
+                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
+                      <div className="mb-1 text-xs font-bold text-slate-500 dark:text-slate-400">
                         フリー打ち
                       </div>
-                      <div className="text-2xl font-bold text-slate-800 dark:text-white text-center">
+                      <div className="text-center text-2xl font-bold text-slate-800 dark:text-white">
                         {grapeProbB > 0 ? `1/${grapeProbB.toFixed(2)}` : "---"}
                       </div>
-                      <div className="text-[10px] text-center text-slate-400 mt-1">
+                      <div className="mt-1 text-center text-[10px] text-slate-400">
                         推計回数: {Math.round(grapeCountB)}回
                       </div>
                     </div>
@@ -444,7 +469,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   ブドウ逆算結果
                 </h2>
                 <div className="flex h-32 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800/50">
-                  <p className="text-sm text-slate-400 text-center">
+                  <p className="text-center text-sm text-slate-400">
                     総ゲーム数と差枚数を
                     <br />
                     入力してください
@@ -468,7 +493,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   <DynamicInput
                     key={element.id}
                     element={element}
-                    value={inputValues[element.id]}
+                    value={currentInputs[element.id]}
                     onChange={(value) => handleValueChange(element.id, value)}
                     totalGames={totalGames}
                   />
@@ -479,8 +504,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
               {section.elements.some((e) => e.id === "big-count") &&
                 section.elements.some((e) => e.id === "reg-count") &&
                 (() => {
-                  const bigCount = Number(inputValues["big-count"]) || 0;
-                  const regCount = Number(inputValues["reg-count"]) || 0;
+                  const bigCount = Number(currentInputs["big-count"]) || 0;
+                  const regCount = Number(currentInputs["reg-count"]) || 0;
                   const bonusTotal = bigCount + regCount;
                   const prob =
                     totalGames > 0 && bonusTotal > 0
@@ -606,6 +631,40 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                       return el?.settingValues;
                     })(),
                   },
+                  ...(currentMode === "detail"
+                    ? [
+                        {
+                          label: "単独REG",
+                          val: (() => {
+                            const count =
+                              Number(inputValues["reg-solo-count"]) || 0;
+                            return count > 0 ? totalGames / count : 0;
+                          })(),
+                          format: (v: number) => v.toFixed(1),
+                          settingValues: (() => {
+                            const el = config.sections
+                              .flatMap((s) => s.elements)
+                              .find((e) => e.id === "reg-solo-count");
+                            return el?.settingValues;
+                          })(),
+                        },
+                        {
+                          label: "チェリーREG",
+                          val: (() => {
+                            const count =
+                              Number(inputValues["reg-cherry-count"]) || 0;
+                            return count > 0 ? totalGames / count : 0;
+                          })(),
+                          format: (v: number) => v.toFixed(1),
+                          settingValues: (() => {
+                            const el = config.sections
+                              .flatMap((s) => s.elements)
+                              .find((e) => e.id === "reg-cherry-count");
+                            return el?.settingValues;
+                          })(),
+                        },
+                      ]
+                    : []),
                   {
                     label: "合算確率",
                     val: (() => {
@@ -798,20 +857,23 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             </div>
 
             <div className="overflow-x-auto">
+              {/* 詳細項目を除外して表示 */}
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 dark:border-slate-700">
                     <th className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
                       設定
                     </th>
-                    {discriminationElements.map((element) => (
-                      <th
-                        key={element.id}
-                        className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400"
-                      >
-                        {element.label.replace("回数", "確率")}
-                      </th>
-                    ))}
+                    {discriminationElements
+                      .filter((e) => e.visibility !== "detail")
+                      .map((element) => (
+                        <th
+                          key={element.id}
+                          className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400"
+                        >
+                          {element.label.replace("回数", "確率")}
+                        </th>
+                      ))}
                     {config.specs?.payoutRatio && (
                       <th className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
                         機械割
@@ -831,76 +893,79 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         }
                       >
                         <td className="px-2 py-2 text-center text-xs font-bold text-slate-700 dark:text-slate-300">
-                          設定{setting}
+                          {setting}
                         </td>
-                        {discriminationElements.map((element) => {
-                          let currentValue =
-                            Number(inputValues[element.id]) || 0;
+                        {discriminationElements
+                          .filter((e) => e.visibility !== "detail")
+                          .map((element) => {
+                            let currentValue =
+                              Number(inputValues[element.id]) || 0;
 
-                          // 合成確率計算のための特例処理
-                          if (
-                            element.id === "bonus-combined" ||
-                            element.label.includes("合成") ||
-                            element.label.includes("合算")
-                          ) {
-                            const big = Number(inputValues["big-count"]) || 0;
-                            const reg = Number(inputValues["reg-count"]) || 0;
-                            currentValue = big + reg;
-                          }
-
-                          const currentProb =
-                            totalGames > 0 && currentValue > 0
-                              ? totalGames / currentValue
-                              : null;
-                          const expectedValue = element.settingValues[setting];
-
-                          // 最も近い設定を判定するロジック
-                          let isClosest = false;
-                          if (currentProb !== null) {
-                            // 全設定との差分を計算し、最小の差分を持つ設定を探す
-                            let minDiff = Infinity;
-                            let closestSetting = -1;
-
-                            [1, 2, 3, 4, 5, 6].forEach((s) => {
-                              const val = element.settingValues[s];
-                              const diff = Math.abs(currentProb - val);
-                              if (diff < minDiff) {
-                                minDiff = diff;
-                                closestSetting = s;
-                              }
-                            });
-
-                            if (closestSetting === setting) {
-                              isClosest = true;
+                            // 合成確率計算のための特例処理
+                            if (
+                              element.id === "bonus-combined" ||
+                              element.label.includes("合成") ||
+                              element.label.includes("合算")
+                            ) {
+                              const big = Number(inputValues["big-count"]) || 0;
+                              const reg = Number(inputValues["reg-count"]) || 0;
+                              currentValue = big + reg;
                             }
-                          }
 
-                          // フォーマット処理
-                          let formattedValue: string;
-                          if (element.label.includes("ベル")) {
-                            formattedValue = expectedValue.toFixed(2);
-                          } else if (element.label.includes("スイカ")) {
-                            formattedValue = expectedValue.toFixed(1);
-                          } else {
-                            formattedValue =
-                              expectedValue % 1 === 0
-                                ? expectedValue.toString()
-                                : expectedValue.toFixed(1);
-                          }
+                            const currentProb =
+                              totalGames > 0 && currentValue > 0
+                                ? totalGames / currentValue
+                                : null;
+                            const expectedValue =
+                              element.settingValues[setting];
 
-                          return (
-                            <td
-                              key={element.id}
-                              className={`px-2 py-2 text-center text-xs tabular-nums ${
-                                isClosest
-                                  ? "bg-red-100 font-extrabold text-red-600 dark:bg-red-900/30 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800"
-                                  : "text-slate-600 dark:text-slate-400"
-                              }`}
-                            >
-                              1/{formattedValue}
-                            </td>
-                          );
-                        })}
+                            // 最も近い設定を判定するロジック
+                            let isClosest = false;
+                            if (currentProb !== null) {
+                              // 全設定との差分を計算し、最小の差分を持つ設定を探す
+                              let minDiff = Infinity;
+                              let closestSetting = -1;
+
+                              [1, 2, 3, 4, 5, 6].forEach((s) => {
+                                const val = element.settingValues[s];
+                                const diff = Math.abs(currentProb - val);
+                                if (diff < minDiff) {
+                                  minDiff = diff;
+                                  closestSetting = s;
+                                }
+                              });
+
+                              if (closestSetting === setting) {
+                                isClosest = true;
+                              }
+                            }
+
+                            // フォーマット処理
+                            let formattedValue: string;
+                            if (element.label.includes("ベル")) {
+                              formattedValue = expectedValue.toFixed(2);
+                            } else if (element.label.includes("スイカ")) {
+                              formattedValue = expectedValue.toFixed(1);
+                            } else {
+                              formattedValue =
+                                expectedValue % 1 === 0
+                                  ? expectedValue.toString()
+                                  : expectedValue.toFixed(1);
+                            }
+
+                            return (
+                              <td
+                                key={element.id}
+                                className={`px-2 py-2 text-center text-xs tabular-nums ${
+                                  isClosest
+                                    ? "bg-red-100 font-extrabold text-red-600 dark:bg-red-900/30 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800"
+                                    : "text-slate-600 dark:text-slate-400"
+                                }`}
+                              >
+                                1/{formattedValue}
+                              </td>
+                            );
+                          })}
                         {config.specs?.payoutRatio && (
                           <td
                             className={`px-2 py-2 text-center text-xs tabular-nums ${

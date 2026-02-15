@@ -63,6 +63,15 @@ export function calculateEstimation(
     }));
   }
 
+  // 無効化すべき要素IDを特定 (conflictsWith)
+  const activeElements = config.sections
+    .flatMap((s) => s.elements)
+    .filter((e) => (Number(inputs[e.id]) || 0) > 0);
+  const disabledIds = new Set<string>();
+  activeElements.forEach((e) => {
+    e.conflictsWith?.forEach((id) => disabledIds.add(id));
+  });
+
   // 各設定の対数尤度を計算
   const logLikelihoods = settings.map((setting) => {
     let logLikelihood = 0;
@@ -72,6 +81,8 @@ export function calculateEstimation(
       section.elements.forEach((element) => {
         // 判別要素のみを計算対象とする
         if (!element.isDiscriminationFactor) return;
+        // 競合により無効化された要素はスキップ
+        if (disabledIds.has(element.id)) return;
 
         const count = Number(inputs[element.id]) || 0;
         if (count === 0) return; // データがない要素はスキップ
