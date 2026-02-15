@@ -65,6 +65,7 @@ export interface MachineConfig {
     judgmentWeights?: {
       grapeWeightMap?: Record<number, number>;
       regBaseWeight?: number;
+      bigBaseWeight?: number;
     };
   };
 }

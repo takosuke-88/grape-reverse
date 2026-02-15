@@ -106,6 +106,14 @@ export function calculateEstimation(
             weight *= judgmentWeights.regBaseWeight;
           }
 
+          // BIG: 基礎ウェイトの適用
+          if (
+            element.id === "big-count" &&
+            judgmentWeights.bigBaseWeight !== undefined
+          ) {
+            weight *= judgmentWeights.bigBaseWeight;
+          }
+
           // ブドウ: 回転数連動型ウェイト (線形補間)
           if (element.id === "grape-count" && judgmentWeights.grapeWeightMap) {
             const dynamicWeight = calculateGrapeWeight(

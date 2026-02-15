@@ -186,11 +186,13 @@ export const funkyJuggler2Config: MachineConfig = {
     judgmentWeights: {
       grapeWeightMap: {
         0: 0.1,
-        2000: 0.3,
-        4000: 0.6,
-        7000: 1.0,
+        2000: 0.2,
+        4000: 0.5,
+        6000: 0.8,
+        8000: 1.0,
       },
-      regBaseWeight: 0.9,
+      regBaseWeight: 1.0,
+      bigBaseWeight: 0.2,
     },
   },
 };

@@ -679,6 +679,45 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 })}
               </div>
 
+              {/* AIアドバイス (pro-level) */}
+              <div className="mb-4 rounded-lg border border-indigo-100 bg-indigo-50 p-4 dark:border-indigo-800 dark:bg-indigo-900/20">
+                <div className="mb-1 flex items-center gap-2">
+                  <span className="text-lg">🤖</span>
+                  <div className="text-xs font-bold text-indigo-800 dark:text-indigo-300">
+                    AI判定アドバイス ({totalGames}G時点)
+                  </div>
+                </div>
+                <p className="text-sm leading-relaxed text-indigo-900 dark:text-indigo-200">
+                  {totalGames <= 3000 && (
+                    <>
+                      回転数がまだ浅いため、ブレ幅の大きいブドウ・BIG確率の影響度を抑えています。
+                      <span className="font-bold underline decoration-indigo-500 decoration-2">
+                        現時点ではREG確率を軸に
+                      </span>
+                      様子を見ましょう。
+                    </>
+                  )}
+                  {totalGames > 3000 && totalGames <= 6000 && (
+                    <>
+                      折り返し地点です。
+                      <span className="font-bold">
+                        REG確率が安定している場合
+                      </span>
+                      、高設定の期待が高まります。ブドウ確率の信頼度も徐々に上がってきました。
+                    </>
+                  )}
+                  {totalGames > 6000 && (
+                    <>
+                      十分なサンプルが集まりました。
+                      <span className="font-bold">
+                        REG・ブドウ確率を含めた総合的なデータ
+                      </span>
+                      から、最終的な設定を推測します。
+                    </>
+                  )}
+                </p>
+              </div>
+
               {/* グラフ描画エリア（縦棒グラフ） - h-48に拡大して視認性向上 */}
               <div className="flex items-end justify-around gap-2 h-48 border-b border-slate-200 pb-1 dark:border-slate-700">
                 {estimationResults.map((result, index) => {
