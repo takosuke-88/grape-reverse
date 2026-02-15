@@ -5,7 +5,10 @@ import type {
   EstimationResult,
 } from "../../types/machine-schema";
 import DynamicInput from "./DynamicInput";
-import { calculateEstimation } from "../../logic/bayes-estimator";
+import {
+  calculateEstimation,
+  calculateGrapeWeight,
+} from "../../logic/bayes-estimator";
 import { AVAILABLE_MACHINES } from "../../data/machine-list";
 
 interface MachinePageFactoryProps {
@@ -221,25 +224,20 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   };
 
   // 判別要素のみ抽出
+  // 判別要素のみ抽出
   const discriminationElements = useMemo(() => {
-    const elements: Array<{
-      id: string;
-      label: string;
-      settingValues: { [key: number]: number };
-    }> = [];
-    config.sections.forEach((section) => {
-      section.elements.forEach((element) => {
-        if (element.isDiscriminationFactor) {
-          elements.push({
-            id: element.id,
-            label: element.label,
-            settingValues: element.settingValues,
-          });
-        }
-      });
-    });
-    return elements;
-  }, [config]);
+    return config.sections.flatMap((section) =>
+      section.elements.filter((element) => element.isDiscriminationFactor),
+    );
+  }, [config.sections]);
+
+  // ブドウ信頼度の計算
+  const grapeReliability = useMemo(() => {
+    return calculateGrapeWeight(
+      totalGames,
+      config.specs?.judgmentWeights?.grapeWeightMap,
+    );
+  }, [totalGames, config]);
 
   // 最有力設定を計算
   const mostLikelySetting = useMemo(() => {
@@ -550,6 +548,17 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                     <div className="text-[11px] font-bold text-blue-600 dark:text-blue-400">
                       ({mostLikelySetting.probability.toFixed(1)}%)
                     </div>
+                    {/* ブドウ信頼度表示 */}
+                    {grapeReliability < 1.0 && (
+                      <div className="mt-1 text-[9px] font-medium text-slate-400 dark:text-slate-500">
+                        🍇信頼度: {(grapeReliability * 100).toFixed(0)}%
+                        {grapeReliability < 0.5 && (
+                          <span className="text-orange-500 dark:text-orange-400">
+                            (サンプル不足)
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex flex-col items-center justify-center rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
