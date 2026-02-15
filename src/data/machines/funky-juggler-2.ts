@@ -209,8 +209,8 @@ export const funkyJuggler2Config: MachineConfig = {
         6000: 0.8,
         8000: 1.0,
       },
-      regBaseWeight: 1.0,
-      bigBaseWeight: 0.2,
+      regBaseWeight: 1.2,
+      bigBaseWeight: 0.35,
     },
   },
 };
