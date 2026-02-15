@@ -103,29 +103,53 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
         config.specs?.payouts &&
         config.specs.payouts.grape
       ) {
-        const payouts = config.specs.payouts;
+        // 定数定義 (結果カードとロジックを統一)
+        const PAYOUT = {
+          BIG: config.specs.payouts.big,
+          REG: config.specs.payouts.reg,
+          GRAPE: config.specs.payouts.grape,
+          REPLAY: 3,
+          CHERRY: 2,
+        };
+        const PROB = {
+          REPLAY: 7.3,
+          CHERRY: 36.0,
+        };
+        // チェリー狙い時は100%取得とする
+        const CHERRY_ACQUISITION_RATE = 1.0;
 
-        // IN枚数 = 総ゲーム数 * 3
+        // 1. IN枚数 = 総ゲーム数 * 3
+        // (差枚数計算の基準として、通常時のIN枚数3枚/Gを使用)
         const coinIn = currentTotalGames * 3;
 
-        // ボーナス払出枚数
-        const bonusOut = currentBig * payouts.big + currentReg * payouts.reg;
-
-        // 総払出枚数 = IN枚数 + 差枚数
+        // 2. 総払い出し(OUT) = IN + 差枚数
         const totalOut = coinIn + diffCoinsNum;
 
-        // ブドウ払出枚数 = 総払出枚数 - ボーナス払出枚数
-        const grapeOut = totalOut - bonusOut;
+        // 3. ボーナス払い出し分の除去
+        const bonusOut = currentBig * PAYOUT.BIG + currentReg * PAYOUT.REG;
+        const smallRoleOut = totalOut - bonusOut;
 
-        // ブドウ回数 = ブドウ払出枚数 / ブドウ払出
-        const calculatedGrapeCount = Math.round(grapeOut / payouts.grape);
+        // 4. リプレイ払い出し分の除去
+        const replayOut = (currentTotalGames / PROB.REPLAY) * PAYOUT.REPLAY;
+        const baseSmallRoleOut = smallRoleOut - replayOut;
+
+        // 5. チェリー払い出し分の除去 (チェリー狙い時の完全取得)
+        const expectedCherryCount = currentTotalGames / PROB.CHERRY;
+        const cherryPayout =
+          expectedCherryCount * PAYOUT.CHERRY * CHERRY_ACQUISITION_RATE;
+
+        // 6. ブドウ払い出し枚数
+        const grapeOut = baseSmallRoleOut - cherryPayout;
+
+        // 7. ブドウ回数
+        const calculatedGrapeCount = Math.round(grapeOut / PAYOUT.GRAPE);
 
         // 計算結果が0以上、かつ現在の値と異なる場合のみ更新
         if (
           calculatedGrapeCount >= 0 &&
           String(inputValues["grape-count"]) !== String(calculatedGrapeCount)
         ) {
-          console.log("🍇 ブドウ逆算実行 (Smart Auto-Calc):", {
+          console.log("🍇 ブドウ逆算実行 (Smart Auto-Calc - Cherry Aim):", {
             Trigger: "Dependency Changed",
             Calculated: calculatedGrapeCount,
           });
@@ -830,7 +854,13 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                           );
                         })}
                         {config.specs?.payoutRatio && (
-                          <td className="px-2 py-2 text-center text-xs tabular-nums text-slate-600 dark:text-slate-400">
+                          <td
+                            className={`px-2 py-2 text-center text-xs tabular-nums ${
+                              mostLikelySetting?.setting === setting
+                                ? "bg-red-100 font-extrabold text-red-600 dark:bg-red-900/30 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800"
+                                : "text-slate-600 dark:text-slate-400"
+                            }`}
+                          >
                             {config.specs.payoutRatio[setting - 1].toFixed(1)}%
                           </td>
                         )}
