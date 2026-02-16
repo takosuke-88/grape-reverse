@@ -65,6 +65,38 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     elementId: string,
     value: number | boolean | string,
   ) => {
+    // 通常/ブドウモードでのボーナス合計直接入力時の同期処理
+    // Total入力時に、その値を維持するようにUnknownを調整する
+    if (
+      currentMode !== "detail" &&
+      (elementId === "big-count" || elementId === "reg-count")
+    ) {
+      const prefix = elementId === "big-count" ? "big" : "reg";
+      const numValue = Number(value);
+      const targetInputs =
+        currentMode === "grape" ? grapeInputValues : inputValues;
+      const solo = Number(targetInputs[`${prefix}-solo-count`]) || 0;
+      const cherry = Number(targetInputs[`${prefix}-cherry-count`]) || 0;
+      // Total - (Solo + Cherry) = Unknown
+      // 負の値にならないように0でクリップ (Total < 内訳合計 の矛盾回避)
+      const newUnknown = Math.max(0, numValue - (solo + cherry));
+
+      if (currentMode === "grape") {
+        setGrapeInputValues((prev) => ({
+          ...prev,
+          [elementId]: value,
+          [`${prefix}-unknown-count`]: newUnknown,
+        }));
+      } else {
+        setInputValues((prev) => ({
+          ...prev,
+          [elementId]: value,
+          [`${prefix}-unknown-count`]: newUnknown,
+        }));
+      }
+      return;
+    }
+
     if (currentMode === "grape") {
       setGrapeInputValues((prev) => ({
         ...prev,
@@ -85,6 +117,38 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   const totalGames = Number(currentInputs["total-games"]) || 0;
 
   /* 自動計算: 入力値が変更されたら自動的に計算を実行 */
+  // ボーナス内訳の自動合算 (Total = Solo + Cherry + Unknown)
+  useEffect(() => {
+    const calculateTotal = (prefix: "big" | "reg") => {
+      const solo = Number(currentInputs[`${prefix}-solo-count`]) || 0;
+      const cherry = Number(currentInputs[`${prefix}-cherry-count`]) || 0;
+      const unknown = Number(currentInputs[`${prefix}-unknown-count`]) || 0;
+      return solo + cherry + unknown;
+    };
+
+    const newBigTotal = calculateTotal("big");
+    const newRegTotal = calculateTotal("reg");
+
+    const currentBigTotal = Number(currentInputs["big-count"]) || 0;
+    const currentRegTotal = Number(currentInputs["reg-count"]) || 0;
+
+    // 差分がある場合のみ更新 (無限ループ防止)
+    if (newBigTotal !== currentBigTotal) {
+      handleValueChange("big-count", newBigTotal);
+    }
+    if (newRegTotal !== currentRegTotal) {
+      handleValueChange("reg-count", newRegTotal);
+    }
+  }, [
+    currentInputs["big-solo-count"],
+    currentInputs["big-cherry-count"],
+    currentInputs["big-unknown-count"],
+    currentInputs["reg-solo-count"],
+    currentInputs["reg-cherry-count"],
+    currentInputs["reg-unknown-count"],
+    currentMode, // モード切り替え時にも再計算
+  ]);
+
   // 依存値の変更を追跡するためのRef
   const prevDepsRef = useRef({
     totalGames: 0,
@@ -492,7 +556,12 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 {visibleElements.map((element) => (
                   <DynamicInput
                     key={element.id}
-                    element={element}
+                    element={{
+                      ...element,
+                      isReadOnly: element.isReadOnly
+                        ? currentMode === "detail"
+                        : false,
+                    }}
                     value={currentInputs[element.id]}
                     onChange={(value) => handleValueChange(element.id, value)}
                     totalGames={totalGames}

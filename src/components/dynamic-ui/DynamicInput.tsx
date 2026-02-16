@@ -46,8 +46,13 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
 
               <input
                 type="number"
-                value={value === "" ? "" : value}
+                readOnly={!!element.isReadOnly}
+                value={
+                  typeof value === "boolean" ? "" : value === "" ? "" : value
+                }
+                onWheel={(e) => e.currentTarget.blur()}
                 onChange={(e) => {
+                  if (element.isReadOnly) return;
                   if (e.target.value === "") {
                     onChange("");
                   } else {
@@ -55,7 +60,11 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                     onChange(newValue);
                   }
                 }}
-                className="w-24 h-[44px] text-center text-xl font-bold border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                className={`w-24 h-[44px] text-center text-xl font-bold border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:border-slate-600 dark:bg-slate-800 dark:text-white ${
+                  element.isReadOnly
+                    ? "bg-slate-100 text-slate-500 dark:bg-slate-900 dark:text-slate-500 cursor-not-allowed"
+                    : ""
+                }`}
                 placeholder="0"
               />
 
@@ -131,8 +140,12 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
           <div className="flex items-center gap-2">
             <input
               type="number"
-              value={value === "" ? "" : value}
+              readOnly={!!element.isReadOnly}
+              value={
+                typeof value === "boolean" ? "" : value === "" ? "" : value
+              }
               onChange={(e) => {
+                if (element.isReadOnly) return;
                 if (e.target.value === "") {
                   onChange("");
                 } else {
