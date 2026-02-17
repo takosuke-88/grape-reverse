@@ -32,6 +32,20 @@ export default function App() {
                 >
                   ファンキージャグラー2を試す
                 </a>
+                <div className="mt-4">
+                  <a
+                    href="/v2/preview/my-juggler-5"
+                    className="inline-block px-6 py-3 bg-pink-500 text-white font-medium rounded-lg hover:bg-pink-600 transition-colors mr-4"
+                  >
+                    マイジャグラーVを試す
+                  </a>
+                  <a
+                    href="/v2/preview/im-juggler-ex"
+                    className="inline-block px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    SアイムジャグラーEXを試す
+                  </a>
+                </div>
               </div>
             </div>
           }

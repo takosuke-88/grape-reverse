@@ -337,13 +337,6 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
       .reduce((sum, r) => sum + r.probability, 0);
   }, [estimationResults]);
 
-  // 詳細判別モードかどうか
-  const isDetailMode = useMemo(() => {
-    const soloReg = Number(inputValues["reg-solo-count"]) || 0;
-    const cherryReg = Number(inputValues["reg-cherry-count"]) || 0;
-    return soloReg > 0 || cherryReg > 0;
-  }, [inputValues]);
-
   return (
     <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950">
       {/* ヘッダー（テーマカラー適用） */}
@@ -353,11 +346,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             <span className="rounded-md bg-white/20 px-2.5 py-1 text-xs font-medium">
               {config.type}
             </span>
-            {isDetailMode && (
-              <span className="animate-pulse rounded-md bg-yellow-400/90 px-2.5 py-1 text-xs font-bold text-slate-900">
-                ⚡️詳細フラグ判別中
-              </span>
-            )}
+            {/* 詳細フラグ判別中の表示を削除 */}
           </div>
           <h1 className="text-2xl font-bold sm:text-3xl">{config.name}</h1>
           <p className="mt-1 text-sm opacity-90">設定判別ツール</p>
@@ -935,14 +924,29 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                     </th>
                     {discriminationElements
                       .filter((e) => e.visibility !== "detail")
-                      .map((element) => (
-                        <th
-                          key={element.id}
-                          className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400"
-                        >
-                          {element.label.replace("回数", "確率")}
-                        </th>
-                      ))}
+                      .flatMap((element) => {
+                        const headers = [
+                          <th
+                            key={element.id}
+                            className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400"
+                          >
+                            {element.label.replace("回数", "確率")}
+                          </th>,
+                        ];
+
+                        if (element.id === "reg-count") {
+                          headers.push(
+                            <th
+                              key="bonus-combined"
+                              className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400"
+                            >
+                              合成確率
+                            </th>,
+                          );
+                        }
+
+                        return headers;
+                      })}
                     {config.specs?.payoutRatio && (
                       <th className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
                         機械割
@@ -966,11 +970,13 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         </td>
                         {discriminationElements
                           .filter((e) => e.visibility !== "detail")
-                          .map((element) => {
+                          .flatMap((element) => {
+                            const cells = [];
+
                             let currentValue =
                               Number(inputValues[element.id]) || 0;
 
-                            // 合成確率計算のための特例処理
+                            // 合成確率計算のための特例処理 (既存ロジック維持)
                             if (
                               element.id === "bonus-combined" ||
                               element.label.includes("合成") ||
@@ -991,7 +997,6 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                             // 最も近い設定を判定するロジック
                             let isClosest = false;
                             if (currentProb !== null) {
-                              // 全設定との差分を計算し、最小の差分を持つ設定を探す
                               let minDiff = Infinity;
                               let closestSetting = -1;
 
@@ -1011,18 +1016,17 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
                             // フォーマット処理
                             let formattedValue: string;
-                            if (element.label.includes("ベル")) {
+                            if (
+                              element.label.includes("ベル") ||
+                              element.label.includes("ブドウ")
+                            ) {
                               formattedValue = expectedValue.toFixed(2);
-                            } else if (element.label.includes("スイカ")) {
-                              formattedValue = expectedValue.toFixed(1);
                             } else {
-                              formattedValue =
-                                expectedValue % 1 === 0
-                                  ? expectedValue.toString()
-                                  : expectedValue.toFixed(1);
+                              // ボーナスやスイカなどは小数点第1位まで (整数でも.0をつける)
+                              formattedValue = expectedValue.toFixed(1);
                             }
 
-                            return (
+                            cells.push(
                               <td
                                 key={element.id}
                                 className={`px-2 py-2 text-center text-xs tabular-nums ${
@@ -1032,8 +1036,76 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                                 }`}
                               >
                                 1/{formattedValue}
-                              </td>
+                              </td>,
                             );
+
+                            // 合成確率セルの追加
+                            if (element.id === "reg-count") {
+                              const bigEl = discriminationElements.find(
+                                (e) => e.id === "big-count",
+                              );
+                              const bigProb =
+                                bigEl?.settingValues[setting] || 0;
+                              const regProb =
+                                element.settingValues[setting] || 0;
+
+                              let combinedExpected = 0;
+                              if (bigProb > 0 && regProb > 0) {
+                                combinedExpected =
+                                  1 / (1 / bigProb + 1 / regProb);
+                              }
+                              // フォーマットは小数点第1位
+                              const formattedCombined =
+                                combinedExpected.toFixed(1);
+
+                              const bigCount =
+                                Number(inputValues["big-count"]) || 0;
+                              const regCount =
+                                Number(inputValues["reg-count"]) || 0;
+                              const totalCount = bigCount + regCount;
+                              const combinedProb =
+                                totalGames > 0 && totalCount > 0
+                                  ? totalGames / totalCount
+                                  : null;
+
+                              let isCombinedClosest = false;
+                              if (combinedProb !== null && bigEl) {
+                                let minDiff = Infinity;
+                                let closestSetting = -1;
+
+                                [1, 2, 3, 4, 5, 6].forEach((s) => {
+                                  const bP = bigEl.settingValues[s];
+                                  const rP = element.settingValues[s];
+                                  if (bP && rP) {
+                                    const cE = 1 / (1 / bP + 1 / rP);
+                                    const diff = Math.abs(combinedProb - cE);
+                                    if (diff < minDiff) {
+                                      minDiff = diff;
+                                      closestSetting = s;
+                                    }
+                                  }
+                                });
+
+                                if (closestSetting === setting) {
+                                  isCombinedClosest = true;
+                                }
+                              }
+
+                              cells.push(
+                                <td
+                                  key="bonus-combined"
+                                  className={`px-2 py-2 text-center text-xs tabular-nums ${
+                                    isCombinedClosest
+                                      ? "bg-red-100 font-extrabold text-red-600 dark:bg-red-900/30 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800"
+                                      : "text-slate-600 dark:text-slate-400"
+                                  }`}
+                                >
+                                  1/{formattedCombined}
+                                </td>,
+                              );
+                            }
+
+                            return cells;
                           })}
                         {config.specs?.payoutRatio && (
                           <td

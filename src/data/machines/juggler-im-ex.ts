@@ -1,13 +1,14 @@
 import type { MachineConfig } from "../../types/machine-schema";
 
 /**
- * ファンキージャグラー2の設定判別データ
+ * SアイムジャグラーEX / ネオアイムジャグラーEX の設定判別データ
+ * 6号機アイムとネオアイムは内部数値が同一のため統合
  */
-export const funkyJuggler2Config: MachineConfig = {
-  id: "funky-juggler-2",
-  name: "ファンキージャグラー2",
+export const imJugglerExConfig: MachineConfig = {
+  id: "im-juggler-ex",
+  name: "SアイムEX/ネオアイムEX",
   type: "A-type",
-  themeColor: "bg-fuchsia-600",
+  themeColor: "bg-red-600", // アイムらしい赤
   sections: [
     {
       id: "basic-data",
@@ -41,15 +42,16 @@ export const funkyJuggler2Config: MachineConfig = {
           type: "counter",
           unit: "回",
           settingValues: {
-            1: 266.4,
-            2: 259.0,
-            3: 256.0,
-            4: 249.2,
-            5: 240.1,
-            6: 232.4,
+            1: 273.1,
+            2: 269.7,
+            3: 269.7,
+            4: 259.0,
+            5: 259.0,
+            6: 255.0,
           },
           isDiscriminationFactor: true,
-          discriminationWeight: 0.35,
+          // 設定差が小さいのでウェイトを下げる
+          discriminationWeight: 0.1,
           isReadOnly: true,
         },
         {
@@ -58,15 +60,16 @@ export const funkyJuggler2Config: MachineConfig = {
           type: "counter",
           unit: "回",
           settingValues: {
-            1: 424.4,
-            2: 387.8,
-            3: 354.2,
-            4: 324.4,
-            5: 288.7,
-            6: 268.6,
+            1: 439.8,
+            2: 399.6,
+            3: 331.0,
+            4: 315.1,
+            5: 255.0,
+            6: 255.0,
           },
           isDiscriminationFactor: true,
-          discriminationWeight: 1.2,
+          // アイムはREGが全てなのでウェイトを上げる
+          discriminationWeight: 1.3,
           isReadOnly: true,
         },
       ],
@@ -81,7 +84,7 @@ export const funkyJuggler2Config: MachineConfig = {
           label: "単独BIG",
           type: "counter",
           unit: "回",
-          settingValues: {}, // 設定差なし/不明な場合は空またはデフォルト
+          settingValues: {},
           isDiscriminationFactor: false,
           visibility: "detail",
         },
@@ -110,12 +113,12 @@ export const funkyJuggler2Config: MachineConfig = {
           type: "counter",
           unit: "回",
           settingValues: {
-            1: 618.3,
+            1: 636.3,
             2: 569.9,
-            3: 524.2,
-            4: 485.5,
-            5: 425.6,
-            6: 390.1,
+            3: 471.5,
+            4: 445.8,
+            5: 362.1,
+            6: 362.1,
           },
           isDiscriminationFactor: true,
           visibility: "detail",
@@ -125,12 +128,12 @@ export const funkyJuggler2Config: MachineConfig = {
           label: "チェリーREG",
           type: "counter",
           settingValues: {
-            1: 1423.0,
-            2: 1369.5,
-            3: 1317.1,
-            4: 1174.7,
-            5: 1100.8,
-            6: 1005.0,
+            1: 1424.7,
+            2: 1337.5,
+            3: 1110.8,
+            4: 1074.4,
+            5: 862.3,
+            6: 862.3,
           },
           isDiscriminationFactor: true,
           discriminationWeight: 0.8,
@@ -181,12 +184,12 @@ export const funkyJuggler2Config: MachineConfig = {
           type: "counter",
           context: {},
           settingValues: {
-            1: 5.95,
-            2: 5.92,
-            3: 5.88,
-            4: 5.83,
-            5: 5.76,
-            6: 5.66,
+            1: 6.02,
+            2: 6.02,
+            3: 6.02,
+            4: 6.02,
+            5: 6.02,
+            6: 5.78,
           },
           isDiscriminationFactor: true,
           discriminationWeight: 1.5,
@@ -195,23 +198,23 @@ export const funkyJuggler2Config: MachineConfig = {
     },
   ],
   specs: {
-    baseGamesPerMedal: 42, // 推定コイン持ち
-    payoutRatio: [97.0, 98.5, 99.8, 102.0, 104.3, 109.0], // 設定1〜6の機械割
+    baseGamesPerMedal: 40,
+    payoutRatio: [97.0, 98.0, 99.5, 101.1, 103.3, 105.5],
     payouts: {
-      big: 240,
+      big: 252,
       reg: 96,
       grape: 8,
     },
     judgmentWeights: {
       grapeWeightMap: {
-        0: 0.1,
-        2000: 0.2,
-        4000: 0.5,
-        6000: 0.8,
+        0: 0.05,
+        3000: 0.2,
+        5000: 0.5,
+        7000: 0.9,
         8000: 1.0,
       },
-      regBaseWeight: 1.2,
-      bigBaseWeight: 0.35,
+      regBaseWeight: 1.3,
+      bigBaseWeight: 0.1,
     },
   },
 };

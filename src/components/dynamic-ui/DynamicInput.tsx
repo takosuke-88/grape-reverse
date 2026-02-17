@@ -35,10 +35,16 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
               <button
                 type="button"
                 onClick={() => {
+                  if (element.isReadOnly) return;
                   const numValue = Number(value) || 0;
                   onChange(numValue + 1);
                 }}
-                className="min-w-[44px] min-h-[44px] rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-bold text-lg transition-colors flex items-center justify-center"
+                disabled={!!element.isReadOnly}
+                className={`min-w-[44px] min-h-[44px] rounded-lg text-slate-700 font-bold text-lg transition-colors flex items-center justify-center ${
+                  element.isReadOnly
+                    ? "bg-slate-50 text-slate-300 cursor-not-allowed opacity-50"
+                    : "bg-slate-100 hover:bg-slate-200 active:bg-slate-300"
+                }`}
                 aria-label="増やす"
               >
                 ＋
@@ -62,7 +68,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 }}
                 className={`w-24 h-[44px] text-center text-xl font-bold border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:border-slate-600 dark:bg-slate-800 dark:text-white ${
                   element.isReadOnly
-                    ? "bg-slate-100 text-slate-500 dark:bg-slate-900 dark:text-slate-500 cursor-not-allowed"
+                    ? "bg-slate-100 text-slate-500 dark:bg-slate-900 dark:text-slate-500 cursor-not-allowed opacity-60"
                     : ""
                 }`}
                 placeholder="0"
@@ -71,26 +77,35 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
               <button
                 type="button"
                 onClick={() => {
+                  if (element.isReadOnly) return;
                   const numValue = Number(value) || 0;
                   onChange(numValue - 1);
                 }}
-                className="min-w-[44px] min-h-[44px] rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-bold text-lg transition-colors flex items-center justify-center dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                disabled={!!element.isReadOnly}
+                className={`min-w-[44px] min-h-[44px] rounded-lg text-slate-700 font-bold text-lg transition-colors flex items-center justify-center dark:bg-slate-700 dark:text-slate-200 ${
+                  element.isReadOnly
+                    ? "bg-slate-50 text-slate-300 cursor-not-allowed opacity-50 dark:bg-slate-800 dark:text-slate-600"
+                    : "bg-slate-100 hover:bg-slate-200 active:bg-slate-300 dark:hover:bg-slate-600"
+                }`}
                 aria-label="減らす"
               >
                 －
               </button>
 
               {/* リアルタイム確率表示（常時表示） */}
-              <div className="ml-2 text-right min-w-[60px]">
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                  現在
+              {/* リアルタイム確率表示（常時表示、ただしtotal-gamesの場合は非表示） */}
+              {element.id !== "total-games" && (
+                <div className="ml-2 text-right min-w-[60px]">
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                    現在
+                  </div>
+                  <div className="text-sm font-bold text-slate-600 dark:text-slate-300">
+                    {currentProbability
+                      ? `1/${currentProbability.toFixed(1)}`
+                      : "---"}
+                  </div>
                 </div>
-                <div className="text-sm font-bold text-slate-600 dark:text-slate-300">
-                  {currentProbability
-                    ? `1/${currentProbability.toFixed(1)}`
-                    : "---"}
-                </div>
-              </div>
+              )}
             </div>
           </div>
         );

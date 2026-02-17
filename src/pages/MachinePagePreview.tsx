@@ -2,6 +2,8 @@ import { useParams } from "react-router-dom";
 import MachinePageFactory from "../components/dynamic-ui/MachinePageFactory";
 import { hanaHoohConfig } from "../data/machines/hana-hooh";
 import { funkyJuggler2Config } from "../data/machines/funky-juggler-2";
+import { myJuggler5Config } from "../data/machines/juggler-my5";
+import { imJugglerExConfig } from "../data/machines/juggler-im-ex";
 import type { MachineConfig } from "../types/machine-schema";
 
 /**
@@ -15,6 +17,8 @@ export default function MachinePagePreview() {
   const configMap: Record<string, MachineConfig> = {
     "hana-hooh": hanaHoohConfig,
     "funky-juggler-2": funkyJuggler2Config,
+    "my-juggler-5": myJuggler5Config,
+    "im-juggler-ex": imJugglerExConfig,
   };
 
   const config = machineId ? configMap[machineId] : null;
