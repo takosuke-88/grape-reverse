@@ -897,7 +897,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
         {discriminationElements.length > 0 && (
           <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-800 dark:text-white">
+              <h2 className="text-lg font-bold text-slate-800 dark:text-white">
                 確率・設定差一覧
               </h2>
               {config.specs?.baseGamesPerMedal && (
@@ -1118,6 +1118,63 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                             {config.specs.payoutRatio[setting - 1].toFixed(1)}%
                           </td>
                         )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* --- 詳細確率表 (詳細モードかつデータがある場合のみ) --- */}
+        {currentMode === "detail" && config.detailedProbabilities && (
+          <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
+            <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
+              単独・重複ボーナス確率一覧
+            </h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                <thead>
+                  <tr>
+                    <th className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
+                      設定
+                    </th>
+                    <th className="px-2 py-2 text-center text-xs font-medium text-red-500 dark:text-red-400">
+                      単独BIG
+                    </th>
+                    <th className="px-2 py-2 text-center text-xs font-medium text-red-500 dark:text-red-400">
+                      チェリーBIG
+                    </th>
+                    <th className="px-2 py-2 text-center text-xs font-medium text-blue-500 dark:text-blue-400">
+                      単独REG
+                    </th>
+                    <th className="px-2 py-2 text-center text-xs font-medium text-blue-500 dark:text-blue-400">
+                      チェリーREG
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                  {[0, 1, 2, 3, 4, 5].map((index) => {
+                    const setting = index + 1;
+                    const probs = config.detailedProbabilities!;
+                    return (
+                      <tr key={setting}>
+                        <td className="px-2 py-2 text-center text-xs font-bold text-slate-800 dark:text-slate-200">
+                          {setting}
+                        </td>
+                        <td className="px-2 py-2 text-center text-xs text-slate-600 dark:text-slate-400">
+                          1/{probs.big_solo[index].toFixed(1)}
+                        </td>
+                        <td className="px-2 py-2 text-center text-xs text-slate-600 dark:text-slate-400">
+                          1/{probs.big_cherry[index].toFixed(1)}
+                        </td>
+                        <td className="px-2 py-2 text-center text-xs text-slate-600 dark:text-slate-400">
+                          1/{probs.reg_solo[index].toFixed(1)}
+                        </td>
+                        <td className="px-2 py-2 text-center text-xs text-slate-600 dark:text-slate-400">
+                          1/{probs.reg_cherry[index].toFixed(1)}
+                        </td>
                       </tr>
                     );
                   })}

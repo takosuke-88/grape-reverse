@@ -214,4 +214,10 @@ export const funkyJuggler2Config: MachineConfig = {
       bigBaseWeight: 0.35,
     },
   },
+  detailedProbabilities: {
+    big_solo: [404.3, 401.9, 394.1, 381.1, 377.5, 336.1],
+    big_cherry: [1422.3, 1389.0, 1321.9, 1352.3, 1289.4, 1197.9],
+    reg_solo: [636.1, 571.9, 510.6, 449.2, 408.3, 360.2],
+    reg_cherry: [1423.1, 1369.5, 1317.1, 1174.7, 1100.8, 1005.0],
+  },
 };

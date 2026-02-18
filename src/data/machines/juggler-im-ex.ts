@@ -217,4 +217,10 @@ export const imJugglerExConfig: MachineConfig = {
       bigBaseWeight: 0.1,
     },
   },
+  detailedProbabilities: {
+    big_solo: [409.6, 399.6, 399.6, 390.1, 390.1, 381.0],
+    big_cherry: [923.0, 923.0, 923.0, 862.3, 862.3, 862.3],
+    reg_solo: [655.4, 630.2, 496.5, 390.1, 390.1, 381.0],
+    reg_cherry: [1489.5, 1489.5, 1170.3, 1092.3, 910.2, 910.2],
+  },
 };

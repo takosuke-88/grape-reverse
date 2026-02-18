@@ -214,4 +214,10 @@ export const myJuggler5Config: MachineConfig = {
       bigBaseWeight: 0.35,
     },
   },
+  detailedProbabilities: {
+    big_solo: [410.3, 410.0, 398.2, 377.1, 352.9, 342.2],
+    big_cherry: [882.4, 871.3, 857.0, 823.6, 806.5, 762.4],
+    reg_solo: [655.4, 601.3, 492.8, 407.1, 390.1, 327.7],
+    reg_cherry: [1092.3, 1074.4, 1057.0, 1008.3, 862.3, 762.1],
+  },
 };

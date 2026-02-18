@@ -70,6 +70,13 @@ export interface MachineConfig {
       bigBaseWeight?: number;
     };
   };
+  detailedProbabilities?: {
+    // 各配列は [設定1, 設定2, 設定3, 設定4, 設定5, 設定6] の順
+    big_solo: number[];
+    big_cherry: number[];
+    reg_solo: number[];
+    reg_cherry: number[];
+  };
 }
 
 /**
