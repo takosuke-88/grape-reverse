@@ -11,7 +11,6 @@ export interface MachineInfo {
  * カテゴリごとに分類してナビゲーションに使用
  */
 export const AVAILABLE_MACHINES: MachineInfo[] = [
-  // ジャグラー系
   { id: "funky2", name: "ファンキージャグラー2", category: "juggler" },
   { id: "aimex", name: "SアイムEX/ネオアイムEX", category: "juggler" },
   { id: "myjuggler5", name: "マイジャグラーV", category: "juggler" },
@@ -20,8 +19,5 @@ export const AVAILABLE_MACHINES: MachineInfo[] = [
   { id: "mr", name: "ミスタージャグラー", category: "juggler" },
   { id: "miracle", name: "ウルトラミラクルジャグラー", category: "juggler" },
   { id: "happyv3", name: "ハッピージャグラーVⅢ", category: "juggler" },
-
-  // ハナハナ系
   { id: "hana-hooh", name: "ハナハナホウオウ～天翔～", category: "hana" },
-  // ※今後キングハナハナなどを追加予定
 ];
