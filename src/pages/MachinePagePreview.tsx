@@ -4,6 +4,11 @@ import { hanaHoohConfig } from "../data/machines/hana-hooh";
 import { funkyJuggler2Config } from "../data/machines/funky-juggler-2";
 import { myJuggler5Config } from "../data/machines/juggler-my5";
 import { imJugglerExConfig } from "../data/machines/juggler-im-ex";
+import { gogoJuggler3Config } from "../data/machines/juggler-gogo3";
+import { girlsSsConfig } from "../data/machines/juggler-girls-ss";
+import { mrJugglerConfig } from "../data/machines/juggler-mr";
+import { miracleJugglerConfig } from "../data/machines/juggler-miracle";
+import { happyV3Config } from "../data/machines/juggler-happy-v3";
 import type { MachineConfig } from "../types/machine-schema";
 
 /**
@@ -19,6 +24,11 @@ export default function MachinePagePreview() {
     "funky-juggler-2": funkyJuggler2Config,
     "my-juggler-5": myJuggler5Config,
     "im-juggler-ex": imJugglerExConfig,
+    gogo3: gogoJuggler3Config,
+    "girls-ss": girlsSsConfig,
+    mr: mrJugglerConfig,
+    miracle: miracleJugglerConfig,
+    "happy-v3": happyV3Config,
   };
 
   const config = machineId ? configMap[machineId] : null;

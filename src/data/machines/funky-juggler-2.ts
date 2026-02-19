@@ -1,13 +1,12 @@
 import type { MachineConfig } from "../../types/machine-schema";
 
-/**
- * ファンキージャグラー2の設定判別データ
- */
+// ユーザー提供のマスターデータに基づく正確な確率設定
+// 最終更新: 2026-02-19
 export const funkyJuggler2Config: MachineConfig = {
   id: "funky-juggler-2",
   name: "ファンキージャグラー2",
   type: "A-type",
-  themeColor: "bg-fuchsia-600",
+  themeColor: "bg-purple-600",
   sections: [
     {
       id: "basic-data",
@@ -18,14 +17,7 @@ export const funkyJuggler2Config: MachineConfig = {
           label: "総ゲーム数",
           type: "counter",
           context: {},
-          settingValues: {
-            1: 0,
-            2: 0,
-            3: 0,
-            4: 0,
-            5: 0,
-            6: 0,
-          },
+          settingValues: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
           isDiscriminationFactor: false,
           discriminationWeight: 0,
         },
@@ -75,13 +67,19 @@ export const funkyJuggler2Config: MachineConfig = {
       id: "bonus-breakdown-section",
       title: "ボーナス詳細内訳",
       elements: [
-        // BIG Breakdown
         {
           id: "big-solo-count",
           label: "単独BIG",
           type: "counter",
           unit: "回",
-          settingValues: {}, // 設定差なし/不明な場合は空またはデフォルト
+          settingValues: {
+            1: 404.54,
+            2: 397.19,
+            3: 394.8,
+            4: 383.25,
+            5: 374.49,
+            6: 334.37,
+          },
           isDiscriminationFactor: false,
           visibility: "detail",
         },
@@ -90,7 +88,14 @@ export const funkyJuggler2Config: MachineConfig = {
           label: "チェリーBIG",
           type: "counter",
           unit: "回",
-          settingValues: {},
+          settingValues: {
+            1: 1424.7,
+            2: 1365.3,
+            3: 1365.3,
+            4: 1365.3,
+            5: 1285.0,
+            6: 1260.3,
+          },
           isDiscriminationFactor: false,
           visibility: "detail",
         },
@@ -103,7 +108,6 @@ export const funkyJuggler2Config: MachineConfig = {
           isDiscriminationFactor: false,
           visibility: "detail",
         },
-        // REG Breakdown
         {
           id: "reg-solo-count",
           label: "単独REG",
@@ -158,14 +162,7 @@ export const funkyJuggler2Config: MachineConfig = {
           type: "counter",
           visibility: "grape-calc",
           context: {},
-          settingValues: {
-            1: 0,
-            2: 0,
-            3: 0,
-            4: 0,
-            5: 0,
-            6: 0,
-          },
+          settingValues: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
           isDiscriminationFactor: false,
           discriminationWeight: 0,
         },
@@ -195,21 +192,15 @@ export const funkyJuggler2Config: MachineConfig = {
     },
   ],
   specs: {
-    baseGamesPerMedal: 42, // 推定コイン持ち
-    payoutRatio: [97.0, 98.5, 99.8, 102.0, 104.3, 109.0], // 設定1〜6の機械割
+    baseGamesPerMedal: 42,
+    payoutRatio: [97.0, 98.5, 99.8, 102.0, 104.3, 109.0],
     payouts: {
       big: 240,
       reg: 96,
       grape: 8,
     },
     judgmentWeights: {
-      grapeWeightMap: {
-        0: 0.1,
-        2000: 0.2,
-        4000: 0.5,
-        6000: 0.8,
-        8000: 1.0,
-      },
+      grapeWeightMap: { 0: 0.1, 2000: 0.2, 4000: 0.5, 6000: 0.8, 8000: 1.0 },
       regBaseWeight: 1.2,
       bigBaseWeight: 0.35,
     },

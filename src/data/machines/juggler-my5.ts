@@ -1,13 +1,12 @@
 import type { MachineConfig } from "../../types/machine-schema";
 
-/**
- * マイジャグラーVの設定判別データ
- */
+// ユーザー提供のマスターデータに基づく正確な確率設定
+// 最終更新: 2026-02-19
 export const myJuggler5Config: MachineConfig = {
   id: "my-juggler-5",
   name: "マイジャグラーV",
   type: "A-type",
-  themeColor: "bg-pink-500", // マイジャグらしいピンク/パープル系
+  themeColor: "bg-pink-500",
   sections: [
     {
       id: "basic-data",
@@ -18,14 +17,7 @@ export const myJuggler5Config: MachineConfig = {
           label: "総ゲーム数",
           type: "counter",
           context: {},
-          settingValues: {
-            1: 0,
-            2: 0,
-            3: 0,
-            4: 0,
-            5: 0,
-            6: 0,
-          },
+          settingValues: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
           isDiscriminationFactor: false,
           discriminationWeight: 0,
         },
@@ -75,13 +67,19 @@ export const myJuggler5Config: MachineConfig = {
       id: "bonus-breakdown-section",
       title: "ボーナス詳細内訳",
       elements: [
-        // BIG Breakdown
         {
           id: "big-solo-count",
           label: "単独BIG",
           type: "counter",
           unit: "回",
-          settingValues: {},
+          settingValues: {
+            1: 420.1,
+            2: 414.78,
+            3: 404.54,
+            4: 376.64,
+            5: 348.6,
+            6: 341.33,
+          },
           isDiscriminationFactor: false,
           visibility: "detail",
         },
@@ -90,7 +88,14 @@ export const myJuggler5Config: MachineConfig = {
           label: "チェリーBIG",
           type: "counter",
           unit: "回",
-          settingValues: {},
+          settingValues: {
+            1: 1365.3,
+            2: 1365.3,
+            3: 1365.3,
+            4: 1365.3,
+            5: 1337.5,
+            6: 1129.9,
+          },
           isDiscriminationFactor: false,
           visibility: "detail",
         },
@@ -103,7 +108,6 @@ export const myJuggler5Config: MachineConfig = {
           isDiscriminationFactor: false,
           visibility: "detail",
         },
-        // REG Breakdown
         {
           id: "reg-solo-count",
           label: "単独REG",
@@ -158,14 +162,7 @@ export const myJuggler5Config: MachineConfig = {
           type: "counter",
           visibility: "grape-calc",
           context: {},
-          settingValues: {
-            1: 0,
-            2: 0,
-            3: 0,
-            4: 0,
-            5: 0,
-            6: 0,
-          },
+          settingValues: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
           isDiscriminationFactor: false,
           discriminationWeight: 0,
         },
@@ -203,13 +200,7 @@ export const myJuggler5Config: MachineConfig = {
       grape: 8,
     },
     judgmentWeights: {
-      grapeWeightMap: {
-        0: 0.1,
-        2000: 0.2,
-        4000: 0.5,
-        6000: 0.8,
-        8000: 1.0,
-      },
+      grapeWeightMap: { 0: 0.1, 2000: 0.2, 4000: 0.5, 6000: 0.8, 8000: 1.0 },
       regBaseWeight: 1.2,
       bigBaseWeight: 0.35,
     },
