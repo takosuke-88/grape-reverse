@@ -40,7 +40,7 @@ export const AVAILABLE_MACHINES: MachineInfo[] = [
     id: "girlsss",
     name: "ジャグラーガールズSS",
     category: "juggler",
-    color: "#AD1457",
+    color: "#2E7D32", // Green (swapped from miracle)
   },
   {
     id: "mr",
@@ -52,13 +52,13 @@ export const AVAILABLE_MACHINES: MachineInfo[] = [
     id: "miracle",
     name: "ウルトラミラクルジャグラー",
     category: "juggler",
-    color: "#2E7D32",
+    color: "#AD1457", // Pink/Red (swapped from girlsss)
   },
   {
     id: "happyv3",
     name: "ハッピージャグラーVⅢ",
     category: "juggler",
-    color: "#FBC02D",
+    color: "#AED581", // Light Yellow Green
   },
   {
     id: "hana-hooh",
