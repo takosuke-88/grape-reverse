@@ -3,7 +3,7 @@ import type { MachineConfig } from "../../types/machine-schema";
 // ユーザー提供のマスターデータに基づく正確な確率設定
 // 最終更新: 2026-02-19
 export const myJuggler5Config: MachineConfig = {
-  id: "my-juggler-5",
+  id: "myjuggler5",
   name: "マイジャグラーV",
   type: "A-type",
   themeColor: "bg-pink-500",

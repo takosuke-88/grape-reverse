@@ -3,7 +3,7 @@ import type { MachineConfig } from "../../types/machine-schema";
 // ユーザー提供のマスターデータに基づく正確な確率設定
 // 最終更新: 2026-02-19
 export const happyV3Config: MachineConfig = {
-  id: "happy-v3",
+  id: "happyv3",
   name: "ハッピージャグラーVⅢ",
   type: "A-type",
   themeColor: "bg-yellow-400",

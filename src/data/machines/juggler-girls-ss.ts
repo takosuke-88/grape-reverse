@@ -3,7 +3,7 @@ import type { MachineConfig } from "../../types/machine-schema";
 // ユーザー提供のマスターデータに基づく正確な確率設定
 // 最終更新: 2026-02-19
 export const girlsSsConfig: MachineConfig = {
-  id: "girls-ss",
+  id: "girlsss",
   name: "ジャグラーガールズSS",
   type: "A-type",
   themeColor: "bg-pink-500",

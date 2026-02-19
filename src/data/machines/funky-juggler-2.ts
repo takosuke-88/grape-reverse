@@ -3,7 +3,7 @@ import type { MachineConfig } from "../../types/machine-schema";
 // ユーザー提供のマスターデータに基づく正確な確率設定
 // 最終更新: 2026-02-19
 export const funkyJuggler2Config: MachineConfig = {
-  id: "funky-juggler-2",
+  id: "funky2",
   name: "ファンキージャグラー2",
   type: "A-type",
   themeColor: "bg-purple-600",
