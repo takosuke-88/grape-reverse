@@ -3,7 +3,7 @@ import type { MachineConfig } from "../../types/machine-schema";
 // ユーザー提供のマスターデータに基づく正確な確率設定
 // 最終更新: 2026-02-19
 export const imJugglerExConfig: MachineConfig = {
-  id: "imex",
+  id: "aimex",
   name: "SアイムEX/ネオアイムEX",
   type: "A-type",
   themeColor: "bg-red-600",

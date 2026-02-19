@@ -13,7 +13,7 @@ export interface MachineInfo {
 export const AVAILABLE_MACHINES: MachineInfo[] = [
   // ジャグラー系
   { id: "funky2", name: "ファンキージャグラー2", category: "juggler" },
-  { id: "imex", name: "SアイムEX/ネオアイムEX", category: "juggler" },
+  { id: "aimex", name: "SアイムEX/ネオアイムEX", category: "juggler" },
   { id: "myjuggler5", name: "マイジャグラーV", category: "juggler" },
   { id: "gogo3", name: "ゴーゴージャグラー3", category: "juggler" },
   { id: "girlsss", name: "ジャグラーガールズSS", category: "juggler" },
