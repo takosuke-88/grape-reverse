@@ -25,30 +25,58 @@ export default function App() {
                   ジャグラー・ハナハナ・Aタイプ設定判別ツール
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {AVAILABLE_MACHINES.map((machine) => (
-                    <a
-                      key={machine.id}
-                      href={`/${machine.id}`}
-                      className={`block px-6 py-4 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg
-                        ${
-                          machine.category === "hana"
-                            ? "bg-blue-600 hover:bg-blue-700"
-                            : machine.id.includes("funky")
-                              ? "bg-fuchsia-600 hover:bg-fuchsia-700"
-                              : machine.id.includes("my")
-                                ? "bg-pink-500 hover:bg-pink-600"
-                                : machine.id.includes("im") ||
-                                    machine.id.includes("aim")
-                                  ? "bg-red-600 hover:bg-red-700"
-                                  : machine.id.includes("happy")
-                                    ? "bg-yellow-500 hover:bg-yellow-600"
-                                    : "bg-slate-700 hover:bg-slate-800"
-                        }`}
-                    >
-                      {machine.name}
-                    </a>
-                  ))}
+                {/* ジャグラーシリーズ */}
+                <div className="mb-12">
+                  <h2 className="text-xl font-bold text-slate-700 mb-6 flex items-center justify-center gap-2">
+                    <span className="w-8 h-1 bg-pink-500 rounded-full"></span>
+                    ジャグラーシリーズ
+                    <span className="w-8 h-1 bg-pink-500 rounded-full"></span>
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {AVAILABLE_MACHINES.filter(
+                      (m) => m.category === "juggler",
+                    ).map((machine) => (
+                      <a
+                        key={machine.id}
+                        href={`/${machine.id}`}
+                        className="block px-6 py-4 text-white font-bold rounded-xl transition-transform hover:scale-105 shadow-md hover:shadow-xl relative overflow-hidden group"
+                        style={{ backgroundColor: machine.color }}
+                      >
+                        <div className="relative z-10 flex items-center justify-center gap-2">
+                          <span className="text-lg">{machine.name}</span>
+                        </div>
+                        <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ハナハナシリーズ */}
+                <div className="mb-12">
+                  <h2 className="text-xl font-bold text-slate-700 mb-6 flex items-center justify-center gap-2">
+                    <span className="w-8 h-1 bg-red-600 rounded-full"></span>
+                    ハナハナシリーズ
+                    <span className="w-8 h-1 bg-red-600 rounded-full"></span>
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {AVAILABLE_MACHINES.filter(
+                      (m) => m.category === "hana",
+                    ).map((machine) => (
+                      <a
+                        key={machine.id}
+                        href={`/${machine.id}`}
+                        className="block px-6 py-4 text-white font-bold rounded-xl transition-transform hover:scale-105 shadow-md hover:shadow-xl relative overflow-hidden group"
+                        style={{ backgroundColor: machine.color }}
+                      >
+                        <div className="relative z-10 flex items-center justify-center gap-2">
+                          <span className="text-2xl">🌺</span>
+                          <span className="text-lg">{machine.name}</span>
+                          <span className="text-2xl">🌺</span>
+                        </div>
+                        <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                      </a>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

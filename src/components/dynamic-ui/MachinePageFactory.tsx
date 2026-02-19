@@ -24,10 +24,13 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   );
 
   // 現在の機種のカテゴリを取得
-  const currentCategory = useMemo(() => {
-    const current = AVAILABLE_MACHINES.find((m) => m.id === config.id);
-    return current ? current.category : "juggler";
+  // 現在の機種のカテゴリとカラーを取得
+  const currentMachineInfo = useMemo(() => {
+    return AVAILABLE_MACHINES.find((m) => m.id === config.id);
   }, [config.id]);
+
+  const currentCategory = currentMachineInfo?.category || "juggler";
+  const brandColor = currentMachineInfo?.color; // ブランドカラー
 
   // ユーザー入力State (通常・詳細)
   const [inputValues, setInputValues] = useState<
@@ -340,7 +343,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   return (
     <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950">
       {/* ヘッダー（テーマカラー適用） */}
-      <div className={`${themeColor} py-6 px-4 text-white shadow-lg`}>
+      <div
+        className={`py-6 px-4 text-white shadow-lg transition-colors duration-500`}
+        style={{ backgroundColor: brandColor || undefined }} // ブランドカラー適用
+      >
         <div className="mx-auto max-w-md">
           <div className="mb-2 flex items-center gap-2">
             <span className="rounded-md bg-white/20 px-2.5 py-1 text-xs font-medium">
@@ -604,7 +610,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           <button
             type="button"
             onClick={handleReset}
-            className={`w-full rounded-xl ${themeColor} px-6 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80`}
+            className={`w-full rounded-xl px-6 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80`}
+            style={{ backgroundColor: brandColor || undefined }} // ブランドカラー適用
           >
             入力を全てリセット
           </button>
