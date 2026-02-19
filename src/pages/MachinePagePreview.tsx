@@ -21,14 +21,14 @@ export default function MachinePagePreview() {
   // 機種IDと設定ファイルのマッピング
   const configMap: Record<string, MachineConfig> = {
     "hana-hooh": hanaHoohConfig,
-    "funky-juggler-2": funkyJuggler2Config,
-    "my-juggler-5": myJuggler5Config,
-    "im-juggler-ex": imJugglerExConfig,
+    funky2: funkyJuggler2Config,
+    myjuggler5: myJuggler5Config,
+    aimex: imJugglerExConfig,
     gogo3: gogoJuggler3Config,
-    "girls-ss": girlsSsConfig,
+    girlsss: girlsSsConfig,
     mr: mrJugglerConfig,
     miracle: miracleJugglerConfig,
-    "happy-v3": happyV3Config,
+    happyv3: happyV3Config,
   };
 
   const config = machineId ? configMap[machineId] : null;
@@ -53,10 +53,7 @@ export default function MachinePagePreview() {
             <ul className="list-disc list-inside text-slate-600 space-y-1">
               {Object.keys(configMap).map((id) => (
                 <li key={id}>
-                  <a
-                    href={`/v2/preview/${id}`}
-                    className="text-blue-600 hover:underline"
-                  >
+                  <a href={`/${id}`} className="text-blue-600 hover:underline">
                     {id}
                   </a>
                 </li>
