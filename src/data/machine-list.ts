@@ -11,9 +11,9 @@ export interface MachineInfo {
  * カテゴリごとに分類してナビゲーションに使用
  */
 export const AVAILABLE_MACHINES: MachineInfo[] = [
-  { id: "funky2", name: "ファンキージャグラー2", category: "juggler" },
-  { id: "aimex", name: "SアイムEX/ネオアイムEX", category: "juggler" },
   { id: "myjuggler5", name: "マイジャグラーV", category: "juggler" },
+  { id: "aimex", name: "SアイムEX/ネオアイムEX", category: "juggler" },
+  { id: "funky2", name: "ファンキージャグラー2", category: "juggler" },
   { id: "gogo3", name: "ゴーゴージャグラー3", category: "juggler" },
   { id: "girlsss", name: "ジャグラーガールズSS", category: "juggler" },
   { id: "mr", name: "ミスタージャグラー", category: "juggler" },
