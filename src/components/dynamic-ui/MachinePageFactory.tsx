@@ -344,8 +344,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950">
       {/* ヘッダー（テーマカラー適用） */}
       <div
-        className={`py-6 px-4 text-white shadow-lg transition-colors duration-500`}
-        style={{ backgroundColor: brandColor || undefined }} // ブランドカラー適用
+        className={`${themeColor} py-6 px-4 text-white shadow-lg transition-colors duration-500`}
+        style={{ backgroundColor: brandColor || undefined }} // ブランドカラー適用 (優先)
       >
         <div className="mx-auto max-w-md">
           <div className="mb-2 flex items-center gap-2">
@@ -610,7 +610,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           <button
             type="button"
             onClick={handleReset}
-            className={`w-full rounded-xl px-6 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80`}
+            className={`w-full rounded-xl ${themeColor} px-6 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80`}
             style={{ backgroundColor: brandColor || undefined }} // ブランドカラー適用
           >
             入力を全てリセット
