@@ -3,6 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <!-- Google tag (gtag.js) -->
+    <script>
+      const GA_ID = "G-VENL1QQD4E";
+      const GA_DISABLE_KEY = "ga-disable-" + GA_ID;
+      if (localStorage.getItem(GA_DISABLE_KEY) === "true") {
+        window[GA_DISABLE_KEY] = true;
+      }
+    </script>
     <script
       async
       src="https://www.googletagmanager.com/gtag/js?id=G-VENL1QQD4E"

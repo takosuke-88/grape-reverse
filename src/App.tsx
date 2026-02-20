@@ -83,6 +83,18 @@ export default function App() {
           }
         />
       </Routes>
+
+      {/* 開発者用：GA計測停止リンク */}
+      <button
+        onClick={() => {
+          localStorage.setItem("ga-disable-G-VENL1QQD4E", "true");
+          (window as any)["ga-disable-G-VENL1QQD4E"] = true;
+          alert("計測を無効化しました（反映にはリロード推奨）");
+        }}
+        className="fixed bottom-2 right-2 text-[10px] opacity-10 hover:opacity-50 transition-opacity cursor-pointer bg-transparent border-none text-slate-500 z-50"
+      >
+        このブラウザの計測を無効にする
+      </button>
     </BrowserRouter>
   );
 }
