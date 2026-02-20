@@ -1251,14 +1251,6 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             </div>
           );
         })()}
-
-        {/* フッター */}
-        <div className="mt-8 border-t border-slate-200 pt-6 text-center text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
-          <p className="mb-1">
-            Copyright &copy; 2026 GrapeReverse All Rights Reserved.
-          </p>
-          <p>当サイトのコード・タグ等の無断転載・使用は固く禁じます。</p>
-        </div>
       </div>
     </div>
   );

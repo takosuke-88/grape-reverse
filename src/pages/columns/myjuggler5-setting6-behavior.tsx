@@ -9,20 +9,6 @@ const MyJugglerColumn = () => {
 
   return (
     <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950">
-      <header className="bg-[#D81B60] p-4 text-white shadow-md">
-        <div className="container mx-auto max-w-3xl flex justify-between items-center">
-          <Link
-            to="/"
-            className="font-bold text-sm sm:text-base hover:underline flex items-center gap-1"
-          >
-            <span>←</span> ホームに戻る
-          </Link>
-          <div className="text-sm font-bold opacity-90">
-            GrapeReverse コラム
-          </div>
-        </div>
-      </header>
-
       <main className="container mx-auto px-4 py-8 max-w-3xl">
         <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
           【マイジャグ5】設定6はこう動く！ボーナス確率よりも「ぶどう」を信じるべき数学的理由

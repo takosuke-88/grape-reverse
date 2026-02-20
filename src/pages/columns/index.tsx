@@ -4,20 +4,6 @@ import { ATTACHED_COLUMNS } from "../../data/column-list";
 const ColumnIndexPage = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 pb-12">
-      <header className="bg-indigo-600 p-4 text-white shadow-md">
-        <div className="container mx-auto max-w-4xl flex justify-between items-center">
-          <Link
-            to="/"
-            className="font-bold text-sm sm:text-base hover:underline flex items-center gap-1"
-          >
-            <span>←</span> ホームに戻る
-          </Link>
-          <div className="text-sm font-bold opacity-90">
-            GrapeReverse コラム一覧
-          </div>
-        </div>
-      </header>
-
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold mb-3 text-slate-800 dark:text-white">

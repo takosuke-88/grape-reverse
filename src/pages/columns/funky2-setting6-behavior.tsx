@@ -3,20 +3,6 @@ import { Link } from "react-router-dom";
 const Funky2Column = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      <header className="bg-[#6A1B9A] p-4 text-white shadow-md">
-        <div className="container mx-auto max-w-3xl flex justify-between items-center">
-          <Link
-            to="/"
-            className="font-bold text-sm sm:text-base hover:underline flex items-center gap-1"
-          >
-            <span>←</span> ホームに戻る
-          </Link>
-          <div className="text-sm font-bold opacity-90">
-            GrapeReverse コラム
-          </div>
-        </div>
-      </header>
-
       <main className="container mx-auto px-4 py-8 max-w-3xl">
         <h1 className="text-2xl md:text-3xl font-bold mb-6 text-[#6A1B9A] dark:text-purple-400">
           ファンキージャグラー2の設定6は別格？BIG先行の罠と、本当に見るべき「単独REG」の正体
