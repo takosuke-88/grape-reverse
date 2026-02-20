@@ -60,7 +60,7 @@ export default function App() {
                     </div>
 
                     {/* ジャグラーシリーズ */}
-                    <div id="juggler-section" className="mb-12 scroll-mt-24">
+                    <div id="juggler" className="mb-12 scroll-mt-24">
                       <h2 className="text-xl font-bold text-slate-700 mb-6 flex items-center justify-center gap-2">
                         <span className="w-8 h-1 bg-pink-500 rounded-full"></span>
                         ジャグラーシリーズ
@@ -86,7 +86,7 @@ export default function App() {
                     </div>
 
                     {/* ハナハナシリーズ */}
-                    <div id="hanahana-section" className="mb-12 scroll-mt-24">
+                    <div id="hana" className="mb-12 scroll-mt-24">
                       <h2 className="text-xl font-bold text-slate-700 mb-6 flex items-center justify-center gap-2">
                         <span className="w-8 h-1 bg-red-600 rounded-full"></span>
                         ハナハナシリーズ
