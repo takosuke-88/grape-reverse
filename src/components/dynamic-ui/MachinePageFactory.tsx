@@ -10,6 +10,7 @@ import {
   calculateGrapeWeight,
 } from "../../logic/bayes-estimator";
 import { AVAILABLE_MACHINES } from "../../data/machine-list";
+import { ATTACHED_COLUMNS } from "../../data/column-list";
 
 interface MachinePageFactoryProps {
   config: MachineConfig;
@@ -1191,42 +1192,65 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           </div>
         )}
 
-        {/* この機種の攻略・検証記事 */}
-        {(config.id === "myjuggler5" || config.id === "funky2") && (
-          <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6 mt-4">
-            <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
-              この機種の攻略・検証記事
-            </h2>
-            <div className="flex flex-col gap-4">
-              {config.id === "myjuggler5" && (
-                <a
-                  href="/columns/myjuggler5-setting6-behavior"
-                  className="block p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:scale-[1.02] hover:border-pink-400 group"
-                >
-                  <h3 className="text-[15px] font-bold text-slate-800 dark:text-slate-100 mb-2 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">
-                    【マイジャグ5】設定6はこう動く！ボーナス確率よりも「ぶどう」を信じるべき数学的理由
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">
-                    「合算1/120の台が空いた！」←実はそれ、罠かもしれません。AIシミュレーションと実戦データから導き出した、マイジャグ5の本当の狙い方。
-                  </p>
-                </a>
-              )}
-              {config.id === "funky2" && (
-                <a
-                  href="/columns/funky2-setting6-behavior"
-                  className="block p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:scale-[1.02] hover:border-purple-400 group"
-                >
-                  <h3 className="text-[15px] font-bold text-slate-800 dark:text-slate-100 mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                    ファンキージャグラー2の設定6は別格？BIG先行の罠と、本当に見るべき「単独REG」の正体
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">
-                    BIG確率だけで設定判別していませんか？ファンキー2で勝つために見落としがちな「単独REG」と「ぶどう」の重要性を徹底解説。
-                  </p>
-                </a>
-              )}
+        {/* この機種に関連する攻略・検証記事 */}
+        {(() => {
+          // 現在の機種カテゴリ・IDに合致するタグを持つ記事を優先取得
+          const currentMachineInfo = AVAILABLE_MACHINES.find(
+            (m) => m.id === config.id,
+          );
+          const currentCategory = currentMachineInfo?.category || "other";
+
+          const relatedColumns = ATTACHED_COLUMNS.filter(
+            (col) =>
+              col.tags.includes(config.id) ||
+              col.tags.includes(currentCategory),
+          );
+          // それ以外の記事を取得
+          const otherColumns = ATTACHED_COLUMNS.filter(
+            (col) => !relatedColumns.includes(col),
+          );
+          // 関連度の高い順に最大4件表示
+          const displayColumns = [...relatedColumns, ...otherColumns].slice(
+            0,
+            4,
+          );
+
+          if (displayColumns.length === 0) return null;
+
+          return (
+            <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6 mt-4">
+              <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white flex items-center gap-2">
+                <span className="text-indigo-500">📚</span> この記事もチェック！
+              </h2>
+              <div className="flex flex-col gap-4">
+                {displayColumns.map((col) => (
+                  <a
+                    key={col.id}
+                    href={col.path}
+                    className="block p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:scale-[1.02] hover:border-indigo-400 group"
+                  >
+                    <div className="flex gap-2 mb-2">
+                      {col.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold rounded-full"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                    <h3 className="text-[15px] font-bold text-slate-800 dark:text-slate-100 mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      {col.title}
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">
+                      {col.description}
+                    </p>
+                  </a>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* フッター */}
         <div className="mt-8 border-t border-slate-200 pt-6 text-center text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">

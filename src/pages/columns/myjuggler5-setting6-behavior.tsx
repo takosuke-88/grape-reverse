@@ -162,7 +162,7 @@ const MyJugglerColumn = () => {
               to="/myjuggler5"
               className="inline-block bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform transition hover:scale-105"
             >
-              マイジャグ5 ぶどう逆算ツールを使う
+              マイジャグ5 設定判別ツールを使う
             </Link>
           </div>
 

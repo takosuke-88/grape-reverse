@@ -3,10 +3,13 @@ import MachinePagePreview from "./pages/MachinePagePreview";
 import { AVAILABLE_MACHINES } from "./data/machine-list";
 import MyJugglerColumn from "./pages/columns/myjuggler5-setting6-behavior";
 import Funky2Column from "./pages/columns/funky2-setting6-behavior";
+import ColumnIndexPage from "./pages/columns/index";
+import ScrollToTop from "./components/ScrollToTop";
 
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         {/* v2: Schema-driven UI プレビュー - 互換性のため残す */}
         <Route path="/v2/preview/:machineId" element={<MachinePagePreview />} />
@@ -15,6 +18,7 @@ export default function App() {
         <Route path="/:machineId" element={<MachinePagePreview />} />
 
         {/* コラム記事 */}
+        <Route path="/columns" element={<ColumnIndexPage />} />
         <Route
           path="/columns/myjuggler5-setting6-behavior"
           element={<MyJugglerColumn />}
@@ -33,9 +37,19 @@ export default function App() {
                 <h1 className="text-3xl font-bold text-slate-800 mb-4">
                   GrapeReverse
                 </h1>
-                <p className="text-slate-600 mb-8">
+                <p className="text-slate-600 mb-6">
                   ジャグラー・ハナハナ・Aタイプ設定判別ツール
                 </p>
+
+                {/* 攻略コラム一覧へのリンク */}
+                <div className="mb-10 flex justify-center">
+                  <a
+                    href="/columns"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-full shadow-md transition-transform hover:scale-105"
+                  >
+                    <span>📚</span> パチスロ攻略コラム一覧を見る
+                  </a>
+                </div>
 
                 {/* ジャグラーシリーズ */}
                 <div className="mb-12">

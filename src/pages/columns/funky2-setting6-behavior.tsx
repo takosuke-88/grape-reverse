@@ -221,7 +221,7 @@ const Funky2Column = () => {
                 to="/funky2"
                 className="inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform transition hover:scale-105"
               >
-                ファンキー2 判別ツールを使う
+                ファンキー2 設定判別ツールを使う
               </Link>
             </div>
           </div>
