@@ -1,0 +1,459 @@
+commit c9d18913663998361ca1afaf14f9cc5618d685b4
+Author: takosuke-88 <artofspider2029@gmail.com>
+Date:   Fri Feb 20 14:11:09 2026 +0900
+
+    計測拒否リンク設置
+
+diff --git a/src/App.tsx b/src/App.tsx
+index f3a8485..977591e 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -83,6 +83,18 @@ export default function App() {
+           }
+         />
+       </Routes>
++
++      {/* 開発者用：GA計測停止リンク */}
++      <button
++        onClick={() => {
++          localStorage.setItem("ga-disable-G-VENL1QQD4E", "true");
++          (window as any)["ga-disable-G-VENL1QQD4E"] = true;
++          alert("計測を無効化しました（反映にはリロード推奨）");
++        }}
++        className="fixed bottom-2 right-2 text-[10px] opacity-10 hover:opacity-50 transition-opacity cursor-pointer bg-transparent border-none text-slate-500 z-50"
++      >
++        このブラウザの計測を無効にする
++      </button>
+     </BrowserRouter>
+   );
+ }
+
+commit cfffb1f8b3f799b9fbf30c1a690d511dc34e2710
+Author: takosuke-88 <artofspider2029@gmail.com>
+Date:   Thu Feb 19 19:45:49 2026 +0900
+
+    Feat: Implement category separation and brand colors
+
+diff --git a/src/App.tsx b/src/App.tsx
+index f78da17..f3a8485 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -25,30 +25,58 @@ export default function App() {
+                   ジャグラー・ハナハナ・Aタイプ設定判別ツール
+                 </p>
+ 
+-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+-                  {AVAILABLE_MACHINES.map((machine) => (
+-                    <a
+-                      key={machine.id}
+-                      href={`/${machine.id}`}
+-                      className={`block px-6 py-4 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg
+-                        ${
+-                          machine.category === "hana"
+-                            ? "bg-blue-600 hover:bg-blue-700"
+-                            : machine.id.includes("funky")
+-                              ? "bg-fuchsia-600 hover:bg-fuchsia-700"
+-                              : machine.id.includes("my")
+-                                ? "bg-pink-500 hover:bg-pink-600"
+-                                : machine.id.includes("im") ||
+-                                    machine.id.includes("aim")
+-                                  ? "bg-red-600 hover:bg-red-700"
+-                                  : machine.id.includes("happy")
+-                                    ? "bg-yellow-500 hover:bg-yellow-600"
+-                                    : "bg-slate-700 hover:bg-slate-800"
+-                        }`}
+-                    >
+-                      {machine.name}
+-                    </a>
+-                  ))}
++                {/* ジャグラーシリーズ */}
++                <div className="mb-12">
++                  <h2 className="text-xl font-bold text-slate-700 mb-6 flex items-center justify-center gap-2">
++                    <span className="w-8 h-1 bg-pink-500 rounded-full"></span>
++                    ジャグラーシリーズ
++                    <span className="w-8 h-1 bg-pink-500 rounded-full"></span>
++                  </h2>
++                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
++                    {AVAILABLE_MACHINES.filter(
++                      (m) => m.category === "juggler",
++                    ).map((machine) => (
++                      <a
++                        key={machine.id}
++                        href={`/${machine.id}`}
++                        className="block px-6 py-4 text-white font-bold rounded-xl transition-transform hover:scale-105 shadow-md hover:shadow-xl relative overflow-hidden group"
++                        style={{ backgroundColor: machine.color }}
++                      >
++                        <div className="relative z-10 flex items-center justify-center gap-2">
++                          <span className="text-lg">{machine.name}</span>
++                        </div>
++                        <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
++                      </a>
++                    ))}
++                  </div>
++                </div>
++
++                {/* ハナハナシリーズ */}
++                <div className="mb-12">
++                  <h2 className="text-xl font-bold text-slate-700 mb-6 flex items-center justify-center gap-2">
++                    <span className="w-8 h-1 bg-red-600 rounded-full"></span>
++                    ハナハナシリーズ
++                    <span className="w-8 h-1 bg-red-600 rounded-full"></span>
++                  </h2>
++                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
++                    {AVAILABLE_MACHINES.filter(
++                      (m) => m.category === "hana",
++                    ).map((machine) => (
++                      <a
++                        key={machine.id}
++                        href={`/${machine.id}`}
++                        className="block px-6 py-4 text-white font-bold rounded-xl transition-transform hover:scale-105 shadow-md hover:shadow-xl relative overflow-hidden group"
++                        style={{ backgroundColor: machine.color }}
++                      >
++                        <div className="relative z-10 flex items-center justify-center gap-2">
++                          <span className="text-2xl">🌺</span>
++                          <span className="text-lg">{machine.name}</span>
++                          <span className="text-2xl">🌺</span>
++                        </div>
++                        <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
++                      </a>
++                    ))}
++                  </div>
+                 </div>
+               </div>
+             </div>
+
+commit 4fd06e4c71c7f9d526327fd3c650cf1690903ed3
+Author: takosuke-88 <artofspider2029@gmail.com>
+Date:   Thu Feb 19 18:53:58 2026 +0900
+
+    Feat: Dynamic machine list on landing page
+
+diff --git a/src/App.tsx b/src/App.tsx
+index fc0a11a..f78da17 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -1,5 +1,6 @@
+ import { BrowserRouter, Routes, Route } from "react-router-dom";
+ import MachinePagePreview from "./pages/MachinePagePreview";
++import { AVAILABLE_MACHINES } from "./data/machine-list";
+ 
+ export default function App() {
+   return (
+@@ -15,49 +16,39 @@ export default function App() {
+         <Route
+           path="/"
+           element={
+-            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+-              <div className="text-center">
++            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
++              <div className="text-center w-full max-w-2xl">
+                 <h1 className="text-3xl font-bold text-slate-800 mb-4">
+                   GrapeReverse
+                 </h1>
+-                <p className="text-slate-600 mb-6">
++                <p className="text-slate-600 mb-8">
+                   ジャグラー・ハナハナ・Aタイプ設定判別ツール
+                 </p>
+-                <div className="flex flex-col gap-4">
+-                  <div className="flex gap-4 justify-center">
+-                    <a
+-                      href="/hana-hooh"
+-                      className="inline-block px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+-                    >
+-                      ハナハナホウオウを試す
+-                    </a>
+-                    <a
+-                      href="/funky2"
+-                      className="inline-block px-6 py-3 bg-fuchsia-600 text-white font-medium rounded-lg hover:bg-fuchsia-700 transition-colors"
+-                    >
+-                      ファンキージャグラー2を試す
+-                    </a>
+-                  </div>
+-                  <div className="flex gap-4 justify-center">
+-                    <a
+-                      href="/myjuggler5"
+-                      className="inline-block px-6 py-3 bg-pink-500 text-white font-medium rounded-lg hover:bg-pink-600 transition-colors"
+-                    >
+-                      マイジャグラーVを試す
+-                    </a>
++
++                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
++                  {AVAILABLE_MACHINES.map((machine) => (
+                     <a
+-                      href="/aimex"
+-                      className="inline-block px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
++                      key={machine.id}
++                      href={`/${machine.id}`}
++                      className={`block px-6 py-4 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg
++                        ${
++                          machine.category === "hana"
++                            ? "bg-blue-600 hover:bg-blue-700"
++                            : machine.id.includes("funky")
++                              ? "bg-fuchsia-600 hover:bg-fuchsia-700"
++                              : machine.id.includes("my")
++                                ? "bg-pink-500 hover:bg-pink-600"
++                                : machine.id.includes("im") ||
++                                    machine.id.includes("aim")
++                                  ? "bg-red-600 hover:bg-red-700"
++                                  : machine.id.includes("happy")
++                                    ? "bg-yellow-500 hover:bg-yellow-600"
++                                    : "bg-slate-700 hover:bg-slate-800"
++                        }`}
+                     >
+-                      SアイムジャグラーEXを試す
++                      {machine.name}
+                     </a>
+-                  </div>
+-                </div>
+-                <div className="mt-8 text-slate-500 text-sm">
+-                  <p>その他の機種もURL直接入力でアクセス可能です:</p>
+-                  <p className="mt-2 text-xs">
+-                    /gogo3, /girlsss, /mr, /miracle, /happyv3 など
+-                  </p>
++                  ))}
+                 </div>
+               </div>
+             </div>
+
+commit cb7c79ca9895e1fcaecdb89b97909f4183b16dbb
+Author: takosuke-88 <artofspider2029@gmail.com>
+Date:   Thu Feb 19 18:50:31 2026 +0900
+
+    Fix: Add top-level routing for legacy URLs
+
+diff --git a/src/App.tsx b/src/App.tsx
+index e761e1b..fc0a11a 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -5,9 +5,12 @@ export default function App() {
+   return (
+     <BrowserRouter>
+       <Routes>
+-        {/* v2: Schema-driven UI プレビュー */}
++        {/* v2: Schema-driven UI プレビュー - 互換性のため残す */}
+         <Route path="/v2/preview/:machineId" element={<MachinePagePreview />} />
+ 
++        {/* 本番用ルート: /myjuggler5 など */}
++        <Route path="/:machineId" element={<MachinePagePreview />} />
++
+         {/* デフォルトルート */}
+         <Route
+           path="/"
+@@ -20,31 +23,41 @@ export default function App() {
+                 <p className="text-slate-600 mb-6">
+                   ジャグラー・ハナハナ・Aタイプ設定判別ツール
+                 </p>
+-                <a
+-                  href="/v2/preview/hana-hooh"
+-                  className="inline-block px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors mr-4"
+-                >
+-                  ハナハナホウオウを試す
+-                </a>
+-                <a
+-                  href="/v2/preview/funky-juggler-2"
+-                  className="inline-block px-6 py-3 bg-fuchsia-600 text-white font-medium rounded-lg hover:bg-fuchsia-700 transition-colors"
+-                >
+-                  ファンキージャグラー2を試す
+-                </a>
+-                <div className="mt-4">
+-                  <a
+-                    href="/v2/preview/my-juggler-5"
+-                    className="inline-block px-6 py-3 bg-pink-500 text-white font-medium rounded-lg hover:bg-pink-600 transition-colors mr-4"
+-                  >
+-                    マイジャグラーVを試す
+-                  </a>
+-                  <a
+-                    href="/v2/preview/im-juggler-ex"
+-                    className="inline-block px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
+-                  >
+-                    SアイムジャグラーEXを試す
+-                  </a>
++                <div className="flex flex-col gap-4">
++                  <div className="flex gap-4 justify-center">
++                    <a
++                      href="/hana-hooh"
++                      className="inline-block px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
++                    >
++                      ハナハナホウオウを試す
++                    </a>
++                    <a
++                      href="/funky2"
++                      className="inline-block px-6 py-3 bg-fuchsia-600 text-white font-medium rounded-lg hover:bg-fuchsia-700 transition-colors"
++                    >
++                      ファンキージャグラー2を試す
++                    </a>
++                  </div>
++                  <div className="flex gap-4 justify-center">
++                    <a
++                      href="/myjuggler5"
++                      className="inline-block px-6 py-3 bg-pink-500 text-white font-medium rounded-lg hover:bg-pink-600 transition-colors"
++                    >
++                      マイジャグラーVを試す
++                    </a>
++                    <a
++                      href="/aimex"
++                      className="inline-block px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
++                    >
++                      SアイムジャグラーEXを試す
++                    </a>
++                  </div>
++                </div>
++                <div className="mt-8 text-slate-500 text-sm">
++                  <p>その他の機種もURL直接入力でアクセス可能です:</p>
++                  <p className="mt-2 text-xs">
++                    /gogo3, /girlsss, /mr, /miracle, /happyv3 など
++                  </p>
+                 </div>
+               </div>
+             </div>
+
+commit d58dcf5bdc099daf9ff4594b882d3069a64cc880
+Author: takosuke-88 <artofspider2029@gmail.com>
+Date:   Tue Feb 17 20:27:06 2026 +0900
+
+    横展開・ボーナス確率微調整
+
+diff --git a/src/App.tsx b/src/App.tsx
+index a508693..e761e1b 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -32,6 +32,20 @@ export default function App() {
+                 >
+                   ファンキージャグラー2を試す
+                 </a>
++                <div className="mt-4">
++                  <a
++                    href="/v2/preview/my-juggler-5"
++                    className="inline-block px-6 py-3 bg-pink-500 text-white font-medium rounded-lg hover:bg-pink-600 transition-colors mr-4"
++                  >
++                    マイジャグラーVを試す
++                  </a>
++                  <a
++                    href="/v2/preview/im-juggler-ex"
++                    className="inline-block px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
++                  >
++                    SアイムジャグラーEXを試す
++                  </a>
++                </div>
+               </div>
+             </div>
+           }
+
+commit 772ee830510f6bac8b11b5b8be97a1a47eba4e2a
+Author: takosuke-88 <artofspider2029@gmail.com>
+Date:   Tue Feb 10 16:57:39 2026 +0900
+
+    棒グラフ修正
+
+diff --git a/src/App.tsx b/src/App.tsx
+index 0ddb2ce..a508693 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -1,5 +1,5 @@
+-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+-import MachinePagePreview from './pages/MachinePagePreview';
++import { BrowserRouter, Routes, Route } from "react-router-dom";
++import MachinePagePreview from "./pages/MachinePagePreview";
+ 
+ export default function App() {
+   return (
+@@ -7,26 +7,35 @@ export default function App() {
+       <Routes>
+         {/* v2: Schema-driven UI プレビュー */}
+         <Route path="/v2/preview/:machineId" element={<MachinePagePreview />} />
+-        
++
+         {/* デフォルトルート */}
+-        <Route path="/" element={
+-          <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+-            <div className="text-center">
+-              <h1 className="text-3xl font-bold text-slate-800 mb-4">
+-                GrapeReverse
+-              </h1>
+-              <p className="text-slate-600 mb-6">
+-                ジャグラー・ハナハナ・Aタイプ設定判別ツール
+-              </p>
+-              <a
+-                href="/v2/preview/hana-hooh"
+-                className="inline-block px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+-              >
+-                ハナハナホウオウを試す
+-              </a>
++        <Route
++          path="/"
++          element={
++            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
++              <div className="text-center">
++                <h1 className="text-3xl font-bold text-slate-800 mb-4">
++                  GrapeReverse
++                </h1>
++                <p className="text-slate-600 mb-6">
++                  ジャグラー・ハナハナ・Aタイプ設定判別ツール
++                </p>
++                <a
++                  href="/v2/preview/hana-hooh"
++                  className="inline-block px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors mr-4"
++                >
++                  ハナハナホウオウを試す
++                </a>
++                <a
++                  href="/v2/preview/funky-juggler-2"
++                  className="inline-block px-6 py-3 bg-fuchsia-600 text-white font-medium rounded-lg hover:bg-fuchsia-700 transition-colors"
++                >
++                  ファンキージャグラー2を試す
++                </a>
++              </div>
+             </div>
+-          </div>
+-        } />
++          }
++        />
+       </Routes>
+     </BrowserRouter>
+   );
+
+commit 9cd823beb38ec9c257d30e8c9d73e71e242479ed
+Author: takosuke-88 <artofspider2029@gmail.com>
+Date:   Mon Feb 9 20:59:11 2026 +0900
+
+    fix: update gitignore and refresh index
+
+diff --git a/src/App.tsx b/src/App.tsx
+new file mode 100644
+index 0000000..0ddb2ce
+--- /dev/null
++++ b/src/App.tsx
+@@ -0,0 +1,33 @@
++import { BrowserRouter, Routes, Route } from 'react-router-dom';
++import MachinePagePreview from './pages/MachinePagePreview';
++
++export default function App() {
++  return (
++    <BrowserRouter>
++      <Routes>
++        {/* v2: Schema-driven UI プレビュー */}
++        <Route path="/v2/preview/:machineId" element={<MachinePagePreview />} />
++        
++        {/* デフォルトルート */}
++        <Route path="/" element={
++          <div className="min-h-screen bg-slate-50 flex items-center justify-center">
++            <div className="text-center">
++              <h1 className="text-3xl font-bold text-slate-800 mb-4">
++                GrapeReverse
++              </h1>
++              <p className="text-slate-600 mb-6">
++                ジャグラー・ハナハナ・Aタイプ設定判別ツール
++              </p>
++              <a
++                href="/v2/preview/hana-hooh"
++                className="inline-block px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
++              >
++                ハナハナホウオウを試す
++              </a>
++            </div>
++          </div>
++        } />
++      </Routes>
++    </BrowserRouter>
++  );
++}

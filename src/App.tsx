@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MachinePagePreview from "./pages/MachinePagePreview";
 import { AVAILABLE_MACHINES } from "./data/machine-list";
+import MyJugglerColumn from "./pages/columns/myjuggler5-setting6-behavior";
+import Funky2Column from "./pages/columns/funky2-setting6-behavior";
 
 export default function App() {
   return (
@@ -11,6 +13,16 @@ export default function App() {
 
         {/* 本番用ルート: /myjuggler5 など */}
         <Route path="/:machineId" element={<MachinePagePreview />} />
+
+        {/* コラム記事 */}
+        <Route
+          path="/columns/myjuggler5-setting6-behavior"
+          element={<MyJugglerColumn />}
+        />
+        <Route
+          path="/columns/funky2-setting6-behavior"
+          element={<Funky2Column />}
+        />
 
         {/* デフォルトルート */}
         <Route
@@ -76,6 +88,40 @@ export default function App() {
                         <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
                       </a>
                     ))}
+                  </div>
+                </div>
+
+                {/* 攻略コラム */}
+                <div className="mb-12">
+                  <h2 className="text-xl font-bold text-slate-700 mb-6 flex items-center justify-center gap-2">
+                    <span className="w-8 h-1 bg-indigo-500 rounded-full"></span>
+                    パチスロ攻略コラム
+                    <span className="w-8 h-1 bg-indigo-500 rounded-full"></span>
+                  </h2>
+                  <div className="flex flex-col gap-4 text-left mx-auto max-w-xl">
+                    <a
+                      href="/columns/myjuggler5-setting6-behavior"
+                      className="block p-4 bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:scale-[1.02] hover:shadow-md hover:border-indigo-300 group"
+                    >
+                      <h3 className="text-lg font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">
+                        【マイジャグ5】設定6はこう動く！ボーナス確率よりも「ぶどう」を信じるべき数学的理由
+                      </h3>
+                      <p className="text-sm text-slate-500 line-clamp-2">
+                        「合算1/120の台が空いた！」←実はそれ、罠かもしれません。AIシミュレーションと実戦データから導き出した、マイジャグ5の本当の狙い方を解説します。
+                      </p>
+                    </a>
+
+                    <a
+                      href="/columns/funky2-setting6-behavior"
+                      className="block p-4 bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:scale-[1.02] hover:shadow-md hover:border-indigo-300 group"
+                    >
+                      <h3 className="text-lg font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">
+                        ファンキージャグラー2の設定6は別格？BIG先行の罠と、本当に見るべき「単独REG」の正体
+                      </h3>
+                      <p className="text-sm text-slate-500 line-clamp-2">
+                        BIG確率だけで設定判別していませんか？ファンキー2で勝つために見落としがちな「単独REG」と「ぶどう」の重要性を徹底解説。
+                      </p>
+                    </a>
                   </div>
                 </div>
               </div>
