@@ -197,47 +197,42 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
         config.specs?.payouts &&
         config.specs.payouts.grape
       ) {
-        // 定数定義 (結果カードとロジックを統一)
+        // 定数定義
         const PAYOUT = {
           BIG: config.specs.payouts.big,
           REG: config.specs.payouts.reg,
           GRAPE: config.specs.payouts.grape,
-          REPLAY: 3,
           CHERRY: 2,
         };
-        const PROB = {
-          REPLAY: 7.3,
-          CHERRY: 36.0,
+        const PROB_DENOM = {
+          REPLAY: config.specs.reverseCalcProbDenominators?.replay || 7.3,
+          CHERRY: config.specs.reverseCalcProbDenominators?.cherry || 36.0,
         };
-        // チェリー狙い時は100%取得とする
-        const CHERRY_ACQUISITION_RATE = 1.0;
 
-        // 1. IN枚数 = 総ゲーム数 * 3
-        const coinIn = currentTotalGames * 3;
+        const REPLAY_PROB = 1 / PROB_DENOM.REPLAY;
+        const CHERRY_PROB = 1 / PROB_DENOM.CHERRY;
 
-        // 2. 総払い出し(OUT) = IN + 差枚数
-        const totalOut = coinIn + diffCoinsNum;
+        // ユーザー指定の正確な計算式に基づく逆算アルゴリズム
+        // 1. 消費枚数 = (総回転数 / 7.33 * 0) + (総回転数 * (1 - 1/7.33) * 3)
+        // ※リプレイを除いた回転数に3を乗じる
+        const coinIn = currentTotalGames * (1 - REPLAY_PROB) * 3;
 
-        // 3. ボーナス払い出し分の除去
+        // 2. ボーナス総獲得 = (BIG回数 * BIG_PAYOUT) + (REG回数 * REG_PAYOUT)
         const bonusOut = currentBig * PAYOUT.BIG + currentReg * PAYOUT.REG;
-        const smallRoleOut = totalOut - bonusOut;
 
-        // 4. リプレイ払い出し分の除去
-        const replayOut = (currentTotalGames / PROB.REPLAY) * PAYOUT.REPLAY;
-        const baseSmallRoleOut = smallRoleOut - replayOut;
+        // 3. チェリー期待枚数 = (総回転数 / 33.0) * 2
+        const cherryPayout = currentTotalGames * CHERRY_PROB * PAYOUT.CHERRY;
 
-        // 5. チェリー払い出し分の除去 (チェリー狙い時の完全取得)
-        const expectedCherryCount = currentTotalGames / PROB.CHERRY;
-        const cherryPayout =
-          expectedCherryCount * PAYOUT.CHERRY * CHERRY_ACQUISITION_RATE;
+        // 4. 推定ブドウ獲得枚数 = 差枚数 + 消費枚数 - ボーナス総獲得 - チェリー期待枚数
+        // 差枚数(diffCoinsNum)がプラスの場合は客の浮き、マイナスの場合は沈みを示すとする。
+        // 出玉の定義: 差枚数 = INとOUTの差分 (通常 差枚 = OUT - IN だが、この式では 獲得 = 差枚 + 消費 という考え方)
+        // ここでの消費枚数はすでに「純消費」
+        const grapePayout = diffCoinsNum + coinIn - bonusOut - cherryPayout;
 
-        // 6. ブドウ払い出し枚数
-        const grapeOut = baseSmallRoleOut - cherryPayout;
+        // 5. 推定ブドウ回数 = 推定ブドウ獲得枚数 / GRAPE_PAYOUT
+        const calculatedGrapeCount = Math.round(grapePayout / PAYOUT.GRAPE);
 
-        // 7. ブドウ回数
-        const calculatedGrapeCount = Math.round(grapeOut / PAYOUT.GRAPE);
-
-        console.log("🍇 ブドウ逆算実行 (Smart Auto-Calc - Cherry Aim):", {
+        console.log("🍇 ブドウ逆算実行 (Strict Formula):", {
           Trigger: "Dependency Changed",
           Calculated: calculatedGrapeCount,
         });
@@ -440,44 +435,50 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             const regCount = Number(currentInputs["reg-count"]) || 0;
 
             if (totalGames > 0 && hasDiffCoins) {
-              // --- 定数定義 ---
+              // --- 定数定義 (Strict Formula) ---
               const PAYOUT = {
-                BIG: 240,
-                REG: 96,
-                GRAPE: 8,
-                REPLAY: 3,
+                BIG: config.specs?.payouts?.big || 252,
+                REG: config.specs?.payouts?.reg || 96,
+                GRAPE: config.specs?.payouts?.grape || 8,
                 CHERRY: 2,
               };
-              const PROB = {
-                REPLAY: 7.3,
-                CHERRY: 36.0,
+              const PROB_DENOM = {
+                REPLAY:
+                  config.specs?.reverseCalcProbDenominators?.replay || 7.3,
+                CHERRY:
+                  config.specs?.reverseCalcProbDenominators?.cherry || 36.0,
               };
 
-              // 1. 総払い出し(OUT)の算出
-              const totalOut = totalGames * 3 + diffCoins;
+              const REPLAY_PROB = 1 / PROB_DENOM.REPLAY;
+              const CHERRY_PROB = 1 / PROB_DENOM.CHERRY;
 
-              // 2. ボーナス払い出し分の除去
-              const smallRoleOut =
-                totalOut - bigCount * PAYOUT.BIG - regCount * PAYOUT.REG;
-
-              // 3. リプレイ払い出し分の除去
-              const replayOut = (totalGames / PROB.REPLAY) * PAYOUT.REPLAY;
-              const baseSmallRoleOut = smallRoleOut - replayOut;
-
-              // --- A. チェリー狙い ---
-              const cherryOut = (totalGames / PROB.CHERRY) * PAYOUT.CHERRY;
-              const grapeOutA = baseSmallRoleOut - cherryOut;
-              const grapeCountA = grapeOutA / PAYOUT.GRAPE;
+              // --- A. チェリー狙い (完全取得) ---
+              const CHERRY_ACQUISITION_RATE_A = 1.0;
+              const coinInA = totalGames * (1 - REPLAY_PROB) * 3;
+              const bonusOutA = bigCount * PAYOUT.BIG + regCount * PAYOUT.REG;
+              const cherryPayoutA =
+                totalGames *
+                CHERRY_PROB *
+                PAYOUT.CHERRY *
+                CHERRY_ACQUISITION_RATE_A;
+              const grapePayoutA =
+                diffCoins + coinInA - bonusOutA - cherryPayoutA;
+              const grapeCountA = grapePayoutA / PAYOUT.GRAPE;
               const grapeProbA = grapeCountA > 0 ? totalGames / grapeCountA : 0;
 
-              // --- B. フリー打ち ---
-              // チェリー取得率を考慮 (約66.7% = 2/3)
-              const CHERRY_ACQUISITION_RATE = 2 / 3;
-              const expectedCherryCount = totalGames / PROB.CHERRY;
-              const freeCherryPayout =
-                expectedCherryCount * PAYOUT.CHERRY * CHERRY_ACQUISITION_RATE;
-              const grapeOutB = baseSmallRoleOut - freeCherryPayout;
-              const grapeCountB = grapeOutB / PAYOUT.GRAPE;
+              // --- B. フリー打ち (チェリー取得率 約66.7% = 2/3) ---
+              // ※チェリーを取りこぼすとその分ぶどう獲得枚数が減ったように計算されるため、見かけ上のぶどう確率が悪くなる方向へ補正される
+              const CHERRY_ACQUISITION_RATE_B = 2 / 3;
+              const coinInB = totalGames * (1 - REPLAY_PROB) * 3;
+              const bonusOutB = bigCount * PAYOUT.BIG + regCount * PAYOUT.REG;
+              const cherryPayoutB =
+                totalGames *
+                CHERRY_PROB *
+                PAYOUT.CHERRY *
+                CHERRY_ACQUISITION_RATE_B;
+              const grapePayoutB =
+                diffCoins + coinInB - bonusOutB - cherryPayoutB;
+              const grapeCountB = grapePayoutB / PAYOUT.GRAPE;
               const grapeProbB = grapeCountB > 0 ? totalGames / grapeCountB : 0;
 
               return (
@@ -672,7 +673,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   {
                     label: "BIG確率",
                     val: (() => {
-                      const count = Number(inputValues["big-count"]) || 0;
+                      const count = Number(currentInputs["big-count"]) || 0;
                       return count > 0 ? totalGames / count : 0;
                     })(),
                     format: (v: number) => v.toFixed(1),
@@ -686,7 +687,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   {
                     label: "REG確率",
                     val: (() => {
-                      const count = Number(inputValues["reg-count"]) || 0;
+                      const count = Number(currentInputs["reg-count"]) || 0;
                       return count > 0 ? totalGames / count : 0;
                     })(),
                     format: (v: number) => v.toFixed(1),
@@ -703,7 +704,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                           label: "単独REG",
                           val: (() => {
                             const count =
-                              Number(inputValues["reg-solo-count"]) || 0;
+                              Number(currentInputs["reg-solo-count"]) || 0;
                             return count > 0 ? totalGames / count : 0;
                           })(),
                           format: (v: number) => v.toFixed(1),
@@ -718,7 +719,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                           label: "チェリーREG",
                           val: (() => {
                             const count =
-                              Number(inputValues["reg-cherry-count"]) || 0;
+                              Number(currentInputs["reg-cherry-count"]) || 0;
                             return count > 0 ? totalGames / count : 0;
                           })(),
                           format: (v: number) => v.toFixed(1),
@@ -734,8 +735,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   {
                     label: "合算確率",
                     val: (() => {
-                      const big = Number(inputValues["big-count"]) || 0;
-                      const reg = Number(inputValues["reg-count"]) || 0;
+                      const big = Number(currentInputs["big-count"]) || 0;
+                      const reg = Number(currentInputs["reg-count"]) || 0;
                       const total = big + reg;
                       return total > 0 ? totalGames / total : 0;
                     })(),
@@ -750,7 +751,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   {
                     label: "ブドウ確率",
                     val: (() => {
-                      const count = Number(inputValues["grape-count"]) || 0;
+                      const count = Number(currentInputs["grape-count"]) || 0;
                       return count > 0 ? totalGames / count : 0;
                     })(),
                     format: (v: number) => v.toFixed(2),
@@ -796,7 +797,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                               : "text-blue-500 dark:text-blue-400"
                           }`}
                         >
-                          (設定{approxSetting}近似)
+                          {config.id === "aimex" &&
+                          item.settingValues![approxSetting] === 255.0
+                            ? "(設定5・6近似)"
+                            : `(設定${approxSetting}近似)`}
                         </div>
                       )}
                     </div>
@@ -982,7 +986,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                             const cells = [];
 
                             let currentValue =
-                              Number(inputValues[element.id]) || 0;
+                              Number(currentInputs[element.id]) || 0;
 
                             // 合成確率計算のための特例処理 (既存ロジック維持)
                             if (
@@ -990,8 +994,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                               element.label.includes("合成") ||
                               element.label.includes("合算")
                             ) {
-                              const big = Number(inputValues["big-count"]) || 0;
-                              const reg = Number(inputValues["reg-count"]) || 0;
+                              const big =
+                                Number(currentInputs["big-count"]) || 0;
+                              const reg =
+                                Number(currentInputs["reg-count"]) || 0;
                               currentValue = big + reg;
                             }
 
@@ -1067,9 +1073,9 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                                 combinedExpected.toFixed(1);
 
                               const bigCount =
-                                Number(inputValues["big-count"]) || 0;
+                                Number(currentInputs["big-count"]) || 0;
                               const regCount =
-                                Number(inputValues["reg-count"]) || 0;
+                                Number(currentInputs["reg-count"]) || 0;
                               const totalCount = bigCount + regCount;
                               const combinedProb =
                                 totalGames > 0 && totalCount > 0

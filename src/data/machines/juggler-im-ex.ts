@@ -204,6 +204,10 @@ export const imJugglerExConfig: MachineConfig = {
       regBaseWeight: 1.2,
       bigBaseWeight: 0.35,
     },
+    reverseCalcProbDenominators: {
+      replay: 7.33,
+      cherry: 33.0,
+    },
   },
   detailedProbabilities: {
     big_solo: [431.16, 422.81, 422.81, 417.43, 417.43, 407.06],

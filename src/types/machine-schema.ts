@@ -69,6 +69,10 @@ export interface MachineConfig {
       regBaseWeight?: number;
       bigBaseWeight?: number;
     };
+    reverseCalcProbDenominators?: {
+      replay: number;
+      cherry: number;
+    };
   };
   detailedProbabilities?: {
     // 各配列は [設定1, 設定2, 設定3, 設定4, 設定5, 設定6] の順
