@@ -204,6 +204,10 @@ export const myJuggler5Config: MachineConfig = {
       regBaseWeight: 1.2,
       bigBaseWeight: 0.35,
     },
+    reverseCalcProbDenominators: {
+      replay: 7.3,
+      cherry: 35.6,
+    },
   },
   detailedProbabilities: {
     big_solo: [420.1, 414.78, 404.54, 376.64, 348.6, 341.33],

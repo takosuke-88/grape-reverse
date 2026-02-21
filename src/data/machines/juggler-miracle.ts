@@ -204,6 +204,10 @@ export const miracleJugglerConfig: MachineConfig = {
       regBaseWeight: 1.2,
       bigBaseWeight: 0.35,
     },
+    reverseCalcProbDenominators: {
+      replay: 7.3,
+      cherry: 33.0,
+    },
   },
   detailedProbabilities: {
     big_solo: [333.65, 333.32, 328.76, 310.66, 304.33, 281.78],

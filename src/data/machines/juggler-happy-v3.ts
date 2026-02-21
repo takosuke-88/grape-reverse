@@ -204,6 +204,10 @@ export const happyV3Config: MachineConfig = {
       regBaseWeight: 1.2,
       bigBaseWeight: 0.35,
     },
+    reverseCalcProbDenominators: {
+      replay: 7.3,
+      cherry: 56.5,
+    },
   },
   detailedProbabilities: {
     big_solo: [436.9, 431.2, 412.2, 414.8, 376.6, 344.9],

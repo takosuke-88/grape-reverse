@@ -204,6 +204,10 @@ export const funkyJuggler2Config: MachineConfig = {
       regBaseWeight: 1.2,
       bigBaseWeight: 0.35,
     },
+    reverseCalcProbDenominators: {
+      replay: 7.3,
+      cherry: 35.6,
+    },
   },
   detailedProbabilities: {
     big_solo: [404.54, 397.19, 394.8, 383.25, 374.49, 334.37],

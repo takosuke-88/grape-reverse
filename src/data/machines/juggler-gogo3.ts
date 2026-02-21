@@ -204,6 +204,10 @@ export const gogoJuggler3Config: MachineConfig = {
       regBaseWeight: 1.2,
       bigBaseWeight: 0.35,
     },
+    reverseCalcProbDenominators: {
+      replay: 7.3,
+      cherry: 33.0,
+    },
   },
   detailedProbabilities: {
     big_solo: [376.64, 376.64, 376.64, 376.64, 370.26, 352.34],

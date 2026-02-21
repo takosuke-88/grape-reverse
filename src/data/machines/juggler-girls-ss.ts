@@ -204,6 +204,10 @@ export const girlsSsConfig: MachineConfig = {
       regBaseWeight: 1.2,
       bigBaseWeight: 0.35,
     },
+    reverseCalcProbDenominators: {
+      replay: 7.3,
+      cherry: 33.0,
+    },
   },
   detailedProbabilities: {
     big_solo: [387.8, 381.0, 370.3, 350.5, 337.8, 312.1],
