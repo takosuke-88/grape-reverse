@@ -52,18 +52,22 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     return initialValues;
   });
 
-  // ブドウ逆算用入力State (独立)
-  const [grapeInputValues, setGrapeInputValues] = useState<
-    Record<string, number | boolean | string>
-  >({});
+  // ブドウ算出結果用
+  const [calculatedGrapeCount, setCalculatedGrapeCount] = useState<
+    number | null
+  >(null);
 
   const [estimationResults, setEstimationResults] = useState<
     EstimationResult[] | null
   >(null);
 
-  // 現在のモードに応じた入力値を参照
-  const currentInputs =
-    currentMode === "grape" ? grapeInputValues : inputValues;
+  // 現在のモードに応じた入力値を参照 (ブドウ逆算結果を合成)
+  const currentInputs = useMemo(() => {
+    if (currentMode === "grape" && calculatedGrapeCount !== null) {
+      return { ...inputValues, "grape-count": calculatedGrapeCount };
+    }
+    return inputValues;
+  }, [currentMode, inputValues, calculatedGrapeCount]);
 
   const handleValueChange = (
     elementId: string,
@@ -77,41 +81,24 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     ) {
       const prefix = elementId === "big-count" ? "big" : "reg";
       const numValue = Number(value);
-      const targetInputs =
-        currentMode === "grape" ? grapeInputValues : inputValues;
-      const solo = Number(targetInputs[`${prefix}-solo-count`]) || 0;
-      const cherry = Number(targetInputs[`${prefix}-cherry-count`]) || 0;
+      const solo = Number(inputValues[`${prefix}-solo-count`]) || 0;
+      const cherry = Number(inputValues[`${prefix}-cherry-count`]) || 0;
       // Total - (Solo + Cherry) = Unknown
       // 負の値にならないように0でクリップ (Total < 内訳合計 の矛盾回避)
       const newUnknown = Math.max(0, numValue - (solo + cherry));
 
-      if (currentMode === "grape") {
-        setGrapeInputValues((prev) => ({
-          ...prev,
-          [elementId]: value,
-          [`${prefix}-unknown-count`]: newUnknown,
-        }));
-      } else {
-        setInputValues((prev) => ({
-          ...prev,
-          [elementId]: value,
-          [`${prefix}-unknown-count`]: newUnknown,
-        }));
-      }
-      return;
-    }
-
-    if (currentMode === "grape") {
-      setGrapeInputValues((prev) => ({
-        ...prev,
-        [elementId]: value,
-      }));
-    } else {
       setInputValues((prev) => ({
         ...prev,
         [elementId]: value,
+        [`${prefix}-unknown-count`]: newUnknown,
       }));
+      return;
     }
+
+    setInputValues((prev) => ({
+      ...prev,
+      [elementId]: value,
+    }));
   };
 
   /* エラー状態の管理を追加 */
@@ -155,10 +142,11 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
   // 依存値の変更を追跡するためのRef
   const prevDepsRef = useRef({
-    totalGames: 0,
+    totalGames: -1,
     diffCoins: "" as string | number,
-    bigCount: 0,
-    regCount: 0,
+    bigCount: -1,
+    regCount: -1,
+    mode: "",
   });
 
   useEffect(() => {
@@ -170,12 +158,13 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
     const prev = prevDepsRef.current;
 
-    // 依存値（総ゲーム数、差枚数、ボーナス）が変更されたかチェック
+    // 依存値（総ゲーム数、差枚数、ボーナス、またはモード）が変更されたかチェック
     const isDepChanged =
       currentTotalGames !== prev.totalGames ||
       currentDiffCoins !== prev.diffCoins ||
       currentBig !== prev.bigCount ||
-      currentReg !== prev.regCount;
+      currentReg !== prev.regCount ||
+      currentMode !== prev.mode;
 
     // 依存値が変更された場合のみ、ブドウ逆算を実行
     if (isDepChanged) {
@@ -185,6 +174,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
         diffCoins: currentDiffCoins as string | number,
         bigCount: currentBig,
         regCount: currentReg,
+        mode: currentMode,
       };
 
       // 差枚数からのブドウ逆算ロジック
@@ -236,10 +226,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           Trigger: "Dependency Changed",
           Calculated: calculatedGrapeCount,
         });
-        setGrapeInputValues((state) => ({
-          ...state,
-          "grape-count": calculatedGrapeCount,
-        }));
+        setCalculatedGrapeCount(calculatedGrapeCount);
+      } else {
+        // 条件を満たさない場合は結果をクリア
+        setCalculatedGrapeCount(null);
       }
     }
   }, [currentInputs, totalGames, config, currentMode]);
@@ -296,12 +286,9 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
       });
     });
 
-    if (currentMode === "grape") {
-      setGrapeInputValues(resetValues);
-    } else {
-      setInputValues(resetValues);
-    }
+    setInputValues(resetValues);
     setEstimationResults(null);
+    setCalculatedGrapeCount(null);
     setError(null);
   };
 
