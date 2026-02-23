@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import type { DiscriminationElement } from "../../types/machine-schema";
 
 interface DynamicInputProps {
@@ -24,20 +24,23 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
     return denominator;
   };
 
-  // リアルタイム触覚フィードバック（確実な実行のために配列指定と例外処理追加）
-  const triggerHaptic = () => {
-    if (
-      typeof window !== "undefined" &&
-      window.navigator &&
-      window.navigator.vibrate
-    ) {
+  // ネイティブtouchstartイベントをDOMに直接アタッチするcallback ref
+  // Reactのイベント委譲を完全にバイパスし、タッチした瞬間に即座に振動させる
+  const hapticRef = useCallback((node: HTMLButtonElement | null) => {
+    if (!node) return;
+    const handler = () => {
       try {
-        window.navigator.vibrate([40]);
-      } catch (e) {
-        console.warn("Vibration API failed", e);
+        if (window.navigator && window.navigator.vibrate) {
+          window.navigator.vibrate(30);
+        }
+      } catch (_) {
+        // Firefox Android等はVibration API無効のためsilent fail
       }
-    }
-  };
+    };
+    // passive: true でスクロールブロッキングを防止し、最速で発火させる
+    node.addEventListener("touchstart", handler, { passive: true });
+    // クリーンアップは不要（Reactがノードをアンマウントすればリスナーも消える）
+  }, []);
 
   const currentProbability = calculateProbability();
 
@@ -48,12 +51,8 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <button
+                ref={element.isReadOnly ? undefined : hapticRef}
                 type="button"
-                onPointerDown={() => {
-                  if (!element.isReadOnly) {
-                    triggerHaptic();
-                  }
-                }}
                 onClick={() => {
                   if (element.isReadOnly) return;
                   const numValue = Number(value) || 0;
@@ -114,12 +113,8 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
               />
 
               <button
+                ref={element.isReadOnly ? undefined : hapticRef}
                 type="button"
-                onPointerDown={() => {
-                  if (!element.isReadOnly) {
-                    triggerHaptic();
-                  }
-                }}
                 onClick={() => {
                   if (element.isReadOnly) return;
                   const numValue = Number(value) || 0;
