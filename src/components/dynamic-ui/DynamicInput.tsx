@@ -24,6 +24,21 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
     return denominator;
   };
 
+  // リアルタイム触覚フィードバック（確実な実行のために配列指定と例外処理追加）
+  const triggerHaptic = () => {
+    if (
+      typeof window !== "undefined" &&
+      window.navigator &&
+      window.navigator.vibrate
+    ) {
+      try {
+        window.navigator.vibrate([40]);
+      } catch (e) {
+        console.warn("Vibration API failed", e);
+      }
+    }
+  };
+
   const currentProbability = calculateProbability();
 
   const renderInput = () => {
@@ -34,11 +49,13 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
             <div className="flex items-center gap-2">
               <button
                 type="button"
+                onPointerDown={() => {
+                  if (!element.isReadOnly) {
+                    triggerHaptic();
+                  }
+                }}
                 onClick={() => {
                   if (element.isReadOnly) return;
-                  if (navigator.vibrate) {
-                    navigator.vibrate(50);
-                  }
                   const numValue = Number(value) || 0;
                   onChange(numValue + 1);
                 }}
@@ -98,11 +115,13 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
 
               <button
                 type="button"
+                onPointerDown={() => {
+                  if (!element.isReadOnly) {
+                    triggerHaptic();
+                  }
+                }}
                 onClick={() => {
                   if (element.isReadOnly) return;
-                  if (navigator.vibrate) {
-                    navigator.vibrate(50);
-                  }
                   const numValue = Number(value) || 0;
                   onChange(numValue - 1);
                 }}
