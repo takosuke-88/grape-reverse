@@ -445,6 +445,44 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
           if (visibleElements.length === 0) return null;
 
+          // ぶどう逆算モード: 差枚数セクション(other-section)の直後にリセットボタンを挿入
+          if (currentMode === "grape" && section.id === "other-section") {
+            return (
+              <React.Fragment key={section.id}>
+                <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
+                  <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
+                    {section.title}
+                  </h2>
+                  <div className="space-y-4">
+                    {visibleElements.map((element) => (
+                      <DynamicInput
+                        key={element.id}
+                        element={{
+                          ...element,
+                          isReadOnly: false,
+                        }}
+                        value={currentInputs[element.id]}
+                        onChange={(value) =>
+                          handleValueChange(element.id, value)
+                        }
+                        totalGames={totalGames}
+                      />
+                    ))}
+                  </div>
+                </div>
+                {/* リセットボタン（差枚数の直下） */}
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className={`w-full rounded-xl ${themeColor} px-6 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80`}
+                  style={{ backgroundColor: brandColor || undefined }}
+                >
+                  入力を全てリセット
+                </button>
+              </React.Fragment>
+            );
+          }
+
           // ブドウ逆算モードかつ通常時小役セクションの場合、特別な結果カードを表示
           if (currentMode === "grape" && section.id === "normal-role-section") {
             const diffCoins = Number(currentInputs["diff-coins"]);
@@ -627,15 +665,17 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             </p>
           </div>
 
-          {/* リセットボタン（常時表示） */}
-          <button
-            type="button"
-            onClick={handleReset}
-            className={`w-full rounded-xl ${themeColor} px-6 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80`}
-            style={{ backgroundColor: brandColor || undefined }} // ブランドカラー適用
-          >
-            入力を全てリセット
-          </button>
+          {/* リセットボタン（ぶどう逆算モード以外で表示。ぶどう逆算モードでは差枚数の直下に配置済み） */}
+          {currentMode !== "grape" && (
+            <button
+              type="button"
+              onClick={handleReset}
+              className={`w-full rounded-xl ${themeColor} px-6 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80`}
+              style={{ backgroundColor: brandColor || undefined }}
+            >
+              入力を全てリセット
+            </button>
+          )}
         </div>
 
         {/* 結果表示（常時表示） */}
