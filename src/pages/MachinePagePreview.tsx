@@ -65,5 +65,5 @@ export default function MachinePagePreview() {
     );
   }
 
-  return <MachinePageFactory config={config} />;
+  return <MachinePageFactory key={config.id} config={config} />;
 }

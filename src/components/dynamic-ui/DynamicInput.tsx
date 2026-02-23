@@ -36,6 +36,9 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 type="button"
                 onClick={() => {
                   if (element.isReadOnly) return;
+                  if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                  }
                   const numValue = Number(value) || 0;
                   onChange(numValue + 1);
                 }}
@@ -57,6 +60,25 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                   typeof value === "boolean" ? "" : value === "" ? "" : value
                 }
                 onWheel={(e) => e.currentTarget.blur()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    // 現在のDOMからすべてのnumberタイプのinput要素を取得
+                    const inputs = Array.from(
+                      document.querySelectorAll(
+                        'input[type="number"]:not([readonly])',
+                      ),
+                    ) as HTMLInputElement[];
+                    const currentIndex = inputs.indexOf(e.currentTarget);
+                    if (currentIndex > -1 && currentIndex < inputs.length - 1) {
+                      // 次のinputへフォーカス移動
+                      inputs[currentIndex + 1].focus();
+                    } else {
+                      // 最後の入力欄だった場合はキーボードを閉じる
+                      e.currentTarget.blur();
+                    }
+                  }
+                }}
                 onChange={(e) => {
                   if (element.isReadOnly) return;
                   if (e.target.value === "") {
@@ -78,6 +100,9 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 type="button"
                 onClick={() => {
                   if (element.isReadOnly) return;
+                  if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                  }
                   const numValue = Number(value) || 0;
                   onChange(numValue - 1);
                 }}

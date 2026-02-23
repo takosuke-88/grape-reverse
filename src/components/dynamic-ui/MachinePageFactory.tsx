@@ -49,6 +49,20 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
         }
       });
     });
+    // 初期値をLocalStorageから復元
+    const storageKey = `grape-reverse-data-${config.id}`;
+    const savedData = localStorage.getItem(storageKey);
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        // 保存されたデータと初期値をマージ（スキーマ変更への対応）
+        const mergedValues = { ...initialValues, ...parsedData };
+        return mergedValues;
+      } catch (e) {
+        console.error("Failed to parse saved data for", config.id, e);
+      }
+    }
+
     return initialValues;
   });
 
@@ -139,6 +153,16 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     currentInputs["reg-unknown-count"],
     currentMode, // モード切り替え時にも再計算
   ]);
+
+  // localStorageに現在状態を自動保存
+  useEffect(() => {
+    const storageKey = `grape-reverse-data-${config.id}`;
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(inputValues));
+    } catch (e) {
+      console.error("Failed to save data for", config.id, e);
+    }
+  }, [inputValues, config.id]);
 
   // 依存値の変更を追跡するためのRef
   const prevDepsRef = useRef({
@@ -285,6 +309,14 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
         }
       });
     });
+
+    // localStorageからも削除
+    const storageKey = `grape-reverse-data-${config.id}`;
+    try {
+      localStorage.removeItem(storageKey);
+    } catch (e) {
+      console.error("Failed to remove data for", config.id, e);
+    }
 
     setInputValues(resetValues);
     setEstimationResults(null);
