@@ -690,18 +690,18 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
               {mostLikelySetting && (
                 <div className="mb-4 grid grid-cols-2 gap-2">
                   <div className="flex flex-col items-center justify-center rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
                       最有力設定
                     </div>
                     <div className="text-2xl font-bold text-slate-800 dark:text-white">
                       設定{mostLikelySetting.setting}
                     </div>
-                    <div className="text-[11px] font-bold text-blue-600 dark:text-blue-400">
+                    <div className="text-xs font-bold text-blue-600 dark:text-blue-400">
                       ({mostLikelySetting.probability.toFixed(1)}%)
                     </div>
                     {/* ブドウ信頼度表示 */}
                     {grapeReliability < 1.0 && (
-                      <div className="mt-1 text-[9px] font-medium text-slate-400 dark:text-slate-500">
+                      <div className="mt-1 text-sm font-bold text-indigo-500 dark:text-indigo-400">
                         🍇信頼度: {(grapeReliability * 100).toFixed(0)}%
                         {grapeReliability < 0.5 && (
                           <span className="text-orange-500 dark:text-orange-400">
@@ -713,13 +713,13 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   </div>
 
                   <div className="flex flex-col items-center justify-center rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
                       高設定の可能性
                     </div>
                     <div className="text-2xl font-bold text-slate-800 dark:text-white">
                       {highSettingProb.toFixed(1)}%
                     </div>
-                    <div className="text-[11px] font-bold text-red-500 dark:text-red-400">
+                    <div className="text-xs font-bold text-red-500 dark:text-red-400">
                       (設定5・6の可能性)
                     </div>
                   </div>
@@ -801,10 +801,34 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                     })(),
                     format: (v: number) => v.toFixed(1),
                     settingValues: (() => {
-                      const el = config.sections
+                      const bigEl = config.sections
+                        .flatMap((s) => s.elements)
+                        .find((e) => e.id === "big-count");
+                      const regEl = config.sections
+                        .flatMap((s) => s.elements)
+                        .find((e) => e.id === "reg-count");
+
+                      // BIG・REG両方の確率設定があれば、合算確率を計算して返す
+                      if (bigEl?.settingValues && regEl?.settingValues) {
+                        const combined: Record<number, number> = {};
+                        [1, 2, 3, 4, 5, 6].forEach((s) => {
+                          if (
+                            bigEl.settingValues![s] &&
+                            regEl.settingValues![s]
+                          ) {
+                            const bigProb = 1 / bigEl.settingValues![s];
+                            const regProb = 1 / regEl.settingValues![s];
+                            combined[s] = 1 / (bigProb + regProb);
+                          }
+                        });
+                        return combined;
+                      }
+
+                      // 事前定義要素があればそちらをフォールバックとして使う
+                      const combinedEl = config.sections
                         .flatMap((s) => s.elements)
                         .find((e) => e.id === "bonus-combined");
-                      return el?.settingValues;
+                      return combinedEl?.settingValues;
                     })(),
                   },
                   {
@@ -842,7 +866,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                       key={idx}
                       className="flex flex-col items-center justify-center rounded-lg border border-slate-100 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-800"
                     >
-                      <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                      <div className="text-xs text-slate-500 dark:text-slate-400">
                         {item.label}
                       </div>
                       <div className="text-xl font-bold text-slate-800 dark:text-white">
@@ -850,7 +874,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                       </div>
                       {approxSetting && (
                         <div
-                          className={`text-[10px] font-bold ${
+                          className={`text-xs font-bold ${
                             approxSetting >= 5
                               ? "text-red-500 dark:text-red-400"
                               : "text-blue-500 dark:text-blue-400"
