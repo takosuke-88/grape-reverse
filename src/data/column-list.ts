@@ -24,9 +24,18 @@ export const ATTACHED_COLUMNS: ColumnArticle[] = [
     title:
       "ファンキージャグラー2の設定6は別格？BIG先行の罠と、本当に見るべき「単独REG」の正体",
     description:
-      "BIG確率だけで設定判別していませんか？ファンキー2で勝つために見落としがちな「単独REG」と「ぶどう」の重要性を徹底解説。",
+      "BIG確率だけで設定判別していませんか？ファンキー2で勝つために見落とされがちな「単独REG」と「ぶどう」の重要性を徹底解説。",
     tags: ["juggler", "funky2"],
     date: "2026-02-20",
     path: "/columns/funky2-setting6-behavior",
+  },
+  {
+    id: "imjuggler-setting4-behavior",
+    title: "設定4のネオアイムジャグラーは打つ価値あり？データで徹底検証",
+    description:
+      "夕方のホールで「合算1/142前後、RBもそこそこ出てる空き台」を見つけたとき、「これ設定4っぽいな」と感じたことはないだろうか。設定4が入っていたとして、果たしてそれは打ち続ける価値があるのか——今回はデータをもとにシビアに答えを出す。",
+    tags: ["juggler", "im-juggler"],
+    date: "2026-02-24",
+    path: "/columns/imjuggler-setting4-behavior",
   },
 ];

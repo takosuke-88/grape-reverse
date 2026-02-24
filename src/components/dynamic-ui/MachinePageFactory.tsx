@@ -1298,10 +1298,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           const otherColumns = ATTACHED_COLUMNS.filter(
             (col) => !relatedColumns.includes(col),
           );
-          // 関連度の高い順に最大4件表示
+          // 関連度の高い順に最大3件表示
           const displayColumns = [...relatedColumns, ...otherColumns].slice(
             0,
-            4,
+            3,
           );
 
           if (displayColumns.length === 0) return null;

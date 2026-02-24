@@ -3,6 +3,7 @@ import MachinePagePreview from "./pages/MachinePagePreview";
 import { AVAILABLE_MACHINES } from "./data/machine-list";
 import MyJugglerColumn from "./pages/columns/myjuggler5-setting6-behavior";
 import Funky2Column from "./pages/columns/funky2-setting6-behavior";
+import ImJugglerColumn from "./pages/columns/imjuggler-setting4-behavior";
 import ColumnIndexPage from "./pages/columns/index";
 import ScrollToTop from "./components/ScrollToTop";
 import Header from "./components/layout/Header";
@@ -34,6 +35,10 @@ export default function App() {
             <Route
               path="/columns/funky2-setting6-behavior"
               element={<Funky2Column />}
+            />
+            <Route
+              path="/columns/imjuggler-setting4-behavior"
+              element={<ImJugglerColumn />}
             />
 
             {/* デフォルトルート */}
@@ -142,6 +147,18 @@ export default function App() {
                           </h3>
                           <p className="text-sm text-slate-500 line-clamp-2">
                             BIG確率だけで設定判別していませんか？ファンキー2で勝つために見落としがちな「単独REG」と「ぶどう」の重要性を徹底解説。
+                          </p>
+                        </a>
+
+                        <a
+                          href="/columns/imjuggler-setting4-behavior"
+                          className="block p-4 bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:scale-[1.02] hover:shadow-md hover:border-indigo-300 group"
+                        >
+                          <h3 className="text-lg font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">
+                            設定4のネオアイムジャグラーは打つ価値あり？データで徹底検証
+                          </h3>
+                          <p className="text-sm text-slate-500 line-clamp-2">
+                            夕方のホールで「合算1/142前後、RBもそこそこ出てる空き台」を見つけたとき、「これ設定4っぽいな」と感じたことはないだろうか。設定4が入っていたとして、果たしてそれは打ち続ける価値があるのか——今回はデータをもとにシビアに答えを出す。
                           </p>
                         </a>
                       </div>
