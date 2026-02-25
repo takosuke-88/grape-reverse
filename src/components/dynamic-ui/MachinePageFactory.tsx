@@ -1289,20 +1289,26 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           );
           const currentCategory = currentMachineInfo?.category || "other";
 
-          const relatedColumns = ATTACHED_COLUMNS.filter(
+          // 最新のものを優先するため、日付で降順ソート
+          const sortedColumns = [...ATTACHED_COLUMNS].sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+          );
+
+          const relatedColumns = sortedColumns.filter(
             (col) =>
               col.tags.includes(config.id) ||
               col.tags.includes(currentCategory),
           );
           // それ以外の記事を取得
-          const otherColumns = ATTACHED_COLUMNS.filter(
+          const otherColumns = sortedColumns.filter(
             (col) => !relatedColumns.includes(col),
           );
-          // 関連度の高い順に最大3件表示
-          const displayColumns = [...relatedColumns, ...otherColumns].slice(
-            0,
-            3,
-          );
+          // 関連度の高い順に最大3件取得した後、最終的な見た目として最新順（日付降順）にソートして表示
+          const displayColumns = [...relatedColumns, ...otherColumns]
+            .slice(0, 3)
+            .sort(
+              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+            );
 
           if (displayColumns.length === 0) return null;
 

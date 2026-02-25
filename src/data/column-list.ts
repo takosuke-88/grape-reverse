@@ -38,4 +38,14 @@ export const ATTACHED_COLUMNS: ColumnArticle[] = [
     date: "2026-02-24",
     path: "/columns/imjuggler-setting4-behavior",
   },
+  {
+    id: "mrjuggler-expectations",
+    title:
+      "今さら聞けないミスタージャグラー、結局勝てるの？データで正直に評価する",
+    description:
+      "「なんか難しそう」でスルーしてきた人、正直多いんじゃないか。ミスタージャグラーはピエロ重複だの中押し攻略だの、調べると情報がわんさか出てきて初見だと確かに面倒くさそうに見える。ただ結論から言うと、チェリー狙いさえできればアイムジャグラーと変わらない感覚で打てる。",
+    tags: ["juggler", "mr"],
+    date: "2026-02-25",
+    path: "/columns/mrjuggler-expectations",
+  },
 ];

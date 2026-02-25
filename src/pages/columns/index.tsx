@@ -15,38 +15,42 @@ const ColumnIndexPage = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {ATTACHED_COLUMNS.map((col) => (
-            <Link
-              key={col.id}
-              to={col.path}
-              className="group flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1"
-            >
-              <div className="p-6 flex-1 flex flex-col">
-                <div className="flex gap-2 mb-3 flex-wrap">
-                  {col.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2 py-1 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 text-xs font-bold rounded-full"
-                    >
-                      #{tag}
+          {[...ATTACHED_COLUMNS]
+            .sort(
+              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+            )
+            .map((col) => (
+              <Link
+                key={col.id}
+                to={col.path}
+                className="group flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1"
+              >
+                <div className="p-6 flex-1 flex flex-col">
+                  <div className="flex gap-2 mb-3 flex-wrap">
+                    {col.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-1 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 text-xs font-bold rounded-full"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                    <span className="px-2 py-1 text-slate-400 text-xs ml-auto">
+                      {col.date}
                     </span>
-                  ))}
-                  <span className="px-2 py-1 text-slate-400 text-xs ml-auto">
-                    {col.date}
-                  </span>
+                  </div>
+                  <h2 className="text-lg font-bold mb-3 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                    {col.title}
+                  </h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-3 mb-4 flex-1">
+                    {col.description}
+                  </p>
+                  <div className="mt-auto flex items-center text-indigo-600 dark:text-indigo-400 text-sm font-bold group-hover:translate-x-1 transition-transform">
+                    記事を読む <span className="ml-1">→</span>
+                  </div>
                 </div>
-                <h2 className="text-lg font-bold mb-3 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                  {col.title}
-                </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-3 mb-4 flex-1">
-                  {col.description}
-                </p>
-                <div className="mt-auto flex items-center text-indigo-600 dark:text-indigo-400 text-sm font-bold group-hover:translate-x-1 transition-transform">
-                  記事を読む <span className="ml-1">→</span>
-                </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
         </div>
       </main>
     </div>

@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MachinePagePreview from "./pages/MachinePagePreview";
 import { AVAILABLE_MACHINES } from "./data/machine-list";
+import { ATTACHED_COLUMNS } from "./data/column-list";
 import MyJugglerColumn from "./pages/columns/myjuggler5-setting6-behavior";
 import Funky2Column from "./pages/columns/funky2-setting6-behavior";
 import ImJugglerColumn from "./pages/columns/imjuggler-setting4-behavior";
+import MrJugglerColumn from "./pages/columns/mrjuggler-expectations";
 import ColumnIndexPage from "./pages/columns/index";
 import ScrollToTop from "./components/ScrollToTop";
 import Header from "./components/layout/Header";
@@ -39,6 +41,10 @@ export default function App() {
             <Route
               path="/columns/imjuggler-setting4-behavior"
               element={<ImJugglerColumn />}
+            />
+            <Route
+              path="/columns/mrjuggler-expectations"
+              element={<MrJugglerColumn />}
             />
 
             {/* デフォルトルート */}
@@ -126,41 +132,27 @@ export default function App() {
                         <span className="w-8 h-1 bg-indigo-500 rounded-full"></span>
                       </h2>
                       <div className="flex flex-col gap-4 text-left mx-auto max-w-xl">
-                        <a
-                          href="/columns/myjuggler5-setting6-behavior"
-                          className="block p-4 bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:scale-[1.02] hover:shadow-md hover:border-indigo-300 group"
-                        >
-                          <h3 className="text-lg font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">
-                            【マイジャグ5】設定6はこう動く！ボーナス確率よりも「ぶどう」を信じるべき数学的理由
-                          </h3>
-                          <p className="text-sm text-slate-500 line-clamp-2">
-                            「合算1/120の台が空いた！」←実はそれ、罠かもしれません。AIシミュレーションと実戦データから導き出した、マイジャグ5の本当の狙い方を解説します。
-                          </p>
-                        </a>
-
-                        <a
-                          href="/columns/funky2-setting6-behavior"
-                          className="block p-4 bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:scale-[1.02] hover:shadow-md hover:border-indigo-300 group"
-                        >
-                          <h3 className="text-lg font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">
-                            ファンキージャグラー2の設定6は別格？BIG先行の罠と、本当に見るべき「単独REG」の正体
-                          </h3>
-                          <p className="text-sm text-slate-500 line-clamp-2">
-                            BIG確率だけで設定判別していませんか？ファンキー2で勝つために見落としがちな「単独REG」と「ぶどう」の重要性を徹底解説。
-                          </p>
-                        </a>
-
-                        <a
-                          href="/columns/imjuggler-setting4-behavior"
-                          className="block p-4 bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:scale-[1.02] hover:shadow-md hover:border-indigo-300 group"
-                        >
-                          <h3 className="text-lg font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">
-                            設定4のネオアイムジャグラーは打つ価値あり？データで徹底検証
-                          </h3>
-                          <p className="text-sm text-slate-500 line-clamp-2">
-                            夕方のホールで「合算1/142前後、RBもそこそこ出てる空き台」を見つけたとき、「これ設定4っぽいな」と感じたことはないだろうか。設定4が入っていたとして、果たしてそれは打ち続ける価値があるのか——今回はデータをもとにシビアに答えを出す。
-                          </p>
-                        </a>
+                        {[...ATTACHED_COLUMNS]
+                          .sort(
+                            (a, b) =>
+                              new Date(b.date).getTime() -
+                              new Date(a.date).getTime(),
+                          )
+                          .slice(0, 3)
+                          .map((col) => (
+                            <a
+                              key={col.id}
+                              href={col.path}
+                              className="block p-4 bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:scale-[1.02] hover:shadow-md hover:border-indigo-300 group"
+                            >
+                              <h3 className="text-lg font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">
+                                {col.title}
+                              </h3>
+                              <p className="text-sm text-slate-500 line-clamp-2">
+                                {col.description}
+                              </p>
+                            </a>
+                          ))}
                       </div>
                     </div>
                   </div>
