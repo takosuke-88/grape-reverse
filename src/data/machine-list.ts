@@ -34,7 +34,7 @@ export const AVAILABLE_MACHINES: MachineInfo[] = [
     id: "gogo3",
     name: "ゴーゴージャグラー3",
     category: "juggler",
-    color: "#0277BD",
+    color: "#E91E63", // Pink
   },
   {
     id: "girlsss",
