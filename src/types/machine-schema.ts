@@ -62,7 +62,8 @@ export interface MachineConfig {
     payouts?: {
       big: number;
       reg: number;
-      grape: number;
+      grape?: number;
+      bell?: number;
     };
     judgmentWeights?: {
       grapeWeightMap?: Record<number, number>;
@@ -76,10 +77,17 @@ export interface MachineConfig {
   };
   detailedProbabilities?: {
     // 各配列は [設定1, 設定2, 設定3, 設定4, 設定5, 設定6] の順
-    big_solo: number[];
-    big_cherry: number[];
-    reg_solo: number[];
-    reg_cherry: number[];
+    big_solo?: number[];
+    big_cherry?: number[];
+    reg_solo?: number[];
+    reg_cherry?: number[];
+    big_suika_raw?: number[];
+    reg_lamp_blue_raw?: number[];
+    reg_lamp_yellow_raw?: number[];
+    reg_lamp_green_raw?: number[];
+    reg_lamp_red_raw?: number[];
+    feather_lamp_raw?: number[];
+    retro_sound_raw?: number[];
   };
 }
 

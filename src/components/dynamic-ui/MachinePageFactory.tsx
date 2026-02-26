@@ -416,7 +416,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             >
               {mode === "simple" && "通常入力"}
               {mode === "detail" && "詳細入力"}
-              {mode === "grape" && "ぶどう逆算"}
+              {mode === "grape" &&
+                (currentCategory === "hana" ? "ベル逆算" : "ぶどう逆算")}
             </button>
           ))}
         </div>
@@ -544,7 +545,9 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6"
                 >
                   <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
-                    ブドウ逆算結果
+                    {currentCategory === "hana"
+                      ? "ベル逆算結果"
+                      : "ブドウ逆算結果"}
                   </h2>
 
                   <div className="space-y-3">
@@ -584,7 +587,9 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6"
               >
                 <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
-                  ブドウ逆算結果
+                  {currentCategory === "hana"
+                    ? "ベル逆算結果"
+                    : "ブドウ逆算結果"}
                 </h2>
                 <div className="flex h-32 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800/50">
                   <p className="text-center text-sm text-slate-400">
@@ -700,16 +705,26 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                       ({mostLikelySetting.probability.toFixed(1)}%)
                     </div>
                     {/* ブドウ信頼度表示 */}
-                    {grapeReliability < 1.0 && (
-                      <div className="mt-1 text-sm font-bold text-indigo-500 dark:text-indigo-400">
-                        🍇信頼度: {(grapeReliability * 100).toFixed(0)}%
-                        {grapeReliability < 0.5 && (
-                          <span className="text-orange-500 dark:text-orange-400">
-                            (サンプル不足)
-                          </span>
-                        )}
-                      </div>
-                    )}
+                    <div
+                      className={`mt-1 text-sm font-bold ${
+                        grapeReliability >= 0.8
+                          ? "text-red-600 dark:text-red-400" /* 80-100% Red */
+                          : grapeReliability >= 0.6
+                            ? "text-orange-500 dark:text-orange-400" /* 60-79% Orange */
+                            : grapeReliability >= 0.4
+                              ? "text-yellow-600 dark:text-yellow-400" /* 40-59% Yellow */
+                              : grapeReliability >= 0.2
+                                ? "text-cyan-500 dark:text-cyan-400" /* 20-39% Cyan (水色) */
+                                : "text-slate-400 dark:text-white" /* 0-19% White/Slate */
+                      }`}
+                    >
+                      🍇信頼度: {(grapeReliability * 100).toFixed(0)}%
+                      {grapeReliability < 0.5 && (
+                        <span className="ml-1 text-xs opacity-80">
+                          (サンプル不足)
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex flex-col items-center justify-center rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
@@ -758,38 +773,100 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                     })(),
                   },
                   ...(currentMode === "detail"
-                    ? [
-                        {
-                          label: "単独REG",
-                          val: (() => {
-                            const count =
-                              Number(currentInputs["reg-solo-count"]) || 0;
-                            return count > 0 ? totalGames / count : 0;
-                          })(),
-                          format: (v: number) => v.toFixed(1),
-                          settingValues: (() => {
-                            const el = config.sections
-                              .flatMap((s) => s.elements)
-                              .find((e) => e.id === "reg-solo-count");
-                            return el?.settingValues;
-                          })(),
-                        },
-                        {
-                          label: "チェリーREG",
-                          val: (() => {
-                            const count =
-                              Number(currentInputs["reg-cherry-count"]) || 0;
-                            return count > 0 ? totalGames / count : 0;
-                          })(),
-                          format: (v: number) => v.toFixed(1),
-                          settingValues: (() => {
-                            const el = config.sections
-                              .flatMap((s) => s.elements)
-                              .find((e) => e.id === "reg-cherry-count");
-                            return el?.settingValues;
-                          })(),
-                        },
-                      ]
+                    ? currentCategory === "hana"
+                      ? [
+                          {
+                            label: "BIG中スイカ",
+                            val: (() => {
+                              const bCount =
+                                Number(currentInputs["big-count"]) || 0;
+                              const count =
+                                Number(currentInputs["big-suika-count"]) || 0;
+                              return bCount > 0 && count > 0
+                                ? (bCount * 24) / count
+                                : 0;
+                            })(),
+                            format: (v: number) => v.toFixed(1),
+                            settingValues: (() => {
+                              if (config.detailedProbabilities?.big_suika_raw) {
+                                const raw =
+                                  config.detailedProbabilities.big_suika_raw;
+                                return {
+                                  1: raw[0],
+                                  2: raw[1],
+                                  3: raw[2],
+                                  4: raw[3],
+                                  5: raw[4],
+                                  6: raw[5],
+                                };
+                              }
+                              return undefined;
+                            })(),
+                          },
+                          {
+                            label: "合算フェザー",
+                            val: (() => {
+                              const bCount =
+                                Number(currentInputs["big-count"]) || 0;
+                              const count =
+                                Number(currentInputs["feather-lamp-count"]) ||
+                                0;
+                              return bCount > 0 && count > 0
+                                ? bCount / count
+                                : 0;
+                            })(),
+                            format: (v: number) => v.toFixed(1),
+                            settingValues: (() => {
+                              if (
+                                config.detailedProbabilities?.feather_lamp_raw
+                              ) {
+                                const raw =
+                                  config.detailedProbabilities.feather_lamp_raw;
+                                return {
+                                  1: raw[0],
+                                  2: raw[1],
+                                  3: raw[2],
+                                  4: raw[3],
+                                  5: raw[4],
+                                  6: raw[5],
+                                };
+                              }
+                              return undefined;
+                            })(),
+                          },
+                        ]
+                      : [
+                          {
+                            label: "単独REG",
+                            val: (() => {
+                              const count =
+                                Number(currentInputs["reg-solo-count"]) || 0;
+                              return count > 0 ? totalGames / count : 0;
+                            })(),
+                            format: (v: number) => v.toFixed(1),
+                            settingValues: (() => {
+                              const el = config.sections
+                                .flatMap((s) => s.elements)
+                                .find((e) => e.id === "reg-solo-count");
+                              return el?.settingValues;
+                            })(),
+                          },
+                          {
+                            label: "チェリーREG",
+                            val: (() => {
+                              const count =
+                                Number(currentInputs["reg-cherry-count"]) || 0;
+                              return count > 0 ? totalGames / count : 0;
+                            })(),
+                            format: (v: number) => v.toFixed(1),
+                            settingValues: (() => {
+                              const el = config.sections
+                                .flatMap((s) => s.elements)
+                                .find((e) => e.id === "reg-cherry-count");
+                              return el?.settingValues;
+                            })(),
+                          },
+                        ]
                     : []),
                   {
                     label: "合算確率",
@@ -832,16 +909,25 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                     })(),
                   },
                   {
-                    label: "ブドウ確率",
+                    label:
+                      currentCategory === "hana" ? "ベル確率" : "ブドウ確率",
                     val: (() => {
-                      const count = Number(currentInputs["grape-count"]) || 0;
+                      const countId =
+                        currentCategory === "hana"
+                          ? "bell-count"
+                          : "grape-count";
+                      const count = Number(currentInputs[countId]) || 0;
                       return count > 0 ? totalGames / count : 0;
                     })(),
                     format: (v: number) => v.toFixed(2),
                     settingValues: (() => {
+                      const countId =
+                        currentCategory === "hana"
+                          ? "bell-count"
+                          : "grape-count";
                       const el = config.sections
                         .flatMap((s) => s.elements)
-                        .find((e) => e.id === "grape-count");
+                        .find((e) => e.id === countId);
                       return el?.settingValues;
                     })(),
                   },
@@ -1225,61 +1311,65 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
         )}
 
         {/* --- 詳細確率表 (詳細モードかつデータがある場合のみ) --- */}
-        {currentMode === "detail" && config.detailedProbabilities && (
-          <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
-            <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
-              単独・重複ボーナス確率一覧
-            </h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                <thead>
-                  <tr>
-                    <th className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
-                      設定
-                    </th>
-                    <th className="px-2 py-2 text-center text-xs font-medium text-red-500 dark:text-red-400">
-                      単独BIG
-                    </th>
-                    <th className="px-2 py-2 text-center text-xs font-medium text-red-500 dark:text-red-400">
-                      チェリーBIG
-                    </th>
-                    <th className="px-2 py-2 text-center text-xs font-medium text-blue-500 dark:text-blue-400">
-                      単独REG
-                    </th>
-                    <th className="px-2 py-2 text-center text-xs font-medium text-blue-500 dark:text-blue-400">
-                      チェリーREG
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                  {[0, 1, 2, 3, 4, 5].map((index) => {
-                    const setting = index + 1;
-                    const probs = config.detailedProbabilities!;
-                    return (
-                      <tr key={setting}>
-                        <td className="px-2 py-2 text-center text-xs font-bold text-slate-800 dark:text-slate-200">
-                          {setting}
-                        </td>
-                        <td className="px-2 py-2 text-center text-xs text-slate-600 dark:text-slate-400">
-                          1/{probs.big_solo[index].toFixed(1)}
-                        </td>
-                        <td className="px-2 py-2 text-center text-xs text-slate-600 dark:text-slate-400">
-                          1/{probs.big_cherry[index].toFixed(1)}
-                        </td>
-                        <td className="px-2 py-2 text-center text-xs text-slate-600 dark:text-slate-400">
-                          1/{probs.reg_solo[index].toFixed(1)}
-                        </td>
-                        <td className="px-2 py-2 text-center text-xs text-slate-600 dark:text-slate-400">
-                          1/{probs.reg_cherry[index].toFixed(1)}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+        {currentMode === "detail" &&
+          config.detailedProbabilities?.big_solo &&
+          config.detailedProbabilities?.big_cherry &&
+          config.detailedProbabilities?.reg_solo &&
+          config.detailedProbabilities?.reg_cherry && (
+            <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
+              <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
+                単独・重複ボーナス確率一覧
+              </h2>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                  <thead>
+                    <tr>
+                      <th className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
+                        設定
+                      </th>
+                      <th className="px-2 py-2 text-center text-xs font-medium text-red-500 dark:text-red-400">
+                        単独BIG
+                      </th>
+                      <th className="px-2 py-2 text-center text-xs font-medium text-red-500 dark:text-red-400">
+                        チェリーBIG
+                      </th>
+                      <th className="px-2 py-2 text-center text-xs font-medium text-blue-500 dark:text-blue-400">
+                        単独REG
+                      </th>
+                      <th className="px-2 py-2 text-center text-xs font-medium text-blue-500 dark:text-blue-400">
+                        チェリーREG
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                    {[0, 1, 2, 3, 4, 5].map((index) => {
+                      const setting = index + 1;
+                      const probs = config.detailedProbabilities!;
+                      return (
+                        <tr key={setting}>
+                          <td className="px-2 py-2 text-center text-xs font-bold text-slate-800 dark:text-slate-200">
+                            {setting}
+                          </td>
+                          <td className="px-2 py-2 text-center text-xs text-slate-600 dark:text-slate-400">
+                            1/{probs.big_solo![index].toFixed(1)}
+                          </td>
+                          <td className="px-2 py-2 text-center text-xs text-slate-600 dark:text-slate-400">
+                            1/{probs.big_cherry![index].toFixed(1)}
+                          </td>
+                          <td className="px-2 py-2 text-center text-xs text-slate-600 dark:text-slate-400">
+                            1/{probs.reg_solo![index].toFixed(1)}
+                          </td>
+                          <td className="px-2 py-2 text-center text-xs text-slate-600 dark:text-slate-400">
+                            1/{probs.reg_cherry![index].toFixed(1)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* この機種に関連する攻略・検証記事 */}
         {(() => {

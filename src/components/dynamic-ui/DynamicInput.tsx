@@ -48,7 +48,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
     switch (element.type) {
       case "counter":
         return (
-          <div className="space-y-1">
+          <div className="flex flex-col items-center gap-1">
             <div className="flex items-center gap-2">
               <button
                 ref={element.isReadOnly ? undefined : hapticRef}
@@ -130,22 +130,21 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
               >
                 －
               </button>
-
-              {/* リアルタイム確率表示（常時表示） */}
-              {/* リアルタイム確率表示（常時表示、ただしtotal-gamesの場合は非表示） */}
-              {element.id !== "total-games" && (
-                <div className="ml-2 text-right min-w-[60px]">
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                    現在
-                  </div>
-                  <div className="text-sm font-bold text-slate-600 dark:text-slate-300">
-                    {currentProbability
-                      ? `1/${currentProbability.toFixed(1)}`
-                      : "---"}
-                  </div>
-                </div>
-              )}
             </div>
+
+            {/* リアルタイム確率表示（下行に配置） */}
+            {element.id !== "total-games" && (
+              <div className="text-center">
+                <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                  現在
+                </div>
+                <div className="text-sm font-bold text-slate-600 dark:text-slate-300">
+                  {currentProbability
+                    ? `1/${currentProbability.toFixed(1)}`
+                    : "---"}
+                </div>
+              </div>
+            )}
           </div>
         );
 
