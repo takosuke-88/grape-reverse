@@ -63,6 +63,19 @@ export function calculateEstimation(
     }));
   }
 
+  // --- 設定6確定演出（例外処理） ---
+  // ハナハナホウオウの「reg-lamp-rainbow」等、入力が1以上の場合は設定6の期待度を100%とする
+  const isSetting6Guaranteed =
+    (Number(inputs["reg-lamp-rainbow"]) || 0) > 0 ||
+    (Number(inputs["bonus-rainbow"]) || 0) > 0; // 汎用的な別フラグも念のため
+
+  if (isSetting6Guaranteed) {
+    return settings.map((setting) => ({
+      setting,
+      probability: setting === 6 ? 100 : 0,
+    }));
+  }
+
   // 無効化すべき要素IDを特定 (conflictsWith)
   const activeElements = config.sections
     .flatMap((s) => s.elements)
@@ -143,6 +156,41 @@ export function calculateEstimation(
       setting,
       logLikelihood,
     };
+  });
+
+  // --- REG後フェザーランプ等による設定否定ロジック ---
+  const deniedSettings = new Set<number>();
+  if ((Number(inputs["reg-after-blue"]) || 0) > 0) {
+    deniedSettings.add(1);
+  }
+  if ((Number(inputs["reg-after-yellow"]) || 0) > 0) {
+    deniedSettings.add(1);
+    deniedSettings.add(2);
+  }
+  if ((Number(inputs["reg-after-green"]) || 0) > 0) {
+    deniedSettings.add(1);
+    deniedSettings.add(2);
+    deniedSettings.add(3);
+  }
+  if ((Number(inputs["reg-after-red"]) || 0) > 0) {
+    deniedSettings.add(1);
+    deniedSettings.add(2);
+    deniedSettings.add(3);
+    deniedSettings.add(4);
+  }
+  if ((Number(inputs["reg-after-rainbow"]) || 0) > 0) {
+    deniedSettings.add(1);
+    deniedSettings.add(2);
+    deniedSettings.add(3);
+    deniedSettings.add(4);
+    deniedSettings.add(5);
+  }
+
+  // 否定された設定の対数尤度を -Infinity にする（尤度に変換した際に0になる）
+  logLikelihoods.forEach((item) => {
+    if (deniedSettings.has(item.setting)) {
+      item.logLikelihood = -Infinity;
+    }
   });
 
   // 最大対数尤度でオフセット（数値の安定性のため）

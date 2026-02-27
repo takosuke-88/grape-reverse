@@ -11,6 +11,7 @@ import {
 } from "../../logic/bayes-estimator";
 import { AVAILABLE_MACHINES } from "../../data/machine-list";
 import { ATTACHED_COLUMNS } from "../../data/column-list";
+import EstimationResultDisplay from "./EstimationResultDisplay";
 
 interface MachinePageFactoryProps {
   config: MachineConfig;
@@ -611,7 +612,13 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 {section.title}
               </h2>
 
-              <div className="space-y-4">
+              <div
+                className={
+                  section.layout === "grid"
+                    ? "grid grid-cols-2 gap-4"
+                    : "space-y-4"
+                }
+              >
                 {visibleElements.map((element) => (
                   <DynamicInput
                     key={element.id}
@@ -720,9 +727,12 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                     >
                       🍇信頼度: {(grapeReliability * 100).toFixed(0)}%
                       {grapeReliability < 0.5 && (
-                        <span className="ml-1 text-xs opacity-80">
-                          (サンプル不足)
-                        </span>
+                        <>
+                          <br />
+                          <span className="text-xs opacity-80">
+                            (サンプル不足)
+                          </span>
+                        </>
                       )}
                     </div>
                   </div>
@@ -741,8 +751,16 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 </div>
               )}
 
+              {/* 設定別期待度の詳細表示 */}
+              <div className="mt-4">
+                <EstimationResultDisplay
+                  results={estimationResults}
+                  inputs={currentInputs}
+                />
+              </div>
+
               {/* 4大指標 (現在確率) */}
-              <div className="mb-4 grid grid-cols-2 gap-2">
+              <div className="mb-4 grid grid-cols-2 gap-2 mt-4">
                 {[
                   {
                     label: "BIG確率",

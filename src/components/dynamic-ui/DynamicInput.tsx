@@ -224,6 +224,13 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
         {element.label}
       </label>
       <div className="flex justify-center">{renderInput()}</div>
+      {/* 設定6確定演出の注意書き表示 */}
+      {(element.id === "reg-lamp-rainbow" || element.id === "bonus-rainbow") &&
+        Number(value) > 0 && (
+          <div className="text-center text-xs font-bold text-red-500 animate-pulse mt-1">
+            ※設定6確定演出として計算されます
+          </div>
+        )}
     </div>
   );
 };

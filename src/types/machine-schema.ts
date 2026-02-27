@@ -43,6 +43,7 @@ export interface DiscriminationElement {
 export interface ConfigSection {
   id: string;
   title: string;
+  layout?: "grid" | "list";
   elements: DiscriminationElement[];
 }
 
