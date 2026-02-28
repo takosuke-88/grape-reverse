@@ -4,6 +4,7 @@ import type { EstimationResult, UserInputs } from "../../types/machine-schema";
 interface EstimationResultDisplayProps {
   results: EstimationResult[];
   inputs?: UserInputs;
+  grapeReliability?: number; // 0.0 ~ 1.0
 }
 
 // 設定ごとのカラー定義
@@ -19,6 +20,7 @@ const SETTING_COLORS = [
 const EstimationResultDisplay: React.FC<EstimationResultDisplayProps> = ({
   results,
   inputs,
+  grapeReliability,
 }) => {
   // 最も可能性の高い設定を特定
   const maxResult = results.reduce((max, current) =>
@@ -35,40 +37,90 @@ const EstimationResultDisplay: React.FC<EstimationResultDisplayProps> = ({
       {/* サマリーカード（コンパクト化） */}
       <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
         <div className="grid grid-cols-3 gap-3 text-center">
-          <div>
+          <div className="flex flex-col h-full">
             <div className="text-xs text-slate-500 mb-1">判別結果</div>
-            <div className="text-3xl font-bold text-slate-800">
-              設定{maxResult.setting}
+            <div className="flex-1 flex flex-col justify-center">
+              <div className="text-3xl font-bold text-slate-800">
+                設定{maxResult.setting}
+              </div>
             </div>
-            <div className="text-xs text-slate-600 mt-1">
-              {maxResult.probability.toFixed(1)}%
+            <div
+              className={`text-xs font-bold mt-1 ${
+                maxResult.probability >= 80
+                  ? "text-red-600 dark:text-red-400"
+                  : maxResult.probability >= 60
+                    ? "text-orange-500 dark:text-orange-400"
+                    : maxResult.probability >= 40
+                      ? "text-yellow-600 dark:text-yellow-400"
+                      : maxResult.probability >= 20
+                        ? "text-cyan-500 dark:text-cyan-400"
+                        : "text-slate-400 dark:text-slate-400"
+              }`}
+            >
+              ({maxResult.probability.toFixed(1)}%)
             </div>
           </div>
 
-          <div className="border-l border-slate-200">
-            <div className="text-xs text-slate-500 mb-1">高設定</div>
-            <div className="text-3xl font-bold text-rose-600">
-              {highSettingProb.toFixed(1)}
+          <div className="border-l border-slate-200 flex flex-col h-full">
+            <div className="text-[10px] text-slate-500 mb-1 w-full text-center flex items-center justify-center flex-1">
+              設定5・6の可能性
             </div>
-            <div className="text-xs text-slate-400 mt-1">%</div>
+            <div
+              className={`text-2xl font-bold ${
+                highSettingProb >= 80
+                  ? "text-red-600 dark:text-red-400"
+                  : highSettingProb >= 60
+                    ? "text-orange-500 dark:text-orange-400"
+                    : highSettingProb >= 40
+                      ? "text-yellow-600 dark:text-yellow-400"
+                      : highSettingProb >= 20
+                        ? "text-cyan-500 dark:text-cyan-400"
+                        : "text-slate-400 dark:text-slate-400"
+              }`}
+            >
+              {highSettingProb.toFixed(1)}%
+            </div>
+            <div className="text-xs mt-1 invisible">%</div>{" "}
+            {/* 高さを揃えるためのスペーサー */}
           </div>
 
-          <div className="border-l border-slate-200">
+          <div className="border-l border-slate-200 flex flex-col h-full relative">
             <div className="text-xs text-slate-500 mb-1">信頼度</div>
-            <div className="text-3xl font-bold text-slate-600">
-              {maxResult.probability >= 50
-                ? "高"
-                : maxResult.probability >= 30
-                  ? "中"
-                  : "低"}
+            <div className="flex-1 flex flex-col justify-center items-center">
+              {grapeReliability !== undefined ? (
+                <>
+                  <div
+                    className={`text-2xl font-bold ${
+                      grapeReliability >= 0.8
+                        ? "text-red-600 dark:text-red-400"
+                        : grapeReliability >= 0.6
+                          ? "text-orange-500 dark:text-orange-400"
+                          : grapeReliability >= 0.4
+                            ? "text-yellow-600 dark:text-yellow-400"
+                            : grapeReliability >= 0.2
+                              ? "text-cyan-500 dark:text-cyan-400"
+                              : "text-slate-400 dark:text-slate-400"
+                    }`}
+                  >
+                    {(grapeReliability * 100).toFixed(0)}%
+                  </div>
+                  {grapeReliability < 0.5 && (
+                    <div className="text-[10px] text-slate-400 dark:text-slate-500 leading-none mt-1">
+                      (サンプル不足)
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-3xl font-bold text-slate-400">-</div>
+              )}
             </div>
-            <div className="text-xs text-slate-400 mt-1">
-              {maxResult.probability >= 50
-                ? "★★★"
-                : maxResult.probability >= 30
-                  ? "★★☆"
-                  : "★☆☆"}
-            </div>
+
+            {/* サンプル不足がない場合の高さ確保用透明要素 */}
+            {grapeReliability !== undefined && grapeReliability >= 0.5 && (
+              <div className="text-[10px] invisible leading-none mt-1">
+                (サンプル不足)
+              </div>
+            )}
           </div>
         </div>
       </div>

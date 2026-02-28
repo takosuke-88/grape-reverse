@@ -8,6 +8,7 @@ import ImJugglerColumn from "./pages/columns/imjuggler-setting4-behavior";
 import MrJugglerColumn from "./pages/columns/mrjuggler-expectations";
 import ColumnIndexPage from "./pages/columns/index";
 import ScrollToTop from "./components/ScrollToTop";
+import ScrollToTopButton from "./components/ScrollToTopButton";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 
@@ -15,6 +16,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
+      <ScrollToTopButton />
       <Header />
       <div className="flex flex-col min-h-screen pt-16">
         <main className="flex-1">

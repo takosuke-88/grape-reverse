@@ -101,11 +101,13 @@ export const hanaHoohConfig: MachineConfig = {
     {
       id: "big-role-section",
       title: "BIG中要素",
+      layout: "grid",
       elements: [
         {
           id: "big-suika-count",
           label: "BIG中 スイカ",
           type: "counter",
+          visibility: "detail",
           context: {
             duringBonus: "big",
             description: "BIG中のスイカ成立回数",
@@ -125,6 +127,7 @@ export const hanaHoohConfig: MachineConfig = {
           id: "retro-sound-count",
           label: "レトロサウンド発生",
           type: "counter",
+          visibility: "detail",
           settingValues: {
             1: 4796.55,
             2: 3831.16,
@@ -141,11 +144,13 @@ export const hanaHoohConfig: MachineConfig = {
     {
       id: "reg-role-section",
       title: "REG中ビタ押し時サイドランプ",
+      layout: "grid",
       elements: [
         {
           id: "reg-lamp-blue",
           label: "青 (奇数示唆)",
           type: "counter",
+          visibility: "detail",
           settingValues: {
             1: 1377.78,
             2: 1974.14,
@@ -161,6 +166,7 @@ export const hanaHoohConfig: MachineConfig = {
           id: "reg-lamp-yellow",
           label: "黄 (偶数示唆)",
           type: "counter",
+          visibility: "detail",
           settingValues: {
             1: 2066.67,
             2: 1316.09,
@@ -176,6 +182,7 @@ export const hanaHoohConfig: MachineConfig = {
           id: "reg-lamp-green",
           label: "緑 (奇数強示唆)",
           type: "counter",
+          visibility: "detail",
           settingValues: {
             1: 2066.67,
             2: 2726.19,
@@ -191,6 +198,7 @@ export const hanaHoohConfig: MachineConfig = {
           id: "reg-lamp-red",
           label: "赤 (偶数強示唆)",
           type: "counter",
+          visibility: "detail",
           settingValues: {
             1: 3100,
             2: 1817.46,
@@ -206,6 +214,7 @@ export const hanaHoohConfig: MachineConfig = {
           id: "reg-lamp-rainbow",
           label: "虹 (高設定!?)",
           type: "counter",
+          visibility: "detail",
           settingValues: {
             1: 0,
             2: 0,
@@ -221,6 +230,7 @@ export const hanaHoohConfig: MachineConfig = {
           id: "reg-miss",
           label: "ミス等",
           type: "counter",
+          visibility: "detail",
           settingValues: {
             1: 0,
             2: 0,
@@ -237,11 +247,13 @@ export const hanaHoohConfig: MachineConfig = {
     {
       id: "big-after-section",
       title: "BIG後トップパネル",
+      layout: "grid",
       elements: [
         {
           id: "big-feather-white",
           label: "白",
           type: "counter",
+          visibility: "detail",
           settingValues: {
             1: 594.0,
             2: 631.1,
@@ -257,6 +269,7 @@ export const hanaHoohConfig: MachineConfig = {
           id: "big-feather-blue",
           label: "青",
           type: "counter",
+          visibility: "detail",
           settingValues: {
             1: 848.6,
             2: 710.0,
@@ -272,6 +285,7 @@ export const hanaHoohConfig: MachineConfig = {
           id: "big-feather-yellow",
           label: "黄",
           type: "counter",
+          visibility: "detail",
           settingValues: {
             1: 2970.0,
             2: 2840.0,
@@ -287,6 +301,7 @@ export const hanaHoohConfig: MachineConfig = {
           id: "big-feather-green",
           label: "緑",
           type: "counter",
+          visibility: "detail",
           settingValues: {
             1: 6600.0,
             2: 6311.1,
@@ -302,6 +317,7 @@ export const hanaHoohConfig: MachineConfig = {
           id: "big-feather-red",
           label: "赤",
           type: "counter",
+          visibility: "detail",
           settingValues: {
             1: 59400.0,
             2: 56800.0,
@@ -317,6 +333,7 @@ export const hanaHoohConfig: MachineConfig = {
           id: "big-feather-rainbow",
           label: "虹",
           type: "counter",
+          visibility: "detail",
           settingValues: {
             1: 0,
             2: 0,
@@ -333,11 +350,13 @@ export const hanaHoohConfig: MachineConfig = {
     {
       id: "reg-after-section",
       title: "REG後トップパネル",
+      layout: "grid",
       elements: [
         {
           id: "reg-after-blue",
           label: "青",
           type: "counter",
+          visibility: "detail",
           settingValues: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
           isDiscriminationFactor: false,
           discriminationWeight: 0,
@@ -346,6 +365,7 @@ export const hanaHoohConfig: MachineConfig = {
           id: "reg-after-yellow",
           label: "黄",
           type: "counter",
+          visibility: "detail",
           settingValues: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
           isDiscriminationFactor: false,
           discriminationWeight: 0,
@@ -354,6 +374,7 @@ export const hanaHoohConfig: MachineConfig = {
           id: "reg-after-green",
           label: "緑",
           type: "counter",
+          visibility: "detail",
           settingValues: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
           isDiscriminationFactor: false,
           discriminationWeight: 0,
@@ -362,6 +383,7 @@ export const hanaHoohConfig: MachineConfig = {
           id: "reg-after-red",
           label: "赤",
           type: "counter",
+          visibility: "detail",
           settingValues: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
           isDiscriminationFactor: false,
           discriminationWeight: 0,
@@ -370,6 +392,7 @@ export const hanaHoohConfig: MachineConfig = {
           id: "reg-after-rainbow",
           label: "虹",
           type: "counter",
+          visibility: "detail",
           settingValues: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
           isDiscriminationFactor: false,
           discriminationWeight: 0,

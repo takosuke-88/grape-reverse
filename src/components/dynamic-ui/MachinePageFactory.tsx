@@ -56,14 +56,41 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData);
-        // 保存されたデータと初期値をマージ（スキーマ変更への対応）
-        const mergedValues = { ...initialValues, ...parsedData };
-        return mergedValues;
+        return { ...initialValues, ...parsedData };
       } catch (e) {
         console.error("Failed to parse saved data for", config.id, e);
       }
     }
+    return initialValues;
+  });
 
+  // ユーザー入力State (ぶどう・ベル逆算専用)
+  const [grapeInputValues, setGrapeInputValues] = useState<
+    Record<string, number | boolean | string>
+  >(() => {
+    const initialValues: Record<string, number | boolean | string> = {};
+    config.sections.forEach((section) => {
+      section.elements.forEach((element) => {
+        if (element.type === "flag") {
+          initialValues[element.id] = false;
+        } else if (element.type === "select") {
+          initialValues[element.id] = "";
+        } else {
+          initialValues[element.id] = "";
+        }
+      });
+    });
+    // 初期値をLocalStorageから復元
+    const storageKey = `grape-reverse-data-grape-mode-${config.id}`;
+    const savedData = localStorage.getItem(storageKey);
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        return { ...initialValues, ...parsedData };
+      } catch (e) {
+        console.error("Failed to parse saved data for", config.id, e);
+      }
+    }
     return initialValues;
   });
 
@@ -78,17 +105,27 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
   // 現在のモードに応じた入力値を参照 (ブドウ逆算結果を合成)
   const currentInputs = useMemo(() => {
-    if (currentMode === "grape" && calculatedGrapeCount !== null) {
-      return { ...inputValues, "grape-count": calculatedGrapeCount };
+    if (currentMode === "grape") {
+      return calculatedGrapeCount !== null
+        ? { ...grapeInputValues, "grape-count": calculatedGrapeCount }
+        : grapeInputValues;
     }
     return inputValues;
-  }, [currentMode, inputValues, calculatedGrapeCount]);
+  }, [currentMode, inputValues, grapeInputValues, calculatedGrapeCount]);
 
   const handleValueChange = (
     elementId: string,
     value: number | boolean | string,
   ) => {
-    // 通常/ブドウモードでのボーナス合計直接入力時の同期処理
+    if (currentMode === "grape") {
+      setGrapeInputValues((prev) => ({
+        ...prev,
+        [elementId]: value,
+      }));
+      return;
+    }
+
+    // 通常モードでのボーナス合計直接入力時の同期処理
     // Total入力時に、その値を維持するようにUnknownを調整する
     if (
       currentMode !== "detail" &&
@@ -164,6 +201,15 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
       console.error("Failed to save data for", config.id, e);
     }
   }, [inputValues, config.id]);
+
+  useEffect(() => {
+    const storageKey = `grape-reverse-data-grape-mode-${config.id}`;
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(grapeInputValues));
+    } catch (e) {
+      console.error("Failed to save grape data for", config.id, e);
+    }
+  }, [grapeInputValues, config.id]);
 
   // 依存値の変更を追跡するためのRef
   const prevDepsRef = useRef({
@@ -311,18 +357,28 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
       });
     });
 
-    // localStorageからも削除
-    const storageKey = `grape-reverse-data-${config.id}`;
-    try {
-      localStorage.removeItem(storageKey);
-    } catch (e) {
-      console.error("Failed to remove data for", config.id, e);
+    if (currentMode === "grape") {
+      // ぶどう・ベル逆算タブのリセット
+      const storageKey = `grape-reverse-data-grape-mode-${config.id}`;
+      try {
+        localStorage.removeItem(storageKey);
+      } catch (e) {
+        console.error("Failed to remove grape data for", config.id, e);
+      }
+      setGrapeInputValues(resetValues);
+      setCalculatedGrapeCount(null);
+    } else {
+      // 通常・詳細タブのリセット
+      const storageKey = `grape-reverse-data-${config.id}`;
+      try {
+        localStorage.removeItem(storageKey);
+      } catch (e) {
+        console.error("Failed to remove data for", config.id, e);
+      }
+      setInputValues(resetValues);
+      setEstimationResults(null);
+      setError(null);
     }
-
-    setInputValues(resetValues);
-    setEstimationResults(null);
-    setCalculatedGrapeCount(null);
-    setError(null);
   };
 
   // 判別要素のみ抽出
@@ -346,14 +402,6 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     return estimationResults.reduce((max, current) =>
       current.probability > max.probability ? current : max,
     );
-  }, [estimationResults]);
-
-  // 高設定確率
-  const highSettingProb = useMemo(() => {
-    if (!estimationResults) return 0;
-    return estimationResults
-      .filter((r) => r.setting >= 5)
-      .reduce((sum, r) => sum + r.probability, 0);
   }, [estimationResults]);
 
   return (
@@ -698,64 +746,12 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
           {estimationResults ? (
             <>
-              {/* データグリッド (2列レイアウト) */}
-              {mostLikelySetting && (
-                <div className="mb-4 grid grid-cols-2 gap-2">
-                  <div className="flex flex-col items-center justify-center rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
-                    <div className="text-xs text-slate-500 dark:text-slate-400">
-                      最有力設定
-                    </div>
-                    <div className="text-2xl font-bold text-slate-800 dark:text-white">
-                      設定{mostLikelySetting.setting}
-                    </div>
-                    <div className="text-xs font-bold text-blue-600 dark:text-blue-400">
-                      ({mostLikelySetting.probability.toFixed(1)}%)
-                    </div>
-                    {/* ブドウ信頼度表示 */}
-                    <div
-                      className={`mt-1 text-sm font-bold ${
-                        grapeReliability >= 0.8
-                          ? "text-red-600 dark:text-red-400" /* 80-100% Red */
-                          : grapeReliability >= 0.6
-                            ? "text-orange-500 dark:text-orange-400" /* 60-79% Orange */
-                            : grapeReliability >= 0.4
-                              ? "text-yellow-600 dark:text-yellow-400" /* 40-59% Yellow */
-                              : grapeReliability >= 0.2
-                                ? "text-cyan-500 dark:text-cyan-400" /* 20-39% Cyan (水色) */
-                                : "text-slate-400 dark:text-white" /* 0-19% White/Slate */
-                      }`}
-                    >
-                      🍇信頼度: {(grapeReliability * 100).toFixed(0)}%
-                      {grapeReliability < 0.5 && (
-                        <>
-                          <br />
-                          <span className="text-xs opacity-80">
-                            (サンプル不足)
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col items-center justify-center rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
-                    <div className="text-xs text-slate-500 dark:text-slate-400">
-                      高設定の可能性
-                    </div>
-                    <div className="text-2xl font-bold text-slate-800 dark:text-white">
-                      {highSettingProb.toFixed(1)}%
-                    </div>
-                    <div className="text-xs font-bold text-red-500 dark:text-red-400">
-                      (設定5・6の可能性)
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* 設定別期待度の詳細表示 */}
               <div className="mt-4">
                 <EstimationResultDisplay
                   results={estimationResults}
                   inputs={currentInputs}
+                  grapeReliability={grapeReliability}
                 />
               </div>
 
