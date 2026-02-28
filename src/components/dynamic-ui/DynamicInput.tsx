@@ -68,7 +68,9 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                   onChange(numValue + 1);
                 }}
                 disabled={!!element.isReadOnly}
-                className={`min-w-[44px] min-h-[44px] text-slate-700 font-bold text-lg transition-colors flex items-center justify-center dark:text-slate-200 ${
+                className={`${
+                  isConnected ? "min-w-[42px]" : "min-w-[44px]"
+                } min-h-[44px] text-slate-700 font-bold text-lg transition-colors flex items-center justify-center dark:text-slate-200 ${
                   element.isReadOnly
                     ? "bg-slate-50 text-slate-300 cursor-not-allowed opacity-50 dark:bg-slate-800 dark:text-slate-600"
                     : "bg-slate-100 hover:bg-slate-200 active:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600"
@@ -138,7 +140,9 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                   onChange(numValue - 1);
                 }}
                 disabled={!!element.isReadOnly}
-                className={`min-w-[44px] min-h-[44px] text-slate-700 font-bold text-lg transition-colors flex items-center justify-center dark:text-slate-200 ${
+                className={`${
+                  isConnected ? "min-w-[42px]" : "min-w-[44px]"
+                } min-h-[44px] text-slate-700 font-bold text-lg transition-colors flex items-center justify-center dark:text-slate-200 ${
                   element.isReadOnly
                     ? "bg-slate-50 text-slate-300 cursor-not-allowed opacity-50 dark:bg-slate-800 dark:text-slate-600"
                     : "bg-slate-100 hover:bg-slate-200 active:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600"
