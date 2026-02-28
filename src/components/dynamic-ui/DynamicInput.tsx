@@ -6,6 +6,7 @@ interface DynamicInputProps {
   value: number | boolean | string;
   onChange: (value: number | boolean | string) => void;
   totalGames?: number; // 総ゲーム数（確率計算用）
+  machineId?: string; // 機種ごとのUI変更用
 }
 
 const DynamicInput: React.FC<DynamicInputProps> = ({
@@ -13,6 +14,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   value,
   onChange,
   totalGames,
+  machineId,
 }) => {
   // リアルタイム確率計算
   const calculateProbability = () => {
@@ -47,9 +49,16 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   const renderInput = () => {
     switch (element.type) {
       case "counter":
+        const isConnected = machineId === "hana-hooh";
         return (
           <div className="flex flex-col items-center gap-1">
-            <div className="flex items-center gap-2">
+            <div
+              className={`flex items-center ${
+                isConnected
+                  ? "gap-0 rounded-lg overflow-hidden border border-slate-300 shadow-sm dark:border-slate-600"
+                  : "gap-2"
+              }`}
+            >
               <button
                 ref={element.isReadOnly ? undefined : hapticRef}
                 type="button"
@@ -59,10 +68,14 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                   onChange(numValue + 1);
                 }}
                 disabled={!!element.isReadOnly}
-                className={`min-w-[44px] min-h-[44px] rounded-lg text-slate-700 font-bold text-lg transition-colors flex items-center justify-center ${
+                className={`min-w-[44px] min-h-[44px] text-slate-700 font-bold text-lg transition-colors flex items-center justify-center dark:text-slate-200 ${
                   element.isReadOnly
-                    ? "bg-slate-50 text-slate-300 cursor-not-allowed opacity-50"
-                    : "bg-slate-100 hover:bg-slate-200 active:bg-slate-300"
+                    ? "bg-slate-50 text-slate-300 cursor-not-allowed opacity-50 dark:bg-slate-800 dark:text-slate-600"
+                    : "bg-slate-100 hover:bg-slate-200 active:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600"
+                } ${
+                  isConnected
+                    ? "border-r border-slate-300 dark:border-slate-600"
+                    : "rounded-lg"
                 }`}
                 aria-label="増やす"
               >
@@ -104,10 +117,14 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                     onChange(newValue);
                   }
                 }}
-                className={`w-24 h-[44px] text-center text-xl font-bold border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:border-slate-600 dark:bg-slate-800 dark:text-white ${
+                className={`w-24 h-[44px] text-center text-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:text-white ${
                   element.isReadOnly
-                    ? "bg-slate-100 text-slate-500 dark:bg-slate-900 dark:text-slate-500 cursor-not-allowed opacity-60"
-                    : ""
+                    ? "text-slate-500 cursor-not-allowed opacity-60 dark:text-slate-500 bg-slate-100 dark:bg-slate-900"
+                    : "bg-white"
+                } ${
+                  isConnected
+                    ? "rounded-none border-0"
+                    : "border border-slate-300 rounded-lg dark:border-slate-600"
                 }`}
                 placeholder="0"
               />
@@ -121,10 +138,14 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                   onChange(numValue - 1);
                 }}
                 disabled={!!element.isReadOnly}
-                className={`min-w-[44px] min-h-[44px] rounded-lg text-slate-700 font-bold text-lg transition-colors flex items-center justify-center dark:bg-slate-700 dark:text-slate-200 ${
+                className={`min-w-[44px] min-h-[44px] text-slate-700 font-bold text-lg transition-colors flex items-center justify-center dark:text-slate-200 ${
                   element.isReadOnly
                     ? "bg-slate-50 text-slate-300 cursor-not-allowed opacity-50 dark:bg-slate-800 dark:text-slate-600"
-                    : "bg-slate-100 hover:bg-slate-200 active:bg-slate-300 dark:hover:bg-slate-600"
+                    : "bg-slate-100 hover:bg-slate-200 active:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600"
+                } ${
+                  isConnected
+                    ? "border-l border-slate-300 dark:border-slate-600"
+                    : "rounded-lg"
                 }`}
                 aria-label="減らす"
               >

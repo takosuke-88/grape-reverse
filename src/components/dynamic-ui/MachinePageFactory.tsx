@@ -516,6 +516,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                           handleValueChange(element.id, value)
                         }
                         totalGames={totalGames}
+                        machineId={config.id}
                       />
                     ))}
                   </div>
@@ -679,6 +680,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                     value={currentInputs[element.id]}
                     onChange={(value) => handleValueChange(element.id, value)}
                     totalGames={totalGames}
+                    machineId={config.id}
                   />
                 ))}
               </div>
