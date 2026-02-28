@@ -22,8 +22,24 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
   // モード管理
   const [currentMode, setCurrentMode] = useState<"simple" | "detail" | "grape">(
-    "simple",
+    () => {
+      // ローカルストレージから前回選択したタブを復元 (全機種共通)
+      const savedMode = localStorage.getItem("grape-reverse-active-tab");
+      if (
+        savedMode === "simple" ||
+        savedMode === "detail" ||
+        savedMode === "grape"
+      ) {
+        return savedMode;
+      }
+      return "simple";
+    },
   );
+
+  // モードが変更されたらローカルストレージに保存
+  useEffect(() => {
+    localStorage.setItem("grape-reverse-active-tab", currentMode);
+  }, [currentMode]);
 
   // 現在の機種のカテゴリを取得
   // 現在の機種のカテゴリとカラーを取得
