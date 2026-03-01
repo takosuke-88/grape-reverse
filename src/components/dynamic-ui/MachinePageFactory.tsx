@@ -657,62 +657,75 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           }
 
           return (
-            <div
-              key={section.id}
-              className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6"
-            >
-              <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
-                {section.title}
-              </h2>
+            <React.Fragment key={section.id}>
+              <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
+                <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
+                  {section.title}
+                </h2>
 
-              <div
-                className={
-                  section.layout === "grid"
-                    ? "grid grid-cols-2 gap-4"
-                    : "space-y-4"
-                }
-              >
-                {visibleElements.map((element) => (
-                  <DynamicInput
-                    key={element.id}
-                    element={{
-                      ...element,
-                      isReadOnly: element.isReadOnly
-                        ? currentMode === "detail"
-                        : false,
-                    }}
-                    value={currentInputs[element.id]}
-                    onChange={(value) => handleValueChange(element.id, value)}
-                    totalGames={totalGames}
-                    machineId={config.id}
-                  />
-                ))}
+                <div
+                  className={
+                    section.layout === "grid"
+                      ? "grid grid-cols-2 gap-4"
+                      : "space-y-4"
+                  }
+                >
+                  {visibleElements.map((element) => (
+                    <DynamicInput
+                      key={element.id}
+                      element={{
+                        ...element,
+                        isReadOnly: element.isReadOnly
+                          ? currentMode === "detail"
+                          : false,
+                      }}
+                      value={currentInputs[element.id]}
+                      onChange={(value) => handleValueChange(element.id, value)}
+                      totalGames={totalGames}
+                      machineId={config.id}
+                    />
+                  ))}
+                </div>
+
+                {/* ボーナス合算確率（BIG/REGが含まれるセクションのみ） */}
+                {section.elements.some((e) => e.id === "big-count") &&
+                  section.elements.some((e) => e.id === "reg-count") &&
+                  (() => {
+                    const bigCount = Number(currentInputs["big-count"]) || 0;
+                    const regCount = Number(currentInputs["reg-count"]) || 0;
+                    const bonusTotal = bigCount + regCount;
+                    const prob =
+                      totalGames > 0 && bonusTotal > 0
+                        ? (totalGames / bonusTotal).toFixed(1)
+                        : "---";
+
+                    return (
+                      <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-800">
+                        <span className="text-base font-bold text-slate-800 dark:text-slate-200">
+                          ボーナス合成確率
+                        </span>
+                        <span className="text-xl font-bold text-slate-800 dark:text-white">
+                          1/{prob}
+                        </span>
+                      </div>
+                    );
+                  })()}
               </div>
 
-              {/* ボーナス合算確率（BIG/REGが含まれるセクションのみ） */}
-              {section.elements.some((e) => e.id === "big-count") &&
-                section.elements.some((e) => e.id === "reg-count") &&
-                (() => {
-                  const bigCount = Number(currentInputs["big-count"]) || 0;
-                  const regCount = Number(currentInputs["reg-count"]) || 0;
-                  const bonusTotal = bigCount + regCount;
-                  const prob =
-                    totalGames > 0 && bonusTotal > 0
-                      ? (totalGames / bonusTotal).toFixed(1)
-                      : "---";
-
-                  return (
-                    <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-800">
-                      <span className="text-base font-bold text-slate-800 dark:text-slate-200">
-                        ボーナス合成確率
-                      </span>
-                      <span className="text-xl font-bold text-slate-800 dark:text-white">
-                        1/{prob}
-                      </span>
-                    </div>
-                  );
-                })()}
-            </div>
+              {/* ハナハナシリーズの詳細入力タブ限定で、通常時小役の下にリセットボタンを追加 */}
+              {currentCategory === "hana" &&
+                currentMode === "detail" &&
+                section.id === "normal-role-section" && (
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className={`w-full rounded-xl ${themeColor} px-6 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80`}
+                    style={{ backgroundColor: brandColor || undefined }}
+                  >
+                    入力を全てリセット
+                  </button>
+                )}
+            </React.Fragment>
           );
         })}
 
@@ -992,41 +1005,146 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           <h3 className="mb-4 text-center text-lg font-bold text-slate-700 dark:text-slate-200">
             設定別期待度
           </h3>
-          <div className="mb-4 rounded-lg border border-indigo-100 bg-indigo-50 p-4 dark:border-indigo-800 dark:bg-indigo-900/20">
-            <div className="mb-1 flex items-center gap-2">
-              <span className="text-lg">🤖</span>
-              <div className="text-xs font-bold text-indigo-800 dark:text-indigo-300">
-                AI判定アドバイス ({totalGames}G時点)
+
+          {(() => {
+            // 高設定（設定5・6）の合算確率を計算
+            const highSettingProb = (estimationResults || [])
+              .filter((r) => r.setting >= 5)
+              .reduce((sum, r) => sum + r.probability, 0);
+
+            // ランク判定とスタイルの定義
+            let rankStyle = "";
+            let rankIcon = "🤖";
+
+            if (highSettingProb >= 70) {
+              // Rank S: 超・高設定圏内
+              rankStyle =
+                "border-purple-200 bg-purple-50 dark:border-purple-800 dark:bg-purple-900/20";
+              rankIcon = "👑";
+            } else if (highSettingProb >= 50) {
+              // Rank A: 高設定の期待大
+              rankStyle =
+                "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20";
+              rankIcon = "🔥";
+            } else if (highSettingProb >= 30) {
+              // Rank B: 判断保留・様子見
+              rankStyle =
+                "border-yellow-200 bg-yellow-50 dark:border-yellow-800/50 dark:bg-yellow-900/10";
+              rankIcon = "🤔";
+            } else {
+              // Rank C: 低設定の疑い
+              rankStyle =
+                "border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/50";
+              rankIcon = "⚠️";
+            }
+
+            return (
+              <div
+                className={`mb-4 rounded-lg border p-4 transition-colors duration-300 ${rankStyle}`}
+              >
+                <div className="mb-2 flex items-center gap-2 border-b border-black/5 pb-2 dark:border-white/5">
+                  <span className="text-xl">{rankIcon}</span>
+                  <div className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                    AI判定アドバイス ({totalGames}G時点)
+                  </div>
+                </div>
+                <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                  {currentCategory === "hana" ? (
+                    // ハナハナ専用アドバイスロジック
+                    <>
+                      {totalGames <= 1500 && (
+                        <>
+                          序盤戦です。ボーナス合算よりも
+                          <span className="font-bold underline decoration-indigo-400 decoration-2">
+                            BIG中のスイカ出現率や、REGサイドランプの色（奇遇判別）
+                          </span>
+                          の偏りを重視して設定の上下を見極めましょう。
+                          {highSettingProb >= 50 &&
+                            "現状の滑り出しはとても良好です。"}
+                          {highSettingProb < 30 &&
+                            "ボーナスが引けていても中身が伴っていない可能性があります、要注意。"}
+                        </>
+                      )}
+                      {totalGames > 1500 && totalGames <= 3000 && (
+                        <>
+                          中盤戦に差し掛かりました。
+                          <span className="font-bold">
+                            ベル逆算値とボーナス合算
+                          </span>
+                          のバランスが重要になります。
+                          {highSettingProb >= 50
+                            ? "数値は設定4以上、あるいは高設定の塊を十分狙える挙動を示しています。"
+                            : "設定4の妥協点を探るか、周囲の台の状況（塊や法則性）も加味して続行を判断してください。"}
+                        </>
+                      )}
+                      {totalGames > 3000 && (
+                        <>
+                          終盤戦です。サンプルは十分に集まりました。
+                          {highSettingProb >= 70 && (
+                            <span className="font-bold text-purple-600 dark:text-purple-400">
+                              サイドランプ・スイカ共に文句なし。閉店までブン回すべきお宝台です！
+                            </span>
+                          )}
+                          {highSettingProb >= 50 && highSettingProb < 70 && (
+                            <span className="font-bold text-red-600 dark:text-red-400">
+                              挙動は良好。特にREGサイドランプの偶数偏りが強いなら、設定4・6を意識して続行しましょう。虹・赤フェザー等の確定演出にも期待。
+                            </span>
+                          )}
+                          {highSettingProb >= 30 && highSettingProb < 50 && (
+                            <span className="font-bold text-yellow-600 dark:text-yellow-400">
+                              まだサンプル不足、または中間設定寄りの数値です。ベル確率がついてくるまでは、周囲の状況も確認しつつ慎重に。
+                            </span>
+                          )}
+                          {highSettingProb < 30 && (
+                            <span className="font-bold text-slate-500">
+                              厳しい数値です。確定演出（虹フェザー等）が出ていない限り、早めの撤退も視野に。
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    // ジャグラーおよびその他のアドバイスロジック（従来通りだがランクで色付け）
+                    <>
+                      {totalGames <= 3000 && (
+                        <>
+                          回転数がまだ浅いため、ブレ幅の大きいブドウ・BIG確率の影響度を抑えています。
+                          <span className="font-bold underline decoration-indigo-400 decoration-2">
+                            現時点ではREG確率を軸に
+                          </span>
+                          様子を見ましょう。
+                        </>
+                      )}
+                      {totalGames > 3000 && totalGames <= 6000 && (
+                        <>
+                          折り返し地点です。
+                          <span className="font-bold">
+                            REG確率が安定している場合
+                          </span>
+                          、高設定の期待が高まります。ブドウ確率の信頼度も徐々に上がってきました。
+                        </>
+                      )}
+                      {totalGames > 6000 && (
+                        <>
+                          十分なサンプルが集まりました。
+                          {highSettingProb >= 70 ? (
+                            <span className="font-bold text-purple-600 dark:text-purple-400">
+                              REG・ブドウ確率を含めた総合的なデータから、自信を持って高設定と言えます！
+                            </span>
+                          ) : (
+                            <span className="font-bold">
+                              REG・ブドウ確率を含めた総合的なデータ
+                            </span>
+                          )}
+                          から、最終的な設定を推測します。
+                        </>
+                      )}
+                    </>
+                  )}
+                </p>
               </div>
-            </div>
-            <p className="text-sm leading-relaxed text-indigo-900 dark:text-indigo-200">
-              {totalGames <= 3000 && (
-                <>
-                  回転数がまだ浅いため、ブレ幅の大きいブドウ・BIG確率の影響度を抑えています。
-                  <span className="font-bold underline decoration-indigo-500 decoration-2">
-                    現時点ではREG確率を軸に
-                  </span>
-                  様子を見ましょう。
-                </>
-              )}
-              {totalGames > 3000 && totalGames <= 6000 && (
-                <>
-                  折り返し地点です。
-                  <span className="font-bold">REG確率が安定している場合</span>
-                  、高設定の期待が高まります。ブドウ確率の信頼度も徐々に上がってきました。
-                </>
-              )}
-              {totalGames > 6000 && (
-                <>
-                  十分なサンプルが集まりました。
-                  <span className="font-bold">
-                    REG・ブドウ確率を含めた総合的なデータ
-                  </span>
-                  から、最終的な設定を推測します。
-                </>
-              )}
-            </p>
-          </div>
+            );
+          })()}
 
           {/* グラフ描画エリア（縦棒グラフ） - h-48に拡大して視認性向上 */}
           <div className="flex items-end justify-around gap-2 h-48 border-b border-slate-200 pb-1 dark:border-slate-700 mt-6">
