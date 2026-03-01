@@ -750,385 +750,368 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             詳細判別
           </h2>
 
-          {estimationResults ? (
-            <>
-              {/* 設定別期待度の詳細表示 */}
-              <div className="mt-4">
-                <EstimationResultDisplay
-                  results={estimationResults}
-                  inputs={currentInputs}
-                  grapeReliability={grapeReliability}
-                />
-              </div>
+          {/* 設定別期待度の詳細表示 */}
+          <div className="mt-4">
+            <EstimationResultDisplay
+              results={
+                estimationResults ||
+                [1, 2, 3, 4, 5, 6].map((s) => ({
+                  setting: s,
+                  probability: 0,
+                }))
+              }
+              inputs={currentInputs}
+              grapeReliability={grapeReliability}
+            />
+          </div>
 
-              {/* 4大指標 (現在確率) */}
-              <div className="mb-4 grid grid-cols-2 gap-2 mt-4">
-                {[
-                  {
-                    label: "BIG確率",
-                    val: (() => {
-                      const count = Number(currentInputs["big-count"]) || 0;
-                      return count > 0 ? totalGames / count : 0;
-                    })(),
-                    format: (v: number) => v.toFixed(1),
-                    settingValues: (() => {
-                      const el = config.sections
-                        .flatMap((s) => s.elements)
-                        .find((e) => e.id === "big-count");
-                      return el?.settingValues;
-                    })(),
-                  },
-                  {
-                    label: "REG確率",
-                    val: (() => {
-                      const count = Number(currentInputs["reg-count"]) || 0;
-                      return count > 0 ? totalGames / count : 0;
-                    })(),
-                    format: (v: number) => v.toFixed(1),
-                    settingValues: (() => {
-                      const el = config.sections
-                        .flatMap((s) => s.elements)
-                        .find((e) => e.id === "reg-count");
-                      return el?.settingValues;
-                    })(),
-                  },
-                  ...(currentMode === "detail"
-                    ? currentCategory === "hana"
-                      ? [
-                          {
-                            label: "BIG中スイカ",
-                            val: (() => {
-                              const bCount =
-                                Number(currentInputs["big-count"]) || 0;
-                              const count =
-                                Number(currentInputs["big-suika-count"]) || 0;
-                              return bCount > 0 && count > 0
-                                ? (bCount * 24) / count
-                                : 0;
-                            })(),
-                            format: (v: number) => v.toFixed(1),
-                            settingValues: (() => {
-                              if (config.detailedProbabilities?.big_suika_raw) {
-                                const raw =
-                                  config.detailedProbabilities.big_suika_raw;
-                                return {
-                                  1: raw[0],
-                                  2: raw[1],
-                                  3: raw[2],
-                                  4: raw[3],
-                                  5: raw[4],
-                                  6: raw[5],
-                                };
-                              }
-                              return undefined;
-                            })(),
-                          },
-                          {
-                            label: "合算フェザー",
-                            val: (() => {
-                              const bCount =
-                                Number(currentInputs["big-count"]) || 0;
-                              const count =
-                                Number(currentInputs["feather-lamp-count"]) ||
-                                0;
-                              return bCount > 0 && count > 0
-                                ? bCount / count
-                                : 0;
-                            })(),
-                            format: (v: number) => v.toFixed(1),
-                            settingValues: (() => {
-                              if (
-                                config.detailedProbabilities?.feather_lamp_raw
-                              ) {
-                                const raw =
-                                  config.detailedProbabilities.feather_lamp_raw;
-                                return {
-                                  1: raw[0],
-                                  2: raw[1],
-                                  3: raw[2],
-                                  4: raw[3],
-                                  5: raw[4],
-                                  6: raw[5],
-                                };
-                              }
-                              return undefined;
-                            })(),
-                          },
-                        ]
-                      : [
-                          {
-                            label: "単独REG",
-                            val: (() => {
-                              const count =
-                                Number(currentInputs["reg-solo-count"]) || 0;
-                              return count > 0 ? totalGames / count : 0;
-                            })(),
-                            format: (v: number) => v.toFixed(1),
-                            settingValues: (() => {
-                              const el = config.sections
-                                .flatMap((s) => s.elements)
-                                .find((e) => e.id === "reg-solo-count");
-                              return el?.settingValues;
-                            })(),
-                          },
-                          {
-                            label: "チェリーREG",
-                            val: (() => {
-                              const count =
-                                Number(currentInputs["reg-cherry-count"]) || 0;
-                              return count > 0 ? totalGames / count : 0;
-                            })(),
-                            format: (v: number) => v.toFixed(1),
-                            settingValues: (() => {
-                              const el = config.sections
-                                .flatMap((s) => s.elements)
-                                .find((e) => e.id === "reg-cherry-count");
-                              return el?.settingValues;
-                            })(),
-                          },
-                        ]
-                    : []),
-                  {
-                    label: "合算確率",
-                    val: (() => {
-                      const big = Number(currentInputs["big-count"]) || 0;
-                      const reg = Number(currentInputs["reg-count"]) || 0;
-                      const total = big + reg;
-                      return total > 0 ? totalGames / total : 0;
-                    })(),
-                    format: (v: number) => v.toFixed(1),
-                    settingValues: (() => {
-                      const bigEl = config.sections
-                        .flatMap((s) => s.elements)
-                        .find((e) => e.id === "big-count");
-                      const regEl = config.sections
-                        .flatMap((s) => s.elements)
-                        .find((e) => e.id === "reg-count");
-
-                      // BIG・REG両方の確率設定があれば、合算確率を計算して返す
-                      if (bigEl?.settingValues && regEl?.settingValues) {
-                        const combined: Record<number, number> = {};
-                        [1, 2, 3, 4, 5, 6].forEach((s) => {
-                          if (
-                            bigEl.settingValues![s] &&
-                            regEl.settingValues![s]
-                          ) {
-                            const bigProb = 1 / bigEl.settingValues![s];
-                            const regProb = 1 / regEl.settingValues![s];
-                            combined[s] = 1 / (bigProb + regProb);
+          {/* 4大指標 (現在確率) */}
+          <div className="mb-4 grid grid-cols-2 gap-2 mt-4">
+            {[
+              {
+                label: "BIG確率",
+                val: (() => {
+                  const count = Number(currentInputs["big-count"]) || 0;
+                  return count > 0 ? totalGames / count : 0;
+                })(),
+                format: (v: number) => v.toFixed(1),
+                settingValues: (() => {
+                  const el = config.sections
+                    .flatMap((s) => s.elements)
+                    .find((e) => e.id === "big-count");
+                  return el?.settingValues;
+                })(),
+              },
+              {
+                label: "REG確率",
+                val: (() => {
+                  const count = Number(currentInputs["reg-count"]) || 0;
+                  return count > 0 ? totalGames / count : 0;
+                })(),
+                format: (v: number) => v.toFixed(1),
+                settingValues: (() => {
+                  const el = config.sections
+                    .flatMap((s) => s.elements)
+                    .find((e) => e.id === "reg-count");
+                  return el?.settingValues;
+                })(),
+              },
+              ...(currentMode === "detail"
+                ? currentCategory === "hana"
+                  ? [
+                      {
+                        label: "BIG中スイカ",
+                        val: (() => {
+                          const bCount =
+                            Number(currentInputs["big-count"]) || 0;
+                          const count =
+                            Number(currentInputs["big-suika-count"]) || 0;
+                          return bCount > 0 && count > 0
+                            ? (bCount * 24) / count
+                            : 0;
+                        })(),
+                        format: (v: number) => v.toFixed(1),
+                        settingValues: (() => {
+                          if (config.detailedProbabilities?.big_suika_raw) {
+                            const raw =
+                              config.detailedProbabilities.big_suika_raw;
+                            return {
+                              1: raw[0],
+                              2: raw[1],
+                              3: raw[2],
+                              4: raw[3],
+                              5: raw[4],
+                              6: raw[5],
+                            };
                           }
-                        });
-                        return combined;
-                      }
+                          return undefined;
+                        })(),
+                      },
+                      {
+                        label: "合算フェザー",
+                        val: (() => {
+                          const bCount =
+                            Number(currentInputs["big-count"]) || 0;
+                          const count =
+                            Number(currentInputs["feather-lamp-count"]) || 0;
+                          return bCount > 0 && count > 0 ? bCount / count : 0;
+                        })(),
+                        format: (v: number) => v.toFixed(1),
+                        settingValues: (() => {
+                          if (config.detailedProbabilities?.feather_lamp_raw) {
+                            const raw =
+                              config.detailedProbabilities.feather_lamp_raw;
+                            return {
+                              1: raw[0],
+                              2: raw[1],
+                              3: raw[2],
+                              4: raw[3],
+                              5: raw[4],
+                              6: raw[5],
+                            };
+                          }
+                          return undefined;
+                        })(),
+                      },
+                    ]
+                  : [
+                      {
+                        label: "単独REG",
+                        val: (() => {
+                          const count =
+                            Number(currentInputs["reg-solo-count"]) || 0;
+                          return count > 0 ? totalGames / count : 0;
+                        })(),
+                        format: (v: number) => v.toFixed(1),
+                        settingValues: (() => {
+                          const el = config.sections
+                            .flatMap((s) => s.elements)
+                            .find((e) => e.id === "reg-solo-count");
+                          return el?.settingValues;
+                        })(),
+                      },
+                      {
+                        label: "チェリーREG",
+                        val: (() => {
+                          const count =
+                            Number(currentInputs["reg-cherry-count"]) || 0;
+                          return count > 0 ? totalGames / count : 0;
+                        })(),
+                        format: (v: number) => v.toFixed(1),
+                        settingValues: (() => {
+                          const el = config.sections
+                            .flatMap((s) => s.elements)
+                            .find((e) => e.id === "reg-cherry-count");
+                          return el?.settingValues;
+                        })(),
+                      },
+                    ]
+                : []),
+              {
+                label: "合算確率",
+                val: (() => {
+                  const big = Number(currentInputs["big-count"]) || 0;
+                  const reg = Number(currentInputs["reg-count"]) || 0;
+                  const total = big + reg;
+                  return total > 0 ? totalGames / total : 0;
+                })(),
+                format: (v: number) => v.toFixed(1),
+                settingValues: (() => {
+                  const bigEl = config.sections
+                    .flatMap((s) => s.elements)
+                    .find((e) => e.id === "big-count");
+                  const regEl = config.sections
+                    .flatMap((s) => s.elements)
+                    .find((e) => e.id === "reg-count");
 
-                      // 事前定義要素があればそちらをフォールバックとして使う
-                      const combinedEl = config.sections
-                        .flatMap((s) => s.elements)
-                        .find((e) => e.id === "bonus-combined");
-                      return combinedEl?.settingValues;
-                    })(),
-                  },
-                  {
-                    label:
-                      currentCategory === "hana" ? "ベル確率" : "ブドウ確率",
-                    val: (() => {
-                      const countId =
-                        currentCategory === "hana"
-                          ? "bell-count"
-                          : "grape-count";
-                      const count = Number(currentInputs[countId]) || 0;
-                      return count > 0 ? totalGames / count : 0;
-                    })(),
-                    format: (v: number) => v.toFixed(2),
-                    settingValues: (() => {
-                      const countId =
-                        currentCategory === "hana"
-                          ? "bell-count"
-                          : "grape-count";
-                      const el = config.sections
-                        .flatMap((s) => s.elements)
-                        .find((e) => e.id === countId);
-                      return el?.settingValues;
-                    })(),
-                  },
-                ].map((item, idx) => {
-                  let approxSetting: number | null = null;
-                  if (item.val > 0 && item.settingValues) {
-                    let minDiff = Infinity;
-                    ([1, 2, 3, 4, 5, 6] as const).forEach((setting) => {
-                      const settingVal = item.settingValues![setting];
-                      if (settingVal) {
-                        const diff = Math.abs(item.val - settingVal);
-                        if (diff < minDiff) {
-                          minDiff = diff;
-                          approxSetting = setting;
-                        }
+                  // BIG・REG両方の確率設定があれば、合算確率を計算して返す
+                  if (bigEl?.settingValues && regEl?.settingValues) {
+                    const combined: Record<number, number> = {};
+                    [1, 2, 3, 4, 5, 6].forEach((s) => {
+                      if (bigEl.settingValues![s] && regEl.settingValues![s]) {
+                        const bigProb = 1 / bigEl.settingValues![s];
+                        const regProb = 1 / regEl.settingValues![s];
+                        combined[s] = 1 / (bigProb + regProb);
                       }
                     });
+                    return combined;
                   }
 
-                  return (
+                  // 事前定義要素があればそちらをフォールバックとして使う
+                  const combinedEl = config.sections
+                    .flatMap((s) => s.elements)
+                    .find((e) => e.id === "bonus-combined");
+                  return combinedEl?.settingValues;
+                })(),
+              },
+              {
+                label: currentCategory === "hana" ? "ベル確率" : "ブドウ確率",
+                val: (() => {
+                  const countId =
+                    currentCategory === "hana" ? "bell-count" : "grape-count";
+                  const count = Number(currentInputs[countId]) || 0;
+                  return count > 0 ? totalGames / count : 0;
+                })(),
+                format: (v: number) => v.toFixed(2),
+                settingValues: (() => {
+                  const countId =
+                    currentCategory === "hana" ? "bell-count" : "grape-count";
+                  const el = config.sections
+                    .flatMap((s) => s.elements)
+                    .find((e) => e.id === countId);
+                  return el?.settingValues;
+                })(),
+              },
+            ].map((item, idx) => {
+              let approxSetting: number | null = null;
+              if (item.val > 0 && item.settingValues) {
+                let minDiff = Infinity;
+                ([1, 2, 3, 4, 5, 6] as const).forEach((setting) => {
+                  const settingVal = item.settingValues![setting];
+                  if (settingVal) {
+                    const diff = Math.abs(item.val - settingVal);
+                    if (diff < minDiff) {
+                      minDiff = diff;
+                      approxSetting = setting;
+                    }
+                  }
+                });
+              }
+
+              return (
+                <div
+                  key={idx}
+                  className="flex flex-col items-center justify-center rounded-lg border border-slate-100 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-800"
+                >
+                  <div className="text-xs text-slate-500 dark:text-slate-400">
+                    {item.label}
+                  </div>
+                  <div className="text-xl font-bold text-slate-800 dark:text-white">
+                    {item.val > 0 ? `1/${item.format(item.val)}` : "---"}
+                  </div>
+                  {approxSetting && (
                     <div
-                      key={idx}
-                      className="flex flex-col items-center justify-center rounded-lg border border-slate-100 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-800"
+                      className={`text-xs font-bold ${
+                        approxSetting >= 5
+                          ? "text-red-500 dark:text-red-400"
+                          : "text-blue-500 dark:text-blue-400"
+                      }`}
                     >
-                      <div className="text-xs text-slate-500 dark:text-slate-400">
-                        {item.label}
-                      </div>
-                      <div className="text-xl font-bold text-slate-800 dark:text-white">
-                        {item.val > 0 ? `1/${item.format(item.val)}` : "---"}
-                      </div>
-                      {approxSetting && (
-                        <div
-                          className={`text-xs font-bold ${
-                            approxSetting >= 5
-                              ? "text-red-500 dark:text-red-400"
-                              : "text-blue-500 dark:text-blue-400"
+                      {config.id === "aimex" &&
+                      item.settingValues![approxSetting] === 255.0
+                        ? "(設定5・6近似)"
+                        : `(設定${approxSetting}近似)`}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* 設定別期待度見出しとAIアドバイス */}
+          <h3 className="mb-4 text-center text-lg font-bold text-slate-700 dark:text-slate-200">
+            設定別期待度
+          </h3>
+          <div className="mb-4 rounded-lg border border-indigo-100 bg-indigo-50 p-4 dark:border-indigo-800 dark:bg-indigo-900/20">
+            <div className="mb-1 flex items-center gap-2">
+              <span className="text-lg">🤖</span>
+              <div className="text-xs font-bold text-indigo-800 dark:text-indigo-300">
+                AI判定アドバイス ({totalGames}G時点)
+              </div>
+            </div>
+            <p className="text-sm leading-relaxed text-indigo-900 dark:text-indigo-200">
+              {totalGames <= 3000 && (
+                <>
+                  回転数がまだ浅いため、ブレ幅の大きいブドウ・BIG確率の影響度を抑えています。
+                  <span className="font-bold underline decoration-indigo-500 decoration-2">
+                    現時点ではREG確率を軸に
+                  </span>
+                  様子を見ましょう。
+                </>
+              )}
+              {totalGames > 3000 && totalGames <= 6000 && (
+                <>
+                  折り返し地点です。
+                  <span className="font-bold">REG確率が安定している場合</span>
+                  、高設定の期待が高まります。ブドウ確率の信頼度も徐々に上がってきました。
+                </>
+              )}
+              {totalGames > 6000 && (
+                <>
+                  十分なサンプルが集まりました。
+                  <span className="font-bold">
+                    REG・ブドウ確率を含めた総合的なデータ
+                  </span>
+                  から、最終的な設定を推測します。
+                </>
+              )}
+            </p>
+          </div>
+
+          {/* グラフ描画エリア（縦棒グラフ） - h-48に拡大して視認性向上 */}
+          <div className="flex items-end justify-around gap-2 h-48 border-b border-slate-200 pb-1 dark:border-slate-700 mt-6">
+            {(
+              estimationResults ||
+              [1, 2, 3, 4, 5, 6].map((s) => ({
+                setting: s,
+                probability: 0,
+              }))
+            ).map((result, index, arr) => {
+              const colors = [
+                { bg: "bg-slate-400", text: "text-slate-600" }, // 1
+                { bg: "bg-slate-400", text: "text-slate-600" }, // 2
+                { bg: "bg-slate-400", text: "text-slate-600" }, // 3
+                { bg: "bg-blue-500", text: "text-blue-600" }, // 4
+                { bg: "bg-amber-500", text: "text-amber-600" }, // 5
+                { bg: "bg-rose-600", text: "text-rose-600" }, // 6
+              ];
+              const colorObj = colors[index] || colors[0];
+              const maxResult = arr.reduce((max, current) =>
+                current.probability > max.probability ? current : max,
+              );
+              const isMax =
+                result.setting === maxResult.setting && result.probability > 0;
+              const percentage = Math.max(result.probability, 1); // 最小1%確保
+
+              return (
+                <div
+                  key={result.setting}
+                  className="flex flex-col items-center flex-1 h-full justify-end group mt-4"
+                >
+                  <div className="relative w-full flex-1 flex items-end justify-center px-1">
+                    {isMax && (
+                      <div
+                        className="absolute w-full flex justify-center z-10 pointer-events-none"
+                        style={{ bottom: `calc(${percentage}% + 18px)` }}
+                      >
+                        <span
+                          className={`text-[9px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap shadow-sm ${
+                            result.probability === 100 && result.setting === 6
+                              ? "bg-gradient-to-r from-red-500 via-yellow-500 to-blue-500 text-white animate-pulse"
+                              : "bg-blue-100 text-blue-600"
                           }`}
                         >
-                          {config.id === "aimex" &&
-                          item.settingValues![approxSetting] === 255.0
-                            ? "(設定5・6近似)"
-                            : `(設定${approxSetting}近似)`}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* 設定別期待度見出しとAIアドバイス */}
-              <h3 className="mb-4 text-center text-lg font-bold text-slate-700 dark:text-slate-200">
-                設定別期待度
-              </h3>
-              <div className="mb-4 rounded-lg border border-indigo-100 bg-indigo-50 p-4 dark:border-indigo-800 dark:bg-indigo-900/20">
-                <div className="mb-1 flex items-center gap-2">
-                  <span className="text-lg">🤖</span>
-                  <div className="text-xs font-bold text-indigo-800 dark:text-indigo-300">
-                    AI判定アドバイス ({totalGames}G時点)
+                          {result.probability === 100 && result.setting === 6
+                            ? "設定6確定！"
+                            : "最有力"}
+                        </span>
+                      </div>
+                    )}
+                    <div
+                      className={`w-full rounded-t-sm transition-all duration-700 hover:opacity-80 ${
+                        result.probability === 100 && result.setting === 6
+                          ? "bg-gradient-to-t from-purple-500 via-pink-500 to-red-500 animate-pulse"
+                          : colorObj.bg
+                      }`}
+                      style={{
+                        height: `${percentage}%`,
+                      }}
+                    ></div>
+                    {/* 確率表示（バーの上） */}
+                    <span
+                      className={`absolute mb-0.5 tabular-nums font-bold ${
+                        isMax
+                          ? result.probability === 100 && result.setting === 6
+                            ? "text-red-500 text-sm"
+                            : colorObj.text + " text-xs"
+                          : "text-slate-600 text-xs dark:text-slate-400"
+                      }`}
+                      style={{ bottom: `${percentage}%` }}
+                    >
+                      {result.probability.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="mt-2 text-xs flex flex-col items-center">
+                    <span
+                      className={`font-bold ${isMax ? colorObj.text : "text-slate-500"}`}
+                    >
+                      設定{result.setting}
+                    </span>
                   </div>
                 </div>
-                <p className="text-sm leading-relaxed text-indigo-900 dark:text-indigo-200">
-                  {totalGames <= 3000 && (
-                    <>
-                      回転数がまだ浅いため、ブレ幅の大きいブドウ・BIG確率の影響度を抑えています。
-                      <span className="font-bold underline decoration-indigo-500 decoration-2">
-                        現時点ではREG確率を軸に
-                      </span>
-                      様子を見ましょう。
-                    </>
-                  )}
-                  {totalGames > 3000 && totalGames <= 6000 && (
-                    <>
-                      折り返し地点です。
-                      <span className="font-bold">
-                        REG確率が安定している場合
-                      </span>
-                      、高設定の期待が高まります。ブドウ確率の信頼度も徐々に上がってきました。
-                    </>
-                  )}
-                  {totalGames > 6000 && (
-                    <>
-                      十分なサンプルが集まりました。
-                      <span className="font-bold">
-                        REG・ブドウ確率を含めた総合的なデータ
-                      </span>
-                      から、最終的な設定を推測します。
-                    </>
-                  )}
-                </p>
-              </div>
-
-              {/* グラフ描画エリア（縦棒グラフ） - h-48に拡大して視認性向上 */}
-              <div className="flex items-end justify-around gap-2 h-48 border-b border-slate-200 pb-1 dark:border-slate-700 mt-6">
-                {estimationResults.map((result, index) => {
-                  const colors = [
-                    { bg: "bg-slate-400", text: "text-slate-600" }, // 1
-                    { bg: "bg-slate-400", text: "text-slate-600" }, // 2
-                    { bg: "bg-slate-400", text: "text-slate-600" }, // 3
-                    { bg: "bg-blue-500", text: "text-blue-600" }, // 4
-                    { bg: "bg-amber-500", text: "text-amber-600" }, // 5
-                    { bg: "bg-rose-600", text: "text-rose-600" }, // 6
-                  ];
-                  const colorObj = colors[index] || colors[0];
-                  const maxResult = estimationResults.reduce((max, current) =>
-                    current.probability > max.probability ? current : max,
-                  );
-                  const isMax = result.setting === maxResult.setting;
-                  const percentage = Math.max(result.probability, 1); // 最小1%確保
-
-                  return (
-                    <div
-                      key={result.setting}
-                      className="flex flex-col items-center flex-1 h-full justify-end group mt-4"
-                    >
-                      <div className="relative w-full flex-1 flex items-end justify-center px-1">
-                        {isMax && (
-                          <div
-                            className="absolute w-full flex justify-center z-10 pointer-events-none"
-                            style={{ bottom: `calc(${percentage}% + 18px)` }}
-                          >
-                            <span
-                              className={`text-[9px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap shadow-sm ${
-                                result.probability === 100 &&
-                                result.setting === 6
-                                  ? "bg-gradient-to-r from-red-500 via-yellow-500 to-blue-500 text-white animate-pulse"
-                                  : "bg-blue-100 text-blue-600"
-                              }`}
-                            >
-                              {result.probability === 100 &&
-                              result.setting === 6
-                                ? "設定6確定！"
-                                : "最有力"}
-                            </span>
-                          </div>
-                        )}
-                        <div
-                          className={`w-full rounded-t-sm transition-all duration-700 hover:opacity-80 ${
-                            result.probability === 100 && result.setting === 6
-                              ? "bg-gradient-to-t from-purple-500 via-pink-500 to-red-500 animate-pulse"
-                              : colorObj.bg
-                          }`}
-                          style={{
-                            height: `${percentage}%`,
-                          }}
-                        ></div>
-                        {/* 確率表示（バーの上） */}
-                        <span
-                          className={`absolute mb-0.5 tabular-nums font-bold ${
-                            isMax
-                              ? result.probability === 100 &&
-                                result.setting === 6
-                                ? "text-red-500 text-sm"
-                                : colorObj.text + " text-xs"
-                              : "text-slate-600 text-xs dark:text-slate-400"
-                          }`}
-                          style={{ bottom: `${percentage}%` }}
-                        >
-                          {result.probability.toFixed(1)}%
-                        </span>
-                      </div>
-                      <div className="mt-2 text-xs flex flex-col items-center">
-                        <span
-                          className={`font-bold ${isMax ? colorObj.text : "text-slate-500"}`}
-                        >
-                          設定{result.setting}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          ) : (
-            <div className="flex h-48 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800/50">
-              <p className="text-sm text-slate-400 text-center">
-                データを入力して
-                <br />
-                「設定判別する」を押してください
-              </p>
-            </div>
-          )}
+              );
+            })}
+          </div>
 
           <div className="mt-4 text-xs text-slate-500 dark:text-slate-400 text-center">
             ※ベイズ推定による確率分布
