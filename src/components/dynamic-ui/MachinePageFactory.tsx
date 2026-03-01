@@ -50,10 +50,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   const currentCategory = currentMachineInfo?.category || "juggler";
   const brandColor = currentMachineInfo?.color; // ブランドカラー
 
-  // ユーザー入力State (通常・詳細)
-  const [inputValues, setInputValues] = useState<
-    Record<string, number | boolean | string>
-  >(() => {
+  // 初期化ロジックを関数化
+  const initializeValues = (mode: "normal" | "grape") => {
     const initialValues: Record<string, number | boolean | string> = {};
     config.sections.forEach((section) => {
       section.elements.forEach((element) => {
@@ -66,49 +64,39 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
         }
       });
     });
-    // 初期値をLocalStorageから復元
-    const storageKey = `grape-reverse-data-${config.id}`;
+
+    const suffix = mode === "grape" ? "-grape-mode" : "";
+    const storageKey = `grape-reverse-data${suffix}-${config.id}`;
     const savedData = localStorage.getItem(storageKey);
+
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData);
         return { ...initialValues, ...parsedData };
       } catch (e) {
-        console.error("Failed to parse saved data for", config.id, e);
+        console.error(`Failed to parse saved data for ${config.id}`, e);
       }
     }
     return initialValues;
-  });
+  };
+
+  // ユーザー入力State (通常・詳細)
+  const [inputValues, setInputValues] = useState<
+    Record<string, number | boolean | string>
+  >(() => initializeValues("normal"));
 
   // ユーザー入力State (ぶどう・ベル逆算専用)
   const [grapeInputValues, setGrapeInputValues] = useState<
     Record<string, number | boolean | string>
-  >(() => {
-    const initialValues: Record<string, number | boolean | string> = {};
-    config.sections.forEach((section) => {
-      section.elements.forEach((element) => {
-        if (element.type === "flag") {
-          initialValues[element.id] = false;
-        } else if (element.type === "select") {
-          initialValues[element.id] = "";
-        } else {
-          initialValues[element.id] = "";
-        }
-      });
-    });
-    // 初期値をLocalStorageから復元
-    const storageKey = `grape-reverse-data-grape-mode-${config.id}`;
-    const savedData = localStorage.getItem(storageKey);
-    if (savedData) {
-      try {
-        const parsedData = JSON.parse(savedData);
-        return { ...initialValues, ...parsedData };
-      } catch (e) {
-        console.error("Failed to parse saved data for", config.id, e);
-      }
-    }
-    return initialValues;
-  });
+  >(() => initializeValues("grape"));
+
+  // ルーティングで機種が切り替わった時にステートを再初期化する
+  useEffect(() => {
+    setInputValues(initializeValues("normal"));
+    setGrapeInputValues(initializeValues("grape"));
+    setCalculatedGrapeCount(null);
+    setEstimationResults(null);
+  }, [config.id]);
 
   // ブドウ算出結果用
   const [calculatedGrapeCount, setCalculatedGrapeCount] = useState<
@@ -1009,7 +997,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 })}
               </div>
 
-              {/* AIアドバイス (pro-level) */}
+              {/* 設定別期待度見出しとAIアドバイス */}
+              <h3 className="mb-4 text-center text-lg font-bold text-slate-700 dark:text-slate-200">
+                設定別期待度
+              </h3>
               <div className="mb-4 rounded-lg border border-indigo-100 bg-indigo-50 p-4 dark:border-indigo-800 dark:bg-indigo-900/20">
                 <div className="mb-1 flex items-center gap-2">
                   <span className="text-lg">🤖</span>
@@ -1049,42 +1040,80 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
               </div>
 
               {/* グラフ描画エリア（縦棒グラフ） - h-48に拡大して視認性向上 */}
-              <div className="flex items-end justify-around gap-2 h-48 border-b border-slate-200 pb-1 dark:border-slate-700">
+              <div className="flex items-end justify-around gap-2 h-48 border-b border-slate-200 pb-1 dark:border-slate-700 mt-6">
                 {estimationResults.map((result, index) => {
                   const colors = [
-                    "#94a3b8", // 設定1: グレー
-                    "#94a3b8", // 設定2
-                    "#94a3b8", // 設定3
-                    "#60a5fa", // 設定4: 青
-                    "#f59e0b", // 設定5: 黄
-                    "#ef4444", // 設定6: 赤
+                    { bg: "bg-slate-400", text: "text-slate-600" }, // 1
+                    { bg: "bg-slate-400", text: "text-slate-600" }, // 2
+                    { bg: "bg-slate-400", text: "text-slate-600" }, // 3
+                    { bg: "bg-blue-500", text: "text-blue-600" }, // 4
+                    { bg: "bg-amber-500", text: "text-amber-600" }, // 5
+                    { bg: "bg-rose-600", text: "text-rose-600" }, // 6
                   ];
-                  const barColor = colors[index] || "#94a3b8";
+                  const colorObj = colors[index] || colors[0];
+                  const maxResult = estimationResults.reduce((max, current) =>
+                    current.probability > max.probability ? current : max,
+                  );
+                  const isMax = result.setting === maxResult.setting;
                   const percentage = Math.max(result.probability, 1); // 最小1%確保
 
                   return (
                     <div
                       key={result.setting}
-                      className="flex flex-col items-center flex-1 h-full justify-end group"
+                      className="flex flex-col items-center flex-1 h-full justify-end group mt-4"
                     >
                       <div className="relative w-full flex-1 flex items-end justify-center px-1">
+                        {isMax && (
+                          <div
+                            className="absolute w-full flex justify-center z-10 pointer-events-none"
+                            style={{ bottom: `calc(${percentage}% + 18px)` }}
+                          >
+                            <span
+                              className={`text-[9px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap shadow-sm ${
+                                result.probability === 100 &&
+                                result.setting === 6
+                                  ? "bg-gradient-to-r from-red-500 via-yellow-500 to-blue-500 text-white animate-pulse"
+                                  : "bg-blue-100 text-blue-600"
+                              }`}
+                            >
+                              {result.probability === 100 &&
+                              result.setting === 6
+                                ? "設定6確定！"
+                                : "最有力"}
+                            </span>
+                          </div>
+                        )}
                         <div
-                          className="w-full rounded-t-sm transition-all duration-700 hover:opacity-80"
+                          className={`w-full rounded-t-sm transition-all duration-700 hover:opacity-80 ${
+                            result.probability === 100 && result.setting === 6
+                              ? "bg-gradient-to-t from-purple-500 via-pink-500 to-red-500 animate-pulse"
+                              : colorObj.bg
+                          }`}
                           style={{
                             height: `${percentage}%`,
-                            backgroundColor: barColor,
                           }}
                         ></div>
                         {/* 確率表示（バーの上） */}
                         <span
-                          className="absolute text-[9px] font-bold text-slate-700 dark:text-slate-200 mb-0.5"
+                          className={`absolute mb-0.5 tabular-nums font-bold ${
+                            isMax
+                              ? result.probability === 100 &&
+                                result.setting === 6
+                                ? "text-red-500 text-sm"
+                                : colorObj.text + " text-xs"
+                              : "text-slate-600 text-xs dark:text-slate-400"
+                          }`}
                           style={{ bottom: `${percentage}%` }}
                         >
                           {result.probability.toFixed(1)}%
                         </span>
                       </div>
-                      <div className="mt-2 text-[10px] text-slate-500 dark:text-slate-400">
-                        設定{result.setting}
+                      <div className="mt-2 text-xs flex flex-col items-center">
+                        <span
+                          className={`font-bold ${isMax ? colorObj.text : "text-slate-500"}`}
+                        >
+                          設定{result.setting}
+                        </span>
                       </div>
                     </div>
                   );

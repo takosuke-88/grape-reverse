@@ -7,16 +7,6 @@ interface EstimationResultDisplayProps {
   grapeReliability?: number; // 0.0 ~ 1.0
 }
 
-// 設定ごとのカラー定義
-const SETTING_COLORS = [
-  { bg: "bg-slate-400", text: "text-slate-600" }, // 1
-  { bg: "bg-slate-400", text: "text-slate-600" }, // 2
-  { bg: "bg-slate-400", text: "text-slate-600" }, // 3
-  { bg: "bg-blue-500", text: "text-blue-600" }, // 4
-  { bg: "bg-amber-500", text: "text-amber-600" }, // 5
-  { bg: "bg-rose-600", text: "text-rose-600" }, // 6
-];
-
 const EstimationResultDisplay: React.FC<EstimationResultDisplayProps> = ({
   results,
   inputs,
@@ -125,8 +115,8 @@ const EstimationResultDisplay: React.FC<EstimationResultDisplayProps> = ({
         </div>
       </div>
 
-      {/* トップパネル色 履歴（入力がある場合のみ表示） */}
-      {inputs && (
+      {/* トップパネル色 履歴（入力がある場合のみ表示。ハナハナ専用項目があるかチェック） */}
+      {inputs && inputs["big-feather-white"] !== undefined && (
         <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
           <h3 className="text-sm font-bold text-slate-600 mb-3">
             トップパネル色 履歴
@@ -238,60 +228,6 @@ const EstimationResultDisplay: React.FC<EstimationResultDisplayProps> = ({
           </div>
         </div>
       )}
-
-      {/* 詳細グラフ */}
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
-        <h3 className="text-sm font-bold text-slate-600 mb-3">設定別期待度</h3>
-
-        <div className="space-y-2">
-          {results.map((result, index) => {
-            const isMax = result.setting === maxResult.setting;
-            const colors = SETTING_COLORS[index];
-
-            return (
-              <div key={result.setting} className="space-y-1">
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`font-bold ${isMax ? colors.text : "text-slate-500"}`}
-                    >
-                      設定{result.setting}
-                    </span>
-                    {isMax && (
-                      <span
-                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${result.probability === 100 && result.setting === 6 ? "bg-gradient-to-r from-red-500 via-yellow-500 to-blue-500 text-white animate-pulse" : "bg-blue-100 text-blue-600"}`}
-                      >
-                        {result.probability === 100 && result.setting === 6
-                          ? "設定6確定演出発生中！"
-                          : "最有力"}
-                      </span>
-                    )}
-                  </div>
-                  <span
-                    className={`font-bold tabular-nums ${isMax ? (result.probability === 100 && result.setting === 6 ? "text-red-500 text-sm" : colors.text) : "text-slate-600"}`}
-                  >
-                    {result.probability.toFixed(1)}%
-                  </span>
-                </div>
-
-                <div className="relative h-6 bg-slate-100 rounded overflow-hidden">
-                  <div
-                    className={`absolute inset-y-0 left-0 transition-all duration-700 ease-out ${result.probability === 100 && result.setting === 6 ? "bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 animate-pulse" : colors.bg}`}
-                    style={{
-                      width: `${Math.max(result.probability, 2)}%`,
-                    }}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* 注釈 */}
-        <div className="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500">
-          ※ベイズの定理による推定値です。
-        </div>
-      </div>
     </div>
   );
 };
