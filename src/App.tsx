@@ -3,6 +3,7 @@ import MachinePagePreview from "./pages/MachinePagePreview";
 import { AVAILABLE_MACHINES } from "./data/machine-list";
 import { ATTACHED_COLUMNS } from "./data/column-list";
 import MyJugglerColumn from "./pages/columns/myjuggler5-setting6-behavior";
+import MyJugglerStrategyColumn from "./pages/columns/myjuggler5-strategy-trap";
 import Funky2Column from "./pages/columns/funky2-setting6-behavior";
 import ImJugglerColumn from "./pages/columns/imjuggler-setting4-behavior";
 import MrJugglerColumn from "./pages/columns/mrjuggler-expectations";
@@ -35,6 +36,10 @@ export default function App() {
             <Route
               path="/columns/myjuggler5-setting6-behavior"
               element={<MyJugglerColumn />}
+            />
+            <Route
+              path="/columns/myjuggler5-strategy-trap"
+              element={<MyJugglerStrategyColumn />}
             />
             <Route
               path="/columns/funky2-setting6-behavior"
