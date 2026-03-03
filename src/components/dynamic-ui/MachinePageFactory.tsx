@@ -1308,7 +1308,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                     <>
                       {" "}
                       ｜ 機械割: {config.specs.payoutRatio[0].toFixed(1)}～
-                      {config.specs.payoutRatio[5].toFixed(1)}%
+                      {config.specs.payoutRatio[
+                        config.specs.payoutRatio.length - 1
+                      ].toFixed(1)}
+                      %
                     </>
                   )}
                 </div>
