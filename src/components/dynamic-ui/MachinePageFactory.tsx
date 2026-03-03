@@ -921,7 +921,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   // BIG・REG両方の確率設定があれば、合算確率を計算して返す
                   if (bigEl?.settingValues && regEl?.settingValues) {
                     const combined: Record<number, number> = {};
-                    [1, 2, 3, 4, 5, 6].forEach((s) => {
+                    const settings = config.specs?.settings || [
+                      1, 2, 3, 4, 5, 6,
+                    ];
+                    settings.forEach((s) => {
                       if (bigEl.settingValues![s] && regEl.settingValues![s]) {
                         const bigProb = 1 / bigEl.settingValues![s];
                         const regProb = 1 / regEl.settingValues![s];
@@ -960,8 +963,11 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
               let approxSetting: number | null = null;
               if (item.val > 0 && item.settingValues) {
                 let minDiff = Infinity;
-                ([1, 2, 3, 4, 5, 6] as const).forEach((setting) => {
-                  const settingVal = item.settingValues![setting];
+                const settings = config.specs?.settings || [1, 2, 3, 4, 5, 6];
+                settings.forEach((setting) => {
+                  const settingVal = (
+                    item.settingValues as Record<number, number>
+                  )[setting];
                   if (settingVal) {
                     const diff = Math.abs(item.val - settingVal);
                     if (diff < minDiff) {
@@ -994,7 +1000,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                       {config.id === "aimex" &&
                       item.settingValues![approxSetting] === 255.0
                         ? "(設定5・6近似)"
-                        : `(設定${approxSetting}近似)`}
+                        : `(設定${config.specs?.settingLabels?.[approxSetting] || approxSetting}近似)`}
                     </div>
                   )}
                 </div>
@@ -1202,7 +1208,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           <div className="flex items-end justify-around gap-2 h-48 border-b border-slate-200 pb-1 dark:border-slate-700 mt-6">
             {(
               estimationResults ||
-              [1, 2, 3, 4, 5, 6].map((s) => ({
+              (config.specs?.settings || [1, 2, 3, 4, 5, 6]).map((s) => ({
                 setting: s,
                 probability: 0,
               }))
@@ -1350,132 +1356,60 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {[1, 2, 3, 4, 5, 6].map((setting, idx) => {
-                    return (
-                      <tr
-                        key={setting}
-                        className={
-                          idx % 2 === 0
-                            ? "bg-slate-50 dark:bg-slate-800/50"
-                            : "bg-white dark:bg-slate-900"
-                        }
-                      >
-                        <td className="px-2 py-2 text-center text-xs font-bold text-slate-700 dark:text-slate-300">
-                          {setting}
-                        </td>
-                        {discriminationElements
-                          .filter((e) => e.visibility !== "detail")
-                          .flatMap((element) => {
-                            const cells = [];
+                  {(config.specs?.settings || [1, 2, 3, 4, 5, 6]).map(
+                    (setting, idx) => {
+                      return (
+                        <tr
+                          key={setting}
+                          className={
+                            idx % 2 === 0
+                              ? "bg-slate-50 dark:bg-slate-800/50"
+                              : "bg-white dark:bg-slate-900"
+                          }
+                        >
+                          <td className="px-2 py-2 text-center text-xs font-bold text-slate-700 dark:text-slate-300">
+                            {config.specs?.settingLabels?.[setting] || setting}
+                          </td>
+                          {discriminationElements
+                            .filter((e) => e.visibility !== "detail")
+                            .flatMap((element) => {
+                              const cells = [];
 
-                            let currentValue =
-                              Number(currentInputs[element.id]) || 0;
+                              let currentValue =
+                                Number(currentInputs[element.id]) || 0;
 
-                            // 合成確率計算のための特例処理 (既存ロジック維持)
-                            if (
-                              element.id === "bonus-combined" ||
-                              element.label.includes("合成") ||
-                              element.label.includes("合算")
-                            ) {
-                              const big =
-                                Number(currentInputs["big-count"]) || 0;
-                              const reg =
-                                Number(currentInputs["reg-count"]) || 0;
-                              currentValue = big + reg;
-                            }
-
-                            const currentProb =
-                              totalGames > 0 && currentValue > 0
-                                ? totalGames / currentValue
-                                : null;
-                            const expectedValue =
-                              element.settingValues[setting];
-
-                            // 最も近い設定を判定するロジック
-                            let isClosest = false;
-                            if (currentProb !== null) {
-                              let minDiff = Infinity;
-                              let closestSetting = -1;
-
-                              [1, 2, 3, 4, 5, 6].forEach((s) => {
-                                const val = element.settingValues[s];
-                                const diff = Math.abs(currentProb - val);
-                                if (diff < minDiff) {
-                                  minDiff = diff;
-                                  closestSetting = s;
-                                }
-                              });
-
-                              if (closestSetting === setting) {
-                                isClosest = true;
+                              // 合成確率計算のための特例処理 (既存ロジック維持)
+                              if (
+                                element.id === "bonus-combined" ||
+                                element.label.includes("合成") ||
+                                element.label.includes("合算")
+                              ) {
+                                const big =
+                                  Number(currentInputs["big-count"]) || 0;
+                                const reg =
+                                  Number(currentInputs["reg-count"]) || 0;
+                                currentValue = big + reg;
                               }
-                            }
 
-                            // フォーマット処理
-                            let formattedValue: string;
-                            if (
-                              element.label.includes("ベル") ||
-                              element.label.includes("ブドウ")
-                            ) {
-                              formattedValue = expectedValue.toFixed(2);
-                            } else {
-                              // ボーナスやスイカなどは小数点第1位まで (整数でも.0をつける)
-                              formattedValue = expectedValue.toFixed(1);
-                            }
-
-                            cells.push(
-                              <td
-                                key={element.id}
-                                className={`px-2 py-2 text-center text-xs tabular-nums ${
-                                  isClosest
-                                    ? "bg-red-100 font-extrabold text-red-600 dark:bg-red-900/30 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800"
-                                    : "text-slate-600 dark:text-slate-400"
-                                }`}
-                              >
-                                1/{formattedValue}
-                              </td>,
-                            );
-
-                            // 合成確率セルの追加
-                            if (element.id === "reg-count") {
-                              const bigEl = discriminationElements.find(
-                                (e) => e.id === "big-count",
-                              );
-                              const bigProb =
-                                bigEl?.settingValues[setting] || 0;
-                              const regProb =
-                                element.settingValues[setting] || 0;
-
-                              let combinedExpected = 0;
-                              if (bigProb > 0 && regProb > 0) {
-                                combinedExpected =
-                                  1 / (1 / bigProb + 1 / regProb);
-                              }
-                              // フォーマットは小数点第1位
-                              const formattedCombined =
-                                combinedExpected.toFixed(1);
-
-                              const bigCount =
-                                Number(currentInputs["big-count"]) || 0;
-                              const regCount =
-                                Number(currentInputs["reg-count"]) || 0;
-                              const totalCount = bigCount + regCount;
-                              const combinedProb =
-                                totalGames > 0 && totalCount > 0
-                                  ? totalGames / totalCount
+                              const currentProb =
+                                totalGames > 0 && currentValue > 0
+                                  ? totalGames / currentValue
                                   : null;
+                              const expectedValue =
+                                element.settingValues[setting];
 
-                              let isCombinedClosest = false;
-                              if (combinedProb !== null && bigEl) {
+                              // 最も近い設定を判定するロジック
+                              let isClosest = false;
+                              if (currentProb !== null && expectedValue) {
                                 let minDiff = Infinity;
                                 let closestSetting = -1;
 
-                                [1, 2, 3, 4, 5, 6].forEach((s) => {
-                                  const bP = bigEl.settingValues[s];
-                                  const rP = element.settingValues[s];
-                                  if (bP && rP) {
-                                    const cE = 1 / (1 / bP + 1 / rP);
-                                    const diff = Math.abs(combinedProb - cE);
+                                (
+                                  config.specs?.settings || [1, 2, 3, 4, 5, 6]
+                                ).forEach((s) => {
+                                  const val = element.settingValues[s];
+                                  if (val) {
+                                    const diff = Math.abs(currentProb - val);
                                     if (diff < minDiff) {
                                       minDiff = diff;
                                       closestSetting = s;
@@ -1484,40 +1418,125 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                                 });
 
                                 if (closestSetting === setting) {
-                                  isCombinedClosest = true;
+                                  isClosest = true;
                                 }
+                              }
+
+                              // フォーマット処理
+                              let formattedValue: string;
+                              if (!expectedValue) {
+                                formattedValue = "---";
+                              } else if (
+                                element.label.includes("ベル") ||
+                                element.label.includes("ブドウ")
+                              ) {
+                                formattedValue =
+                                  "1/" + expectedValue.toFixed(2);
+                              } else {
+                                // ボーナスやスイカなどは小数点第1位まで (整数でも.0をつける)
+                                formattedValue =
+                                  "1/" + expectedValue.toFixed(1);
                               }
 
                               cells.push(
                                 <td
-                                  key="bonus-combined"
+                                  key={element.id}
                                   className={`px-2 py-2 text-center text-xs tabular-nums ${
-                                    isCombinedClosest
+                                    isClosest
                                       ? "bg-red-100 font-extrabold text-red-600 dark:bg-red-900/30 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800"
                                       : "text-slate-600 dark:text-slate-400"
                                   }`}
                                 >
-                                  1/{formattedCombined}
+                                  {formattedValue}
                                 </td>,
                               );
-                            }
 
-                            return cells;
-                          })}
-                        {config.specs?.payoutRatio && (
-                          <td
-                            className={`px-2 py-2 text-center text-xs tabular-nums ${
-                              mostLikelySetting?.setting === setting
-                                ? "bg-red-100 font-extrabold text-red-600 dark:bg-red-900/30 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800"
-                                : "text-slate-600 dark:text-slate-400"
-                            }`}
-                          >
-                            {config.specs.payoutRatio[setting - 1].toFixed(1)}%
-                          </td>
-                        )}
-                      </tr>
-                    );
-                  })}
+                              // 合成確率セルの追加
+                              if (element.id === "reg-count") {
+                                const bigEl = discriminationElements.find(
+                                  (e) => e.id === "big-count",
+                                );
+                                const bigProb =
+                                  bigEl?.settingValues[setting] || 0;
+                                const regProb =
+                                  element.settingValues[setting] || 0;
+
+                                let combinedExpected = 0;
+                                if (bigProb > 0 && regProb > 0) {
+                                  combinedExpected =
+                                    1 / (1 / bigProb + 1 / regProb);
+                                }
+                                // フォーマットは小数点第1位
+                                const formattedCombined =
+                                  combinedExpected.toFixed(1);
+
+                                const bigCount =
+                                  Number(currentInputs["big-count"]) || 0;
+                                const regCount =
+                                  Number(currentInputs["reg-count"]) || 0;
+                                const totalCount = bigCount + regCount;
+                                const combinedProb =
+                                  totalGames > 0 && totalCount > 0
+                                    ? totalGames / totalCount
+                                    : null;
+
+                                let isCombinedClosest = false;
+                                if (combinedProb !== null && bigEl) {
+                                  let minDiff = Infinity;
+                                  let closestSetting = -1;
+
+                                  (
+                                    config.specs?.settings || [1, 2, 3, 4, 5, 6]
+                                  ).forEach((s) => {
+                                    const bP = bigEl.settingValues[s];
+                                    const rP = element.settingValues[s];
+                                    if (bP && rP) {
+                                      const cE = 1 / (1 / bP + 1 / rP);
+                                      const diff = Math.abs(combinedProb - cE);
+                                      if (diff < minDiff) {
+                                        minDiff = diff;
+                                        closestSetting = s;
+                                      }
+                                    }
+                                  });
+
+                                  if (closestSetting === setting) {
+                                    isCombinedClosest = true;
+                                  }
+                                }
+
+                                cells.push(
+                                  <td
+                                    key="bonus-combined"
+                                    className={`px-2 py-2 text-center text-xs tabular-nums ${
+                                      isCombinedClosest
+                                        ? "bg-red-100 font-extrabold text-red-600 dark:bg-red-900/30 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800"
+                                        : "text-slate-600 dark:text-slate-400"
+                                    }`}
+                                  >
+                                    1/{formattedCombined}
+                                  </td>,
+                                );
+                              }
+
+                              return cells;
+                            })}
+                          {config.specs?.payoutRatio &&
+                            config.specs.payoutRatio[idx] !== undefined && (
+                              <td
+                                className={`px-2 py-2 text-center text-xs tabular-nums ${
+                                  mostLikelySetting?.setting === setting
+                                    ? "bg-red-100 font-extrabold text-red-600 dark:bg-red-900/30 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800"
+                                    : "text-slate-600 dark:text-slate-400"
+                                }`}
+                              >
+                                {config.specs.payoutRatio[idx].toFixed(1)}%
+                              </td>
+                            )}
+                        </tr>
+                      );
+                    },
+                  )}
                 </tbody>
               </table>
             </div>
