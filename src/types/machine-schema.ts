@@ -92,6 +92,11 @@ export interface MachineConfig {
     feather_lamp_raw?: number[];
     retro_sound_raw?: number[];
   };
+  exceptions?: {
+    type: "highlight" | "warning";
+    condition: string;
+    description: string;
+  }[];
 }
 
 /**

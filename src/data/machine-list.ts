@@ -103,6 +103,12 @@ export const AVAILABLE_MACHINES: MachineInfo[] = [
     color: "#00695C",
   },
   {
+    id: "new-hanahana-gold",
+    name: "ニューハナハナゴールド-30",
+    category: "hana",
+    color: "#FBC02D", // gold color
+  },
+  {
     id: "last-utopia",
     name: "ラストユートピア",
     category: "hana",
