@@ -73,10 +73,10 @@ export const AVAILABLE_MACHINES: MachineInfo[] = [
     color: "#D32F2F",
   },
   {
-    id: "dragon-senko",
-    name: "ドラゴンハナハナ～閃光～-30",
+    id: "new-king-v",
+    name: "ニューキングハナハナV-30",
     category: "hana",
-    color: "#B71C1C",
+    color: "#7B1FA2",
   },
   {
     id: "star-hanahana",
@@ -85,16 +85,10 @@ export const AVAILABLE_MACHINES: MachineInfo[] = [
     color: "#E65100",
   },
   {
-    id: "new-king-v",
-    name: "ニューキングハナハナV-30",
+    id: "dragon-senko",
+    name: "ドラゴンハナハナ～閃光～-30",
     category: "hana",
-    color: "#7B1FA2",
-  },
-  {
-    id: "last-utopia",
-    name: "ラストユートピア",
-    category: "hana",
-    color: "#1976D2",
+    color: "#B71C1C",
   },
   {
     id: "haihai-siosai2",
@@ -107,5 +101,11 @@ export const AVAILABLE_MACHINES: MachineInfo[] = [
     name: "ハイハイシオサイ",
     category: "hana",
     color: "#00695C",
+  },
+  {
+    id: "last-utopia",
+    name: "ラストユートピア",
+    category: "hana",
+    color: "#1976D2",
   },
 ];
