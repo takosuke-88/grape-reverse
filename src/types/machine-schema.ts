@@ -75,6 +75,8 @@ export interface MachineConfig {
       replay: number;
       cherry: number;
     };
+    settings?: number[]; // [1, 2, 3, 4, 5, 6] by default
+    settingLabels?: Record<number, string>; // e.g. {6: "V"}
   };
   detailedProbabilities?: {
     // 各配列は [設定1, 設定2, 設定3, 設定4, 設定5, 設定6] の順

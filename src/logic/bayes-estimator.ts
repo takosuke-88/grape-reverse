@@ -50,7 +50,7 @@ export function calculateEstimation(
   config: MachineConfig,
   inputs: UserInputs,
 ): EstimationResult[] {
-  const settings = [1, 2, 3, 4, 5, 6];
+  const settings = config.specs?.settings || [1, 2, 3, 4, 5, 6];
 
   // 総ゲーム数を取得（判別の試行回数として使用）
   const totalGames = Number(inputs["total-games"]) || 0;
@@ -70,9 +70,10 @@ export function calculateEstimation(
     (Number(inputs["bonus-rainbow"]) || 0) > 0; // 汎用的な別フラグも念のため
 
   if (isSetting6Guaranteed) {
+    const topSetting = Math.max(...settings);
     return settings.map((setting) => ({
       setting,
-      probability: setting === 6 ? 100 : 0,
+      probability: setting === topSetting ? 100 : 0,
     }));
   }
 

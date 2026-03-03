@@ -102,7 +102,7 @@ export default function App() {
                     <div id="hana" className="mb-12 scroll-mt-24">
                       <h2 className="text-xl font-bold text-slate-700 mb-6 flex items-center justify-center gap-2">
                         <span className="w-8 h-1 bg-red-600 rounded-full"></span>
-                        ハナハナシリーズ
+                        ハナハナ・シオサイシリーズ
                         <span className="w-8 h-1 bg-red-600 rounded-full"></span>
                       </h2>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

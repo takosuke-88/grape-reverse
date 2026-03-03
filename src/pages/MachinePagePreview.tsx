@@ -9,6 +9,13 @@ import { girlsSsConfig } from "../data/machines/juggler-girls-ss";
 import { mrJugglerConfig } from "../data/machines/juggler-mr";
 import { miracleJugglerConfig } from "../data/machines/juggler-miracle";
 import { happyV3Config } from "../data/machines/juggler-happy-v3";
+import { kingHanahanaConfig } from "../data/machines/king-hanahana";
+import { dragonSenkoConfig } from "../data/machines/dragon-senko";
+import { starHanahanaConfig } from "../data/machines/star-hanahana";
+import { newKingVConfig } from "../data/machines/new-king-v";
+import { lastUtopiaConfig } from "../data/machines/last-utopia";
+import { haihaiSiosai2Config } from "../data/machines/haihai-siosai2";
+import { haihaiSiosaiConfig } from "../data/machines/haihai-siosai";
 import type { MachineConfig } from "../types/machine-schema";
 
 /**
@@ -29,6 +36,13 @@ export default function MachinePagePreview() {
     mr: mrJugglerConfig,
     miracle: miracleJugglerConfig,
     happyv3: happyV3Config,
+    "king-hanahana": kingHanahanaConfig,
+    "dragon-senko": dragonSenkoConfig,
+    "star-hanahana": starHanahanaConfig,
+    "new-king-v": newKingVConfig,
+    "last-utopia": lastUtopiaConfig,
+    "haihai-siosai2": haihaiSiosai2Config,
+    "haihai-siosai": haihaiSiosaiConfig,
   };
 
   const config = machineId ? configMap[machineId] : null;

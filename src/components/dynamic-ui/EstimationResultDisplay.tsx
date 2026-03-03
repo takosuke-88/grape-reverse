@@ -1,17 +1,25 @@
 import React from "react";
-import type { EstimationResult, UserInputs } from "../../types/machine-schema";
+import type {
+  EstimationResult,
+  UserInputs,
+  MachineConfig,
+} from "../../types/machine-schema";
 
 interface EstimationResultDisplayProps {
   results: EstimationResult[];
   inputs?: UserInputs;
   grapeReliability?: number; // 0.0 ~ 1.0
+  config?: MachineConfig;
 }
 
 const EstimationResultDisplay: React.FC<EstimationResultDisplayProps> = ({
   results,
   inputs,
   grapeReliability,
+  config,
 }) => {
+  const getSettingLabel = (s: number) =>
+    config?.specs?.settingLabels?.[s] || `設定${s}`;
   // 最も可能性の高い設定を特定
   const maxResult = results.reduce((max, current) =>
     current.probability > max.probability ? current : max,
@@ -31,7 +39,7 @@ const EstimationResultDisplay: React.FC<EstimationResultDisplayProps> = ({
             <div className="text-xs text-slate-500 mb-1">判別結果</div>
             <div className="flex-1 flex flex-col justify-center">
               <div className="text-3xl font-bold text-slate-800">
-                設定{maxResult.setting}
+                {getSettingLabel(maxResult.setting)}
               </div>
             </div>
             <div

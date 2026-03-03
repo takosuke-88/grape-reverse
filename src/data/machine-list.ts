@@ -66,4 +66,46 @@ export const AVAILABLE_MACHINES: MachineInfo[] = [
     category: "hana",
     color: "#BF360C",
   },
+  {
+    id: "king-hanahana",
+    name: "キングハナハナ-30",
+    category: "hana",
+    color: "#D32F2F",
+  },
+  {
+    id: "dragon-senko",
+    name: "ドラゴンハナハナ～閃光～-30",
+    category: "hana",
+    color: "#B71C1C",
+  },
+  {
+    id: "star-hanahana",
+    name: "スターハナハナ-30",
+    category: "hana",
+    color: "#E65100",
+  },
+  {
+    id: "new-king-v",
+    name: "ニューキングハナハナV-30",
+    category: "hana",
+    color: "#7B1FA2",
+  },
+  {
+    id: "last-utopia",
+    name: "ラストユートピア",
+    category: "hana",
+    color: "#1976D2",
+  },
+  {
+    id: "haihai-siosai2",
+    name: "ハイハイシオサイ2",
+    category: "hana",
+    color: "#00796B",
+  },
+  {
+    id: "haihai-siosai",
+    name: "ハイハイシオサイ",
+    category: "hana",
+    color: "#00695C",
+  },
 ];
