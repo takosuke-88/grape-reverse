@@ -1,4 +1,10 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useParams,
+} from "react-router-dom";
 import MachinePagePreview from "./pages/MachinePagePreview";
 import { AVAILABLE_MACHINES } from "./data/machine-list";
 import { ATTACHED_COLUMNS } from "./data/column-list";
@@ -27,6 +33,9 @@ export default function App() {
               path="/v2/preview/:machineId"
               element={<MachinePagePreview />}
             />
+
+            {/* 古いURL（/machine/:id）からの301リダイレクト設定 */}
+            <Route path="/machine/:machineId" element={<MachineRedirect />} />
 
             {/* 本番用ルート: /myjuggler5 など */}
             <Route path="/:machineId" element={<MachinePagePreview />} />
@@ -184,4 +193,11 @@ export default function App() {
       </button>
     </BrowserRouter>
   );
+}
+
+// 過去の /machine/:id URLから /:id へリダイレクトするコンポーネント
+// React Router の <Navigate replace /> を使用して履歴を残さずに転送します（SEO上の301リダイレクト相当）
+function MachineRedirect() {
+  const { machineId } = useParams<{ machineId: string }>();
+  return <Navigate to={`/${machineId}`} replace />;
 }

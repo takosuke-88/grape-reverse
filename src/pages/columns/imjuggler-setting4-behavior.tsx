@@ -193,7 +193,7 @@ const ImJugglerSetting4Column = () => {
               アイムジャグラーを判別するなら
             </p>
             <Link
-              to="/juggler-im-ex"
+              to="/aimex"
               className="inline-block bg-[#D81B60] hover:bg-pink-700 text-white font-bold py-3 px-10 rounded-lg shadow-md transition"
             >
               今すぐツールで判別する
