@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
 import type { DiscriminationElement } from "../../types/machine-schema";
+import { AVAILABLE_MACHINES } from "../../data/machine-list";
 
 interface DynamicInputProps {
   element: DiscriminationElement;
@@ -49,7 +50,10 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   const renderInput = () => {
     switch (element.type) {
       case "counter":
-        const isConnected = machineId === "hana-hooh";
+        const isConnected =
+          !!machineId &&
+          AVAILABLE_MACHINES.find((m) => m.id === machineId)?.category ===
+            "hana";
         return (
           <div className="flex flex-col items-center gap-1">
             <div

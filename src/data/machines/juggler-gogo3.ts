@@ -5,6 +5,7 @@ import type { MachineConfig } from "../../types/machine-schema";
 export const gogoJuggler3Config: MachineConfig = {
   id: "gogo3",
   name: "ゴーゴージャグラー3",
+  title: "ゴーゴージャグラー3の設定判別・ぶどう逆算 -GrapeReverse",
   type: "A-type",
   themeColor: "bg-orange-500",
   sections: [

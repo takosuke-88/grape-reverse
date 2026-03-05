@@ -3,6 +3,7 @@ import type { MachineConfig } from "../../types/machine-schema";
 export const dragonSenkoConfig: MachineConfig = {
   id: "dragon-senko",
   name: "ドラゴンハナハナ～閃光～-30",
+  title: "ドラゴンハナハナ～閃光～-30の設定判別・ベル逆算 -GrapeReverse",
   type: "A-type",
   themeColor: "bg-red-700",
   sections: [

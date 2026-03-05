@@ -5,6 +5,7 @@ import type { MachineConfig } from "../../types/machine-schema";
 export const happyV3Config: MachineConfig = {
   id: "happyv3",
   name: "ハッピージャグラーVⅢ",
+  title: "ハッピージャグラーVⅢの設定判別・ぶどう逆算 -GrapeReverse",
   type: "A-type",
   themeColor: "bg-yellow-400",
   sections: [

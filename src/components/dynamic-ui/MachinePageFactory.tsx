@@ -96,7 +96,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     setGrapeInputValues(initializeValues("grape"));
     setCalculatedGrapeCount(null);
     setEstimationResults(null);
-  }, [config.id]);
+
+    // 機種名（または専用に設定されたtitle）をドキュメントタイトルにセット
+    document.title = config.title || config.name;
+  }, [config.id, config.title, config.name]);
 
   // ブドウ算出結果用
   const [calculatedGrapeCount, setCalculatedGrapeCount] = useState<
@@ -665,7 +668,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
                 <div
                   className={
-                    section.layout === "grid"
+                    section.layout === "grid" && visibleElements.length > 1
                       ? "grid grid-cols-2 gap-4"
                       : "space-y-4"
                   }

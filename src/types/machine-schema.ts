@@ -53,6 +53,7 @@ export interface ConfigSection {
 export interface MachineConfig {
   id: string;
   name: string;
+  title?: string;
   type: "A-type" | "BT" | "AT";
   themeColor?: string; // Tailwind BG クラス (例: 'bg-rose-600')
   sections: ConfigSection[];

@@ -1,6 +1,12 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const Funky2Column = () => {
+  useEffect(() => {
+    document.title =
+      "ファンキージャグラー2の設定6は別格？ -GrapeReverse パチスロ設定判別・ぶどう/ベル逆算ツール";
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <main className="container mx-auto px-4 py-8 max-w-3xl">

@@ -5,6 +5,7 @@ import type { MachineConfig } from "../../types/machine-schema";
 export const miracleJugglerConfig: MachineConfig = {
   id: "miracle",
   name: "ウルトラミラクルジャグラー",
+  title: "ウルトラミラクルジャグラーの設定判別・ぶどう逆算 -GrapeReverse",
   type: "A-type",
   themeColor: "bg-red-500",
   sections: [

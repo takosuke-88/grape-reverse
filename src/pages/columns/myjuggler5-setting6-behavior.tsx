@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const MyJugglerColumn = () => {
   useEffect(() => {
     document.title =
-      "【マイジャグ5】設定6はこう動く！ボーナスより「ぶどう」を信じるべき数学的理由";
+      "【マイジャグ5】設定6はこう動く！ -GrapeReverse パチスロ設定判別・ぶどう/ベル逆算ツール";
   }, []);
 
   return (

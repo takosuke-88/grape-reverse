@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const ImJugglerSetting4Column = () => {
   useEffect(() => {
     document.title =
-      "設定4のネオアイムジャグラーは打つ価値あり？データで徹底検証 | GrapeReverse";
+      "設定4のネオアイムジャグラーは打つ価値あり？ -GrapeReverse パチスロ設定判別・ぶどう/ベル逆算ツール";
   }, []);
 
   return (
