@@ -67,6 +67,7 @@ export const myJuggler5Config: MachineConfig = {
     {
       id: "bonus-breakdown-section",
       title: "ボーナス詳細内訳",
+      layout: "grid",
       elements: [
         {
           id: "big-solo-count",
@@ -108,6 +109,7 @@ export const myJuggler5Config: MachineConfig = {
           settingValues: {},
           isDiscriminationFactor: false,
           visibility: "detail",
+          colSpan: 2,
         },
         {
           id: "reg-solo-count",
@@ -150,6 +152,7 @@ export const myJuggler5Config: MachineConfig = {
           settingValues: {},
           isDiscriminationFactor: false,
           visibility: "detail",
+          colSpan: 2,
         },
       ],
     },

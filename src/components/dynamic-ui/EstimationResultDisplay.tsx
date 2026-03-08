@@ -4,6 +4,7 @@ import type {
   UserInputs,
   MachineConfig,
 } from "../../types/machine-schema";
+import { formatBonusText } from "../../utils/formatters";
 
 interface EstimationResultDisplayProps {
   results: EstimationResult[];
@@ -134,7 +135,7 @@ const EstimationResultDisplay: React.FC<EstimationResultDisplayProps> = ({
             {/* BIG後 */}
             <div>
               <div className="text-xs text-slate-500 mb-2 border-b border-slate-100 pb-1">
-                BIG後トップパネル
+                {formatBonusText("BIG後トップパネル")}
               </div>
               <ul className="text-xs space-y-1">
                 <li className="flex justify-between">
@@ -169,7 +170,7 @@ const EstimationResultDisplay: React.FC<EstimationResultDisplayProps> = ({
             {/* REG後 */}
             <div>
               <div className="text-xs text-slate-500 mb-2 border-b border-slate-100 pb-1">
-                REG後トップパネル (設定否定)
+                {formatBonusText("REG後トップパネル (設定否定)")}
               </div>
               <ul className="text-xs space-y-1">
                 <li className="flex justify-between items-center text-slate-600 mb-1">

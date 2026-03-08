@@ -11,6 +11,7 @@ import {
 } from "../../logic/bayes-estimator";
 import { AVAILABLE_MACHINES } from "../../data/machine-list";
 import { ATTACHED_COLUMNS } from "../../data/column-list";
+import { formatBonusText } from "../../utils/formatters";
 import EstimationResultDisplay from "./EstimationResultDisplay";
 
 interface MachinePageFactoryProps {
@@ -523,7 +524,6 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                           handleValueChange(element.id, value)
                         }
                         totalGames={totalGames}
-                        machineId={config.id}
                       />
                     ))}
                   </div>
@@ -544,12 +544,9 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           // ブドウ逆算モードかつ通常時小役セクションの場合、特別な結果カードを表示
           if (currentMode === "grape" && section.id === "normal-role-section") {
             const diffCoins = Number(currentInputs["diff-coins"]);
-            const hasDiffCoins =
-              currentInputs["diff-coins"] !== "" && !isNaN(diffCoins);
             const bigCount = Number(currentInputs["big-count"]) || 0;
             const regCount = Number(currentInputs["reg-count"]) || 0;
 
-            if (totalGames > 0 && hasDiffCoins) {
               // --- 定数定義 (Strict Formula) ---
               const PAYOUT = {
                 BIG: config.specs?.payouts?.big || 252,
@@ -636,27 +633,6 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   </div>
                 </div>
               );
-            }
-            // データ不足時はプレースホルダーを表示
-            return (
-              <div
-                key={section.id}
-                className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6"
-              >
-                <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
-                  {currentCategory === "hana"
-                    ? "ベル逆算結果"
-                    : "ブドウ逆算結果"}
-                </h2>
-                <div className="flex h-32 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800/50">
-                  <p className="text-center text-sm text-slate-400">
-                    総ゲーム数と差枚数を
-                    <br />
-                    入力してください
-                  </p>
-                </div>
-              </div>
-            );
           }
 
           return (
@@ -674,19 +650,28 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   }
                 >
                   {visibleElements.map((element) => (
-                    <DynamicInput
+                    <div
                       key={element.id}
-                      element={{
-                        ...element,
-                        isReadOnly: element.isReadOnly
-                          ? currentMode === "detail"
-                          : false,
-                      }}
-                      value={currentInputs[element.id]}
-                      onChange={(value) => handleValueChange(element.id, value)}
-                      totalGames={totalGames}
-                      machineId={config.id}
-                    />
+                      className={
+                        element.colSpan === 2
+                          ? "col-span-2 grid grid-cols-2 gap-4"
+                          : ""
+                      }
+                    >
+                      <div className={element.colSpan === 2 ? "col-start-1" : ""}>
+                        <DynamicInput
+                          element={{
+                            ...element,
+                            isReadOnly: element.isReadOnly
+                              ? currentMode === "detail"
+                              : false,
+                          }}
+                          value={currentInputs[element.id]}
+                          onChange={(value) => handleValueChange(element.id, value)}
+                          totalGames={totalGames}
+                        />
+                      </div>
+                    </div>
                   ))}
                 </div>
 
@@ -987,7 +972,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   className="flex flex-col items-center justify-center rounded-lg border border-slate-100 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-800"
                 >
                   <div className="text-xs text-slate-500 dark:text-slate-400">
-                    {item.label}
+                    {formatBonusText(item.label)}
                   </div>
                   <div className="text-xl font-bold text-slate-800 dark:text-white">
                     {item.val > 0 ? `1/${item.format(item.val)}` : "---"}
@@ -1337,7 +1322,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                             key={element.id}
                             className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400"
                           >
-                            {element.label.replace("回数", "確率")}
+                            {formatBonusText(element.label.replace("回数", "確率"))}
                           </th>,
                         ];
 
