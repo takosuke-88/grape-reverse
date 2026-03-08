@@ -13,6 +13,7 @@ import MyJugglerStrategyColumn from "./pages/columns/myjuggler5-strategy-trap";
 import Funky2Column from "./pages/columns/funky2-setting6-behavior";
 import ImJugglerColumn from "./pages/columns/imjuggler-setting4-behavior";
 import MrJugglerColumn from "./pages/columns/mrjuggler-expectations";
+import HanahanaLosingPatternsColumn from "./pages/columns/hanahana-losing-patterns";
 import ColumnIndexPage from "./pages/columns/index";
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToTopButton from "./components/ScrollToTopButton";
@@ -61,6 +62,10 @@ export default function App() {
             <Route
               path="/columns/mrjuggler-expectations"
               element={<MrJugglerColumn />}
+            />
+            <Route
+              path="/columns/hanahana-losing-patterns"
+              element={<HanahanaLosingPatternsColumn />}
             />
 
             {/* デフォルトルート */}

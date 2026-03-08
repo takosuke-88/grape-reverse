@@ -59,4 +59,14 @@ export const ATTACHED_COLUMNS: ColumnArticle[] = [
     date: "2026-02-25",
     path: "/columns/mrjuggler-expectations",
   },
+  {
+    id: "hanahana-losing-patterns",
+    title:
+      "ハナハナで負け続ける人には共通点があった！ -GrapeReverse -パチスロ設定判別・ぶどう/ベル逆算ツール",
+    description:
+      "ハナハナで負け続ける人の多くは、台が悪いのではなく判断の根拠が演出任せになっています。フラッシュの色に踊らされず、ベル確率を重視するなど、勝つための「判断の癖」を解説します。",
+    tags: ["hana", "hanahana", "strategy", "column"],
+    date: "2026-03-08",
+    path: "/columns/hanahana-losing-patterns",
+  },
 ];
