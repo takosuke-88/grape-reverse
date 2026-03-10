@@ -1,7 +1,12 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ATTACHED_COLUMNS } from "../../data/column-list";
 
 const ColumnIndexPage = () => {
+  useEffect(() => {
+    document.title = "パチスロ攻略コラム -GrapeReverse -パチスロ設定判別";
+  }, []);
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 pb-12">
       <main className="container mx-auto px-4 py-8 max-w-4xl">

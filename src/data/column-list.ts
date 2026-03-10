@@ -11,8 +11,7 @@ export interface ColumnArticle {
 export const ATTACHED_COLUMNS: ColumnArticle[] = [
   {
     id: "myjuggler5-strategy-trap",
-    title:
-      "「マイジャグVは負けやすい」の真実。設定2の地雷を避ける立ち回り術 -GrapeReverse パチスロ設定判別・ぶどう/ベル逆算ツール",
+    title: "「マイジャグVは負けやすい」の真実。設定2の地雷を避ける立ち回り術",
     description:
       "看板機種ゆえの皮肉。実はフリー打ち設定2で98.0%、確実なマイナス構造に潜む「見えない地雷」を避けるための必須知識を解説します。",
     tags: ["juggler", "myjuggler5", "strategy", "column"],
@@ -21,8 +20,7 @@ export const ATTACHED_COLUMNS: ColumnArticle[] = [
   },
   {
     id: "myjuggler5-setting6-behavior",
-    title:
-      "【マイジャグ5】設定6はこう動く！ -GrapeReverse パチスロ設定判別・ぶどう/ベル逆算ツール",
+    title: "【マイジャグ5】設定6はこう動く！",
     description:
       "「合算1/120の台が空いた！」←実はそれ、罠かもしれません。AIシミュレーションと実戦データから導き出した、マイジャグ5の本当の狙い方を解説します。",
     tags: ["juggler", "myjuggler5"],
@@ -31,8 +29,7 @@ export const ATTACHED_COLUMNS: ColumnArticle[] = [
   },
   {
     id: "funky2-setting6-behavior",
-    title:
-      "ファンキージャグラー2の設定6は別格？ -GrapeReverse パチスロ設定判別・ぶどう/ベル逆算ツール",
+    title: "ファンキージャグラー2の設定6は別格？",
     description:
       "BIG確率だけで設定判別していませんか？ファンキー2で勝つために見落とされがちな「単独REG」と「ぶどう」の重要性を徹底解説。",
     tags: ["juggler", "funky2"],
@@ -41,8 +38,7 @@ export const ATTACHED_COLUMNS: ColumnArticle[] = [
   },
   {
     id: "imjuggler-setting4-behavior",
-    title:
-      "設定4のネオアイムジャグラーは打つ価値あり？ -GrapeReverse パチスロ設定判別・ぶどう/ベル逆算ツール",
+    title: "設定4のネオアイムジャグラーは打つ価値あり？",
     description:
       "夕方のホールで「合算1/142前後、RBもそこそこ出てる空き台」を見つけたとき、「これ設定4っぽいな」と感じたことはないだろうか。設定4が入っていたとして、果たしてそれは打ち続ける価値があるのか——今回はデータをもとにシビアに答えを出す。",
     tags: ["juggler", "im-juggler"],
@@ -51,8 +47,7 @@ export const ATTACHED_COLUMNS: ColumnArticle[] = [
   },
   {
     id: "mrjuggler-expectations",
-    title:
-      "今さら聞けないミスタージャグラー、結局勝てるの？ -GrapeReverse パチスロ設定判別・ぶどう/ベル逆算ツール",
+    title: "今さら聞けないミスタージャグラー、結局勝てるの？",
     description:
       "「なんか難しそう」でスルーしてきた人、正直多いんじゃないか。ミスタージャグラーはピエロ重複だの中押し攻略だの、調べると情報がわんさか出てきて初見だと確かに面倒くさそうに見える。ただ結論から言うと、チェリー狙いさえできればアイムジャグラーと変わらない感覚で打てる。",
     tags: ["juggler", "mr"],
@@ -61,8 +56,7 @@ export const ATTACHED_COLUMNS: ColumnArticle[] = [
   },
   {
     id: "hanahana-losing-patterns",
-    title:
-      "ハナハナで負け続ける人には共通点があった！ -GrapeReverse -パチスロ設定判別・ぶどう/ベル逆算ツール",
+    title: "ハナハナで負け続ける人には共通点があった！",
     description:
       "ハナハナで負け続ける人の多くは、台が悪いのではなく判断の根拠が演出任せになっています。フラッシュの色に踊らされず、ベル確率を重視するなど、勝つための「判断の癖」を解説します。",
     tags: ["hana", "hanahana", "strategy", "column"],
@@ -71,8 +65,7 @@ export const ATTACHED_COLUMNS: ColumnArticle[] = [
   },
   {
     id: "hanahana-strategy-differences",
-    title:
-      "ハナハナの立ち回り、機種が変わっても同じでいいのか？ -GrapeReverse パチスロ設定判別・ぶどう/ベル逆算ツール",
+    title: "ハナハナの立ち回り、機種が変わっても同じでいいのか？",
     description:
       "機種が変わってもベル数えてBIG中のスイカ見てフェザーランプ確認して……この流れ自体は変わらない。基本骨格は一緒だ。ただ、「どうせ全部同じハナハナでしょ」って感覚で座ると、機種ごとに仕込まれてる微妙な差異を見逃す。",
     tags: ["hana", "hanahana", "strategy", "column"],
