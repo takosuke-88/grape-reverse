@@ -69,4 +69,14 @@ export const ATTACHED_COLUMNS: ColumnArticle[] = [
     date: "2026-03-08",
     path: "/columns/hanahana-losing-patterns",
   },
+  {
+    id: "hanahana-strategy-differences",
+    title:
+      "ハナハナの立ち回り、機種が変わっても同じでいいのか？ -GrapeReverse パチスロ設定判別・ぶどう/ベル逆算ツール",
+    description:
+      "機種が変わってもベル数えてBIG中のスイカ見てフェザーランプ確認して……この流れ自体は変わらない。基本骨格は一緒だ。ただ、「どうせ全部同じハナハナでしょ」って感覚で座ると、機種ごとに仕込まれてる微妙な差異を見逃す。",
+    tags: ["hana", "hanahana", "strategy", "column"],
+    date: "2026-03-10",
+    path: "/columns/hanahana-strategy-differences",
+  },
 ];
