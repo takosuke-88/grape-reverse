@@ -5,7 +5,6 @@ import type { MachineConfig } from "../../types/machine-schema";
 export const girlsSsConfig: MachineConfig = {
   id: "girlsss",
   name: "ジャグラーガールズSS",
-  title: "ジャグラーガールズSSの設定判別・ぶどう逆算 -GrapeReverse",
   type: "A-type",
   themeColor: "bg-pink-500",
   sections: [

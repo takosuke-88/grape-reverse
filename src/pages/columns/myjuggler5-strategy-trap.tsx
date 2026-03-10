@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const MyJugglerStrategyColumn = () => {
   useEffect(() => {
     document.title =
-      "「マイジャグVは負けやすい」の真実。設定2の地雷を避ける立ち回り術 -GrapeReverse パチスロ設定判別・ぶどう/ベル逆算ツール";
+      "「マイジャグVは負けやすい」の真実。設定2の地雷を避ける立ち回り術 -パチスロ攻略コラム｜GrapeReverse";
   }, []);
 
   return (

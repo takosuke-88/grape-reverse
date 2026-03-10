@@ -5,7 +5,6 @@ import type { MachineConfig } from "../../types/machine-schema";
 export const funkyJuggler2Config: MachineConfig = {
   id: "funky2",
   name: "ファンキージャグラー2",
-  title: "ファンキージャグラー2の設定判別・ぶどう逆算 -GrapeReverse",
   type: "A-type",
   themeColor: "bg-purple-600",
   sections: [

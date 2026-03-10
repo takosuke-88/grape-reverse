@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const MyJugglerColumn = () => {
   useEffect(() => {
     document.title =
-      "【マイジャグ5】設定6はこう動く！ -GrapeReverse パチスロ設定判別・ぶどう/ベル逆算ツール";
+      "【マイジャグ5】設定6はこう動く！ -パチスロ攻略コラム｜GrapeReverse";
   }, []);
 
   return (

@@ -3,7 +3,6 @@ import type { MachineConfig } from "../../types/machine-schema";
 export const haihaiSiosai2Config: MachineConfig = {
   id: "haihai-siosai2",
   name: "ハイハイシオサイ2",
-  title: "ハイハイシオサイ2の設定判別・ベル逆算 -GrapeReverse",
   type: "A-type",
   themeColor: "bg-teal-600",
   sections: [

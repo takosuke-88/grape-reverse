@@ -5,7 +5,6 @@ import type { MachineConfig } from "../../types/machine-schema";
 export const imJugglerExConfig: MachineConfig = {
   id: "aimex",
   name: "SアイムEX/ネオアイムEX",
-  title: "アイムジャグラーEXの設定判別・ぶどう逆算 -GrapeReverse",
   type: "A-type",
   themeColor: "bg-red-600",
   sections: [

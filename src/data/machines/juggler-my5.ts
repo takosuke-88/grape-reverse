@@ -5,7 +5,6 @@ import type { MachineConfig } from "../../types/machine-schema";
 export const myJuggler5Config: MachineConfig = {
   id: "myjuggler5",
   name: "マイジャグラーV",
-  title: "マイジャグラーVの設定判別・ぶどう逆算 -GrapeReverse",
   type: "A-type",
   themeColor: "bg-pink-500",
   sections: [

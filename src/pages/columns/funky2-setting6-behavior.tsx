@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const Funky2Column = () => {
   useEffect(() => {
     document.title =
-      "ファンキージャグラー2の設定6は別格？ -GrapeReverse パチスロ設定判別・ぶどう/ベル逆算ツール";
+      "ファンキージャグラー2の設定6は別格？ -パチスロ攻略コラム｜GrapeReverse";
   }, []);
 
   return (

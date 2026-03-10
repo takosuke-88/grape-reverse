@@ -4,7 +4,7 @@ import { ATTACHED_COLUMNS } from "../../data/column-list";
 
 const ColumnIndexPage = () => {
   useEffect(() => {
-    document.title = "パチスロ攻略コラム -GrapeReverse -パチスロ設定判別";
+    document.title = "パチスロ攻略コラム｜GrapeReverse";
   }, []);
 
   return (

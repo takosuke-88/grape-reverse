@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const HanahanaLosingPatternsColumn = () => {
   useEffect(() => {
     document.title =
-      "ハナハナで負け続ける人には共通点があった！ -GrapeReverse -パチスロ設定判別・ぶどう/ベル逆算ツール";
+      "ハナハナで負け続ける人には共通点があった！ -パチスロ攻略コラム｜GrapeReverse";
   }, []);
 
   return (

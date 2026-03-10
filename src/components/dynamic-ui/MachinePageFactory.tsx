@@ -99,8 +99,9 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     setEstimationResults(null);
 
     // 機種名（または専用に設定されたtitle）をドキュメントタイトルにセット
-    document.title = config.title || config.name;
-  }, [config.id, config.title, config.name]);
+    const categoryLiteral = currentCategory === "hana" ? "ベル逆算" : currentCategory === "juggler" ? "ぶどう逆算" : "ぶどう/ベル逆算";
+    document.title = `${config.name}の攻略・設定判別 ${categoryLiteral}｜GrapeReverse`;
+  }, [config.id, config.name, currentCategory]);
 
   // ブドウ算出結果用
   const [calculatedGrapeCount, setCalculatedGrapeCount] = useState<

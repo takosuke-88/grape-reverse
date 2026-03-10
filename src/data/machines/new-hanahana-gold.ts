@@ -3,7 +3,6 @@ import type { MachineConfig } from "../../types/machine-schema";
 export const newHanahanaGoldConfig: MachineConfig = {
   id: "new-hanahana-gold",
   name: "ニューハナハナゴールド-30",
-  title: "ニューハナハナゴールド-30の設定判別・ベル逆算 -GrapeReverse",
   type: "A-type",
   themeColor: "bg-yellow-500", // "Gold" theme
   sections: [

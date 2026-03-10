@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const HanahanaStrategyDifferencesColumn = () => {
   useEffect(() => {
     document.title =
-      "ハナハナの立ち回り、機種が変わっても同じでいいのか？ -GrapeReverse パチスロ設定判別・ぶどう/ベル逆算ツール";
+      "ハナハナの立ち回り、機種が変わっても同じでいいのか？ -パチスロ攻略コラム｜GrapeReverse";
   }, []);
 
   return (

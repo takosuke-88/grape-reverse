@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const MrJugglerColumn = () => {
   useEffect(() => {
     document.title =
-      "今さら聞けないミスタージャグラー、結局勝てるの？ -GrapeReverse パチスロ設定判別・ぶどう/ベル逆算ツール";
+      "今さら聞けないミスタージャグラー、結局勝てるの？ -パチスロ攻略コラム｜GrapeReverse";
   }, []);
 
   return (

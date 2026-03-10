@@ -3,7 +3,6 @@ import type { MachineConfig } from "../../types/machine-schema";
 export const kingHanahanaConfig: MachineConfig = {
   id: "king-hanahana",
   name: "キングハナハナ-30",
-  title: "キングハナハナ-30の設定判別・ベル逆算 -GrapeReverse",
   type: "A-type",
   themeColor: "bg-red-600",
   sections: [
