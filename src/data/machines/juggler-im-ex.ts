@@ -4,7 +4,7 @@ import type { MachineConfig } from "../../types/machine-schema";
 // 最終更新: 2026-02-19
 export const imJugglerExConfig: MachineConfig = {
   id: "aimex",
-  name: "SアイムEX/ネオアイムEX",
+  name: "ネオアイムジャグラーEX",
   type: "A-type",
   themeColor: "bg-red-600",
   sections: [

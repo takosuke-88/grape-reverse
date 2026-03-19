@@ -10,6 +10,15 @@ export interface ColumnArticle {
 
 export const ATTACHED_COLUMNS: ColumnArticle[] = [
   {
+    id: "neo-im-juggler-setting6-behavior",
+    title: "ネオアイムジャグラーの設定6、実際どう動くのか？",
+    description:
+      "設定6引いたら絶対勝てる——そう思ってる人、多い。でも現実はちょっと違う。「ほぼ勝てる。けど、普通に負ける日もある」これが正直なところ。シミュレーションと実戦データから、設定6のリアルな姿を洗い出してみる。",
+    tags: ["neo-im-juggler", "setting6", "column"],
+    date: "2026-03-19",
+    path: "/columns/neo-im-juggler-setting6-behavior",
+  },
+  {
     id: "myjuggler5-strategy-trap",
     title: "「マイジャグVは負けやすい」の真実。設定2の地雷を避ける立ち回り術",
     description:

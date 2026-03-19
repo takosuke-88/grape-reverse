@@ -15,6 +15,7 @@ import ImJugglerColumn from "./pages/columns/imjuggler-setting4-behavior";
 import MrJugglerColumn from "./pages/columns/mrjuggler-expectations";
 import HanahanaLosingPatternsColumn from "./pages/columns/hanahana-losing-patterns";
 import HanahanaStrategyDifferencesColumn from "./pages/columns/hanahana-strategy-differences";
+import NeoImColumn from "./pages/columns/neo-im-juggler-setting6-behavior";
 import ColumnIndexPage from "./pages/columns/index";
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToTopButton from "./components/ScrollToTopButton";
@@ -71,6 +72,10 @@ export default function App() {
             <Route
               path="/columns/hanahana-strategy-differences"
               element={<HanahanaStrategyDifferencesColumn />}
+            />
+            <Route
+              path="/columns/neo-im-juggler-setting6-behavior"
+              element={<NeoImColumn />}
             />
 
             {/* デフォルトルート */}

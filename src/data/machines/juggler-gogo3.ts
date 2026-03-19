@@ -6,7 +6,7 @@ export const gogoJuggler3Config: MachineConfig = {
   id: "gogo3",
   name: "ゴーゴージャグラー3",
   type: "A-type",
-  themeColor: "bg-orange-500",
+  themeColor: "bg-pink-500",
   sections: [
     {
       id: "basic-data",

@@ -22,8 +22,8 @@ export const AVAILABLE_MACHINES: MachineInfo[] = [
   },
   {
     id: "aimex",
-    name: "SアイムEX/ネオアイムEX",
-    title: "アイムジャグラーEXの設定判別・ぶどう逆算 -GrapeReverse",
+    name: "ネオアイムジャグラーEX",
+    title: "ネオアイムジャグラーEXの攻略・設定判別 ぶどう逆算｜GrapeReverse",
     category: "juggler",
     color: "#C62828",
   },
@@ -39,7 +39,7 @@ export const AVAILABLE_MACHINES: MachineInfo[] = [
     name: "ゴーゴージャグラー3",
     title: "ゴーゴージャグラー3の設定判別・ぶどう逆算 -GrapeReverse",
     category: "juggler",
-    color: "#E91E63", // Pink
+    color: "#FF4081", // Brighter Pink
   },
   {
     id: "girlsss",
