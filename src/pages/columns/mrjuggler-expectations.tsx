@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const MrJugglerColumn = () => {
   useEffect(() => {
     document.title =
-      "今さら聞けないミスタージャグラー、結局勝てるの？ -パチスロ攻略コラム｜GrapeReverse";
+      "今さら聞けないミスタージャグラー、結局勝てるの？｜GrapeReverse";
   }, []);
 
   return (
@@ -327,9 +327,9 @@ const MrJugglerColumn = () => {
           </p>
 
           <div className="mt-12 p-8 bg-gray-100 dark:bg-gray-800 rounded-xl text-center">
-            <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
               さあ、ホールで答え合わせをしよう
-            </h3>
+            </h2>
             <p className="mb-6 text-gray-600 dark:text-gray-300">
               登録不要・完全無料で使えます。
             </p>

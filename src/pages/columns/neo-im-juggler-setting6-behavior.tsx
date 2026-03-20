@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const NeoImSetting6BehaviorColumn = () => {
   useEffect(() => {
     document.title =
-      "ネオアイムジャグラーの設定6、実際どう動くのか？ -パチスロ攻略コラム｜GrapeReverse";
+      "ネオアイムジャグラーの設定6、実際どう動くのか？｜GrapeReverse";
   }, []);
 
   return (
@@ -174,7 +174,7 @@ const NeoImSetting6BehaviorColumn = () => {
 
           {/* フッター誘導 */}
           <div className="bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/10 dark:to-pink-900/10 p-8 rounded-3xl mt-16 text-center border border-red-100 dark:border-red-800/30">
-            <h3 className="text-xl font-bold mb-4">確実な設定判別こそが勝利への近道</h3>
+            <h2 className="text-xl font-bold mb-4">確実な設定判別こそが勝利への近道</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
               機種の癖を知り、ツールで正確な数値を導き出す。
               <br />

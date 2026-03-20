@@ -3,8 +3,7 @@ import { Link } from "react-router-dom";
 
 const Funky2Column = () => {
   useEffect(() => {
-    document.title =
-      "ファンキージャグラー2の設定6は別格？ -パチスロ攻略コラム｜GrapeReverse";
+    document.title = "ファンキージャグラー2の設定6は別格？｜GrapeReverse";
   }, []);
 
   return (

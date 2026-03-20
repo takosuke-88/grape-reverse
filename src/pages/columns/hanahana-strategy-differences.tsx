@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const HanahanaStrategyDifferencesColumn = () => {
   useEffect(() => {
     document.title =
-      "ハナハナの立ち回り、機種が変わっても同じでいいのか？ -パチスロ攻略コラム｜GrapeReverse";
+      "ハナハナの立ち回り、機種が変わっても同じでいいのか？｜GrapeReverse";
   }, []);
 
   return (
@@ -87,9 +87,9 @@ const HanahanaStrategyDifferencesColumn = () => {
           </p>
 
           <div className="mt-12 p-8 bg-gray-100 dark:bg-gray-800 rounded-xl text-center">
-            <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
               機種ごとの違いをツールでカバーしよう
-            </h3>
+            </h2>
             <p className="mb-6 text-gray-600 dark:text-gray-300">
               ハナハナシリーズの判別ならGrapeReverseにお任せ
             </p>

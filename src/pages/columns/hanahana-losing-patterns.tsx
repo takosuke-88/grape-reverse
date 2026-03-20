@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const HanahanaLosingPatternsColumn = () => {
   useEffect(() => {
     document.title =
-      "ハナハナで負け続ける人には共通点があった！ -パチスロ攻略コラム｜GrapeReverse";
+      "ハナハナで負け続ける人には共通点があった！｜GrapeReverse";
   }, []);
 
   return (
@@ -100,9 +100,9 @@ const HanahanaLosingPatternsColumn = () => {
           </p>
 
           <div className="my-10 text-center">
-            <p className="text-lg font-bold mb-4 text-gray-900 dark:text-white">
+            <h2 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">
               今の台のベル確率、足りてる？逆算ツールでチェック！
-            </p>
+            </h2>
             <Link
               to="/king-hanahana"
               className="inline-block bg-gradient-to-r from-purple-600 to-red-600 hover:from-purple-700 hover:to-red-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform transition hover:scale-105"

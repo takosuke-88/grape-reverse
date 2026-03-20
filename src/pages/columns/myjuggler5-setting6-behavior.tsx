@@ -3,8 +3,7 @@ import { Link } from "react-router-dom";
 
 const MyJugglerColumn = () => {
   useEffect(() => {
-    document.title =
-      "【マイジャグ5】設定6はこう動く！ -パチスロ攻略コラム｜GrapeReverse";
+    document.title = "【マイジャグ5】設定6はこう動く！｜GrapeReverse";
   }, []);
 
   return (
@@ -34,9 +33,9 @@ const MyJugglerColumn = () => {
           </p>
 
           <div className="my-8 p-6 bg-blue-50 dark:bg-gray-800 rounded-lg border border-blue-100 dark:border-gray-700">
-            <h3 className="text-xl font-bold mb-4 text-blue-800 dark:text-blue-300">
+            <h2 className="text-xl font-bold mb-4 text-blue-800 dark:text-blue-300">
               この記事の結論
-            </h3>
+            </h2>
             <ul className="list-disc pl-5 space-y-2 text-gray-700 dark:text-gray-300">
               <li>
                 設定1でも、<strong>10〜15%</strong>
@@ -208,9 +207,9 @@ const MyJugglerColumn = () => {
           </p>
 
           <div className="mt-12 p-8 bg-gray-100 dark:bg-gray-800 rounded-xl text-center">
-            <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
               さあ、ホールで答え合わせをしよう
-            </h3>
+            </h2>
             <p className="mb-6 text-gray-600 dark:text-gray-300">
               登録不要・完全無料で使えます。
             </p>

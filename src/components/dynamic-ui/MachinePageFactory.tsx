@@ -101,8 +101,12 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     setEstimationResults(null);
 
     // 機種名（または専用に設定されたtitle）をドキュメントタイトルにセット
-    const categoryLiteral = currentCategory === "hana" ? "ベル逆算" : currentCategory === "juggler" ? "ぶどう逆算" : "ぶどう/ベル逆算";
-    document.title = `${config.name}の攻略・設定判別 ${categoryLiteral}｜GrapeReverse`;
+    if (config.title) {
+      document.title = config.title;
+    } else {
+      const categoryLiteral = currentCategory === "hana" ? "ベル逆算" : currentCategory === "juggler" ? "ぶどう逆算" : "ぶどう/ベル逆算";
+      document.title = `${config.name}の攻略・設定判別 ${categoryLiteral}｜GrapeReverse`;
+    }
   }, [config.id, config.name, currentCategory]);
 
   // ブドウ算出結果用

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const MyJugglerStrategyColumn = () => {
   useEffect(() => {
     document.title =
-      "「マイジャグVは負けやすい」の真実。設定2の地雷を避ける立ち回り術 -パチスロ攻略コラム｜GrapeReverse";
+      "「マイジャグVは負けやすい」の真実。設定2の地雷を避ける立ち回り術｜GrapeReverse";
   }, []);
 
   return (
@@ -143,9 +143,9 @@ const MyJugglerStrategyColumn = () => {
           </p>
 
           <div className="mt-12 p-8 bg-purple-50 dark:bg-gray-800 rounded-xl text-center border border-purple-100 dark:border-purple-900">
-            <h3 className="text-2xl font-bold mb-4 text-purple-900 dark:text-white">
+            <h2 className="text-2xl font-bold mb-4 text-purple-900 dark:text-white">
               本当に「今座っている台」は追うべきか？
-            </h3>
+            </h2>
             <p className="mb-6 text-gray-600 dark:text-gray-300">
               今のデータを見切る基準として、ツールを活用してみよう。
             </p>

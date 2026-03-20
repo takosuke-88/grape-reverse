@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const ImJugglerSetting4Column = () => {
   useEffect(() => {
     document.title =
-      "設定4のネオアイムジャグラーは打つ価値あり？ -パチスロ攻略コラム｜GrapeReverse";
+      "設定4のネオアイムジャグラーは打つ価値あり？｜GrapeReverse";
   }, []);
 
   return (
@@ -186,9 +186,9 @@ const ImJugglerSetting4Column = () => {
           </p>
 
           <div className="mt-12 p-8 bg-gray-100 dark:bg-gray-800 rounded-xl text-center">
-            <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
               さあ、ホールで答え合わせをしよう
-            </h3>
+            </h2>
             <p className="mb-6 text-gray-600 dark:text-gray-300">
               アイムジャグラーを判別するなら
             </p>
