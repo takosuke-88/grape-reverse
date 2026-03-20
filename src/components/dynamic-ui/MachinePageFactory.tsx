@@ -50,6 +50,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
   const currentCategory = currentMachineInfo?.category || "juggler";
   const brandColor = currentMachineInfo?.color; // ブランドカラー
+  const toolNameSuffix = currentCategory === "hana" ? "ベル逆算ツール" : "ぶどう逆算ツール";
+  const toolLabel = `設定判別・${toolNameSuffix}`;
 
   // 初期化ロジックを関数化
   const initializeValues = (mode: "normal" | "grape") => {
@@ -427,8 +429,12 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             </span>
             {/* 詳細フラグ判別中の表示を削除 */}
           </div>
-          <h1 className="text-2xl font-bold sm:text-3xl">{config.name}</h1>
-          <p className="mt-1 text-sm opacity-90">設定判別ツール</p>
+          <h1 className="font-bold">
+            <span className="block text-2xl sm:text-3xl">{config.name}</span>
+            <span className="block mt-2 text-sm sm:text-base font-normal opacity-90">
+              {toolLabel}
+            </span>
+          </h1>
         </div>
       </div>
 
