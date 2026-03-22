@@ -1614,60 +1614,58 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           );
           const currentCategory = currentMachineInfo?.category || "other";
 
-          // 最新のものを優先するため、日付で降順ソート
           const sortedColumns = [...ATTACHED_COLUMNS].sort(
             (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
           );
 
-          const relatedColumns = sortedColumns.filter(
-            (col) =>
-              col.tags.includes(config.id) ||
-              col.tags.includes(currentCategory),
-          );
-          // それ以外の記事を取得
-          const otherColumns = sortedColumns.filter(
-            (col) => !relatedColumns.includes(col),
-          );
-          // 関連度の高い順に最大3件取得した後、最終的な見た目として最新順（日付降順）にソートして表示
-          const displayColumns = [...relatedColumns, ...otherColumns]
-            .slice(0, 3)
-            .sort(
-              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-            );
+          // STEP 1: 機種に関連するコラム
+          const specificRelated = sortedColumns
+            .filter(
+              (col) =>
+                col.tags.includes(config.id) ||
+                col.tags.includes(currentCategory),
+            )
+            .slice(0, 3);
 
-          if (displayColumns.length === 0) return null;
+          // STEP 2: サイト全体の最新コラム (STEP 1と重複しないもの)
+          const siteWideLatest = sortedColumns
+            .filter((col) => !specificRelated.find((r) => r.id === col.id))
+            .slice(0, 3);
+
+          if (specificRelated.length === 0 && siteWideLatest.length === 0)
+            return null;
 
           return (
-            <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6 mt-4">
-              <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white flex items-center gap-2">
-                <span className="text-indigo-500">📚</span> この記事もチェック！
-              </h2>
-              <div className="flex flex-col gap-4">
-                {displayColumns.map((col) => (
-                  <a
-                    key={col.id}
-                    href={col.path}
-                    className="block p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:scale-[1.02] hover:border-indigo-400 group"
-                  >
-                    <div className="flex gap-2 mb-2">
-                      {col.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold rounded-full"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                    <h3 className="text-[15px] font-bold text-slate-800 dark:text-slate-100 mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                      {col.title}
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">
-                      {col.description}
-                    </p>
-                  </a>
-                ))}
-              </div>
+            <div className="mt-8 space-y-8">
+              {/* セクション1: 機種特化コラム (存在する場合のみ) */}
+              {specificRelated.length > 0 && (
+                <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
+                  <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white flex items-center gap-2">
+                    <span className="text-indigo-500">📚</span>{" "}
+                    この機種の攻略コラム
+                  </h2>
+                  <div className="flex flex-col gap-4">
+                    {specificRelated.map((col) => (
+                      <ColumnCard key={col.id} col={col} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* セクション2: サイト全体の最新コラム */}
+              {siteWideLatest.length > 0 && (
+                <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
+                  <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white flex items-center gap-2">
+                    <span className="text-indigo-500">✨</span>{" "}
+                    最新のパチスロ・業界コラム
+                  </h2>
+                  <div className="flex flex-col gap-4">
+                    {siteWideLatest.map((col) => (
+                      <ColumnCard key={col.id} col={col} />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           );
         })()}
@@ -1675,5 +1673,30 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     </div>
   );
 };
+
+// 共通カードコンポーネント
+const ColumnCard = ({ col }: { col: (typeof ATTACHED_COLUMNS)[0] }) => (
+  <a
+    href={col.path}
+    className="block p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:scale-[1.01] hover:border-indigo-400 group"
+  >
+    <div className="flex gap-2 mb-2">
+      {col.tags.slice(0, 3).map((tag) => (
+        <span
+          key={tag}
+          className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold rounded-full"
+        >
+          #{tag}
+        </span>
+      ))}
+    </div>
+    <h3 className="text-[15px] font-bold text-slate-800 dark:text-slate-100 mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+      {col.title}
+    </h3>
+    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">
+      {col.description}
+    </p>
+  </a>
+);
 
 export default MachinePageFactory;

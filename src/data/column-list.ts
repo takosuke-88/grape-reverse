@@ -10,6 +10,15 @@ export interface ColumnArticle {
 
 export const ATTACHED_COLUMNS: ColumnArticle[] = [
   {
+    id: "are-guest-performers-necessary",
+    title: "来店演者って「いらなくない？」",
+    description:
+      "7,000人の応募、数十万人のフォロワー、そしてリークされる「指定台」の疑い。集客の切り札として定着した来店演者バブルの裏側にある歪みと、業界が本当に必要としている『透明性』について考える。",
+    tags: ["column", "opinion", "strategy"],
+    date: "2026-03-22",
+    path: "/columns/are-guest-performers-necessary",
+  },
+  {
     id: "neo-im-juggler-setting6-behavior",
     title: "ネオアイムジャグラーの設定6、実際どう動くのか？",
     description:
