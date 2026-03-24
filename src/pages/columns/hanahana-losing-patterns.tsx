@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
 import ColumnNavigation from "../../components/ColumnNavigation";
 
 const HanahanaLosingPatternsColumn = () => {
