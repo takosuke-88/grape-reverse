@@ -10,6 +10,15 @@ export interface ColumnArticle {
 
 export const ATTACHED_COLUMNS: ColumnArticle[] = [
   {
+    id: "evening-juggler-strategy",
+    title: "仕事帰りのジャグラー、なぜ勝てない？「夕方からの台選び」で絶対にやってはいけない3つのこと",
+    description:
+      "仕事を終えてホールへ直行。データ機を眺めて「合算1/130、これいけるんじゃね？」と座る。その判断が、実は負けの始まりかもしれません。夕方からの立ち回りで陥りがちな3つの罠と、勝率を劇的に変える「ぶどう逆算」の重要性を解説します。",
+    tags: ["column", "juggler", "strategy"],
+    date: "2026-03-24",
+    path: "/columns/evening-juggler-strategy",
+  },
+  {
     id: "are-guest-performers-necessary",
     title: "来店演者って「いらなくない？」",
     description:
