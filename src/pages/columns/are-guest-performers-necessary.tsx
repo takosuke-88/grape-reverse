@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import ColumnNavigation from "../../components/ColumnNavigation";
 import RelatedColumns from "../../components/RelatedColumns";
 
 const AreGuestPerformersNecessaryColumn = () => {
@@ -105,24 +106,10 @@ const AreGuestPerformersNecessaryColumn = () => {
               7,000人が演者を目指す世界で、本当に足りてないのは演者じゃない。<strong>「この店で打って良かった」</strong>っていう経験を積み重ねられるホール環境だ。設定状況の透明性を高めて、GrapeReverseみたいなツールでデータを武器に立ち回れる環境を整える方が、長期的な遊技人口の回復には直結するんじゃないか。
             </p>
 
-            <div className="bg-indigo-600 dark:bg-indigo-700 text-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl shadow-indigo-200 dark:shadow-none mb-16 relative overflow-hidden group">
-              <div className="relative z-10">
-                <p className="mb-6 leading-loose text-lg md:text-xl opacity-90">
-                  来店演者は、業界が広告規制っていう制約の中で生み出した「苦肉の策」だったはずだ。その苦肉の策が主役になりすぎてるとしたら——そろそろ問い直す時期に来てると思う。
-                </p>
-                <div className="flex justify-end">
-                  <Link
-                    to="/columns"
-                    className="inline-flex items-center gap-2 text-white font-bold hover:translate-x-1 transition-transform"
-                  >
-                    コラム一覧に戻る <span>→</span>
-                  </Link>
-                </div>
-              </div>
-              {/* 装飾用 */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-400/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-xl"></div>
-            </div>
+            <p className="mt-12 mb-16 pt-10 border-t border-slate-200 dark:border-slate-800 leading-loose text-lg md:text-xl text-slate-700 dark:text-slate-300">
+              来店演者は、業界が広告規制っていう制約の中で生み出した「苦肉の策」だったはずだ。その苦肉の策が主役になりすぎてるとしたら——そろそろ問い直す時期に来てると思う。
+            </p>
+            <ColumnNavigation currentId="are-guest-performers-necessary" />
           </div>
 
           {/* 関連記事セクション */}

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import ColumnNavigation from "../../components/ColumnNavigation";
 
 const NeoImSetting6BehaviorColumn = () => {
   useEffect(() => {
@@ -188,6 +189,8 @@ const NeoImSetting6BehaviorColumn = () => {
               ぶどう逆算で設定6を見極める
             </Link>
           </div>
+
+          <ColumnNavigation currentId="neo-im-juggler-setting6-behavior" />
         </div>
       </main>
     </div>

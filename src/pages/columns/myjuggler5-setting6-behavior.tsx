@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import ColumnNavigation from "../../components/ColumnNavigation";
 
 const MyJugglerColumn = () => {
   useEffect(() => {
@@ -220,6 +221,8 @@ const MyJugglerColumn = () => {
               今すぐツールで判別する
             </Link>
           </div>
+
+          <ColumnNavigation currentId="myjuggler5-setting6-behavior" />
 
           <p className="text-sm text-gray-500 mt-8">
             ※本記事のデータはシミュレーション値であり、実際のホール状況を保証するものではありません。投資は自己責任でお願いします。

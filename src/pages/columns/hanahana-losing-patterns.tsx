@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import ColumnNavigation from "../../components/ColumnNavigation";
 
 const HanahanaLosingPatternsColumn = () => {
   useEffect(() => {
@@ -103,13 +104,15 @@ const HanahanaLosingPatternsColumn = () => {
             <h2 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">
               今の台のベル確率、足りてる？逆算ツールでチェック！
             </h2>
-            <Link
-              to="/king-hanahana"
+            <a
+              href="/#hana"
               className="inline-block bg-gradient-to-r from-purple-600 to-red-600 hover:from-purple-700 hover:to-red-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform transition hover:scale-105"
             >
-              キングハナハナ 設定判別ツールを使う
-            </Link>
+              ハナハナシリーズの設定判別・ベル逆算ツール一覧へ
+            </a>
           </div>
+
+          <ColumnNavigation currentId="hanahana-losing-patterns" />
 
           <p className="text-sm text-gray-500 mt-8">
             ※本記事のデータはシミュレーション値であり、実際のホール状況を保証するものではありません。投資は自己責任でお願いします。

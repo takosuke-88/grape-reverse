@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import ColumnNavigation from "../../components/ColumnNavigation";
 
 const ImJugglerSetting4Column = () => {
   useEffect(() => {
@@ -199,6 +200,8 @@ const ImJugglerSetting4Column = () => {
               今すぐツールで判別する
             </Link>
           </div>
+
+          <ColumnNavigation currentId="imjuggler-setting4-behavior" />
         </div>
       </main>
     </div>

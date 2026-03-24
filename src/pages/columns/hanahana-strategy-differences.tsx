@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import ColumnNavigation from "../../components/ColumnNavigation";
 
 const HanahanaStrategyDifferencesColumn = () => {
   useEffect(() => {
@@ -86,26 +86,19 @@ const HanahanaStrategyDifferencesColumn = () => {
             機種が変わったら1回解析サイト見る。たったそれだけで、ハナハナの設定判別精度はほぼ完成形に持っていける。逆にこれをサボると、9割合ってても残り1割で全部ひっくり返される。
           </p>
 
-          <div className="mt-12 p-8 bg-gray-100 dark:bg-gray-800 rounded-xl text-center">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
-              機種ごとの違いをツールでカバーしよう
+          <div className="my-10 text-center">
+            <h2 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">
+              今の台のベル確率、足りてる？逆算ツールでチェック！
             </h2>
-            <p className="mb-6 text-gray-600 dark:text-gray-300">
-              ハナハナシリーズの判別ならGrapeReverseにお任せ
-            </p>
-            <Link
-              to="/columns"
-              className="inline-block bg-[#D81B60] hover:bg-pink-700 text-white font-bold py-3 px-10 rounded-lg shadow-md transition mx-2"
+            <a
+              href="/#hana"
+              className="inline-block bg-gradient-to-r from-purple-600 to-red-600 hover:from-purple-700 hover:to-red-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform transition hover:scale-105"
             >
-              コラム一覧へ戻る
-            </Link>
-            <Link
-              to="/"
-              className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-10 rounded-lg shadow-md transition mx-2 mt-4 sm:mt-0"
-            >
-              トップページへ
-            </Link>
+              ハナハナシリーズの設定判別・ベル逆算ツール一覧へ
+            </a>
           </div>
+
+          <ColumnNavigation currentId="hanahana-strategy-differences" />
         </div>
       </main>
     </div>

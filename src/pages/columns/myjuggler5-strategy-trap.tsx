@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import ColumnNavigation from "../../components/ColumnNavigation";
 
 const MyJugglerStrategyColumn = () => {
   useEffect(() => {
@@ -156,6 +157,8 @@ const MyJugglerStrategyColumn = () => {
               今すぐツールで判別する
             </Link>
           </div>
+
+          <ColumnNavigation currentId="myjuggler5-strategy-trap" />
         </div>
       </main>
     </div>

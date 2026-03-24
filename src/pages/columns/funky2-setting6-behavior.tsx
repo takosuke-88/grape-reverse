@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import ColumnNavigation from "../../components/ColumnNavigation";
 
 const Funky2Column = () => {
   useEffect(() => {
@@ -216,6 +217,8 @@ const Funky2Column = () => {
               </Link>
             </div>
           </div>
+
+          <ColumnNavigation currentId="funky2-setting6-behavior" />
         </div>
       </main>
     </div>
