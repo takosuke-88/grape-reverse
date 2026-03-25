@@ -99,6 +99,15 @@ export interface MachineConfig {
     condition: string;
     description: string;
   }[];
+  seoContent?: SEOSection[];
+}
+
+/**
+ * SEO・解説用セクション
+ */
+export interface SEOSection {
+  title: string;
+  paragraphs: string[];
 }
 
 /**

@@ -1545,6 +1545,30 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           </div>
         )}
 
+        {/* SEOコンテンツ・独自解説テキスト */}
+        {config.seoContent && config.seoContent.length > 0 && (
+          <div className="mt-8 mb-12 space-y-12 px-2">
+            {config.seoContent.map((section, idx) => (
+              <section key={idx} className="space-y-6">
+                <h2
+                  className="text-xl font-bold text-slate-800 dark:text-white border-l-4 pl-4 py-1"
+                  style={{ borderLeftColor: brandColor || undefined }}
+                >
+                  {section.title}
+                </h2>
+                <div className="space-y-4 text-slate-700 dark:text-slate-300 leading-relaxed">
+                  {section.paragraphs.map((para, pIdx) => (
+                    <p
+                      key={pIdx}
+                      dangerouslySetInnerHTML={{ __html: para }}
+                    />
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        )}
+
         {/* --- 詳細確率表 (詳細モードかつデータがある場合のみ) --- */}
         {currentMode === "detail" &&
           config.detailedProbabilities?.big_solo &&
