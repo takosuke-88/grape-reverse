@@ -13,6 +13,7 @@ import { ATTACHED_COLUMNS } from "../../data/column-list";
 import { formatBonusText } from "../../utils/formatters";
 import EstimationResultDisplay from "./EstimationResultDisplay";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
+import DynamicInput from "./DynamicInput";
 
 interface MachinePageFactoryProps {
   config: MachineConfig;
@@ -458,7 +459,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                           isReadOnly: false,
                         }}
                         value={currentInputs[element.id]}
-                        onChange={(value) =>
+                        onChange={(value: number | string | boolean) =>
                           handleValueChange(element.id, value)
                         }
                         totalGames={totalGames}
@@ -605,7 +606,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                               : false,
                           }}
                           value={currentInputs[element.id]}
-                          onChange={(value) => handleValueChange(element.id, value)}
+                          onChange={(value: number | string | boolean) => handleValueChange(element.id, value)}
                           totalGames={totalGames}
                         />
                       </div>
