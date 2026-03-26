@@ -4,7 +4,6 @@ import type {
   MachineConfig,
   EstimationResult,
 } from "../../types/machine-schema";
-import DynamicInput from "./DynamicInput";
 import {
   calculateEstimation,
   calculateGrapeWeight,
@@ -13,6 +12,7 @@ import { AVAILABLE_MACHINES } from "../../data/machine-list";
 import { ATTACHED_COLUMNS } from "../../data/column-list";
 import { formatBonusText } from "../../utils/formatters";
 import EstimationResultDisplay from "./EstimationResultDisplay";
+import { useLocalStorage } from "../../hooks/useLocalStorage";
 
 interface MachinePageFactoryProps {
   config: MachineConfig;
@@ -22,25 +22,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   const navigate = useNavigate();
 
   // モード管理
-  const [currentMode, setCurrentMode] = useState<"simple" | "detail" | "grape">(
-    () => {
-      // ローカルストレージから前回選択したタブを復元 (全機種共通)
-      const savedMode = localStorage.getItem("grape-reverse-active-tab");
-      if (
-        savedMode === "simple" ||
-        savedMode === "detail" ||
-        savedMode === "grape"
-      ) {
-        return savedMode;
-      }
-      return "simple";
-    },
+  const [currentMode, setCurrentMode] = useLocalStorage<"simple" | "detail" | "grape">(
+    "grape-reverse-active-tab",
+    "simple"
   );
-
-  // モードが変更されたらローカルストレージに保存
-  useEffect(() => {
-    localStorage.setItem("grape-reverse-active-tab", currentMode);
-  }, [currentMode]);
 
   // 現在の機種のカテゴリを取得
   // 現在の機種のカテゴリとカラーを取得
@@ -54,7 +39,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   const toolLabel = `設定判別・${toolNameSuffix}`;
 
   // 初期化ロジックを関数化
-  const initializeValues = (mode: "normal" | "grape") => {
+  const initializeValues = () => {
     const initialValues: Record<string, number | boolean | string> = {};
     config.sections.forEach((section) => {
       section.elements.forEach((element) => {
@@ -67,36 +52,21 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
         }
       });
     });
-
-    const suffix = mode === "grape" ? "-grape-mode" : "";
-    const storageKey = `grape-reverse-data${suffix}-${config.id}`;
-    const savedData = localStorage.getItem(storageKey);
-
-    if (savedData) {
-      try {
-        const parsedData = JSON.parse(savedData);
-        return { ...initialValues, ...parsedData };
-      } catch (e) {
-        console.error(`Failed to parse saved data for ${config.id}`, e);
-      }
-    }
     return initialValues;
   };
 
   // ユーザー入力State (通常・詳細)
-  const [inputValues, setInputValues] = useState<
+  const [inputValues, setInputValues, removeInputValues] = useLocalStorage<
     Record<string, number | boolean | string>
-  >(() => initializeValues("normal"));
+  >(`grape-reverse-data-${config.id}`, () => initializeValues());
 
   // ユーザー入力State (ぶどう・ベル逆算専用)
-  const [grapeInputValues, setGrapeInputValues] = useState<
+  const [grapeInputValues, setGrapeInputValues, removeGrapeInputValues] = useLocalStorage<
     Record<string, number | boolean | string>
-  >(() => initializeValues("grape"));
+  >(`grape-reverse-data-grape-mode-${config.id}`, () => initializeValues());
 
   // ルーティングで機種が切り替わった時にステートを再初期化する
   useEffect(() => {
-    setInputValues(initializeValues("normal"));
-    setGrapeInputValues(initializeValues("grape"));
     setCalculatedGrapeCount(null);
     setEstimationResults(null);
 
@@ -207,24 +177,6 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     currentMode, // モード切り替え時にも再計算
   ]);
 
-  // localStorageに現在状態を自動保存
-  useEffect(() => {
-    const storageKey = `grape-reverse-data-${config.id}`;
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(inputValues));
-    } catch (e) {
-      console.error("Failed to save data for", config.id, e);
-    }
-  }, [inputValues, config.id]);
-
-  useEffect(() => {
-    const storageKey = `grape-reverse-data-grape-mode-${config.id}`;
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(grapeInputValues));
-    } catch (e) {
-      console.error("Failed to save grape data for", config.id, e);
-    }
-  }, [grapeInputValues, config.id]);
 
   // 依存値の変更を追跡するためのRef
   const prevDepsRef = useRef({
@@ -359,38 +311,13 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   }, [currentInputs, totalGames, config, currentMode]);
 
   const handleReset = () => {
-    const resetValues: Record<string, number | boolean | string> = {};
-    config.sections.forEach((section) => {
-      section.elements.forEach((element) => {
-        if (element.type === "flag") {
-          resetValues[element.id] = false;
-        } else if (element.type === "select") {
-          resetValues[element.id] = "";
-        } else {
-          resetValues[element.id] = "";
-        }
-      });
-    });
-
     if (currentMode === "grape") {
       // ぶどう・ベル逆算タブのリセット
-      const storageKey = `grape-reverse-data-grape-mode-${config.id}`;
-      try {
-        localStorage.removeItem(storageKey);
-      } catch (e) {
-        console.error("Failed to remove grape data for", config.id, e);
-      }
-      setGrapeInputValues(resetValues);
+      removeGrapeInputValues();
       setCalculatedGrapeCount(null);
     } else {
       // 通常・詳細タブのリセット
-      const storageKey = `grape-reverse-data-${config.id}`;
-      try {
-        localStorage.removeItem(storageKey);
-      } catch (e) {
-        console.error("Failed to remove data for", config.id, e);
-      }
-      setInputValues(resetValues);
+      removeInputValues();
       setEstimationResults(null);
       setError(null);
     }
