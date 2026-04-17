@@ -18,6 +18,7 @@ import HanahanaStrategyDifferencesColumn from "./pages/columns/hanahana-strategy
 import NeoImColumn from "./pages/columns/neo-im-juggler-setting6-behavior";
 import AreGuestPerformersNecessaryColumn from "./pages/columns/are-guest-performers-necessary";
 import EveningJugglerStrategyColumn from "./pages/columns/evening-juggler-strategy";
+import RemakeBoomAnalysisColumn from "./pages/columns/remake-boom-analysis";
 import ColumnIndexPage from "./pages/columns/index";
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToTopButton from "./components/ScrollToTopButton";
@@ -47,6 +48,10 @@ export default function App() {
 
             {/* コラム記事 */}
             <Route path="/columns" element={<ColumnIndexPage />} />
+            <Route
+              path="/columns/remake-boom-analysis"
+              element={<RemakeBoomAnalysisColumn />}
+            />
             <Route
               path="/columns/myjuggler5-setting6-behavior"
               element={<MyJugglerColumn />}

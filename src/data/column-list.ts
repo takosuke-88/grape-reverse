@@ -10,6 +10,15 @@ export interface ColumnArticle {
 
 export const ATTACHED_COLUMNS: ColumnArticle[] = [
   {
+    id: "remake-boom-analysis",
+    title: "なぜ「懐かし台」ばかりリメイクされるのか。吉宗・ミリオンゴッドから読む業界の本音",
+    description:
+      "2024年以降加速する「懐かし台」のリメイクブーム。吉宗・ミリオンゴッドのスマスロ導入を機に、業界がリメイクを量産する構造的な理由と、ユーザーが陥りがちな心理的ハードルの罠、そして求められる立ち回りの軸について考察します。",
+    tags: ["column", "analysis", "strategy"],
+    date: "2026-04-17",
+    path: "/columns/remake-boom-analysis",
+  },
+  {
     id: "evening-juggler-strategy",
     title: "仕事帰りのジャグラー、なぜ勝てない？「夕方からの台選び」で絶対にやってはいけない3つのこと",
     description:
