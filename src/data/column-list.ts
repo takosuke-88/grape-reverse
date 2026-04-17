@@ -10,6 +10,15 @@ export interface ColumnArticle {
 
 export const ATTACHED_COLUMNS: ColumnArticle[] = [
   {
+    id: "pachinko-vs-slot-market-2026",
+    title: "パチンコとパチスロ、なぜここまで差がついたのか。2026年春の市場データを読む",
+    description:
+      "最新のDI調査で明らかになった、パチンコ▲60.0、パチスロ+40.0という衝撃的な稼働格差。なぜここまで差がついたのか？2026年春の市場データを読み解き、ホールがスロットへ投資をシフトする現状と、打ち手が選ぶべき「勝てる環境」の条件を考察します。",
+    tags: ["column", "analysis", "market"],
+    date: "2026-04-17",
+    path: "/columns/pachinko-vs-slot-market-2026",
+  },
+  {
     id: "remake-boom-analysis",
     title: "なぜ「懐かし台」ばかりリメイクされるのか。吉宗・ミリオンゴッドから読む業界の本音",
     description:
