@@ -36,11 +36,8 @@ export default function App() {
       <div className="flex flex-col min-h-screen pt-16">
         <main className="flex-1">
           <Routes>
-            {/* v2: Schema-driven UI プレビュー - 互換性のため残す */}
-            <Route
-              path="/v2/preview/:machineId"
-              element={<MachinePagePreview />}
-            />
+            {/* 古いURL（/v2/preview/:id）からの301リダイレクト設定 */}
+            <Route path="/v2/preview/:machineId" element={<MachineRedirect />} />
 
             {/* 古いURL（/machine/:id）からの301リダイレクト設定 */}
             <Route path="/machine/:machineId" element={<MachineRedirect />} />

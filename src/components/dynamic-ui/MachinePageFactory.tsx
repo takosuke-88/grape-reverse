@@ -381,7 +381,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             onChange={(e) => {
               const machineId = e.target.value;
               if (machineId) {
-                navigate(`/v2/preview/${machineId}`);
+                navigate(`/${machineId}`);
               }
             }}
             className="w-full text-center font-bold text-lg py-3 rounded-xl border-2 border-slate-300 bg-white text-slate-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"
