@@ -1,5 +1,7 @@
 import { useParams } from "react-router-dom";
 import MachinePageFactory from "../components/dynamic-ui/MachinePageFactory";
+import Seo from "../components/Seo";
+import { AVAILABLE_MACHINES } from "../data/machine-list";
 import { hanaHoohConfig } from "../data/machines/hana-hooh";
 import { funkyJuggler2Config } from "../data/machines/funky-juggler-2";
 import { myJuggler5Config } from "../data/machines/juggler-my5";
@@ -81,5 +83,21 @@ export default function MachinePagePreview() {
     );
   }
 
-  return <MachinePageFactory key={config.id} config={config} />;
+  const machineInfo = AVAILABLE_MACHINES.find((m) => m.id === config.id);
+  const isJuggler = machineInfo?.category === "juggler";
+  const roleName = isJuggler ? "ぶどう" : "ベル";
+
+  const seoTitle = `【${config.name}】設定判別・小役逆算ツール｜GrapeReverse`;
+  const seoDescription = `${config.name}の${roleName}確率を差枚数とボーナス回数から逆算！設定6の挙動や勝つための立ち回りポイントも徹底解説。スマホでサクサク使える完全無料の設定推測ツールです。`;
+
+  return (
+    <>
+      <Seo
+        pageTitle={seoTitle}
+        pageDescription={seoDescription}
+        pagePath={`/${machineId}`}
+      />
+      <MachinePageFactory key={config.id} config={config} />
+    </>
+  );
 }

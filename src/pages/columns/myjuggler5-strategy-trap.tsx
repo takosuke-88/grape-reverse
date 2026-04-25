@@ -1,15 +1,15 @@
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import ColumnNavigation from "../../components/ColumnNavigation";
+import Seo from "../../components/Seo";
 
 const MyJugglerStrategyColumn = () => {
-  useEffect(() => {
-    document.title =
-      "「マイジャグVは負けやすい」の真実。設定2の地雷を避ける立ち回り術｜GrapeReverse";
-  }, []);
-
   return (
     <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950">
+      <Seo
+        pageTitle="「マイジャグVは負けやすい」の真実。設定2の地雷を避ける立ち回り術｜GrapeReverse"
+        pageDescription="看板機種ゆえの皮肉。実はフリー打ち設定2で98.0%、確実なマイナス構造に潜む「見えない地雷」を避けるための必須知識を解説します。"
+        pagePath="/columns/myjuggler5-strategy-trap"
+      />
       <main className="container mx-auto px-4 py-8 max-w-3xl">
         <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
           「マイジャグVは負けやすい」の真実。設定2の地雷を避ける立ち回り術

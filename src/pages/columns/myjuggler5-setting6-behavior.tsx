@@ -1,14 +1,15 @@
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import ColumnNavigation from "../../components/ColumnNavigation";
+import Seo from "../../components/Seo";
 
 const MyJugglerColumn = () => {
-  useEffect(() => {
-    document.title = "【マイジャグ5】設定6はこう動く！｜GrapeReverse";
-  }, []);
-
   return (
     <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950">
+      <Seo
+        pageTitle="【マイジャグ5】設定6はこう動く！｜GrapeReverse"
+        pageDescription="「合算1/120の台が空いた！」←実はそれ、罠かもしれません。AIシミュレーションと実戦データから導き出した、マイジャグ5の本当の狙い方を解説します。"
+        pagePath="/columns/myjuggler5-setting6-behavior"
+      />
       <main className="container mx-auto px-4 py-8 max-w-3xl">
         <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
           【マイジャグ5】設定6はこう動く！ボーナス確率よりも「ぶどう」を信じるべき数学的理由

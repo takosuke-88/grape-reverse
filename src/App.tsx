@@ -25,6 +25,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
+import Seo from "./components/Seo";
 
 export default function App() {
   return (
@@ -103,6 +104,11 @@ export default function App() {
               path="/"
               element={
                 <div className="bg-slate-50 flex justify-center p-4 py-12">
+                  <Seo
+                    pageTitle="パチスロ攻略・設定判別 ぶどう/ベル逆算｜GrapeReverse"
+                    pageDescription="ジャグラーやハナハナのAタイプから、最新スマスロまで対応！独自のぶどう/ベル逆算ロジックを搭載した、高精度な設定判別ツールが完全無料でスマホでサクサク使えます。"
+                    pagePath="/"
+                  />
                   <div className="text-center w-full max-w-2xl">
                     <h1 className="text-3xl font-bold text-slate-800 mb-4">
                       GrapeReverse

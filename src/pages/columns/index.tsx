@@ -1,14 +1,15 @@
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ATTACHED_COLUMNS } from "../../data/column-list";
+import Seo from "../../components/Seo";
 
 const ColumnIndexPage = () => {
-  useEffect(() => {
-    document.title = "パチスロ攻略コラム｜GrapeReverse";
-  }, []);
-
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 pb-12">
+      <Seo
+        pageTitle="パチスロ攻略コラム｜GrapeReverse"
+        pageDescription="データと数学から導き出された、ジャグラー・ハナハナの「本当の狙い方」。独自シミュレーションや実戦データに基づく攻略情報を掲載しています。"
+        pagePath="/columns"
+      />
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold mb-3 text-slate-800 dark:text-white">
