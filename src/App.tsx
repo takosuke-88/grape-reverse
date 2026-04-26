@@ -20,6 +20,7 @@ import AreGuestPerformersNecessaryColumn from "./pages/columns/are-guest-perform
 import EveningJugglerStrategyColumn from "./pages/columns/evening-juggler-strategy";
 import RemakeBoomAnalysisColumn from "./pages/columns/remake-boom-analysis";
 import PachinkoVsSlotMarket2026Column from "./pages/columns/pachinko-vs-slot-market-2026";
+import KingHanahana2026Column from "./pages/columns/king-hanahana-2026";
 import ColumnIndexPage from "./pages/columns/index";
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToTopButton from "./components/ScrollToTopButton";
@@ -47,6 +48,10 @@ export default function App() {
 
             {/* コラム記事 */}
             <Route path="/columns" element={<ColumnIndexPage />} />
+            <Route
+              path="/columns/king-hanahana-2026"
+              element={<KingHanahana2026Column />}
+            />
             <Route
               path="/columns/remake-boom-analysis"
               element={<RemakeBoomAnalysisColumn />}

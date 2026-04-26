@@ -10,6 +10,15 @@ export interface ColumnArticle {
 
 export const ATTACHED_COLUMNS: ColumnArticle[] = [
   {
+    id: "king-hanahana-2026",
+    title: "キングハナハナはまだ狙えるか？ニューキングV導入後の設定状況と立ち回り",
+    description:
+      "2026年のキングハナハナはまだ勝てるのか？認定満期やスマスロ『ニューキングハナハナV-30』導入によるホール状況の変化、設定6をツモるための必須条件を徹底解説します。",
+    tags: ["column", "hana", "strategy"],
+    date: "2026-04-26",
+    path: "/columns/king-hanahana-2026",
+  },
+  {
     id: "pachinko-vs-slot-market-2026",
     title: "パチンコとパチスロ、なぜここまで差がついたのか。2026年春の市場データを読む",
     description:
