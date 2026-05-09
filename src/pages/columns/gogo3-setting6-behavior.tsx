@@ -6,13 +6,13 @@ const Gogo3Setting6BehaviorColumn = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <Seo
-        pageTitle="ゴーゴージャグラー3の設定6を7000G回すとどうなるか ─ GOD神々の軌跡との比較付き｜GrapeReverse"
+        pageTitle="ゴーゴージャグラー3の設定6を7000Gx10万日回すとどうなるか ─ GOD神々の軌跡との比較付き｜GrapeReverse"
         pageDescription="ゴージャグ3の設定6は本当に勝てるのか？10万日のシミュレーションデータから勝率、最大マイナス、平均差枚を算出。スマスロ『ミリオンゴッド-神々の軌跡-』設定6との比較から、最適な立ち回りを考察します。"
         pagePath="/columns/gogo3-setting6-behavior"
       />
       <main className="container mx-auto px-4 py-8 max-w-3xl">
         <h1 className="text-2xl md:text-4xl font-bold mb-8 text-red-700 dark:text-red-400 leading-tight">
-          ゴーゴージャグラー3の設定6を7000G回すとどうなるか ─ GOD神々の軌跡との比較付き
+          ゴーゴージャグラー3の設定6を7000Gx10万日回すとどうなるか ─ GOD神々の軌跡との比較付き
         </h1>
 
         <div className="prose dark:prose-invert max-w-none leading-relaxed">
