@@ -21,6 +21,7 @@ import EveningJugglerStrategyColumn from "./pages/columns/evening-juggler-strate
 import RemakeBoomAnalysisColumn from "./pages/columns/remake-boom-analysis";
 import PachinkoVsSlotMarket2026Column from "./pages/columns/pachinko-vs-slot-market-2026";
 import KingHanahana2026Column from "./pages/columns/king-hanahana-2026";
+import Gogo3Column from "./pages/columns/gogo3-setting6-behavior";
 import WeeklyNews202604Week4Column from "./pages/columns/news-2026-04-week4";
 import ColumnIndexPage from "./pages/columns/index";
 import ScrollToTop from "./components/ScrollToTop";
@@ -96,6 +97,10 @@ export default function App() {
             <Route
               path="/columns/neo-im-juggler-setting6-behavior"
               element={<NeoImColumn />}
+            />
+            <Route
+              path="/columns/gogo3-setting6-behavior"
+              element={<Gogo3Column />}
             />
             <Route
               path="/columns/are-guest-performers-necessary"

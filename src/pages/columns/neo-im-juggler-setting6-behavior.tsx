@@ -38,19 +38,19 @@ const NeoImSetting6BehaviorColumn = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm text-center">
               <div className="text-gray-500 dark:text-gray-400 text-xs mb-1">1日平均差枚</div>
-              <div className="text-xl font-bold text-red-600 dark:text-red-400">+1,564枚</div>
+              <div className="text-xl font-bold text-red-600 dark:text-red-400">+1,365枚</div>
             </div>
             <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm text-center">
               <div className="text-gray-500 dark:text-gray-400 text-xs mb-1">平均投資</div>
-              <div className="text-xl font-bold text-gray-800 dark:text-gray-100">約10,600円</div>
+              <div className="text-xl font-bold text-gray-800 dark:text-gray-100">約9,700円</div>
             </div>
             <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm text-center">
               <div className="text-gray-500 dark:text-gray-400 text-xs mb-1">機械割（実測）</div>
-              <div className="text-xl font-bold text-gray-800 dark:text-gray-100">107.45%</div>
+              <div className="text-xl font-bold text-gray-800 dark:text-gray-100">107.8%</div>
             </div>
             <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm text-center">
               <div className="text-gray-500 dark:text-gray-400 text-xs mb-1">勝率</div>
-              <div className="text-xl font-bold text-blue-600 dark:text-blue-400">85.47%</div>
+              <div className="text-xl font-bold text-blue-600 dark:text-blue-400">85.52%</div>
             </div>
           </div>
 
@@ -122,7 +122,7 @@ const NeoImSetting6BehaviorColumn = () => {
 
           {/* 比較テーブル */}
           <h2 className="text-xl font-bold mt-12 mb-6 border-b-2 border-red-200 dark:border-red-800 pb-2">
-            AT機（東京喰種・からくりサーカス）と並べてみる
+            AT機（北斗転生2・スマスロGOD）と並べてみる
           </h2>
 
           <div className="overflow-x-auto my-6 rounded-xl border border-gray-200 dark:border-gray-700">
@@ -137,29 +137,29 @@ const NeoImSetting6BehaviorColumn = () => {
               </thead>
               <tbody>
                 <tr className="bg-yellow-50 dark:bg-yellow-900/20 font-bold border-b border-gray-200 dark:border-gray-700">
-                  <td className="px-4 py-4 text-gray-900 dark:text-white">ネオアイム（チェリー狙い）</td>
-                  <td className="px-4 py-4 text-center text-red-600 dark:text-red-400">107.3%</td>
+                  <td className="px-4 py-4 text-gray-900 dark:text-white">ネオアイムジャグラーEX（チェリー狙い）</td>
+                  <td className="px-4 py-4 text-center text-red-600 dark:text-red-400">107.8%</td>
                   <td className="px-4 py-4 text-center">97.4%</td>
                   <td className="px-4 py-4">低分散・安定</td>
                 </tr>
                 <tr className="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-700">
-                  <td className="px-4 py-4">スマスロ東京喰種</td>
+                  <td className="px-4 py-4">スマスロ 北斗の拳 転生の章2</td>
                   <td className="px-4 py-4 text-center">114.9%</td>
-                  <td className="px-4 py-4 text-center">97.5%</td>
-                  <td className="px-4 py-4">高分散・大量獲得</td>
+                  <td className="px-4 py-4 text-center">97.2%</td>
+                  <td className="px-4 py-4">攻撃的スペック・高ボラ</td>
                 </tr>
                 <tr className="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-700">
-                  <td className="px-4 py-4">スマスロからくりサーカス</td>
-                  <td className="px-4 py-4 text-center">114.9%</td>
-                  <td className="px-4 py-4 text-center">97.5%</td>
-                  <td className="px-4 py-4">高分散・上振れ爆発</td>
+                  <td className="px-4 py-4">Lミリオンゴッド－神々の軌跡－</td>
+                  <td className="px-4 py-4 text-center">114.6%</td>
+                  <td className="px-4 py-4 text-center">97.6%</td>
+                  <td className="px-4 py-4">一撃特化・超荒波</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
           <p className="mb-4">
-            設定6の機械割だけ見ると、ネオアイムは東京喰種・からくりより約7.6ポイント下。時給換算だと東京喰種の設定6が+6,705円（等価交換）に対して、ネオアイムは+1,800〜+2,200円前後が現実ライン。
+            設定6の機械割だけ見ると、ネオアイムは北斗転生2・ミリオンゴッドより約7ポイント下。時給換算だと北斗転生2の設定6が+6,705円（等価交換）に対して、ネオアイムは+1,800〜+2,400円前後が現実ライン。
             <br />
             AT機の設定6は確保が難しいが、ネオアイムは台数多くて確保しやすく、安定して期待値積めるのが強み。
           </p>

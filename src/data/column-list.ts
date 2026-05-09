@@ -10,6 +10,15 @@ export interface ColumnArticle {
 
 export const ATTACHED_COLUMNS: ColumnArticle[] = [
   {
+    id: "gogo3-setting6-behavior",
+    title: "ゴーゴージャグラー3の設定6を7000G回すとどうなるか ─ GOD神々の軌跡との比較付き",
+    description:
+      "ゴージャグ3の設定6は本当に勝てるのか？10万日のシミュレーションデータから勝率、最大マイナス、平均差枚を算出。スマスロ『ミリオンゴッド-神々の軌跡-』設定6との比較から、最適な立ち回りを考察します。",
+    tags: ["juggler", "gogo-juggler-3", "setting6", "column"],
+    date: "2026-05-09",
+    path: "/columns/gogo3-setting6-behavior",
+  },
+  {
     id: "news-2026-04-week4",
     title: "【2026年4月第4週】パチンコ・パチスロニュース｜GW営業予想と最新台情報",
     description:
