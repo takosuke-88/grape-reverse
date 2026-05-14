@@ -24,6 +24,7 @@ import KingHanahana2026Column from "./pages/columns/king-hanahana-2026";
 import Gogo3Column from "./pages/columns/gogo3-setting6-behavior";
 import WeeklyNews202604Week4Column from "./pages/columns/news-2026-04-week4";
 import ColumnIndexPage from "./pages/columns/index";
+import GoogleAnalytics from "./components/GoogleAnalytics";
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 import Header from "./components/layout/Header";
@@ -33,6 +34,7 @@ import Seo from "./components/Seo";
 export default function App() {
   return (
     <BrowserRouter>
+      <GoogleAnalytics />
       <ScrollToTop />
       <ScrollToTopButton />
       <Header />
