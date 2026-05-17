@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useState } from "react";
 import type { DiscriminationElement } from "../../types/machine-schema";
 import { formatBonusText } from "../../utils/formatters";
 
@@ -6,7 +6,8 @@ interface DynamicInputProps {
   element: DiscriminationElement;
   value: number | boolean | string;
   onChange: (value: number | boolean | string) => void;
-  totalGames?: number; // 総ゲーム数（確率計算用）
+  totalGames?: number;
+  vibrationEnabled?: boolean;
 }
 
 const DynamicInput: React.FC<DynamicInputProps> = ({
@@ -14,140 +15,150 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   value,
   onChange,
   totalGames,
+  vibrationEnabled = true,
 }) => {
-  // リアルタイム確率計算
+  const [showFloat, setShowFloat] = useState(false);
+  const [showGlow, setShowGlow] = useState(false);
+  const [showDirectInput, setShowDirectInput] = useState(false);
+
   const calculateProbability = () => {
-    if (element.type !== "counter" || !totalGames || totalGames === 0)
-      return null;
+    if (element.type !== "counter" || !totalGames || totalGames === 0) return null;
     const count = Number(value) || 0;
     if (count === 0) return null;
-    const denominator = totalGames / count;
-    return denominator;
+    return totalGames / count;
   };
 
-  // ネイティブtouchstartイベントをDOMに直接アタッチするcallback ref
-  // Reactのイベント委譲を完全にバイパスし、タッチした瞬間に即座に振動させる
-  const hapticRef = useCallback((node: HTMLButtonElement | null) => {
-    if (!node) return;
-    const handler = () => {
-      try {
-        if (window.navigator && window.navigator.vibrate) {
-          window.navigator.vibrate(30);
-        }
-      } catch (_) {
-        // Firefox Android等はVibration API無効のためsilent fail
+  const triggerVibration = (type: "inc" | "dec") => {
+    if (!vibrationEnabled) return;
+    try {
+      if (window.navigator?.vibrate) {
+        window.navigator.vibrate(type === "inc" ? 15 : 40);
       }
-    };
-    // passive: true でスクロールブロッキングを防止し、最速で発火させる
-    node.addEventListener("touchstart", handler, { passive: true });
-    // クリーンアップは不要（Reactがノードをアンマウントすればリスナーも消える）
-  }, []);
+    } catch (_) {}
+  };
+
+  const handleIncrement = () => {
+    if (element.isReadOnly) return;
+    onChange((Number(value) || 0) + 1);
+    triggerVibration("inc");
+    setShowGlow(true);
+    setShowFloat(true);
+    setTimeout(() => setShowGlow(false), 450);
+    setTimeout(() => setShowFloat(false), 620);
+  };
+
+  const handleDecrement = () => {
+    if (element.isReadOnly) return;
+    onChange((Number(value) || 0) - 1);
+    triggerVibration("dec");
+  };
 
   const currentProbability = calculateProbability();
 
   const renderInput = () => {
     switch (element.type) {
-      case "counter":
+      case "counter": {
+        const displayValue = Number(value) || 0;
         return (
-          <div className="flex flex-col items-center gap-1">
-            <div className="flex items-center gap-0 rounded-lg overflow-hidden border border-slate-300 shadow-sm dark:border-slate-600">
+          <div
+            className="relative flex w-full rounded-xl overflow-hidden select-none"
+            style={{
+              minHeight: "76px",
+              background: element.isReadOnly ? "#1e293b" : "#0f172a",
+            }}
+          >
+            {/* LEFT 30%: minus button + number display */}
+            <div className="flex items-center" style={{ width: "30%" }}>
               <button
-                ref={element.isReadOnly ? undefined : hapticRef}
                 type="button"
-                onClick={() => {
-                  if (element.isReadOnly) return;
-                  const numValue = Number(value) || 0;
-                  onChange(numValue + 1);
-                }}
+                onClick={handleDecrement}
                 disabled={!!element.isReadOnly}
-                className={`min-w-[42px] min-h-[44px] text-slate-700 font-bold text-lg transition-colors flex items-center justify-center dark:text-slate-200 ${
-                  element.isReadOnly
-                    ? "bg-slate-50 text-slate-300 cursor-not-allowed opacity-50 dark:bg-slate-800 dark:text-slate-600"
-                    : "bg-slate-100 hover:bg-slate-200 active:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600"
-                } border-r border-slate-300 dark:border-slate-600`}
-                aria-label="増やす"
-              >
-                ＋
-              </button>
-
-              <input
-                type="number"
-                readOnly={!!element.isReadOnly}
-                value={
-                  typeof value === "boolean" ? "" : value === "" ? "" : value
-                }
-                onWheel={(e) => e.currentTarget.blur()}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    // 現在のDOMからすべてのnumberタイプのinput要素を取得
-                    const inputs = Array.from(
-                      document.querySelectorAll(
-                        'input[type="number"]:not([readonly])',
-                      ),
-                    ) as HTMLInputElement[];
-                    const currentIndex = inputs.indexOf(e.currentTarget);
-                    if (currentIndex > -1 && currentIndex < inputs.length - 1) {
-                      // 次のinputへフォーカス移動
-                      inputs[currentIndex + 1].focus();
-                    } else {
-                      // 最後の入力欄だった場合はキーボードを閉じる
-                      e.currentTarget.blur();
-                    }
-                  }
+                className="h-full flex items-center justify-center text-2xl text-slate-400 transition-colors active:text-red-400"
+                style={{
+                  minWidth: "44px",
+                  opacity: element.isReadOnly ? 0.25 : 0.55,
                 }}
-                onChange={(e) => {
-                  if (element.isReadOnly) return;
-                  if (e.target.value === "") {
-                    onChange("");
-                  } else {
-                    const newValue = parseInt(e.target.value) || 0;
-                    onChange(newValue);
-                  }
-                }}
-                className={`w-24 h-[44px] text-center text-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-800 dark:text-white ${
-                  element.isReadOnly
-                    ? "text-slate-500 cursor-not-allowed opacity-60 dark:text-slate-500 bg-slate-100 dark:bg-slate-900"
-                    : "bg-white"
-                } rounded-none border-0`}
-                placeholder="0"
-              />
-
-              <button
-                ref={element.isReadOnly ? undefined : hapticRef}
-                type="button"
-                onClick={() => {
-                  if (element.isReadOnly) return;
-                  const numValue = Number(value) || 0;
-                  onChange(numValue - 1);
-                }}
-                disabled={!!element.isReadOnly}
-                className={`min-w-[42px] min-h-[44px] text-slate-700 font-bold text-lg transition-colors flex items-center justify-center dark:text-slate-200 ${
-                  element.isReadOnly
-                    ? "bg-slate-50 text-slate-300 cursor-not-allowed opacity-50 dark:bg-slate-800 dark:text-slate-600"
-                    : "bg-slate-100 hover:bg-slate-200 active:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600"
-                } border-l border-slate-300 dark:border-slate-600`}
                 aria-label="減らす"
               >
-                －
+                −
               </button>
+              <div className="flex-1 flex items-center justify-center">
+                {showDirectInput ? (
+                  <input
+                    type="number"
+                    autoFocus
+                    value={
+                      typeof value === "boolean" ? "" : value === "" ? "" : value
+                    }
+                    onChange={(e) => {
+                      if (e.target.value === "") onChange("");
+                      else onChange(parseInt(e.target.value) || 0);
+                    }}
+                    onBlur={() => setShowDirectInput(false)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        setShowDirectInput(false);
+                      }
+                    }}
+                    className="w-full text-center text-3xl font-bold bg-transparent text-white focus:outline-none tabular-nums"
+                    style={{ maxWidth: "72px" }}
+                  />
+                ) : (
+                  <span
+                    onClick={() => {
+                      if (!element.isReadOnly) setShowDirectInput(true);
+                    }}
+                    className={`text-3xl font-bold tabular-nums transition-all ${
+                      element.isReadOnly
+                        ? "text-slate-500"
+                        : "text-white cursor-pointer"
+                    } ${showGlow ? "counter-number-glow" : ""}`}
+                  >
+                    {displayValue}
+                  </span>
+                )}
+              </div>
             </div>
 
-            {/* リアルタイム確率表示（下行に配置） */}
-            {element.id !== "total-games" && (
-              <div className="text-center">
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                  現在
-                </div>
-                <div className="text-sm font-bold text-slate-600 dark:text-slate-300">
-                  {currentProbability
-                    ? `1/${currentProbability.toFixed(1)}`
-                    : "---"}
-                </div>
-              </div>
-            )}
+            {/* 縦区切り線 */}
+            <div
+              className="absolute top-3 bottom-3 w-px bg-slate-700"
+              style={{ left: "30%" }}
+            />
+
+            {/* RIGHT 70%: tap area */}
+            <div
+              className={`relative flex items-center justify-end ${
+                element.isReadOnly
+                  ? "pointer-events-none"
+                  : "cursor-pointer active:bg-white/[0.04]"
+              }`}
+              style={{ width: "70%" }}
+              onClick={handleIncrement}
+            >
+              {showFloat && (
+                <span
+                  className="counter-float-anim absolute text-green-400 font-bold text-xl"
+                  style={{
+                    left: "40%",
+                    top: "50%",
+                    zIndex: 10,
+                  }}
+                >
+                  +1
+                </span>
+              )}
+              <span
+                className="text-3xl font-thin text-slate-600 pr-4 pointer-events-none"
+                style={{ opacity: element.isReadOnly ? 0.2 : 0.4 }}
+              >
+                ＋
+              </span>
+            </div>
           </div>
         );
+      }
 
       case "select":
         return (
@@ -200,12 +211,8 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
               }
               onChange={(e) => {
                 if (element.isReadOnly) return;
-                if (e.target.value === "") {
-                  onChange("");
-                } else {
-                  const newValue = parseFloat(e.target.value) || 0;
-                  onChange(newValue);
-                }
+                if (e.target.value === "") onChange("");
+                else onChange(parseFloat(e.target.value) || 0);
               }}
               className="w-full h-[44px] px-4 text-center text-xl font-bold border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:border-slate-600 dark:bg-slate-800 dark:text-white"
               step="0.01"
@@ -220,12 +227,31 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   };
 
   return (
-    <div className="space-y-2">
-      <label className="block text-center text-sm font-bold text-gray-800 dark:text-slate-200">
-        {formatBonusText(element.label)}
-      </label>
-      <div className="flex justify-center">{renderInput()}</div>
-      {/* 設定6確定演出の注意書き表示 */}
+    <div className="space-y-1.5">
+      {element.type === "counter" ? (
+        <div className="flex items-center justify-between px-0.5 mb-1">
+          <label className="text-sm font-bold text-gray-800 dark:text-slate-200">
+            {formatBonusText(element.label)}
+          </label>
+          {element.id !== "total-games" && (
+            <span className="text-xs text-slate-500 dark:text-slate-400 tabular-nums">
+              現在:{" "}
+              {currentProbability
+                ? `1/${currentProbability.toFixed(1)}`
+                : "---"}
+            </span>
+          )}
+        </div>
+      ) : (
+        <label className="block text-center text-sm font-bold text-gray-800 dark:text-slate-200">
+          {formatBonusText(element.label)}
+        </label>
+      )}
+
+      <div className={element.type === "counter" ? "w-full" : "flex justify-center"}>
+        {renderInput()}
+      </div>
+
       {(element.id === "reg-lamp-rainbow" || element.id === "bonus-rainbow") &&
         Number(value) > 0 && (
           <div className="text-center text-xs font-bold text-red-500 animate-pulse mt-1">

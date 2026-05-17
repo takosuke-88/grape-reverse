@@ -28,6 +28,12 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     "simple"
   );
 
+  // バイブレーションON/OFF
+  const [vibrationEnabled, setVibrationEnabled] = useLocalStorage<boolean>(
+    "grape-reverse-vibration",
+    true
+  );
+
   // 現在の機種のカテゴリを取得
   // 現在の機種のカテゴリとカラーを取得
   const currentMachineInfo = useMemo(() => {
@@ -111,12 +117,9 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
       return;
     }
 
-    // 通常モードでのボーナス合計直接入力時の同期処理
+    // ボーナス合計直接入力時の同期処理
     // Total入力時に、その値を維持するようにUnknownを調整する
-    if (
-      currentMode !== "detail" &&
-      (elementId === "big-count" || elementId === "reg-count")
-    ) {
+    if (elementId === "big-count" || elementId === "reg-count") {
       const prefix = elementId === "big-count" ? "big" : "reg";
       const numValue = Number(value);
       const solo = Number(inputValues[`${prefix}-solo-count`]) || 0;
@@ -312,6 +315,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   }, [currentInputs, totalGames, config, currentMode]);
 
   const handleReset = () => {
+    if (!window.confirm("本当に入力を全てリセットしますか？")) return;
     if (currentMode === "grape") {
       // ぶどう・ベル逆算タブのリセット
       removeGrapeInputValues();
@@ -370,74 +374,86 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
         </div>
       </div>
 
-      {/* 機種選択ナビゲーション（カテゴリ一致のみ表示） */}
+      {/* 機種選択ナビゲーション */}
       <div className="sticky top-0 z-10 bg-slate-100/95 backdrop-blur-sm py-3 px-4 shadow-md border-b border-slate-200 dark:bg-slate-900/95 dark:border-slate-800">
-        <div className="mx-auto max-w-md text-center">
-          <label className="block text-xs font-bold text-slate-500 mb-1 dark:text-slate-400">
-            ▼ 機種選択
-          </label>
-          <select
-            value={config.id}
-            onChange={(e) => {
-              const machineId = e.target.value;
-              if (machineId) {
-                navigate(`/${machineId}`);
-              }
-            }}
-            className="w-full text-center font-bold text-lg py-3 rounded-xl border-2 border-slate-300 bg-white text-slate-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"
-          >
-            {AVAILABLE_MACHINES.filter(
-              (m) => m.category === currentCategory,
-            ).map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
-          </select>
+        <div className="mx-auto max-w-md space-y-2">
+          {/* 機種選択 + バイブトグル */}
+          <div className="flex items-center gap-2">
+            <select
+              value={config.id}
+              onChange={(e) => {
+                const machineId = e.target.value;
+                if (machineId) navigate(`/${machineId}`);
+              }}
+              className="flex-1 text-center font-bold text-base py-2.5 rounded-xl border-2 border-slate-300 bg-white text-slate-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"
+            >
+              {AVAILABLE_MACHINES.filter((m) => m.category === currentCategory).map((m) => (
+                <option key={m.id} value={m.id}>{m.name}</option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => setVibrationEnabled(!vibrationEnabled)}
+              className={`shrink-0 rounded-xl px-3 py-2.5 text-lg shadow-sm transition-all ${
+                vibrationEnabled
+                  ? "bg-green-500 text-white"
+                  : "bg-slate-300 text-slate-500 dark:bg-slate-700 dark:text-slate-400"
+              }`}
+              title={vibrationEnabled ? "バイブON（タップでOFF）" : "バイブOFF（タップでON）"}
+            >
+              📳
+            </button>
+          </div>
+          {/* ナビゲーションボタン */}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 text-xs font-bold opacity-60"
+              onClick={() => {/* TODO: ボーナス入力ページへ */}}
+            >
+              🎰 ボーナス入力へ
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrentMode("grape")}
+              className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all ${
+                currentMode === "grape"
+                  ? "bg-emerald-600 text-white ring-2 ring-emerald-400"
+                  : "bg-emerald-700 text-white"
+              }`}
+            >
+              {currentCategory === "hana" ? "🔔 ベル逆算へ" : "🍇 ぶどう逆算へ"}
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="mx-auto w-full max-w-md space-y-4 p-4">
-        {/* 入力モード切り替えタブ */}
-        <div className="flex rounded-xl bg-slate-200 p-1 dark:bg-slate-800">
-          {(["simple", "detail", "grape"] as const).map((mode) => (
-            <button
-              key={mode}
-              onClick={() => setCurrentMode(mode)}
-              className={`flex-1 rounded-lg py-2 text-sm font-bold transition-all ${
-                currentMode === mode
-                  ? "bg-white text-slate-800 shadow-sm dark:bg-slate-700 dark:text-white"
-                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-              }`}
-            >
-              {mode === "simple" && "通常入力"}
-              {mode === "detail" && "詳細入力"}
-              {mode === "grape" &&
-                (currentCategory === "hana" ? "ベル逆算" : "ぶどう逆算")}
-            </button>
-          ))}
-        </div>
+        {/* ぶどう/ベル逆算モードの時はメインカウンターへ戻るボタンを表示 */}
+        {currentMode === "grape" && (
+          <button
+            type="button"
+            onClick={() => setCurrentMode("simple")}
+            className="w-full rounded-xl bg-slate-200 dark:bg-slate-800 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-300 transition-colors hover:bg-slate-300 dark:hover:bg-slate-700"
+          >
+            ← カウンターに戻る
+          </button>
+        )}
 
         {/* 入力フォーム */}
         {config.sections.map((section) => {
-          // 現在のモードに基づいて表示すべき要素をフィルタリング
+          // 表示要素のフィルタリング: grapeモードのみ専用フィルタ、それ以外は全要素統合表示
           const visibleElements = section.elements.filter((element) => {
             const visibility = element.visibility || "always";
-
-            if (currentMode === "simple") {
-              return visibility === "always" || visibility === "simple";
-            }
-            if (currentMode === "detail") {
-              return (
-                visibility === "always" ||
-                visibility === "simple" ||
-                visibility === "detail"
-              );
-            }
             if (currentMode === "grape") {
               return visibility === "always" || visibility === "grape-calc";
             }
-            return true;
+            // メインモード: 通常・詳細を統合して全カウンター要素を表示
+            return (
+              visibility === "always" ||
+              visibility === "simple" ||
+              visibility === "detail"
+            );
           });
 
           if (visibleElements.length === 0) return null;
@@ -445,38 +461,25 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           // ぶどう逆算モード: 差枚数セクション(other-section)の直後にリセットボタンを挿入
           if (currentMode === "grape" && section.id === "other-section") {
             return (
-              <React.Fragment key={section.id}>
-                <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
-                  <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
-                    {section.title}
-                  </h2>
-                  <div className="space-y-4">
-                    {visibleElements.map((element) => (
-                      <DynamicInput
-                        key={element.id}
-                        element={{
-                          ...element,
-                          isReadOnly: false,
-                        }}
-                        value={currentInputs[element.id]}
-                        onChange={(value: number | string | boolean) =>
-                          handleValueChange(element.id, value)
-                        }
-                        totalGames={totalGames}
-                      />
-                    ))}
-                  </div>
+              <div key={section.id} className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
+                <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
+                  {section.title}
+                </h2>
+                <div className="space-y-4">
+                  {visibleElements.map((element) => (
+                    <DynamicInput
+                      key={element.id}
+                      element={{ ...element, isReadOnly: false }}
+                      value={currentInputs[element.id]}
+                      onChange={(value: number | string | boolean) =>
+                        handleValueChange(element.id, value)
+                      }
+                      totalGames={totalGames}
+                      vibrationEnabled={vibrationEnabled}
+                    />
+                  ))}
                 </div>
-                {/* リセットボタン（差枚数の直下） */}
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className={`w-full rounded-xl ${themeColor} px-6 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80`}
-                  style={{ backgroundColor: brandColor || undefined }}
-                >
-                  入力を全てリセット
-                </button>
-              </React.Fragment>
+              </div>
             );
           }
 
@@ -601,13 +604,12 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         <DynamicInput
                           element={{
                             ...element,
-                            isReadOnly: element.isReadOnly
-                              ? currentMode === "detail"
-                              : false,
+                            isReadOnly: !!element.isReadOnly,
                           }}
                           value={currentInputs[element.id]}
                           onChange={(value: number | string | boolean) => handleValueChange(element.id, value)}
                           totalGames={totalGames}
+                          vibrationEnabled={vibrationEnabled}
                         />
                       </div>
                     </div>
@@ -639,49 +641,22 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   })()}
               </div>
 
-              {/* ハナハナシリーズの詳細入力タブ限定で、通常時小役の下にリセットボタンを追加 */}
-              {currentCategory === "hana" &&
-                currentMode === "detail" &&
-                section.id === "normal-role-section" && (
-                  <button
-                    type="button"
-                    onClick={handleReset}
-                    className={`w-full rounded-xl ${themeColor} px-6 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80`}
-                    style={{ backgroundColor: brandColor || undefined }}
-                  >
-                    入力を全てリセット
-                  </button>
-                )}
             </React.Fragment>
           );
         })}
 
-        {/* 自動計算の説明とリセットボタン */}
+        {/* 自動計算の説明 */}
         <div className="flex flex-col gap-2">
           {error && (
             <div className="mb-2 rounded-lg bg-red-100 p-3 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-400">
               {error}
             </div>
           )}
-
-          {/* 自動計算の説明 */}
           <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-3 text-center">
             <p className="text-sm text-blue-700 dark:text-blue-300">
               💡 数値を入力すると自動で判別結果が更新されます
             </p>
           </div>
-
-          {/* リセットボタン（ぶどう逆算モード以外で表示。ぶどう逆算モードでは差枚数の直下に配置済み） */}
-          {currentMode !== "grape" && (
-            <button
-              type="button"
-              onClick={handleReset}
-              className={`w-full rounded-xl ${themeColor} px-6 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80`}
-              style={{ backgroundColor: brandColor || undefined }}
-            >
-              入力を全てリセット
-            </button>
-          )}
         </div>
 
         {/* 結果表示（常時表示） */}
@@ -737,11 +712,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   return el?.settingValues;
                 })(),
               },
-              ...(currentMode === "detail"
-                ? currentCategory === "hana"
-                  ? [
-                      {
-                        label: "BIG中スイカ",
+              ...(currentCategory === "hana"
+                ? [
+                    {
+                      label: "BIG中スイカ",
                         val: (() => {
                           const bCount =
                             Number(currentInputs["big-count"]) || 0;
@@ -827,7 +801,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         })(),
                       },
                     ]
-                : []),
+              ),
               {
                 label: "合算確率",
                 val: (() => {
@@ -1473,6 +1447,17 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           </div>
         )}
 
+        {/* リセットボタン（ページ最下部・破壊的操作の隔離） */}
+        <div className="mt-2 mb-4">
+          <button
+            type="button"
+            onClick={handleReset}
+            className="w-full rounded-xl bg-slate-600 dark:bg-slate-700 border border-slate-500 dark:border-slate-600 px-6 py-4 text-base font-bold text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
+          >
+            🗑️ 入力を全てリセット
+          </button>
+        </div>
+
         {/* SEOコンテンツ・独自解説テキスト */}
         {config.seoContent && config.seoContent.length > 0 && (
           <div className="mt-8 mb-12 space-y-12 px-2">
@@ -1497,9 +1482,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           </div>
         )}
 
-        {/* --- 詳細確率表 (詳細モードかつデータがある場合のみ) --- */}
-        {currentMode === "detail" &&
-          config.detailedProbabilities?.big_solo &&
+        {/* --- 詳細確率表 (データがある場合のみ) --- */}
+        {config.detailedProbabilities?.big_solo &&
           config.detailedProbabilities?.big_cherry &&
           config.detailedProbabilities?.reg_solo &&
           config.detailedProbabilities?.reg_cherry && (
