@@ -102,6 +102,9 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
         const probText = showProb
           ? `1/${(totalGames! / displayValue).toFixed(1)}`
           : null;
+        // 4桁以上はフォントを縮小（1000超のぶどうカウント等に対応）
+        const numFontSize =
+          displayValue >= 10000 ? "text-xl" : displayValue >= 1000 ? "text-2xl" : "text-3xl";
 
         return (
           <div
@@ -131,7 +134,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
               >
                 −
               </button>
-              <div className="flex-1 flex items-center justify-center">
+              <div className="flex-1 flex items-center justify-center overflow-hidden">
                 {showDirectInput ? (
                   <input
                     type="number"
@@ -150,7 +153,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                         setShowDirectInput(false);
                       }
                     }}
-                    className="w-full text-center text-3xl font-black bg-transparent text-white focus:outline-none tabular-nums"
+                    className={`w-full text-center ${numFontSize} font-black bg-transparent text-white focus:outline-none tabular-nums`}
                     style={{
                       maxWidth: "72px",
                       fontFamily: "'Urbanist', -apple-system, sans-serif",
@@ -161,7 +164,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                     onClick={() => {
                       if (!element.isReadOnly) setShowDirectInput(true);
                     }}
-                    className="text-3xl font-black tabular-nums"
+                    className={`${numFontSize} font-black tabular-nums`}
                     style={{
                       fontFamily: "'Urbanist', -apple-system, sans-serif",
                       color: "#ffffff",
@@ -179,7 +182,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
 
             {/* RIGHT 70%: tap area */}
             <div
-              className={`relative flex items-center justify-between ${
+              className={`relative ${
                 element.isReadOnly
                   ? "pointer-events-none"
                   : "cursor-pointer active:bg-white/10"
@@ -191,8 +194,8 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 <span
                   className="counter-float-anim absolute font-black text-xl pointer-events-none"
                   style={{
-                    left: "30%",
-                    top: "50%",
+                    left: "40%",
+                    top: "30%",
                     color: "#ffffff",
                     textShadow: `0 0 14px ${theme.accent}`,
                     zIndex: 10,
@@ -202,30 +205,31 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 </span>
               )}
 
-              {/* 確率インバー表示 */}
+              {/* ＋ : 右70%エリア中央 */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <span
+                  className="text-4xl font-thin"
+                  style={{
+                    color: "#ffffff",
+                    opacity: element.isReadOnly ? 0.2 : 0.4,
+                  }}
+                >
+                  ＋
+                </span>
+              </div>
+
+              {/* 確率：右下に絶対配置（数字エリアから完全に分離） */}
               {probText && (
                 <span
-                  className="pl-3 text-sm italic font-semibold tabular-nums pointer-events-none select-none"
+                  className="absolute right-2 bottom-2 text-xs italic font-bold tabular-nums pointer-events-none select-none"
                   style={{
-                    color: "rgba(255,255,255,0.80)",
+                    color: "rgba(255,255,255,0.75)",
                     fontFamily: "'Urbanist', -apple-system, sans-serif",
-                    letterSpacing: "0.01em",
                   }}
                 >
                   {probText}
                 </span>
               )}
-
-              <span
-                className="text-3xl font-thin pr-4 pointer-events-none"
-                style={{
-                  color: "#ffffff",
-                  opacity: element.isReadOnly ? 0.25 : 0.55,
-                  marginLeft: "auto",
-                }}
-              >
-                ＋
-              </span>
             </div>
           </div>
         );
