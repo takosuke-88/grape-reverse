@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import type {
   MachineConfig,
   EstimationResult,
+  DiscriminationElement,
 } from "../../types/machine-schema";
 import {
   calculateEstimation,
@@ -191,9 +192,28 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     );
   }, [config.sections]);
 
+  // 角チェリーのバーチャル要素定義
+  const CHERRY_ELEMENT: DiscriminationElement = {
+    id: "cherry-count",
+    label: "角チェリー",
+    type: "counter",
+    settingValues: {},
+    isDiscriminationFactor: false,
+  };
+
   // 通常小役セクションをボーナスセクションより前に移動した表示順を生成
+  // さらに、normal-role-section に cherry-count がなければ grape-count の前に注入する
   const orderedSections = useMemo(() => {
-    const sections = [...config.sections];
+    const sections = config.sections.map((section) => {
+      if (section.id !== "normal-role-section") return section;
+      if (section.elements.some((e) => e.id === "cherry-count")) return section;
+
+      const grapeIdx = section.elements.findIndex((e) => e.id === "grape-count");
+      const newElements = [...section.elements];
+      newElements.splice(grapeIdx >= 0 ? grapeIdx : 0, 0, CHERRY_ELEMENT);
+      return { ...section, layout: "grid" as const, elements: newElements };
+    });
+
     const normalIdx = sections.findIndex((s) => s.id === "normal-role-section");
     const bonusIdx = sections.findIndex((s) => s.id === "bonus-section");
     if (normalIdx !== -1 && bonusIdx !== -1 && normalIdx > bonusIdx) {

@@ -63,13 +63,6 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   const [showGlow, setShowGlow] = useState(false);
   const [showDirectInput, setShowDirectInput] = useState(false);
 
-  const calculateProbability = () => {
-    if (element.type !== "counter" || !totalGames || totalGames === 0) return null;
-    const count = Number(value) || 0;
-    if (count === 0) return null;
-    return totalGames / count;
-  };
-
   const triggerVibration = (type: "inc" | "dec") => {
     if (!vibrationEnabled) return;
     try {
@@ -95,13 +88,21 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
     triggerVibration("dec");
   };
 
-  const currentProbability = calculateProbability();
   const theme = getElementTheme(element.id);
 
   const renderInput = () => {
     switch (element.type) {
       case "counter": {
         const displayValue = Number(value) || 0;
+        const showProb =
+          element.id !== "total-games" &&
+          totalGames != null &&
+          totalGames > 0 &&
+          displayValue > 0;
+        const probText = showProb
+          ? `1/${(totalGames! / displayValue).toFixed(1)}`
+          : null;
+
         return (
           <div
             className="relative flex w-full rounded-xl overflow-hidden select-none"
@@ -178,7 +179,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
 
             {/* RIGHT 70%: tap area */}
             <div
-              className={`relative flex items-center justify-end ${
+              className={`relative flex items-center justify-between ${
                 element.isReadOnly
                   ? "pointer-events-none"
                   : "cursor-pointer active:bg-white/10"
@@ -190,7 +191,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 <span
                   className="counter-float-anim absolute font-black text-xl pointer-events-none"
                   style={{
-                    left: "40%",
+                    left: "30%",
                     top: "50%",
                     color: "#ffffff",
                     textShadow: `0 0 14px ${theme.accent}`,
@@ -200,11 +201,27 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                   +1
                 </span>
               )}
+
+              {/* 確率インバー表示 */}
+              {probText && (
+                <span
+                  className="pl-3 text-sm italic font-semibold tabular-nums pointer-events-none select-none"
+                  style={{
+                    color: "rgba(255,255,255,0.80)",
+                    fontFamily: "'Urbanist', -apple-system, sans-serif",
+                    letterSpacing: "0.01em",
+                  }}
+                >
+                  {probText}
+                </span>
+              )}
+
               <span
                 className="text-3xl font-thin pr-4 pointer-events-none"
                 style={{
                   color: "#ffffff",
                   opacity: element.isReadOnly ? 0.25 : 0.55,
+                  marginLeft: "auto",
                 }}
               >
                 ＋
@@ -282,25 +299,13 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
 
   return (
     <div className="space-y-1.5">
-      {element.type === "counter" ? (
-        <div className="flex items-center justify-between px-0.5 mb-1">
-          <label className="text-sm font-bold text-slate-700 dark:text-slate-200">
-            {formatBonusText(element.label)}
-          </label>
-          {element.id !== "total-games" && (
-            <span className="text-xs text-slate-500 dark:text-slate-400 tabular-nums">
-              現在:{" "}
-              {currentProbability
-                ? `1/${currentProbability.toFixed(1)}`
-                : "---"}
-            </span>
-          )}
-        </div>
-      ) : (
-        <label className="block text-center text-sm font-bold text-slate-700 dark:text-slate-200">
-          {formatBonusText(element.label)}
-        </label>
-      )}
+      <label
+        className={`text-sm font-bold text-slate-700 dark:text-slate-200 ${
+          element.type === "counter" ? "block" : "block text-center"
+        }`}
+      >
+        {formatBonusText(element.label)}
+      </label>
 
       <div className={element.type === "counter" ? "w-full" : "flex justify-center"}>
         {renderInput()}
