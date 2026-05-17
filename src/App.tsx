@@ -6,6 +6,7 @@ import {
   useParams,
 } from "react-router-dom";
 import MachinePagePreview from "./pages/MachinePagePreview";
+import BonusInputPage from "./pages/BonusInputPage";
 import { AVAILABLE_MACHINES } from "./data/machine-list";
 import { ATTACHED_COLUMNS } from "./data/column-list";
 import MyJugglerColumn from "./pages/columns/myjuggler5-setting6-behavior";
@@ -46,6 +47,9 @@ export default function App() {
 
             {/* 古いURL（/machine/:id）からの301リダイレクト設定 */}
             <Route path="/machine/:machineId" element={<MachineRedirect />} />
+
+            {/* ボーナス入力ページ: /:machineId/bonus */}
+            <Route path="/:machineId/bonus" element={<BonusInputPage />} />
 
             {/* 本番用ルート: /myjuggler5 など */}
             <Route path="/:machineId" element={<MachinePagePreview />} />

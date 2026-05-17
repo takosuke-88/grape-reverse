@@ -73,10 +73,17 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 type="button"
                 onClick={handleDecrement}
                 disabled={!!element.isReadOnly}
-                className="h-full flex items-center justify-center text-2xl text-slate-400 transition-colors active:text-red-400"
+                className="h-full flex items-center justify-center text-2xl text-slate-300 transition-all active:scale-95"
                 style={{
-                  minWidth: "44px",
-                  opacity: element.isReadOnly ? 0.25 : 0.55,
+                  minWidth: "48px",
+                  opacity: element.isReadOnly ? 0.2 : 1,
+                  background: element.isReadOnly
+                    ? "transparent"
+                    : "linear-gradient(145deg, #182232, #0b1622)",
+                  boxShadow: element.isReadOnly
+                    ? "none"
+                    : "inset 2px 2px 4px rgba(255,255,255,0.06), inset -1px -1px 3px rgba(0,0,0,0.7), 3px 3px 8px rgba(0,0,0,0.55), -1px -1px 2px rgba(255,255,255,0.03)",
+                  borderRadius: "0",
                 }}
                 aria-label="減らす"
               >
@@ -112,8 +119,10 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                     className={`text-3xl font-bold tabular-nums transition-all ${
                       element.isReadOnly
                         ? "text-slate-500"
-                        : "text-white cursor-pointer"
-                    } ${showGlow ? "counter-number-glow" : ""}`}
+                        : showGlow
+                        ? "text-white counter-number-glow cursor-pointer"
+                        : "text-white counter-number cursor-pointer"
+                    }`}
                   >
                     {displayValue}
                   </span>

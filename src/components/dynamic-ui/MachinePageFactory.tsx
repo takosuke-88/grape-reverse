@@ -408,8 +408,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           <div className="flex gap-2">
             <button
               type="button"
-              className="flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 text-xs font-bold opacity-60"
-              onClick={() => {/* TODO: ボーナス入力ページへ */}}
+              className="flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 text-xs font-bold transition-opacity hover:opacity-90 active:opacity-80"
+              onClick={() => navigate(`/${config.id}/bonus`)}
             >
               🎰 ボーナス入力へ
             </button>
