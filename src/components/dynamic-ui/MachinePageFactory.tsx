@@ -371,29 +371,6 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   ))}
                 </div>
 
-                {/* ボーナス合算確率（BIG/REGが含まれるセクションのみ） */}
-                {section.elements.some((e) => e.id === "big-count") &&
-                  section.elements.some((e) => e.id === "reg-count") &&
-                  (() => {
-                    const bigCount = Number(currentInputs["big-count"]) || 0;
-                    const regCount = Number(currentInputs["reg-count"]) || 0;
-                    const bonusTotal = bigCount + regCount;
-                    const prob =
-                      totalGames > 0 && bonusTotal > 0
-                        ? (totalGames / bonusTotal).toFixed(1)
-                        : "---";
-
-                    return (
-                      <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-800">
-                        <span className="text-base font-bold text-slate-800 dark:text-slate-200">
-                          ボーナス合成確率
-                        </span>
-                        <span className="text-xl font-bold text-slate-800 dark:text-white">
-                          1/{prob}
-                        </span>
-                      </div>
-                    );
-                  })()}
               </div>
 
             </React.Fragment>
