@@ -19,36 +19,36 @@ interface ElementTheme {
 function getElementTheme(id: string): ElementTheme {
   if (id.includes("grape")) {
     return {
-      bg: "rgba(6, 40, 20, 0.9)",
-      minusBg: "linear-gradient(145deg, #0a3d1e, #041a0c)",
-      accent: "#4ade80",
+      bg: "#15803d",
+      minusBg: "linear-gradient(145deg, #0f6030, #0a4a24)",
+      accent: "#bbf7d0",
     };
   }
   if (id.includes("big")) {
     return {
-      bg: "rgba(60, 8, 8, 0.9)",
-      minusBg: "linear-gradient(145deg, #3d0a0a, #1c0404)",
-      accent: "#f87171",
+      bg: "#b91c1c",
+      minusBg: "linear-gradient(145deg, #991515, #7a1010)",
+      accent: "#fecaca",
     };
   }
   if (id.includes("reg")) {
     return {
-      bg: "rgba(7, 20, 60, 0.9)",
-      minusBg: "linear-gradient(145deg, #0a1740, #030b20)",
-      accent: "#60a5fa",
+      bg: "#1d4ed8",
+      minusBg: "linear-gradient(145deg, #1840c0, #112c9a)",
+      accent: "#bfdbfe",
     };
   }
   if (id.includes("cherry")) {
     return {
-      bg: "rgba(50, 5, 30, 0.9)",
-      minusBg: "linear-gradient(145deg, #3d051e, #1c020e)",
-      accent: "#f472b6",
+      bg: "#be185d",
+      minusBg: "linear-gradient(145deg, #9d154d, #7a1040)",
+      accent: "#fbcfe8",
     };
   }
   return {
-    bg: "rgba(15, 23, 42, 0.95)",
-    minusBg: "linear-gradient(145deg, #182232, #0b1622)",
-    accent: "#94a3b8",
+    bg: "#334155",
+    minusBg: "linear-gradient(145deg, #253447, #182232)",
+    accent: "#e2e8f0",
   };
 }
 
@@ -107,7 +107,8 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
             className="relative flex w-full rounded-xl overflow-hidden select-none"
             style={{
               minHeight: "76px",
-              background: element.isReadOnly ? "rgba(30, 41, 59, 0.8)" : theme.bg,
+              background: theme.bg,
+              opacity: element.isReadOnly ? 0.6 : 1,
             }}
           >
             {/* LEFT 30%: minus button + number display */}
@@ -116,16 +117,13 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 type="button"
                 onClick={handleDecrement}
                 disabled={!!element.isReadOnly}
-                className="h-full flex items-center justify-center text-2xl text-slate-300 transition-all active:scale-95"
+                className="h-full flex items-center justify-center text-2xl text-white/80 transition-all active:scale-95"
                 style={{
                   minWidth: "48px",
-                  opacity: element.isReadOnly ? 0.2 : 1,
-                  background: element.isReadOnly
-                    ? "transparent"
-                    : theme.minusBg,
+                  background: element.isReadOnly ? "transparent" : theme.minusBg,
                   boxShadow: element.isReadOnly
                     ? "none"
-                    : "inset 2px 2px 4px rgba(255,255,255,0.06), inset -1px -1px 3px rgba(0,0,0,0.7), 3px 3px 8px rgba(0,0,0,0.55), -1px -1px 2px rgba(255,255,255,0.03)",
+                    : "inset 2px 2px 4px rgba(255,255,255,0.10), inset -1px -1px 3px rgba(0,0,0,0.5), 3px 3px 8px rgba(0,0,0,0.4), -1px -1px 2px rgba(255,255,255,0.05)",
                   borderRadius: "0",
                 }}
                 aria-label="減らす"
@@ -151,21 +149,26 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                         setShowDirectInput(false);
                       }
                     }}
-                    className="w-full text-center text-3xl font-bold bg-transparent text-white focus:outline-none tabular-nums"
-                    style={{ maxWidth: "72px" }}
+                    className="w-full text-center text-3xl font-black bg-transparent text-white focus:outline-none tabular-nums"
+                    style={{
+                      maxWidth: "72px",
+                      fontFamily: "'Urbanist', -apple-system, sans-serif",
+                    }}
                   />
                 ) : (
                   <span
                     onClick={() => {
                       if (!element.isReadOnly) setShowDirectInput(true);
                     }}
-                    className={`text-3xl font-bold tabular-nums transition-all ${
-                      element.isReadOnly
-                        ? "text-slate-500"
-                        : showGlow
-                        ? "text-white counter-number-glow cursor-pointer"
-                        : "text-white counter-number cursor-pointer"
-                    }`}
+                    className="text-3xl font-black tabular-nums"
+                    style={{
+                      fontFamily: "'Urbanist', -apple-system, sans-serif",
+                      color: "#ffffff",
+                      cursor: element.isReadOnly ? "default" : "pointer",
+                      textShadow: showGlow
+                        ? `0 0 20px ${theme.accent}, 0 0 40px ${theme.accent}, 0 0 60px ${theme.accent}`
+                        : `0 0 10px ${theme.accent}cc, 0 0 22px ${theme.accent}88`,
+                    }}
                   >
                     {displayValue}
                   </span>
@@ -178,18 +181,19 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
               className={`relative flex items-center justify-end ${
                 element.isReadOnly
                   ? "pointer-events-none"
-                  : "cursor-pointer active:bg-white/[0.04]"
+                  : "cursor-pointer active:bg-white/10"
               }`}
               style={{ width: "70%" }}
               onClick={handleIncrement}
             >
               {showFloat && (
                 <span
-                  className="counter-float-anim absolute font-bold text-xl"
+                  className="counter-float-anim absolute font-black text-xl pointer-events-none"
                   style={{
                     left: "40%",
                     top: "50%",
-                    color: theme.accent,
+                    color: "#ffffff",
+                    textShadow: `0 0 14px ${theme.accent}`,
                     zIndex: 10,
                   }}
                 >
@@ -199,8 +203,8 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
               <span
                 className="text-3xl font-thin pr-4 pointer-events-none"
                 style={{
-                  color: theme.accent,
-                  opacity: element.isReadOnly ? 0.15 : 0.35,
+                  color: "#ffffff",
+                  opacity: element.isReadOnly ? 0.25 : 0.55,
                 }}
               >
                 ＋
@@ -280,7 +284,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
     <div className="space-y-1.5">
       {element.type === "counter" ? (
         <div className="flex items-center justify-between px-0.5 mb-1">
-          <label className="text-sm font-bold text-gray-800 dark:text-slate-200">
+          <label className="text-sm font-bold text-slate-700 dark:text-slate-200">
             {formatBonusText(element.label)}
           </label>
           {element.id !== "total-games" && (
@@ -293,7 +297,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
           )}
         </div>
       ) : (
-        <label className="block text-center text-sm font-bold text-gray-800 dark:text-slate-200">
+        <label className="block text-center text-sm font-bold text-slate-700 dark:text-slate-200">
           {formatBonusText(element.label)}
         </label>
       )}
