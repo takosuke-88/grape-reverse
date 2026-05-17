@@ -10,6 +10,48 @@ interface DynamicInputProps {
   vibrationEnabled?: boolean;
 }
 
+interface ElementTheme {
+  bg: string;
+  minusBg: string;
+  accent: string;
+}
+
+function getElementTheme(id: string): ElementTheme {
+  if (id.includes("grape")) {
+    return {
+      bg: "rgba(6, 40, 20, 0.9)",
+      minusBg: "linear-gradient(145deg, #0a3d1e, #041a0c)",
+      accent: "#4ade80",
+    };
+  }
+  if (id.includes("big")) {
+    return {
+      bg: "rgba(60, 8, 8, 0.9)",
+      minusBg: "linear-gradient(145deg, #3d0a0a, #1c0404)",
+      accent: "#f87171",
+    };
+  }
+  if (id.includes("reg")) {
+    return {
+      bg: "rgba(7, 20, 60, 0.9)",
+      minusBg: "linear-gradient(145deg, #0a1740, #030b20)",
+      accent: "#60a5fa",
+    };
+  }
+  if (id.includes("cherry")) {
+    return {
+      bg: "rgba(50, 5, 30, 0.9)",
+      minusBg: "linear-gradient(145deg, #3d051e, #1c020e)",
+      accent: "#f472b6",
+    };
+  }
+  return {
+    bg: "rgba(15, 23, 42, 0.95)",
+    minusBg: "linear-gradient(145deg, #182232, #0b1622)",
+    accent: "#94a3b8",
+  };
+}
+
 const DynamicInput: React.FC<DynamicInputProps> = ({
   element,
   value,
@@ -54,6 +96,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   };
 
   const currentProbability = calculateProbability();
+  const theme = getElementTheme(element.id);
 
   const renderInput = () => {
     switch (element.type) {
@@ -64,7 +107,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
             className="relative flex w-full rounded-xl overflow-hidden select-none"
             style={{
               minHeight: "76px",
-              background: element.isReadOnly ? "#1e293b" : "#0f172a",
+              background: element.isReadOnly ? "rgba(30, 41, 59, 0.8)" : theme.bg,
             }}
           >
             {/* LEFT 30%: minus button + number display */}
@@ -79,7 +122,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                   opacity: element.isReadOnly ? 0.2 : 1,
                   background: element.isReadOnly
                     ? "transparent"
-                    : "linear-gradient(145deg, #182232, #0b1622)",
+                    : theme.minusBg,
                   boxShadow: element.isReadOnly
                     ? "none"
                     : "inset 2px 2px 4px rgba(255,255,255,0.06), inset -1px -1px 3px rgba(0,0,0,0.7), 3px 3px 8px rgba(0,0,0,0.55), -1px -1px 2px rgba(255,255,255,0.03)",
@@ -130,12 +173,6 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
               </div>
             </div>
 
-            {/* 縦区切り線 */}
-            <div
-              className="absolute top-3 bottom-3 w-px bg-slate-700"
-              style={{ left: "30%" }}
-            />
-
             {/* RIGHT 70%: tap area */}
             <div
               className={`relative flex items-center justify-end ${
@@ -148,10 +185,11 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
             >
               {showFloat && (
                 <span
-                  className="counter-float-anim absolute text-green-400 font-bold text-xl"
+                  className="counter-float-anim absolute font-bold text-xl"
                   style={{
                     left: "40%",
                     top: "50%",
+                    color: theme.accent,
                     zIndex: 10,
                   }}
                 >
@@ -159,8 +197,11 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 </span>
               )}
               <span
-                className="text-3xl font-thin text-slate-600 pr-4 pointer-events-none"
-                style={{ opacity: element.isReadOnly ? 0.2 : 0.4 }}
+                className="text-3xl font-thin pr-4 pointer-events-none"
+                style={{
+                  color: theme.accent,
+                  opacity: element.isReadOnly ? 0.15 : 0.35,
+                }}
               >
                 ＋
               </span>
