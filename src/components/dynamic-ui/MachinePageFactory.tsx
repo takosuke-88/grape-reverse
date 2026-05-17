@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type {
   MachineConfig,
@@ -21,12 +21,6 @@ interface MachinePageFactoryProps {
 
 const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   const navigate = useNavigate();
-
-  // モード管理
-  const [currentMode, setCurrentMode] = useLocalStorage<"simple" | "detail" | "grape">(
-    "grape-reverse-active-tab",
-    "simple"
-  );
 
   // バイブレーションON/OFF
   const [vibrationEnabled, setVibrationEnabled] = useLocalStorage<boolean>(
@@ -67,14 +61,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     Record<string, number | boolean | string>
   >(`grape-reverse-data-${config.id}`, () => initializeValues());
 
-  // ユーザー入力State (ぶどう・ベル逆算専用)
-  const [grapeInputValues, setGrapeInputValues, removeGrapeInputValues] = useLocalStorage<
-    Record<string, number | boolean | string>
-  >(`grape-reverse-data-grape-mode-${config.id}`, () => initializeValues());
-
   // ルーティングで機種が切り替わった時にステートを再初期化する
   useEffect(() => {
-    setCalculatedGrapeCount(null);
     setEstimationResults(null);
 
     // 機種名（または専用に設定されたtitle）をドキュメントタイトルにセット
@@ -86,37 +74,16 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     }
   }, [config.id, config.name, currentCategory]);
 
-  // ブドウ算出結果用
-  const [calculatedGrapeCount, setCalculatedGrapeCount] = useState<
-    number | null
-  >(null);
-
   const [estimationResults, setEstimationResults] = useState<
     EstimationResult[] | null
   >(null);
 
-  // 現在のモードに応じた入力値を参照 (ブドウ逆算結果を合成)
-  const currentInputs = useMemo(() => {
-    if (currentMode === "grape") {
-      return calculatedGrapeCount !== null
-        ? { ...grapeInputValues, "grape-count": calculatedGrapeCount }
-        : grapeInputValues;
-    }
-    return inputValues;
-  }, [currentMode, inputValues, grapeInputValues, calculatedGrapeCount]);
+  const currentInputs = inputValues;
 
   const handleValueChange = (
     elementId: string,
     value: number | boolean | string,
   ) => {
-    if (currentMode === "grape") {
-      setGrapeInputValues((prev) => ({
-        ...prev,
-        [elementId]: value,
-      }));
-      return;
-    }
-
     // ボーナス合計直接入力時の同期処理
     // Total入力時に、その値を維持するようにUnknownを調整する
     if (elementId === "big-count" || elementId === "reg-count") {
@@ -178,103 +145,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     currentInputs["reg-solo-count"],
     currentInputs["reg-cherry-count"],
     currentInputs["reg-unknown-count"],
-    currentMode, // モード切り替え時にも再計算
   ]);
 
-
-  // 依存値の変更を追跡するためのRef
-  const prevDepsRef = useRef({
-    totalGames: -1,
-    diffCoins: "" as string | number,
-    bigCount: -1,
-    regCount: -1,
-    mode: "",
-  });
-
-  useEffect(() => {
-    // currentInputsを使用
-    const currentTotalGames = Number(currentInputs["total-games"]) || 0;
-    const currentDiffCoins = currentInputs["diff-coins"];
-    const currentBig = Number(currentInputs["big-count"]) || 0;
-    const currentReg = Number(currentInputs["reg-count"]) || 0;
-
-    const prev = prevDepsRef.current;
-
-    // 依存値（総ゲーム数、差枚数、ボーナス、またはモード）が変更されたかチェック
-    const isDepChanged =
-      currentTotalGames !== prev.totalGames ||
-      currentDiffCoins !== prev.diffCoins ||
-      currentBig !== prev.bigCount ||
-      currentReg !== prev.regCount ||
-      currentMode !== prev.mode;
-
-    // 依存値が変更された場合のみ、ブドウ逆算を実行
-    if (isDepChanged) {
-      // Refを更新
-      prevDepsRef.current = {
-        totalGames: currentTotalGames,
-        diffCoins: currentDiffCoins as string | number,
-        bigCount: currentBig,
-        regCount: currentReg,
-        mode: currentMode,
-      };
-
-      // 差枚数からのブドウ逆算ロジック
-      const diffCoinsNum = Number(currentDiffCoins);
-      const hasDiffCoins = currentDiffCoins !== "" && !isNaN(diffCoinsNum);
-
-      if (
-        currentTotalGames > 0 &&
-        hasDiffCoins &&
-        config.specs?.payouts &&
-        config.specs.payouts.grape
-      ) {
-        // 定数定義
-        const PAYOUT = {
-          BIG: config.specs.payouts.big,
-          REG: config.specs.payouts.reg,
-          GRAPE: config.specs.payouts.grape,
-          CHERRY: 2,
-        };
-        const PROB_DENOM = {
-          REPLAY: config.specs.reverseCalcProbDenominators?.replay || 7.3,
-          CHERRY: config.specs.reverseCalcProbDenominators?.cherry || 36.0,
-        };
-
-        const REPLAY_PROB = 1 / PROB_DENOM.REPLAY;
-        const CHERRY_PROB = 1 / PROB_DENOM.CHERRY;
-
-        // ユーザー指定の正確な計算式に基づく逆算アルゴリズム
-        // 1. 消費枚数 = (総回転数 / 7.33 * 0) + (総回転数 * (1 - 1/7.33) * 3)
-        // ※リプレイを除いた回転数に3を乗じる
-        const coinIn = currentTotalGames * (1 - REPLAY_PROB) * 3;
-
-        // 2. ボーナス総獲得 = (BIG回数 * BIG_PAYOUT) + (REG回数 * REG_PAYOUT)
-        const bonusOut = currentBig * PAYOUT.BIG + currentReg * PAYOUT.REG;
-
-        // 3. チェリー期待枚数 = (総回転数 / 33.0) * 2
-        const cherryPayout = currentTotalGames * CHERRY_PROB * PAYOUT.CHERRY;
-
-        // 4. 推定ブドウ獲得枚数 = 差枚数 + 消費枚数 - ボーナス総獲得 - チェリー期待枚数
-        // 差枚数(diffCoinsNum)がプラスの場合は客の浮き、マイナスの場合は沈みを示すとする。
-        // 出玉の定義: 差枚数 = INとOUTの差分 (通常 差枚 = OUT - IN だが、この式では 獲得 = 差枚 + 消費 という考え方)
-        // ここでの消費枚数はすでに「純消費」
-        const grapePayout = diffCoinsNum + coinIn - bonusOut - cherryPayout;
-
-        // 5. 推定ブドウ回数 = 推定ブドウ獲得枚数 / GRAPE_PAYOUT
-        const calculatedGrapeCount = Math.round(grapePayout / PAYOUT.GRAPE);
-
-        console.log("🍇 ブドウ逆算実行 (Strict Formula):", {
-          Trigger: "Dependency Changed",
-          Calculated: calculatedGrapeCount,
-        });
-        setCalculatedGrapeCount(calculatedGrapeCount);
-      } else {
-        // 条件を満たさない場合は結果をクリア
-        setCalculatedGrapeCount(null);
-      }
-    }
-  }, [currentInputs, totalGames, config, currentMode]);
 
   // 設定推測の自動計算
   useEffect(() => {
@@ -283,22 +155,9 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
       // 総ゲーム数が入力されている場合のみ自動計算
       if (totalGames > 0) {
         setError(null);
-        console.log("🔄 自動計算開始:", {
-          機種: config.name,
-          モード: currentMode,
-          総ゲーム数: totalGames,
-          入力値: currentInputs,
-        });
         try {
           // モードに関わらず、表示中の入力値で推定を行う
           const results = calculateEstimation(config, currentInputs);
-          console.log(
-            "✅ 計算完了:",
-            results.map((r) => ({
-              設定: r.setting,
-              確率: `${r.probability.toFixed(1)}%`,
-            })),
-          );
           setEstimationResults(results);
         } catch (err) {
           console.error("❌ 自動計算エラー:", err);
@@ -312,20 +171,13 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     }, 500); // 500ms のデバウンス
 
     return () => clearTimeout(timer);
-  }, [currentInputs, totalGames, config, currentMode]);
+  }, [currentInputs, totalGames, config]);
 
   const handleReset = () => {
     if (!window.confirm("本当に入力を全てリセットしますか？")) return;
-    if (currentMode === "grape") {
-      // ぶどう・ベル逆算タブのリセット
-      removeGrapeInputValues();
-      setCalculatedGrapeCount(null);
-    } else {
-      // 通常・詳細タブのリセット
-      removeInputValues();
-      setEstimationResults(null);
-      setError(null);
-    }
+    removeInputValues();
+    setEstimationResults(null);
+    setError(null);
   };
 
   // 判別要素のみ抽出
@@ -415,12 +267,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             </button>
             <button
               type="button"
-              onClick={() => setCurrentMode("grape")}
-              className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all ${
-                currentMode === "grape"
-                  ? "bg-emerald-600 text-white ring-2 ring-emerald-400"
-                  : "bg-emerald-700 text-white"
-              }`}
+              onClick={() => navigate(`/${config.id}/grape`)}
+              className="flex-1 rounded-lg bg-emerald-700 text-white py-2 text-xs font-bold transition-opacity hover:opacity-90 active:opacity-80"
             >
               {currentCategory === "hana" ? "🔔 ベル逆算へ" : "🍇 ぶどう逆算へ"}
             </button>
@@ -429,26 +277,11 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
       </div>
 
       <div className="mx-auto w-full max-w-md space-y-4 p-4">
-        {/* ぶどう/ベル逆算モードの時はメインカウンターへ戻るボタンを表示 */}
-        {currentMode === "grape" && (
-          <button
-            type="button"
-            onClick={() => setCurrentMode("simple")}
-            className="w-full rounded-xl bg-slate-200 dark:bg-slate-800 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-300 transition-colors hover:bg-slate-300 dark:hover:bg-slate-700"
-          >
-            ← カウンターに戻る
-          </button>
-        )}
-
         {/* 入力フォーム */}
         {config.sections.map((section) => {
-          // 表示要素のフィルタリング: grapeモードのみ専用フィルタ、それ以外は全要素統合表示
+          // 通常・詳細を統合して全カウンター要素を表示（grape-calc は逆算ページへ分離済み）
           const visibleElements = section.elements.filter((element) => {
             const visibility = element.visibility || "always";
-            if (currentMode === "grape") {
-              return visibility === "always" || visibility === "grape-calc";
-            }
-            // メインモード: 通常・詳細を統合して全カウンター要素を表示
             return (
               visibility === "always" ||
               visibility === "simple" ||
@@ -457,125 +290,6 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           });
 
           if (visibleElements.length === 0) return null;
-
-          // ぶどう逆算モード: 差枚数セクション(other-section)の直後にリセットボタンを挿入
-          if (currentMode === "grape" && section.id === "other-section") {
-            return (
-              <div key={section.id} className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
-                <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
-                  {section.title}
-                </h2>
-                <div className="space-y-4">
-                  {visibleElements.map((element) => (
-                    <DynamicInput
-                      key={element.id}
-                      element={{ ...element, isReadOnly: false }}
-                      value={currentInputs[element.id]}
-                      onChange={(value: number | string | boolean) =>
-                        handleValueChange(element.id, value)
-                      }
-                      totalGames={totalGames}
-                      vibrationEnabled={vibrationEnabled}
-                    />
-                  ))}
-                </div>
-              </div>
-            );
-          }
-
-          // ブドウ逆算モードかつ通常時小役セクションの場合、特別な結果カードを表示
-          if (currentMode === "grape" && section.id === "normal-role-section") {
-            const diffCoins = Number(currentInputs["diff-coins"]);
-            const bigCount = Number(currentInputs["big-count"]) || 0;
-            const regCount = Number(currentInputs["reg-count"]) || 0;
-
-              // --- 定数定義 (Strict Formula) ---
-              const PAYOUT = {
-                BIG: config.specs?.payouts?.big || 252,
-                REG: config.specs?.payouts?.reg || 96,
-                GRAPE: config.specs?.payouts?.grape || 8,
-                CHERRY: 2,
-              };
-              const PROB_DENOM = {
-                REPLAY:
-                  config.specs?.reverseCalcProbDenominators?.replay || 7.3,
-                CHERRY:
-                  config.specs?.reverseCalcProbDenominators?.cherry || 36.0,
-              };
-
-              const REPLAY_PROB = 1 / PROB_DENOM.REPLAY;
-              const CHERRY_PROB = 1 / PROB_DENOM.CHERRY;
-
-              // --- A. チェリー狙い (完全取得) ---
-              const CHERRY_ACQUISITION_RATE_A = 1.0;
-              const coinInA = totalGames * (1 - REPLAY_PROB) * 3;
-              const bonusOutA = bigCount * PAYOUT.BIG + regCount * PAYOUT.REG;
-              const cherryPayoutA =
-                totalGames *
-                CHERRY_PROB *
-                PAYOUT.CHERRY *
-                CHERRY_ACQUISITION_RATE_A;
-              const grapePayoutA =
-                diffCoins + coinInA - bonusOutA - cherryPayoutA;
-              const grapeCountA = grapePayoutA / PAYOUT.GRAPE;
-              const grapeProbA = grapeCountA > 0 ? totalGames / grapeCountA : 0;
-
-              // --- B. フリー打ち (チェリー取得率 約66.7% = 2/3) ---
-              // ※チェリーを取りこぼすとその分ぶどう獲得枚数が減ったように計算されるため、見かけ上のぶどう確率が悪くなる方向へ補正される
-              const CHERRY_ACQUISITION_RATE_B = 2 / 3;
-              const coinInB = totalGames * (1 - REPLAY_PROB) * 3;
-              const bonusOutB = bigCount * PAYOUT.BIG + regCount * PAYOUT.REG;
-              const cherryPayoutB =
-                totalGames *
-                CHERRY_PROB *
-                PAYOUT.CHERRY *
-                CHERRY_ACQUISITION_RATE_B;
-              const grapePayoutB =
-                diffCoins + coinInB - bonusOutB - cherryPayoutB;
-              const grapeCountB = grapePayoutB / PAYOUT.GRAPE;
-              const grapeProbB = grapeCountB > 0 ? totalGames / grapeCountB : 0;
-
-              return (
-                <div
-                  key={section.id}
-                  className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6"
-                >
-                  <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
-                    {currentCategory === "hana"
-                      ? "ベル逆算結果"
-                      : "ブドウ逆算結果"}
-                  </h2>
-
-                  <div className="space-y-3">
-                    {/* チェリー狙い */}
-                    <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 dark:border-emerald-800/30 dark:bg-emerald-900/20">
-                      <div className="mb-1 text-xs font-bold text-emerald-700 dark:text-emerald-400">
-                        チェリー狙い
-                      </div>
-                      <div className="text-center text-2xl font-bold text-slate-800 dark:text-white">
-                        {grapeProbA > 0 ? `1/${grapeProbA.toFixed(2)}` : "---"}
-                      </div>
-                      <div className="mt-1 text-center text-[10px] text-slate-400">
-                        推計回数: {Math.round(grapeCountA)}回
-                      </div>
-                    </div>
-
-                    {/* フリー打ち */}
-                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
-                      <div className="mb-1 text-xs font-bold text-slate-500 dark:text-slate-400">
-                        フリー打ち
-                      </div>
-                      <div className="text-center text-2xl font-bold text-slate-800 dark:text-white">
-                        {grapeProbB > 0 ? `1/${grapeProbB.toFixed(2)}` : "---"}
-                      </div>
-                      <div className="mt-1 text-center text-[10px] text-slate-400">
-                        推計回数: {Math.round(grapeCountB)}回
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-          }
 
           return (
             <React.Fragment key={section.id}>

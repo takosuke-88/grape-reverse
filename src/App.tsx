@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import MachinePagePreview from "./pages/MachinePagePreview";
 import BonusInputPage from "./pages/BonusInputPage";
+import GrapeReversePage from "./pages/GrapeReversePage";
 import { AVAILABLE_MACHINES } from "./data/machine-list";
 import { ATTACHED_COLUMNS } from "./data/column-list";
 import MyJugglerColumn from "./pages/columns/myjuggler5-setting6-behavior";
@@ -50,6 +51,9 @@ export default function App() {
 
             {/* ボーナス入力ページ: /:machineId/bonus */}
             <Route path="/:machineId/bonus" element={<BonusInputPage />} />
+
+            {/* ぶどう/ベル逆算ページ: /:machineId/grape */}
+            <Route path="/:machineId/grape" element={<GrapeReversePage />} />
 
             {/* 本番用ルート: /myjuggler5 など */}
             <Route path="/:machineId" element={<MachinePagePreview />} />
