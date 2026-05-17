@@ -219,7 +219,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
               {/* 確率：右下に絶対配置（数字エリアと重ならない） */}
               {probText && (
                 <span
-                  className="absolute right-2 bottom-1.5 text-base italic font-black tabular-nums pointer-events-none select-none"
+                  className="absolute right-2 bottom-1.5 text-lg italic font-black tabular-nums pointer-events-none select-none"
                   style={{
                     color: "rgba(255,255,255,0.92)",
                     fontFamily: "'Urbanist', -apple-system, sans-serif",
