@@ -84,21 +84,25 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     elementId: string,
     value: number | boolean | string,
   ) => {
-    // ボーナス合計直接入力時の同期処理
-    // Total入力時に、その値を維持するようにUnknownを調整する
+    // ボーナス合計直接入力時の同期処理:
+    // Total - (Solo + Cherry) の差分を「契機不明」要素に自動反映する
     if (elementId === "big-count" || elementId === "reg-count") {
       const prefix = elementId === "big-count" ? "big" : "reg";
       const numValue = Number(value);
       const solo = Number(inputValues[`${prefix}-solo-count`]) || 0;
       const cherry = Number(inputValues[`${prefix}-cherry-count`]) || 0;
-      // Total - (Solo + Cherry) = Unknown
-      // 負の値にならないように0でクリップ (Total < 内訳合計 の矛盾回避)
       const newUnknown = Math.max(0, numValue - (solo + cherry));
+
+      // 機種定義から「契機不明」要素IDを動的に探索する
+      const unknownElement = config.sections
+        .flatMap((s) => s.elements)
+        .find((e) => e.id.startsWith(prefix) && e.id.includes("unknown"));
+      const unknownId = unknownElement?.id ?? `${prefix}-unknown-count`;
 
       setInputValues((prev) => ({
         ...prev,
         [elementId]: value,
-        [`${prefix}-unknown-count`]: newUnknown,
+        [unknownId]: newUnknown,
       }));
       return;
     }
@@ -185,6 +189,19 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     return config.sections.flatMap((section) =>
       section.elements.filter((element) => element.isDiscriminationFactor),
     );
+  }, [config.sections]);
+
+  // 通常小役セクションをボーナスセクションより前に移動した表示順を生成
+  const orderedSections = useMemo(() => {
+    const sections = [...config.sections];
+    const normalIdx = sections.findIndex((s) => s.id === "normal-role-section");
+    const bonusIdx = sections.findIndex((s) => s.id === "bonus-section");
+    if (normalIdx !== -1 && bonusIdx !== -1 && normalIdx > bonusIdx) {
+      const [normalSection] = sections.splice(normalIdx, 1);
+      const newBonusIdx = sections.findIndex((s) => s.id === "bonus-section");
+      sections.splice(newBonusIdx, 0, normalSection);
+    }
+    return sections;
   }, [config.sections]);
 
   // ブドウ信頼度の計算
@@ -278,7 +295,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
       <div className="mx-auto w-full max-w-md space-y-4 p-4">
         {/* 入力フォーム */}
-        {config.sections.map((section) => {
+        {orderedSections.map((section) => {
           // 通常・詳細を統合して全カウンター要素を表示（grape-calc は逆算ページへ分離済み）
           const visibleElements = section.elements.filter((element) => {
             const visibility = element.visibility || "always";
@@ -318,7 +335,11 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         <DynamicInput
                           element={{
                             ...element,
-                            isReadOnly: !!element.isReadOnly,
+                            // BIG/REG回数は直接入力可能にする（詳細内訳と自動同期）
+                            isReadOnly:
+                              element.id === "big-count" || element.id === "reg-count"
+                                ? false
+                                : !!element.isReadOnly,
                           }}
                           value={currentInputs[element.id]}
                           onChange={(value: number | string | boolean) => handleValueChange(element.id, value)}
