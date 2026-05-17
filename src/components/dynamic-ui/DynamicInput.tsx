@@ -134,7 +134,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
               >
                 −
               </button>
-              <div className="flex-1 flex items-center justify-center overflow-hidden">
+              <div className="flex-1 flex items-center justify-center">
                 {showDirectInput ? (
                   <input
                     type="number"
@@ -182,7 +182,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
 
             {/* RIGHT 70%: tap area */}
             <div
-              className={`relative ${
+              className={`relative flex items-center justify-end ${
                 element.isReadOnly
                   ? "pointer-events-none"
                   : "cursor-pointer active:bg-white/10"
@@ -195,7 +195,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                   className="counter-float-anim absolute font-black text-xl pointer-events-none"
                   style={{
                     left: "40%",
-                    top: "30%",
+                    top: "50%",
                     color: "#ffffff",
                     textShadow: `0 0 14px ${theme.accent}`,
                     zIndex: 10,
@@ -205,25 +205,23 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 </span>
               )}
 
-              {/* ＋ : 右70%エリア中央 */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <span
-                  className="text-4xl font-thin"
-                  style={{
-                    color: "#ffffff",
-                    opacity: element.isReadOnly ? 0.2 : 0.4,
-                  }}
-                >
-                  ＋
-                </span>
-              </div>
+              {/* ＋ : 右寄せ（前バージョンと同じ位置） */}
+              <span
+                className="text-3xl font-thin pr-4 pointer-events-none select-none"
+                style={{
+                  color: "#ffffff",
+                  opacity: element.isReadOnly ? 0.2 : 0.45,
+                }}
+              >
+                ＋
+              </span>
 
-              {/* 確率：右下に絶対配置（数字エリアから完全に分離） */}
+              {/* 確率：右下に絶対配置（数字エリアと重ならない） */}
               {probText && (
                 <span
-                  className="absolute right-2 bottom-2 text-xs italic font-bold tabular-nums pointer-events-none select-none"
+                  className="absolute right-2 bottom-1.5 text-sm italic font-bold tabular-nums pointer-events-none select-none"
                   style={{
-                    color: "rgba(255,255,255,0.75)",
+                    color: "rgba(255,255,255,0.82)",
                     fontFamily: "'Urbanist', -apple-system, sans-serif",
                   }}
                 >
