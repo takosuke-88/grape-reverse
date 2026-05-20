@@ -10,6 +10,7 @@ interface DynamicInputProps {
   vibrationEnabled?: boolean;
   onIncrement?: () => void;
   onDecrement?: () => void;
+  onDirectInput?: () => void;
 }
 
 interface ElementTheme {
@@ -62,6 +63,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   vibrationEnabled = true,
   onIncrement,
   onDecrement,
+  onDirectInput,
 }) => {
   const [showFloat, setShowFloat] = useState(false);
   const [showGlow, setShowGlow] = useState(false);
@@ -157,6 +159,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                     onChange={(e) => {
                       if (e.target.value === "") onChange("");
                       else onChange(parseInt(e.target.value) || 0);
+                      onDirectInput?.();
                     }}
                     onBlur={() => setShowDirectInput(false)}
                     onKeyDown={(e) => {

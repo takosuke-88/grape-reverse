@@ -425,6 +425,11 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                             element.id === "reg-count" ? () => handleBonusDecrement("reg") :
                             undefined
                           }
+                          onDirectInput={(() => {
+                            if (/^big(-\w+)?-count$/.test(element.id)) return () => setBigHistory([]);
+                            if (/^reg(-\w+)?-count$/.test(element.id)) return () => setRegHistory([]);
+                            return undefined;
+                          })()}
                         />
                       </div>
                     </div>
