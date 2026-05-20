@@ -283,7 +283,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             <button
               type="button"
               onClick={handleReset}
-              className="shrink-0 flex items-center gap-1 rounded-full bg-red-950/60 border border-red-800/50 px-2.5 py-1.5 text-xs font-bold text-red-200 shadow-sm transition-opacity hover:opacity-75 active:opacity-60"
+              className="shrink-0 flex items-center gap-1 rounded-full bg-red-600 border border-red-400 px-2.5 py-1.5 text-xs font-bold text-white shadow-md transition-opacity hover:opacity-80 active:opacity-60"
               title="データを全てリセット"
             >
               💀 リセット
