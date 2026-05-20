@@ -242,29 +242,28 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
   return (
     <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950">
-      {/* ヘッダー（テーマカラー適用） */}
-      <div
-        className={`${themeColor} py-6 px-4 text-white shadow-lg transition-colors duration-500`}
-        style={{ backgroundColor: brandColor || undefined }} // ブランドカラー適用 (優先)
-      >
-        <div className="mx-auto max-w-md">
-          <div className="mb-2 flex items-center gap-2">
-            <span className="rounded-md bg-white/20 px-2.5 py-1 text-xs font-medium">
-              {config.type}
-            </span>
-            {/* 詳細フラグ判別中の表示を削除 */}
+      {/* 2行スティッキーヘッダー（タイトルバー＋ナビゲーションバー） */}
+      <div className="sticky top-0 z-50">
+        {/* タイトルバー（テーマカラー適用） */}
+        <div
+          className={`${themeColor} py-3 px-4 text-white shadow-lg transition-colors duration-500`}
+          style={{ backgroundColor: brandColor || undefined }}
+        >
+          <div className="mx-auto max-w-md">
+            <div className="flex items-center gap-2">
+              <span className="rounded-md bg-white/20 px-2.5 py-1 text-xs font-medium shrink-0">
+                {config.type}
+              </span>
+              <h1 className="font-bold min-w-0">
+                <span className="block text-lg sm:text-xl font-extrabold leading-tight truncate">{config.name}</span>
+                <span className="block text-xs font-normal opacity-80 truncate">{toolLabel}</span>
+              </h1>
+            </div>
           </div>
-          <h1 className="font-bold">
-            <span className="block text-2xl sm:text-3xl">{config.name}</span>
-            <span className="block mt-2 text-sm sm:text-base font-normal opacity-90">
-              {toolLabel}
-            </span>
-          </h1>
         </div>
-      </div>
 
-      {/* 機種選択ナビゲーション */}
-      <div className="sticky top-0 z-10 bg-slate-100/95 backdrop-blur-sm py-3 px-4 shadow-md border-b border-slate-200 dark:bg-slate-900/95 dark:border-slate-800">
+        {/* 機種選択ナビゲーション */}
+        <div className="bg-slate-100/95 backdrop-blur-sm py-3 px-4 shadow-md border-b border-slate-200 dark:bg-slate-900/95 dark:border-slate-800">
         <div className="mx-auto max-w-md space-y-2">
           {/* 機種選択 + バイブトグル + リセット */}
           <div className="flex items-center gap-2">
@@ -284,22 +283,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             <button
               type="button"
               onClick={handleReset}
-              className="shrink-0 flex items-center gap-1 rounded-full bg-slate-800 px-2.5 py-1.5 text-xs font-medium text-red-400/80 shadow-sm transition-opacity hover:opacity-75 active:opacity-60 dark:bg-slate-700"
+              className="shrink-0 flex items-center gap-1 rounded-full bg-red-950/60 border border-red-800/50 px-2.5 py-1.5 text-xs font-bold text-red-200 shadow-sm transition-opacity hover:opacity-75 active:opacity-60"
               title="データを全てリセット"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                className="h-3 w-3 shrink-0"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.519.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              リセット
+              💀 リセット
             </button>
             <button
               type="button"
@@ -332,7 +319,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             </button>
           </div>
         </div>
-      </div>
+        </div>{/* end nav bar */}
+      </div>{/* end sticky wrapper */}
 
       <div className="mx-auto w-full max-w-md space-y-4 p-4">
         {/* 入力フォーム */}
