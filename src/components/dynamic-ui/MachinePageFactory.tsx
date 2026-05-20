@@ -242,28 +242,26 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
   return (
     <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950">
-      {/* 2行スティッキーヘッダー（タイトルバー＋ナビゲーションバー） */}
-      <div className="sticky top-0 z-50">
-        {/* タイトルバー（テーマカラー適用） */}
-        <div
-          className={`${themeColor} py-3 px-4 text-white shadow-lg transition-colors duration-500`}
-          style={{ backgroundColor: brandColor || undefined }}
-        >
-          <div className="mx-auto max-w-md">
-            <div className="flex items-center gap-2">
-              <span className="rounded-md bg-white/20 px-2.5 py-1 text-xs font-medium shrink-0">
-                {config.type}
-              </span>
-              <h1 className="font-bold min-w-0">
-                <span className="block text-lg sm:text-xl font-extrabold leading-tight truncate">{config.name}</span>
-                <span className="block text-xs font-normal opacity-80 truncate">{toolLabel}</span>
-              </h1>
-            </div>
+      {/* タイトルバー（スクロールアウトする・固定しない） */}
+      <div
+        className={`${themeColor} py-3 px-4 text-white shadow-lg transition-colors duration-500`}
+        style={{ backgroundColor: brandColor || undefined }}
+      >
+        <div className="mx-auto max-w-md">
+          <div className="flex items-center gap-2">
+            <span className="rounded-md bg-white/20 px-2.5 py-1 text-xs font-medium shrink-0">
+              {config.type}
+            </span>
+            <h1 className="font-bold min-w-0">
+              <span className="block text-lg sm:text-xl font-extrabold leading-tight truncate">{config.name}</span>
+              <span className="block text-xs font-normal opacity-80 truncate">{toolLabel}</span>
+            </h1>
           </div>
         </div>
+      </div>
 
-        {/* 機種選択ナビゲーション */}
-        <div className="bg-slate-100/95 backdrop-blur-sm py-3 px-4 shadow-md border-b border-slate-200 dark:bg-slate-900/95 dark:border-slate-800">
+      {/* 機種選択ナビゲーション（2行セットでsticky） */}
+      <div className="sticky top-0 z-50 bg-slate-100/95 backdrop-blur-sm py-3 px-4 shadow-md border-b border-slate-200 dark:bg-slate-900/95 dark:border-slate-800">
         <div className="mx-auto max-w-md space-y-2">
           {/* 機種選択 + バイブトグル + リセット */}
           <div className="flex items-center gap-2">
@@ -319,8 +317,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             </button>
           </div>
         </div>
-        </div>{/* end nav bar */}
-      </div>{/* end sticky wrapper */}
+      </div>{/* end sticky nav */}
 
       <div className="mx-auto w-full max-w-md space-y-4 p-4">
         {/* 入力フォーム */}
