@@ -345,9 +345,9 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             <button
               type="button"
               className="flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 text-xs font-bold transition-opacity hover:opacity-90 active:opacity-80"
-              onClick={() => navigate(`/${config.id}/bonus`)}
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             >
-              🎰 ボーナス入力へ
+              🎰 小役カウンター
             </button>
             <button
               type="button"
