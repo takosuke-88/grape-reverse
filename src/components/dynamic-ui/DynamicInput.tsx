@@ -84,7 +84,9 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
 
   const handleDecrement = () => {
     if (element.isReadOnly) return;
-    onChange((Number(value) || 0) - 1);
+    const current = Number(value) || 0;
+    if (current <= 0) return;
+    onChange(current - 1);
     triggerVibration("dec");
   };
 
