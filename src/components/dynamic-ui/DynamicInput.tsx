@@ -8,6 +8,8 @@ interface DynamicInputProps {
   onChange: (value: number | boolean | string) => void;
   totalGames?: number;
   vibrationEnabled?: boolean;
+  onIncrement?: () => void;
+  onDecrement?: () => void;
 }
 
 interface ElementTheme {
@@ -58,6 +60,8 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   onChange,
   totalGames,
   vibrationEnabled = true,
+  onIncrement,
+  onDecrement,
 }) => {
   const [showFloat, setShowFloat] = useState(false);
   const [showGlow, setShowGlow] = useState(false);
@@ -75,6 +79,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   const handleIncrement = () => {
     if (element.isReadOnly) return;
     onChange((Number(value) || 0) + 1);
+    onIncrement?.();
     triggerVibration("inc");
     setShowGlow(true);
     setShowFloat(true);
@@ -84,6 +89,11 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
 
   const handleDecrement = () => {
     if (element.isReadOnly) return;
+    if (onDecrement) {
+      onDecrement();
+      triggerVibration("dec");
+      return;
+    }
     const current = Number(value) || 0;
     if (current <= 0) return;
     onChange(current - 1);

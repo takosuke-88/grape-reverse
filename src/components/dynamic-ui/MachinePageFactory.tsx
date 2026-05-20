@@ -29,6 +29,16 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     true
   );
 
+  // ボーナス入力履歴（LIFO スタック）
+  const [bigHistory, setBigHistory] = useLocalStorage<string[]>(
+    `grape-reverse-big-history-${config.id}`,
+    []
+  );
+  const [regHistory, setRegHistory] = useLocalStorage<string[]>(
+    `grape-reverse-reg-history-${config.id}`,
+    []
+  );
+
   // 現在の機種のカテゴリを取得
   // 現在の機種のカテゴリとカラーを取得
   const currentMachineInfo = useMemo(() => {
@@ -181,8 +191,39 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   const handleReset = () => {
     if (!window.confirm("これまでのカウントデータを全てリセットしますか？")) return;
     removeInputValues();
+    setBigHistory([]);
+    setRegHistory([]);
     setEstimationResults(null);
     setError(null);
+  };
+
+  // LIFO ボーナス減算：履歴が整合していればスタックpop、不整合時はフォールバック
+  const handleBonusDecrement = (prefix: "big" | "reg") => {
+    const history = prefix === "big" ? bigHistory : regHistory;
+    const setHistory = prefix === "big" ? setBigHistory : setRegHistory;
+    const current = Number(inputValues[`${prefix}-count`]) || 0;
+    if (current <= 0) return;
+
+    if (history.length === current && history.length > 0) {
+      const type = history[history.length - 1];
+      const key = `${prefix}-${type}-count`;
+      const val = Number(inputValues[key]) || 0;
+      if (val > 0) {
+        setInputValues((prev) => ({ ...prev, [key]: val - 1 }));
+        setHistory((prev) => prev.slice(0, -1));
+        return;
+      }
+    }
+
+    // フォールバック: unknown → cherry → solo の順で非ゼロを減算
+    for (const type of ["unknown", "cherry", "solo"]) {
+      const key = `${prefix}-${type}-count`;
+      const val = Number(inputValues[key]) || 0;
+      if (val > 0) {
+        setInputValues((prev) => ({ ...prev, [key]: val - 1 }));
+        return;
+      }
+    }
   };
 
   // 判別要素のみ抽出
@@ -371,6 +412,19 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                           onChange={(value: number | string | boolean) => handleValueChange(element.id, value)}
                           totalGames={totalGames}
                           vibrationEnabled={vibrationEnabled}
+                          onIncrement={(() => {
+                            const m = element.id.match(/^(big|reg)-(solo|cherry|unknown)-count$/);
+                            if (!m) return undefined;
+                            const [, bonus, type] = m;
+                            return bonus === "big"
+                              ? () => setBigHistory((prev) => [...prev, type])
+                              : () => setRegHistory((prev) => [...prev, type]);
+                          })()}
+                          onDecrement={
+                            element.id === "big-count" ? () => handleBonusDecrement("big") :
+                            element.id === "reg-count" ? () => handleBonusDecrement("reg") :
+                            undefined
+                          }
                         />
                       </div>
                     </div>
