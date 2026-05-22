@@ -241,7 +241,7 @@ export default function GrapeReversePage() {
   const roleLabel = isHana ? "ベル" : "ぶどう";
   const roleIcon = isHana ? "🔔" : "🍇";
 
-  const [vibrationEnabled] = useLocalStorage<boolean>("grape-reverse-vibration", true);
+  const [vibrationEnabled, setVibrationEnabled] = useLocalStorage<boolean>("grape-reverse-vibration", true);
 
   const [grapeData, setGrapeData] = useLocalStorage<Record<string, number>>(
     `grape-reverse-data-grape-mode-${machineId}`,
@@ -332,6 +332,19 @@ export default function GrapeReversePage() {
               >
                 🗑️ リセット
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const next = !vibrationEnabled;
+                  setVibrationEnabled(next);
+                  if (next && navigator.vibrate) navigator.vibrate(40);
+                }}
+                className={`shrink-0 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold shadow-md transition-all ${
+                  vibrationEnabled ? "bg-emerald-600 text-white" : "bg-gray-800 text-white"
+                }`}
+              >
+                {vibrationEnabled ? "📳 ON" : "📴 OFF"}
+              </button>
             </div>
 
             {/* Row 2: ナビゲーション */}
@@ -373,12 +386,9 @@ export default function GrapeReversePage() {
 
           {/* 差枚数（台メーター） */}
           <div className="rounded-2xl bg-slate-900 p-4 space-y-3 ring-1 ring-slate-800">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                差枚数（台メーター）
-              </h2>
-              <span className="text-[10px] text-slate-600">プラスが沈み</span>
-            </div>
+            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+              差枚数（台メーター）
+            </h2>
             <GrapeCounter
               label="差枚数"
               value={diffCoins}
