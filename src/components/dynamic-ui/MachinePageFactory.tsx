@@ -329,15 +329,19 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             </button>
             <button
               type="button"
-              onClick={() => setVibrationEnabled(!vibrationEnabled)}
-              className={`shrink-0 rounded-xl px-3 py-2.5 text-lg shadow-sm transition-all ${
+              onClick={() => {
+                const next = !vibrationEnabled;
+                setVibrationEnabled(next);
+                if (next && navigator.vibrate) navigator.vibrate(40);
+              }}
+              className={`shrink-0 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold shadow-md transition-all ${
                 vibrationEnabled
-                  ? "bg-green-500 text-white"
-                  : "bg-slate-300 text-slate-500 dark:bg-slate-700 dark:text-slate-400"
+                  ? "bg-emerald-600 text-white"
+                  : "bg-gray-800 text-gray-500"
               }`}
               title={vibrationEnabled ? "バイブON（タップでOFF）" : "バイブOFF（タップでON）"}
             >
-              📳
+              {vibrationEnabled ? "📳 ON" : "📴 OFF"}
             </button>
           </div>
           {/* ナビゲーションボタン */}
