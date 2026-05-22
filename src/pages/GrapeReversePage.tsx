@@ -321,7 +321,7 @@ export default function GrapeReversePage() {
             {/* Row 1: 機種名 + リセット */}
             <div className="flex items-center gap-2">
               <span
-                className="flex-1 text-center font-bold text-base py-2 px-3 rounded-xl border-2 border-slate-300 bg-white text-slate-800 dark:bg-slate-800 dark:border-slate-600 dark:text-white truncate"
+                className="flex-1 text-center font-bold text-base py-2.5 rounded-xl border-2 border-slate-300 bg-white text-slate-800 shadow-sm dark:bg-slate-800 dark:border-slate-600 dark:text-white truncate"
               >
                 {machineName}
               </span>
