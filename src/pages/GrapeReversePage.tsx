@@ -306,29 +306,44 @@ export default function GrapeReversePage() {
 
       <div className="min-h-screen w-full bg-slate-950">
 
-        {/* カラーバー（スクロールアウト） */}
-        <div className="py-4 px-4 shadow-lg" style={{ backgroundColor: brandColor }}>
+        {/* タイトルバー（スクロールアウト） ─ MachinePageFactoryと同一 */}
+        <div
+          className="py-3 px-4 text-white shadow-lg"
+          style={{ backgroundColor: brandColor }}
+        >
           <div className="mx-auto max-w-md">
-            <h1 className="text-base font-bold text-white">{machineName}</h1>
-            <p className="text-xs text-white/70 mt-0.5">{roleLabel}逆算ツール</p>
+            <div className="flex items-center gap-2">
+              <span className="rounded-md bg-white/20 px-2.5 py-1 text-xs font-medium shrink-0">
+                {config?.type ?? "A-type"}
+              </span>
+              <h1 className="font-bold min-w-0">
+                <span className="block text-lg sm:text-xl font-extrabold leading-tight truncate">{machineName}</span>
+                <span className="block text-xs font-normal opacity-80 truncate">{roleLabel}逆算ツール</span>
+              </h1>
+            </div>
           </div>
         </div>
 
-        {/* 2行 Sticky Header ─ 小役カウンターページと同一構造 */}
+        {/* 2行 Sticky Header ─ MachinePageFactoryと完全同一 */}
         <div className="sticky top-0 z-50 bg-slate-100/95 backdrop-blur-sm py-3 px-4 shadow-md border-b border-slate-200 dark:bg-slate-900/95 dark:border-slate-800">
           <div className="mx-auto max-w-md space-y-2">
 
-            {/* Row 1: 機種名 + リセット */}
+            {/* Row 1: 機種名 + リセット + バイブ */}
             <div className="flex items-center gap-2">
-              <span
-                className="flex-1 text-center font-bold text-base py-2.5 rounded-xl border-2 border-slate-300 bg-white text-slate-800 shadow-sm dark:bg-slate-800 dark:border-slate-600 dark:text-white truncate"
+              <select
+                value={machineId ?? ""}
+                onChange={(e) => { if (e.target.value) navigate(`/${e.target.value}/grape`); }}
+                className="flex-1 text-center font-bold text-base py-2.5 rounded-xl border-2 border-slate-300 bg-white text-slate-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"
               >
-                {machineName}
-              </span>
+                {AVAILABLE_MACHINES.filter((m) => m.category === (machineInfo?.category ?? "juggler")).map((m) => (
+                  <option key={m.id} value={m.id}>{m.name}</option>
+                ))}
+              </select>
               <button
                 type="button"
                 onClick={handleReset}
                 className="shrink-0 flex items-center gap-1 rounded-full bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-md transition-opacity hover:opacity-80 active:opacity-60"
+                title="データを全てリセット"
               >
                 🗑️ リセット
               </button>
@@ -342,6 +357,7 @@ export default function GrapeReversePage() {
                 className={`shrink-0 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold shadow-md transition-all ${
                   vibrationEnabled ? "bg-emerald-600 text-white" : "bg-gray-800 text-white"
                 }`}
+                title={vibrationEnabled ? "バイブON（タップでOFF）" : "バイブOFF（タップでON）"}
               >
                 {vibrationEnabled ? "📳 ON" : "📴 OFF"}
               </button>
