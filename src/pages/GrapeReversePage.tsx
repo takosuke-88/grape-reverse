@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { AVAILABLE_MACHINES } from "../data/machine-list";
@@ -43,38 +43,34 @@ const CONFIG_MAP: Record<string, MachineConfig> = {
 };
 
 // ─────────────────────────────────────────────
-// 汎用スプリットカウンター（逆算ページ専用）
+// 30:70 スプリットカウンター（逆算ページ専用）
 // ─────────────────────────────────────────────
 interface SplitCounterProps {
   label: string;
   value: number;
   onChange: (n: number) => void;
   vibrationEnabled: boolean;
-  accentGlow?: string; // text-shadow 用の色
+  accentGlow?: string;
+  probText?: string; // バー内部に白斜体で表示する確率テキスト
+  step?: number;
 }
 
-function SplitCounter({ label, value, onChange, vibrationEnabled, accentGlow }: SplitCounterProps) {
-  const [showFloat, setShowFloat] = useState(false);
-  const [showGlow, setShowGlow] = useState(false);
-  const [showDirect, setShowDirect] = useState(false);
-
+function SplitCounter({
+  label,
+  value,
+  onChange,
+  vibrationEnabled,
+  accentGlow,
+  probText,
+  step = 1,
+}: SplitCounterProps) {
   const vibrate = (type: "inc" | "dec") => {
     if (!vibrationEnabled) return;
     try { window.navigator?.vibrate?.(type === "inc" ? 15 : 40); } catch (_) {}
   };
 
-  const inc = () => {
-    onChange(value + 1);
-    vibrate("inc");
-    setShowGlow(true); setShowFloat(true);
-    setTimeout(() => setShowGlow(false), 450);
-    setTimeout(() => setShowFloat(false), 650);
-  };
-  const dec = () => {
-    if (value <= 0) return;
-    onChange(value - 1);
-    vibrate("dec");
-  };
+  const inc = () => { onChange(value + step); vibrate("inc"); };
+  const dec = () => { if (value <= 0) return; onChange(Math.max(0, value - step)); vibrate("dec"); };
 
   return (
     <div className="space-y-1.5">
@@ -103,55 +99,40 @@ function SplitCounter({ label, value, onChange, vibrationEnabled, accentGlow }: 
             −
           </button>
           <div className="flex-1 flex items-center justify-center">
-            {showDirect ? (
-              <input
-                type="number"
-                autoFocus
-                min={0}
-                value={value === 0 ? "" : value}
-                onChange={(e) => {
-                  const v = parseInt(e.target.value);
-                  onChange(isNaN(v) ? 0 : Math.max(0, v));
-                }}
-                onBlur={() => setShowDirect(false)}
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); setShowDirect(false); } }}
-                className="w-full text-center text-3xl font-bold bg-transparent text-white focus:outline-none tabular-nums"
-                style={{ maxWidth: "72px", fontFamily: "'Urbanist', sans-serif" }}
-              />
-            ) : (
-              <span
-                onClick={() => setShowDirect(true)}
-                className={`text-3xl font-bold tabular-nums text-white cursor-pointer ${
-                  showGlow ? "counter-number-glow" : "counter-number"
-                }`}
-                style={{
-                  fontFamily: "'Urbanist', sans-serif",
-                  ...(accentGlow && !showGlow
-                    ? { textShadow: `0 0 8px ${accentGlow}44, 0 0 16px ${accentGlow}22` }
-                    : {}),
-                }}
-              >
-                {value}
-              </span>
-            )}
+            <span
+              className="text-3xl font-bold tabular-nums text-white cursor-pointer counter-number"
+              style={{
+                fontFamily: "'Urbanist', sans-serif",
+                ...(accentGlow ? { textShadow: `0 0 8px ${accentGlow}44, 0 0 16px ${accentGlow}22` } : {}),
+              }}
+              onClick={() => {
+                const raw = window.prompt(label, String(value));
+                if (raw === null) return;
+                const v = parseInt(raw);
+                if (!isNaN(v)) onChange(Math.max(0, v));
+              }}
+            >
+              {value}
+            </span>
           </div>
         </div>
 
         {/* 縦区切り */}
         <div className="absolute top-3 bottom-3 w-px bg-slate-700" style={{ left: "30%" }} />
 
-        {/* RIGHT 70%: tap area */}
+        {/* RIGHT 70%: tap area + 確率表示 */}
         <div
           className="relative flex items-center justify-end cursor-pointer active:bg-white/[0.04] transition-colors"
           style={{ width: "70%" }}
           onClick={inc}
         >
-          {showFloat && (
+          {/* 確率テキスト（白斜体） */}
+          {probText && (
             <span
-              className="counter-float-anim absolute font-bold text-xl pointer-events-none"
-              style={{ left: "40%", top: "50%", color: accentGlow || "#86efac", zIndex: 10 }}
+              className="absolute left-0 right-8 text-center text-sm font-bold italic text-white/80 pointer-events-none"
+              style={{ fontFamily: "'Urbanist', sans-serif" }}
             >
-              +1
+              {probText}
             </span>
           )}
           <span className="text-3xl font-thin text-slate-600 pr-4 pointer-events-none" style={{ opacity: 0.4 }}>
@@ -177,21 +158,19 @@ export default function GrapeReversePage() {
   const isHana = machineInfo?.category === "hana";
   const roleLabel = isHana ? "ベル" : "ぶどう";
 
-  // 逆算専用 LocalStorage（メイン画面とは独立）
-  const [grapeData, setGrapeData] = useLocalStorage<Record<string, number | boolean | string>>(
+  const [vibrationEnabled] = useLocalStorage<boolean>("grape-reverse-vibration", true);
+
+  const [grapeData, setGrapeData] = useLocalStorage<Record<string, number>>(
     `grape-reverse-data-grape-mode-${machineId}`,
     {}
   );
-  const [vibrationEnabled] = useLocalStorage<boolean>("grape-reverse-vibration", true);
 
-  const totalGames = Math.max(0, Number(grapeData["total-games"]) || 0);
-  const bigCount = Math.max(0, Number(grapeData["big-count"]) || 0);
-  const regCount = Math.max(0, Number(grapeData["reg-count"]) || 0);
-  const diffCoinsRaw = grapeData["diff-coins"];
-  const diffCoins =
-    diffCoinsRaw !== undefined && diffCoinsRaw !== "" ? Number(diffCoinsRaw) : null;
+  const totalGames = Math.max(0, grapeData["total-games"] ?? 0);
+  const bigCount   = Math.max(0, grapeData["big-count"]   ?? 0);
+  const regCount   = Math.max(0, grapeData["reg-count"]   ?? 0);
+  const diffCoins  = Math.max(0, grapeData["diff-coins"]  ?? 0);
 
-  const update = (key: string, v: number | string) =>
+  const update = (key: string, v: number) =>
     setGrapeData((prev) => ({ ...prev, [key]: v }));
 
   const handleReset = () => {
@@ -199,40 +178,35 @@ export default function GrapeReversePage() {
     setGrapeData({});
   };
 
-  // リアルタイム逆算計算
+  // ─── リアルタイム逆算計算 ───
   const calcResult = useMemo(() => {
-    if (!config?.specs?.payouts?.grape) return null;
-    if (totalGames === 0 || diffCoins === null || isNaN(diffCoins)) return null;
+    if (totalGames === 0) return null;
 
-    const PAYOUT = {
-      BIG: config.specs.payouts.big,
-      REG: config.specs.payouts.reg,
-      GRAPE: config.specs.payouts.grape,
-      CHERRY: 2,
-    };
-    const REPLAY_PROB = 1 / (config.specs.reverseCalcProbDenominators?.replay ?? 7.3);
-    const CHERRY_PROB = 1 / (config.specs.reverseCalcProbDenominators?.cherry ?? 36.0);
+    const BIG_PAYOUT   = config?.specs?.payouts?.big   ?? 240;
+    const REG_PAYOUT   = config?.specs?.payouts?.reg   ?? 96;
+    const GRAPE_PAYOUT = config?.specs?.payouts?.grape ?? 8;
+    const REPLAY_DENOM = config?.specs?.reverseCalcProbDenominators?.replay ?? 7.3;
+    const CHERRY_DENOM = config?.specs?.reverseCalcProbDenominators?.cherry ?? 36.0;
 
-    const coinIn = totalGames * (1 - REPLAY_PROB) * 3;
-    const bonusOut = bigCount * PAYOUT.BIG + regCount * PAYOUT.REG;
+    // ユーザー指定の逆算式
+    const coinIn  = totalGames * 3;
+    const payout  = coinIn - diffCoins; // 差枚数 = 投入 - 払出（正値＝沈み）
 
-    // A: チェリー狙い（完全取得）
-    const grapePayoutA = diffCoins + coinIn - bonusOut - totalGames * CHERRY_PROB * PAYOUT.CHERRY * 1.0;
-    const grapeCountA = grapePayoutA / PAYOUT.GRAPE;
-    const grapeProbA = grapeCountA > 0 ? totalGames / grapeCountA : 0;
+    const bonusOut  = bigCount * BIG_PAYOUT + regCount * REG_PAYOUT;
+    const replayOut = (totalGames / REPLAY_DENOM) * 3;
+    const cherryOut = (totalGames / CHERRY_DENOM) * 2;
+    const correction = replayOut + cherryOut;
 
-    // B: フリー打ち（チェリー取得率 2/3）
-    const grapePayoutB = diffCoins + coinIn - bonusOut - totalGames * CHERRY_PROB * PAYOUT.CHERRY * (2 / 3);
-    const grapeCountB = grapePayoutB / PAYOUT.GRAPE;
-    const grapeProbB = grapeCountB > 0 ? totalGames / grapeCountB : 0;
+    const grapeOut   = payout - bonusOut - correction;
+    const grapeCount = grapeOut / GRAPE_PAYOUT;
 
-    return {
-      A: { prob: grapeProbA, count: Math.round(grapeCountA) },
-      B: { prob: grapeProbB, count: Math.round(grapeCountB) },
-    };
+    if (grapeCount <= 0) return null;
+
+    const prob = totalGames / grapeCount;
+    return { prob, count: Math.round(grapeCount) };
   }, [totalGames, bigCount, regCount, diffCoins, config]);
 
-  const hasResult = calcResult !== null;
+  const probText = calcResult ? `1/${calcResult.prob.toFixed(2)}` : undefined;
 
   return (
     <>
@@ -243,36 +217,89 @@ export default function GrapeReversePage() {
       />
 
       <div className="min-h-screen w-full bg-slate-950">
-        {/* ヘッダー */}
-        <div className="py-5 px-4 text-white shadow-lg" style={{ backgroundColor: brandColor }}>
+        {/* カラーバー（スクロールアウト） */}
+        <div className="py-4 px-4 shadow-lg" style={{ backgroundColor: brandColor }}>
           <div className="mx-auto max-w-md">
-            <button
-              type="button"
-              onClick={() => navigate(`/${machineId}`)}
-              className="mb-3 flex items-center gap-1.5 text-sm font-bold text-white/70 hover:text-white transition-colors"
-            >
-              ← カウンターへ戻る
-            </button>
-            <h1 className="text-xl font-bold">{machineName}</h1>
-            <p className="text-sm text-white/70 mt-0.5">{roleLabel}逆算</p>
+            <h1 className="text-base font-bold text-white">{machineName}</h1>
+            <p className="text-xs text-white/70 mt-0.5">{roleLabel}逆算ツール</p>
           </div>
         </div>
 
-        <div className="mx-auto max-w-md space-y-4 p-4">
-          {/* 入力セクション */}
-          <div className="rounded-2xl bg-slate-900 p-4 space-y-4 ring-1 ring-slate-800">
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-              入力データ
-            </h2>
+        {/* 2行Sticky Header */}
+        <div className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-sm py-3 px-4 shadow-md border-b border-slate-800">
+          <div className="mx-auto max-w-md space-y-2">
+            {/* Row 1: 機種名 + リセット */}
+            <div className="flex items-center gap-2">
+              <span className="flex-1 text-center text-sm font-bold text-white truncate">
+                {machineName}
+              </span>
+              <button
+                type="button"
+                onClick={handleReset}
+                className="shrink-0 flex items-center gap-1 rounded-full bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-md transition-opacity hover:opacity-80 active:opacity-60"
+              >
+                🗑️ リセット
+              </button>
+            </div>
+            {/* Row 2: ナビゲーション */}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => navigate(`/${machineId}`)}
+                className="flex-1 rounded-lg bg-slate-700 text-white py-2 text-xs font-bold transition-opacity hover:opacity-90 active:opacity-80"
+              >
+                🎰 小役カウンター
+              </button>
+              <button
+                type="button"
+                className="flex-1 rounded-lg bg-emerald-700 text-white py-2 text-xs font-bold"
+              >
+                {isHana ? "🔔 ベル逆算" : "🍇 ぶどう逆算"}
+              </button>
+            </div>
+          </div>
+        </div>
 
+        {/* カードエリア */}
+        <div className="mx-auto max-w-md space-y-4 p-4">
+
+          {/* 基本データカード：総ゲーム数 */}
+          <div className="rounded-2xl bg-slate-900 p-4 ring-1 ring-slate-800">
+            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+              基本データ
+            </h2>
             <SplitCounter
               label="総ゲーム数"
               value={totalGames}
               onChange={(n) => update("total-games", n)}
               vibrationEnabled={vibrationEnabled}
               accentGlow="#94a3b8"
+              step={10}
             />
+          </div>
 
+          {/* 差枚数カード */}
+          <div className="rounded-2xl bg-slate-900 p-4 ring-1 ring-slate-800">
+            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
+              差枚数（沈み額）
+            </h2>
+            <p className="text-[10px] text-slate-600 mb-3">プラスが沈み・ゼロは±0以上</p>
+            <SplitCounter
+              label="差枚数"
+              value={diffCoins}
+              onChange={(n) => update("diff-coins", n)}
+              vibrationEnabled={vibrationEnabled}
+              accentGlow="#f59e0b"
+              probText={probText}
+              step={50}
+            />
+          </div>
+
+          {/* ボーナス回数カード */}
+          <div className="rounded-2xl bg-slate-900 p-4 ring-1 ring-slate-800">
+            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+              ボーナス回数
+            </h2>
             <div className="grid grid-cols-2 gap-3">
               <SplitCounter
                 label="BIG回数"
@@ -291,106 +318,54 @@ export default function GrapeReversePage() {
             </div>
           </div>
 
-          {/* 差枚数入力 */}
-          <div className="rounded-2xl bg-slate-900 p-4 ring-1 ring-slate-800">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                差枚数（台メーター）
-              </h2>
-              <span className="text-[10px] text-slate-600">マイナスは沈み</span>
+          {/* 計算結果サマリー */}
+          {totalGames === 0 && (
+            <div className="rounded-2xl bg-slate-900/50 ring-1 ring-slate-800 p-6 text-center">
+              <div className="text-3xl mb-2 opacity-30">{isHana ? "🔔" : "🍇"}</div>
+              <p className="text-sm text-slate-600">
+                総ゲーム数を入力すると<br />リアルタイムで計算されます
+              </p>
             </div>
-            <input
-              type="number"
-              inputMode="numeric"
-              value={diffCoinsRaw === undefined || diffCoinsRaw === "" ? "" : String(diffCoinsRaw)}
-              onChange={(e) => update("diff-coins", e.target.value === "" ? "" : e.target.value)}
-              placeholder="例: -1200"
-              className="w-full rounded-xl bg-slate-800 border border-slate-700 text-center text-4xl font-black text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent py-5 tabular-nums"
-              style={{ fontFamily: "'Urbanist', sans-serif" }}
-            />
-            <p className="mt-2 text-center text-xs text-slate-600">
-              台のメーター（OUT − IN）を入力してください
-            </p>
-          </div>
+          )}
 
-          {/* 逆算結果 */}
-          <div
-            className={`rounded-2xl p-4 ring-1 transition-all duration-300 ${
-              hasResult
-                ? "bg-slate-900 ring-emerald-800/50"
-                : "bg-slate-900/50 ring-slate-800"
-            }`}
-          >
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
-              {roleLabel}逆算結果
-            </h2>
+          {totalGames > 0 && !calcResult && (
+            <div className="rounded-2xl bg-slate-900/50 ring-1 ring-amber-800/40 p-4 text-center">
+              <p className="text-sm text-amber-500/80">
+                差枚数・ボーナス回数を確認してください<br />
+                <span className="text-xs text-slate-600">（{roleLabel}枚数が算出できません）</span>
+              </p>
+            </div>
+          )}
 
-            {!hasResult ? (
-              <div className="text-center py-6">
-                <div className="text-3xl mb-2 opacity-30">{isHana ? "🔔" : "🍇"}</div>
-                <p className="text-sm text-slate-600">
-                  総ゲーム数と差枚数を入力すると<br />リアルタイムで計算されます
+          {calcResult && (
+            <div className="rounded-2xl bg-slate-900 ring-1 ring-emerald-800/50 p-4">
+              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
+                {roleLabel}逆算結果
+              </h2>
+              <div className="text-center">
+                <div
+                  className="text-5xl font-black tabular-nums"
+                  style={{
+                    fontFamily: "'Urbanist', sans-serif",
+                    color: "#34d399",
+                    textShadow: "0 0 20px rgba(52,211,153,0.5), 0 0 40px rgba(52,211,153,0.2)",
+                  }}
+                >
+                  1/{calcResult.prob.toFixed(2)}
+                </div>
+                <p className="mt-2 text-xs text-slate-500">
+                  推計 {calcResult.count} 回 ／ {totalGames} G
                 </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {/* チェリー狙い */}
-                <div className="rounded-xl border border-emerald-800/40 bg-emerald-950/50 p-4">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-bold text-emerald-400">チェリー狙い</span>
-                    <span className="text-[10px] text-slate-600">推計 {calcResult!.A.count} 回</span>
-                  </div>
-                  <div
-                    className="text-center text-3xl font-black tabular-nums"
-                    style={{
-                      fontFamily: "'Urbanist', sans-serif",
-                      color: calcResult!.A.prob > 0 ? "#34d399" : "#475569",
-                      textShadow: calcResult!.A.prob > 0
-                        ? "0 0 16px rgba(52, 211, 153, 0.5), 0 0 32px rgba(52, 211, 153, 0.2)"
-                        : "none",
-                    }}
-                  >
-                    {calcResult!.A.prob > 0 ? `1/${calcResult!.A.prob.toFixed(2)}` : "計算不可"}
-                  </div>
-                </div>
-
-                {/* フリー打ち */}
-                <div className="rounded-xl border border-slate-700/50 bg-slate-800/50 p-4">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-bold text-slate-400">フリー打ち</span>
-                    <span className="text-[10px] text-slate-600">推計 {calcResult!.B.count} 回</span>
-                  </div>
-                  <div
-                    className="text-center text-3xl font-black tabular-nums"
-                    style={{
-                      fontFamily: "'Urbanist', sans-serif",
-                      color: calcResult!.B.prob > 0 ? "#94a3b8" : "#475569",
-                    }}
-                  >
-                    {calcResult!.B.prob > 0 ? `1/${calcResult!.B.prob.toFixed(2)}` : "計算不可"}
-                  </div>
-                </div>
-
-                {/* ゲーム数注記 */}
                 {totalGames < 1000 && (
-                  <p className="text-center text-xs text-amber-500/70">
-                    ⚠️ ゲーム数が少ないため、参考値としてご確認ください
+                  <p className="mt-2 text-xs text-amber-500/70">
+                    ⚠️ ゲーム数が少ないため参考値
                   </p>
                 )}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
-          {/* リセットボタン */}
-          <div className="pt-2 pb-4">
-            <button
-              type="button"
-              onClick={handleReset}
-              className="w-full rounded-xl bg-slate-800 border border-slate-700 px-6 py-4 text-base font-bold text-white/60 hover:text-white transition-colors"
-            >
-              🗑️ {roleLabel}逆算の入力をリセット
-            </button>
-          </div>
+          <div className="pb-4" />
         </div>
       </div>
     </>
