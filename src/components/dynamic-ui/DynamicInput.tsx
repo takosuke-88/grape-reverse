@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import type { DiscriminationElement } from "../../types/machine-schema";
 import { formatBonusText } from "../../utils/formatters";
 
@@ -55,8 +55,6 @@ function getElementTheme(id: string): ElementTheme {
   };
 }
 
-const HOLD_DURATION = 500;
-
 const DynamicInput: React.FC<DynamicInputProps> = ({
   element,
   value,
@@ -70,53 +68,6 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   const [showFloat, setShowFloat] = useState(false);
   const [showGlow, setShowGlow] = useState(false);
   const [showDirectInput, setShowDirectInput] = useState(false);
-
-  // ホールド状態
-  const [holdProgress, setHoldProgress] = useState(0); // 0〜1
-  const [isHolding, setIsHolding] = useState(false);
-  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const holdRafRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const holdStartRef = useRef<number>(0);
-
-  // ホールド対象: bigまたはregのカウンター
-  const useHoldToInput =
-    !element.isReadOnly &&
-    (element.id.includes("big") || element.id.includes("reg")) &&
-    element.type === "counter";
-
-  useEffect(() => {
-    return () => {
-      if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
-      if (holdRafRef.current) clearInterval(holdRafRef.current);
-    };
-  }, []);
-
-  const startHold = () => {
-    if (element.isReadOnly) return;
-    holdStartRef.current = Date.now();
-    setIsHolding(true);
-    setHoldProgress(0);
-
-    holdRafRef.current = setInterval(() => {
-      const elapsed = Date.now() - holdStartRef.current;
-      setHoldProgress(Math.min(elapsed / HOLD_DURATION, 1));
-    }, 16);
-
-    holdTimerRef.current = setTimeout(() => {
-      cancelHold();
-      if (vibrationEnabled) {
-        try { navigator.vibrate?.(30); } catch (_) {}
-      }
-      setShowDirectInput(true);
-    }, HOLD_DURATION);
-  };
-
-  const cancelHold = () => {
-    if (holdTimerRef.current) { clearTimeout(holdTimerRef.current); holdTimerRef.current = null; }
-    if (holdRafRef.current) { clearInterval(holdRafRef.current); holdRafRef.current = null; }
-    setIsHolding(false);
-    setHoldProgress(0);
-  };
 
   const triggerVibration = (type: "inc" | "dec") => {
     if (!vibrationEnabled) return;
@@ -168,13 +119,9 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
         const numFontSize =
           displayValue >= 10000 ? "text-xl" : displayValue >= 1000 ? "text-2xl" : "text-3xl";
 
-        // ホールド中のGlow強度（0〜1）
-        const glowIntensity = isHolding ? holdProgress : 0;
-        const dynamicGlow = glowIntensity > 0
-          ? `0 0 ${10 + 30 * glowIntensity}px ${theme.accent}, 0 0 ${20 + 60 * glowIntensity}px ${theme.accent}88, 0 0 ${40 * glowIntensity}px ${theme.accent}44`
-          : showGlow
-            ? `0 0 20px ${theme.accent}, 0 0 40px ${theme.accent}, 0 0 60px ${theme.accent}`
-            : `0 0 10px ${theme.accent}cc, 0 0 22px ${theme.accent}88`;
+        const dynamicGlow = showGlow
+          ? `0 0 20px ${theme.accent}, 0 0 40px ${theme.accent}, 0 0 60px ${theme.accent}`
+          : `0 0 10px ${theme.accent}cc, 0 0 22px ${theme.accent}88`;
 
         return (
           <div
@@ -204,15 +151,11 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 −
               </button>
 
-              {/* 数字エリア */}
+              {/* 数字エリア: ワンタップで直接入力 */}
               <div
                 className="flex-1 flex items-center justify-center relative"
-                style={{ minHeight: "76px", cursor: useHoldToInput ? "pointer" : element.isReadOnly ? "default" : "pointer" }}
-                onPointerDown={useHoldToInput ? (e) => { e.currentTarget.setPointerCapture(e.pointerId); startHold(); } : undefined}
-                onPointerUp={useHoldToInput ? cancelHold : undefined}
-                onPointerLeave={useHoldToInput ? cancelHold : undefined}
-                onPointerCancel={useHoldToInput ? cancelHold : undefined}
-                onClick={!useHoldToInput && !element.isReadOnly ? () => setShowDirectInput(true) : undefined}
+                style={{ minHeight: "76px", cursor: element.isReadOnly ? "default" : "pointer" }}
+                onClick={!element.isReadOnly ? () => setShowDirectInput(true) : undefined}
               >
                 {showDirectInput ? (
                   <input
@@ -242,25 +185,12 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                       color: "#ffffff",
                       cursor: element.isReadOnly ? "default" : "pointer",
                       textShadow: dynamicGlow,
-                      transition: isHolding ? "text-shadow 0.1s ease" : "none",
                     }}
                   >
                     {displayValue}
                   </span>
                 )}
 
-                {/* ホールドゲージ（黄緑ライン・バー下部） */}
-                {useHoldToInput && (
-                  <div
-                    className="absolute bottom-0 left-0 h-[3px] rounded-full pointer-events-none"
-                    style={{
-                      width: `${holdProgress * 100}%`,
-                      background: "#DEFF9A",
-                      boxShadow: holdProgress > 0 ? "0 0 6px #DEFF9A, 0 0 12px #DEFF9A88" : "none",
-                      transition: isHolding ? "none" : "width 0.1s ease",
-                    }}
-                  />
-                )}
               </div>
             </div>
 
