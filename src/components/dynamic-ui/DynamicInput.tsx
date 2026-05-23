@@ -151,14 +151,17 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
               <div className="flex-1 flex items-center justify-center">
                 {showDirectInput ? (
                   <input
-                    type="number"
+                    type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     autoFocus
                     value={
                       typeof value === "boolean" ? "" : value === "" ? "" : value
                     }
                     onChange={(e) => {
-                      if (e.target.value === "") onChange("");
-                      else onChange(parseInt(e.target.value) || 0);
+                      const raw = e.target.value.replace(/[^0-9]/g, "");
+                      if (raw === "") onChange("");
+                      else onChange(parseInt(raw) || 0);
                       onDirectInput?.();
                     }}
                     onBlur={() => setShowDirectInput(false)}

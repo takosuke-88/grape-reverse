@@ -127,12 +127,14 @@ function GrapeCounter({
           <div className="flex-1 flex items-center justify-center">
             {showDirectInput ? (
               <input
-                type="number"
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 autoFocus
                 min={0}
                 value={value === 0 ? "" : value}
                 onChange={(e) => {
-                  const v = parseInt(e.target.value);
+                  const v = parseInt(e.target.value.replace(/[^0-9]/g, ""));
                   onChange(isNaN(v) ? 0 : Math.max(0, v));
                   onDirectInput?.();
                 }}
