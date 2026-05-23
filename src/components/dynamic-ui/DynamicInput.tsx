@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import type { DiscriminationElement } from "../../types/machine-schema";
 import { formatBonusText } from "../../utils/formatters";
 
@@ -55,6 +55,8 @@ function getElementTheme(id: string): ElementTheme {
   };
 }
 
+const HOLD_DURATION = 500;
+
 const DynamicInput: React.FC<DynamicInputProps> = ({
   element,
   value,
@@ -68,6 +70,53 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   const [showFloat, setShowFloat] = useState(false);
   const [showGlow, setShowGlow] = useState(false);
   const [showDirectInput, setShowDirectInput] = useState(false);
+
+  // ホールド状態
+  const [holdProgress, setHoldProgress] = useState(0); // 0〜1
+  const [isHolding, setIsHolding] = useState(false);
+  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const holdRafRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const holdStartRef = useRef<number>(0);
+
+  // ホールド対象: bigまたはregのカウンター
+  const useHoldToInput =
+    !element.isReadOnly &&
+    (element.id.includes("big") || element.id.includes("reg")) &&
+    element.type === "counter";
+
+  useEffect(() => {
+    return () => {
+      if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+      if (holdRafRef.current) clearInterval(holdRafRef.current);
+    };
+  }, []);
+
+  const startHold = () => {
+    if (element.isReadOnly) return;
+    holdStartRef.current = Date.now();
+    setIsHolding(true);
+    setHoldProgress(0);
+
+    holdRafRef.current = setInterval(() => {
+      const elapsed = Date.now() - holdStartRef.current;
+      setHoldProgress(Math.min(elapsed / HOLD_DURATION, 1));
+    }, 16);
+
+    holdTimerRef.current = setTimeout(() => {
+      cancelHold();
+      if (vibrationEnabled) {
+        try { navigator.vibrate?.(30); } catch (_) {}
+      }
+      setShowDirectInput(true);
+    }, HOLD_DURATION);
+  };
+
+  const cancelHold = () => {
+    if (holdTimerRef.current) { clearTimeout(holdTimerRef.current); holdTimerRef.current = null; }
+    if (holdRafRef.current) { clearInterval(holdRafRef.current); holdRafRef.current = null; }
+    setIsHolding(false);
+    setHoldProgress(0);
+  };
 
   const triggerVibration = (type: "inc" | "dec") => {
     if (!vibrationEnabled) return;
@@ -116,9 +165,16 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
         const probText = showProb
           ? `1/${(totalGames! / displayValue).toFixed(1)}`
           : null;
-        // 4桁以上はフォントを縮小（1000超のぶどうカウント等に対応）
         const numFontSize =
           displayValue >= 10000 ? "text-xl" : displayValue >= 1000 ? "text-2xl" : "text-3xl";
+
+        // ホールド中のGlow強度（0〜1）
+        const glowIntensity = isHolding ? holdProgress : 0;
+        const dynamicGlow = glowIntensity > 0
+          ? `0 0 ${10 + 30 * glowIntensity}px ${theme.accent}, 0 0 ${20 + 60 * glowIntensity}px ${theme.accent}88, 0 0 ${40 * glowIntensity}px ${theme.accent}44`
+          : showGlow
+            ? `0 0 20px ${theme.accent}, 0 0 40px ${theme.accent}, 0 0 60px ${theme.accent}`
+            : `0 0 10px ${theme.accent}cc, 0 0 22px ${theme.accent}88`;
 
         return (
           <div
@@ -142,22 +198,29 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                   boxShadow: element.isReadOnly
                     ? "none"
                     : "inset 2px 2px 4px rgba(255,255,255,0.10), inset -1px -1px 3px rgba(0,0,0,0.5), 3px 3px 8px rgba(0,0,0,0.4), -1px -1px 2px rgba(255,255,255,0.05)",
-                  borderRadius: "0",
                 }}
                 aria-label="減らす"
               >
                 −
               </button>
-              <div className="flex-1 flex items-center justify-center">
+
+              {/* 数字エリア */}
+              <div
+                className="flex-1 flex items-center justify-center relative"
+                style={{ minHeight: "76px", cursor: useHoldToInput ? "pointer" : element.isReadOnly ? "default" : "pointer" }}
+                onPointerDown={useHoldToInput ? (e) => { e.currentTarget.setPointerCapture(e.pointerId); startHold(); } : undefined}
+                onPointerUp={useHoldToInput ? cancelHold : undefined}
+                onPointerLeave={useHoldToInput ? cancelHold : undefined}
+                onPointerCancel={useHoldToInput ? cancelHold : undefined}
+                onClick={!useHoldToInput && !element.isReadOnly ? () => setShowDirectInput(true) : undefined}
+              >
                 {showDirectInput ? (
                   <input
                     type="tel"
                     inputMode="numeric"
                     pattern="[0-9]*"
                     autoFocus
-                    value={
-                      typeof value === "boolean" ? "" : value === "" ? "" : value
-                    }
+                    value={typeof value === "boolean" ? "" : value === "" ? "" : value}
                     onChange={(e) => {
                       const raw = e.target.value.replace(/[^0-9]/g, "");
                       if (raw === "") onChange("");
@@ -166,34 +229,37 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                     }}
                     onBlur={() => setShowDirectInput(false)}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        setShowDirectInput(false);
-                      }
+                      if (e.key === "Enter") { e.preventDefault(); setShowDirectInput(false); }
                     }}
                     className={`w-full text-center ${numFontSize} font-black bg-transparent text-white focus:outline-none tabular-nums`}
-                    style={{
-                      maxWidth: "72px",
-                      fontFamily: "'Urbanist', -apple-system, sans-serif",
-                    }}
+                    style={{ maxWidth: "72px", fontFamily: "'Urbanist', -apple-system, sans-serif" }}
                   />
                 ) : (
                   <span
-                    onClick={() => {
-                      if (!element.isReadOnly) setShowDirectInput(true);
-                    }}
                     className={`${numFontSize} font-black tabular-nums`}
                     style={{
                       fontFamily: "'Urbanist', -apple-system, sans-serif",
                       color: "#ffffff",
                       cursor: element.isReadOnly ? "default" : "pointer",
-                      textShadow: showGlow
-                        ? `0 0 20px ${theme.accent}, 0 0 40px ${theme.accent}, 0 0 60px ${theme.accent}`
-                        : `0 0 10px ${theme.accent}cc, 0 0 22px ${theme.accent}88`,
+                      textShadow: dynamicGlow,
+                      transition: isHolding ? "text-shadow 0.1s ease" : "none",
                     }}
                   >
                     {displayValue}
                   </span>
+                )}
+
+                {/* ホールドゲージ（黄緑ライン・バー下部） */}
+                {useHoldToInput && (
+                  <div
+                    className="absolute bottom-0 left-0 h-[3px] rounded-full pointer-events-none"
+                    style={{
+                      width: `${holdProgress * 100}%`,
+                      background: "#DEFF9A",
+                      boxShadow: holdProgress > 0 ? "0 0 6px #DEFF9A, 0 0 12px #DEFF9A88" : "none",
+                      transition: isHolding ? "none" : "width 0.1s ease",
+                    }}
+                  />
                 )}
               </div>
             </div>
@@ -222,19 +288,12 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                   +1
                 </span>
               )}
-
-              {/* ＋ : 右寄せ（前バージョンと同じ位置） */}
               <span
                 className="text-3xl font-thin pr-4 pointer-events-none select-none"
-                style={{
-                  color: "#ffffff",
-                  opacity: element.isReadOnly ? 0.2 : 0.45,
-                }}
+                style={{ color: "#ffffff", opacity: element.isReadOnly ? 0.2 : 0.45 }}
               >
                 ＋
               </span>
-
-              {/* 確率：右下に絶対配置（数字エリアと重ならない） */}
               {probText && (
                 <span
                   className="absolute right-2 bottom-1.5 text-lg italic font-black tabular-nums pointer-events-none select-none"
@@ -298,9 +357,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
             <input
               type="number"
               readOnly={!!element.isReadOnly}
-              value={
-                typeof value === "boolean" ? "" : value === "" ? "" : value
-              }
+              value={typeof value === "boolean" ? "" : value === "" ? "" : value}
               onChange={(e) => {
                 if (element.isReadOnly) return;
                 if (e.target.value === "") onChange("");
