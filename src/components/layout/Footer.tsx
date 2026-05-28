@@ -85,9 +85,14 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/" className="hover:text-white transition-colors">
+                <a
+                  href="https://docs.google.com/forms/d/e/1FAIpQLSc6PONh9w7W2OMpb0g74QczVxV2TVME2mBYjQ2C1OdyOP5ywA/viewform"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors"
+                >
                   お問い合わせ
-                </Link>
+                </a>
               </li>
               <li>
                 <Link to="/" className="hover:text-white transition-colors">
