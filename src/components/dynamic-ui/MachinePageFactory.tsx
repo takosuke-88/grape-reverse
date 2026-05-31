@@ -15,6 +15,7 @@ import { formatBonusText } from "../../utils/formatters";
 import EstimationResultDisplay from "./EstimationResultDisplay";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import DynamicInput from "./DynamicInput";
+import { isGridOnlyCompactCounterId } from "./counter-layout";
 
 interface MachinePageFactoryProps {
   config: MachineConfig;
@@ -282,7 +283,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   }, [estimationResults]);
 
   return (
-    <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950">
+    <div className="min-h-screen w-full max-w-full overflow-x-clip bg-slate-50 dark:bg-slate-950">
       {/* タイトルバー（スクロールアウトする・固定しない） */}
       <div
         className={`${themeColor} py-3 px-4 text-white shadow-lg transition-colors duration-500`}
@@ -334,7 +335,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 setVibrationEnabled(next);
                 if (next && navigator.vibrate) navigator.vibrate(40);
               }}
-              className={`shrink-0 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold shadow-md transition-all ${
+              className={`shrink-0 flex items-center gap-1 rounded-full px-3 py-1.5 mr-1 text-xs font-semibold shadow-md transition-all ${
                 vibrationEnabled
                   ? "bg-emerald-600 text-white"
                   : "bg-gray-800 text-white"
@@ -389,21 +390,28 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 <div
                   className={
                     section.layout === "grid" && visibleElements.length > 1
-                      ? "grid grid-cols-2 gap-4"
+                      ? "grid min-w-0 grid-cols-2 gap-4"
                       : "space-y-4"
                   }
                 >
-                  {visibleElements.map((element) => (
+                  {visibleElements.map((element) => {
+                    const sectionUsesGrid =
+                      section.layout === "grid" && visibleElements.length > 1;
+                    const compactLayout =
+                      sectionUsesGrid || isGridOnlyCompactCounterId(element.id);
+
+                    return (
                     <div
                       key={element.id}
                       className={
                         element.colSpan === 2
-                          ? "col-span-2 grid grid-cols-2 gap-4"
-                          : ""
+                          ? "col-span-2 grid min-w-0 grid-cols-2 gap-4"
+                          : "min-w-0"
                       }
                     >
                       <div className={element.colSpan === 2 ? "col-start-1" : ""}>
                         <DynamicInput
+                          compactLayout={compactLayout}
                           element={{
                             ...element,
                             // BIG/REG回数は直接入力可能にする（詳細内訳と自動同期）
@@ -437,7 +445,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         />
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
               </div>

@@ -39,8 +39,8 @@ export default function App() {
       <ScrollToTop />
       <ScrollToTopButton />
       <Header />
-      <div className="flex flex-col min-h-screen">
-        <main className="flex-1">
+      <div className="flex min-h-screen w-full max-w-full flex-col">
+        <main className="w-full max-w-full flex-1">
           <Routes>
             {/* 古いURL（/v2/preview/:id）からの301リダイレクト設定 */}
             <Route path="/v2/preview/:machineId" element={<MachineRedirect />} />

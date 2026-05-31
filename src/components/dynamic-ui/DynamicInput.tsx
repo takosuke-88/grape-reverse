@@ -1,6 +1,15 @@
 import React, { useState } from "react";
 import type { DiscriminationElement } from "../../types/machine-schema";
 import { formatBonusText } from "../../utils/formatters";
+import CounterDirectInputZone from "./CounterDirectInputZone";
+import {
+  COUNTER_MINUS_WIDTH_CLASS,
+  clampCounterValueByElementId,
+  getCounterDigitCapacity,
+  getCounterMaxDigits,
+  isGridOnlyCompactCounterId,
+  sanitizeCounterDigitString,
+} from "./counter-layout";
 
 interface DynamicInputProps {
   element: DiscriminationElement;
@@ -11,6 +20,8 @@ interface DynamicInputProps {
   onIncrement?: () => void;
   onDecrement?: () => void;
   onDirectInput?: () => void;
+  /** 2列グリッド内のカウンター（ぶどう・内訳など） */
+  compactLayout?: boolean;
 }
 
 interface ElementTheme {
@@ -64,10 +75,10 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   onIncrement,
   onDecrement,
   onDirectInput,
+  compactLayout = false,
 }) => {
   const [showFloat, setShowFloat] = useState(false);
   const [showGlow, setShowGlow] = useState(false);
-  const [showDirectInput, setShowDirectInput] = useState(false);
 
   const triggerVibration = (type: "inc" | "dec") => {
     if (!vibrationEnabled) return;
@@ -80,7 +91,19 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
 
   const handleIncrement = () => {
     if (element.isReadOnly) return;
-    onChange((Number(value) || 0) + 1);
+    const maxDigits =
+      element.type === "counter" ? getCounterMaxDigits(element.id) : undefined;
+    const current = Number(value) || 0;
+    if (maxDigits != null) {
+      const cap = 10 ** maxDigits - 1;
+      if (current >= cap) return;
+    }
+    const next = current + 1;
+    onChange(
+      element.type === "counter"
+        ? clampCounterValueByElementId(element.id, next)
+        : next,
+    );
     onIncrement?.();
     triggerVibration("inc");
     setShowGlow(true);
@@ -116,8 +139,14 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
         const probText = showProb
           ? `1/${(totalGames! / displayValue).toFixed(1)}`
           : null;
-        const numFontSize =
-          displayValue >= 10000 ? "text-xl" : displayValue >= 1000 ? "text-2xl" : "text-3xl";
+        const useCompact =
+          compactLayout || isGridOnlyCompactCounterId(element.id);
+        const maxDigits = getCounterMaxDigits(element.id);
+        const digitCapacity = getCounterDigitCapacity(element.id, useCompact);
+        const numFontSize = useCompact ? "text-2xl" : "text-3xl";
+
+        const clampCounter = (n: number) =>
+          clampCounterValueByElementId(element.id, n);
 
         const dynamicGlow = showGlow
           ? `0 0 20px ${theme.accent}, 0 0 40px ${theme.accent}, 0 0 60px ${theme.accent}`
@@ -125,22 +154,28 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
 
         return (
           <div
-            className="relative flex w-full rounded-xl overflow-hidden select-none"
+            className="relative flex w-full min-w-0 max-w-full rounded-xl overflow-hidden select-none"
             style={{
               minHeight: "76px",
               background: theme.bg,
               opacity: element.isReadOnly ? 0.6 : 1,
             }}
           >
-            {/* LEFT 30%: minus button + number display */}
-            <div className="flex items-center" style={{ width: "30%" }}>
+            {/* 左: マイナス固定 + 数字ゾーン */}
+            <div
+              className="flex shrink-0 items-stretch"
+              style={useCompact ? undefined : { width: "30%" }}
+            >
               <button
                 type="button"
-                onClick={handleDecrement}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDecrement();
+                }}
                 disabled={!!element.isReadOnly}
-                className="h-full flex items-center justify-center text-2xl text-white/80 transition-all active:scale-95"
+                className={`flex ${COUNTER_MINUS_WIDTH_CLASS} items-center justify-center self-stretch text-2xl text-white/80 transition-all active:scale-95 touch-manipulation`}
                 style={{
-                  minWidth: "48px",
+                  minHeight: "76px",
                   background: element.isReadOnly ? "transparent" : theme.minusBg,
                   boxShadow: element.isReadOnly
                     ? "none"
@@ -151,57 +186,38 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 −
               </button>
 
-              {/* 数字エリア: ワンタップで直接入力 */}
-              <div
-                className="flex-1 flex items-center justify-center relative"
-                style={{ minHeight: "76px", cursor: element.isReadOnly ? "default" : "pointer" }}
-                onClick={!element.isReadOnly ? () => setShowDirectInput(true) : undefined}
-              >
-                {showDirectInput ? (
-                  <input
-                    type="tel"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    autoFocus
-                    value={typeof value === "boolean" ? "" : value === "" ? "" : value}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/[^0-9]/g, "");
-                      if (raw === "") onChange("");
-                      else onChange(parseInt(raw) || 0);
-                      onDirectInput?.();
-                    }}
-                    onBlur={() => setShowDirectInput(false)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") { e.preventDefault(); setShowDirectInput(false); }
-                    }}
-                    className={`w-full text-center ${numFontSize} font-black bg-transparent text-white focus:outline-none tabular-nums`}
-                    style={{ maxWidth: "72px", fontFamily: "'Urbanist', -apple-system, sans-serif" }}
-                  />
-                ) : (
-                  <span
-                    className={`${numFontSize} font-black tabular-nums`}
-                    style={{
-                      fontFamily: "'Urbanist', -apple-system, sans-serif",
-                      color: "#ffffff",
-                      cursor: element.isReadOnly ? "default" : "pointer",
-                      textShadow: dynamicGlow,
-                    }}
-                  >
-                    {displayValue}
-                  </span>
-                )}
-
-              </div>
+              <CounterDirectInputZone
+                label={element.label}
+                displayValue={displayValue}
+                inputValue={
+                  typeof value === "boolean"
+                    ? ""
+                    : value === ""
+                      ? ""
+                      : String(value)
+                }
+                onInputChange={(raw) => {
+                  const digits = sanitizeCounterDigitString(raw, maxDigits);
+                  if (digits === "") onChange("");
+                  else onChange(clampCounter(parseInt(digits, 10) || 0));
+                }}
+                numFontSize={numFontSize}
+                numberGlow={dynamicGlow}
+                readOnly={!!element.isReadOnly}
+                onDirectInput={onDirectInput}
+                variant={useCompact ? "compact" : "default"}
+                maxDigits={maxDigits}
+                digitCapacity={digitCapacity}
+              />
             </div>
 
-            {/* RIGHT 70%: tap area */}
+            {/* 右: プラスエリア */}
             <div
-              className={`relative flex items-center justify-end ${
+              className={`relative flex min-w-0 flex-1 items-center justify-end ${
                 element.isReadOnly
                   ? "pointer-events-none"
                   : "cursor-pointer active:bg-white/10"
               }`}
-              style={{ width: "70%" }}
               onClick={handleIncrement}
             >
               {showFloat && (

@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout *)",
+      "Bash(git worktree *)",
+      "Bash(npx tsc *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git revert *)",
+      "Bash(git restore *)",
+      "PowerShell($json = Get-Content \"C:\\\\Users\\\\moonc\\\\.claude\\\\settings.json\" -Raw | ConvertFrom-Json; $json.hooks.Stop[0].hooks[0].command)",
+      "PowerShell(node -e \"const fs = require\\('fs'\\); JSON.parse\\(fs.readFileSync\\('C:/Users/moonc/.claude/settings.json', 'utf8'\\)\\); console.log\\('JSON valid'\\)\")"
+    ]
+  }
+}

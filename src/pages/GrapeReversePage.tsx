@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { AVAILABLE_MACHINES } from "../data/machine-list";
@@ -20,7 +20,47 @@ import { newKingVConfig } from "../data/machines/new-king-v";
 import { lastUtopiaConfig } from "../data/machines/last-utopia";
 import { haihaiSiosai2Config } from "../data/machines/haihai-siosai2";
 import { haihaiSiosaiConfig } from "../data/machines/haihai-siosai";
-import type { MachineConfig } from "../types/machine-schema";
+import type { EstimationResult, MachineConfig, UserInputs } from "../types/machine-schema";
+import { calculateEstimation } from "../logic/bayes-estimator";
+import GrapeReverseEstimationPanel from "../components/grape/GrapeReverseEstimationPanel";
+import CounterDirectInputZone from "../components/dynamic-ui/CounterDirectInputZone";
+import {
+  COUNTER_MINUS_WIDTH_CLASS,
+  counterMaxValueForDigits,
+  sanitizeCounterDigitString,
+} from "../components/dynamic-ui/counter-layout";
+
+/** 機種Config未登録時のぶどう逆算フォールバック（マイジャグラーV基準） */
+const REVERSE_CALC_FALLBACK = {
+  big: 240,
+  reg: 96,
+  grape: 8,
+  replayDenom: 7.3,
+  cherryDenom: 35.6,
+};
+
+type GrapeReverseModeResult = {
+  prob: number;
+  count: number;
+};
+
+type GrapeReverseCalcResult = {
+  cherryAim: GrapeReverseModeResult | null;
+  freePlay: GrapeReverseModeResult | null;
+};
+
+function computeGrapeModeResult(
+  grapeOut: number,
+  grapePayout: number,
+  totalGames: number,
+): GrapeReverseModeResult | null {
+  const grapeCount = grapeOut / grapePayout;
+  if (grapeCount <= 0) return null;
+  return {
+    prob: totalGames / grapeCount,
+    count: Math.round(grapeCount),
+  };
+}
 
 const CONFIG_MAP: Record<string, MachineConfig> = {
   "hana-hooh": hanaHoohConfig,
@@ -59,6 +99,12 @@ interface GrapeCounterProps {
   theme: CounterTheme;
   probText?: string;       // バー右下に白斜体で表示
   onDirectInput?: () => void;
+  /** BIG/REG：コンパクト数字ゾーン（3桁分固定タップ幅） */
+  compact?: boolean;
+  /** 長いバー想定桁数（4〜5桁カウンター用） */
+  digitCapacity?: number;
+  /** 最大桁数（入力ブロック） */
+  maxDigits?: number;
 }
 
 function GrapeCounter({
@@ -69,18 +115,24 @@ function GrapeCounter({
   theme,
   probText,
   onDirectInput,
+  compact = false,
+  digitCapacity = 5,
+  maxDigits = 5,
 }: GrapeCounterProps) {
   const [showFloat, setShowFloat] = useState(false);
   const [showGlow, setShowGlow] = useState(false);
-  const [showDirectInput, setShowDirectInput] = useState(false);
 
   const triggerVibration = (type: "inc" | "dec") => {
     if (!vibrationEnabled) return;
     try { window.navigator?.vibrate?.(type === "inc" ? 15 : 40); } catch (_) {}
   };
 
+  const cap = counterMaxValueForDigits(maxDigits);
+  const clampValue = (n: number) => Math.min(cap, Math.max(0, n));
+
   const handleIncrement = () => {
-    onChange(value + 1);
+    if (value >= cap) return;
+    onChange(clampValue(value + 1));
     triggerVibration("inc");
     setShowGlow(true);
     setShowFloat(true);
@@ -94,27 +146,36 @@ function GrapeCounter({
     triggerVibration("dec");
   };
 
-  const numFontSize =
-    value >= 10000 ? "text-xl" : value >= 1000 ? "text-2xl" : "text-3xl";
+  const numFontSize = compact ? "text-2xl" : "text-3xl";
+
+  const numberGlow = showGlow
+    ? `0 0 20px ${theme.accent}, 0 0 40px ${theme.accent}, 0 0 60px ${theme.accent}`
+    : `0 0 10px ${theme.accent}cc, 0 0 22px ${theme.accent}88`;
 
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-bold text-slate-200">
+      <label className="block text-sm font-bold text-slate-700 dark:text-slate-200">
         {label}
       </label>
       <div
-        className="relative flex w-full rounded-xl overflow-hidden select-none"
+        className="relative flex w-full min-w-0 max-w-full rounded-xl overflow-hidden select-none"
         style={{ minHeight: "76px", background: theme.bg }}
       >
-        {/* LEFT 30%: minus + number */}
-        <div className="flex items-center" style={{ width: "30%" }}>
+        {/* 左: マイナス固定 + 数字ゾーン */}
+        <div
+          className="flex shrink-0 items-stretch"
+          style={compact ? { maxWidth: "50%" } : { width: "30%" }}
+        >
           <button
             type="button"
-            onClick={handleDecrement}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDecrement();
+            }}
             disabled={value <= 0}
-            className="h-full flex items-center justify-center text-2xl text-white/80 transition-all active:scale-95"
+            className={`flex ${COUNTER_MINUS_WIDTH_CLASS} items-center justify-center self-stretch text-2xl text-white/80 transition-all active:scale-95 touch-manipulation`}
             style={{
-              minWidth: "48px",
+              minHeight: "76px",
               background: theme.minusBg,
               boxShadow:
                 "inset 2px 2px 4px rgba(255,255,255,0.10), inset -1px -1px 3px rgba(0,0,0,0.5), 3px 3px 8px rgba(0,0,0,0.4), -1px -1px 2px rgba(255,255,255,0.05)",
@@ -124,49 +185,27 @@ function GrapeCounter({
           >
             −
           </button>
-          <div className="flex-1 flex items-center justify-center">
-            {showDirectInput ? (
-              <input
-                type="tel"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                autoFocus
-                min={0}
-                value={value === 0 ? "" : value}
-                onChange={(e) => {
-                  const v = parseInt(e.target.value.replace(/[^0-9]/g, ""));
-                  onChange(isNaN(v) ? 0 : Math.max(0, v));
-                  onDirectInput?.();
-                }}
-                onBlur={() => setShowDirectInput(false)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") { e.preventDefault(); setShowDirectInput(false); }
-                }}
-                className={`w-full text-center ${numFontSize} font-black bg-transparent text-white focus:outline-none tabular-nums`}
-                style={{ maxWidth: "72px", fontFamily: "'Urbanist', -apple-system, sans-serif" }}
-              />
-            ) : (
-              <span
-                onClick={() => setShowDirectInput(true)}
-                className={`${numFontSize} font-black tabular-nums cursor-pointer`}
-                style={{
-                  fontFamily: "'Urbanist', -apple-system, sans-serif",
-                  color: "#ffffff",
-                  textShadow: showGlow
-                    ? `0 0 20px ${theme.accent}, 0 0 40px ${theme.accent}, 0 0 60px ${theme.accent}`
-                    : `0 0 10px ${theme.accent}cc, 0 0 22px ${theme.accent}88`,
-                }}
-              >
-                {value}
-              </span>
-            )}
-          </div>
+          <CounterDirectInputZone
+            label={label}
+            displayValue={value}
+            inputValue={value > 0 ? String(value) : ""}
+            onInputChange={(raw) => {
+              const digits = sanitizeCounterDigitString(raw, maxDigits);
+              if (digits === "") onChange(0);
+              else onChange(clampValue(parseInt(digits, 10) || 0));
+            }}
+            numFontSize={numFontSize}
+            numberGlow={numberGlow}
+            onDirectInput={onDirectInput}
+            variant={compact ? "compact" : "default"}
+            maxDigits={maxDigits}
+            digitCapacity={compact ? 3 : digitCapacity}
+          />
         </div>
 
-        {/* RIGHT 70%: tap area */}
+        {/* 右: プラスエリア（z-10で数字ゾーンの上に確実に前面配置） */}
         <div
-          className="relative flex items-center justify-end cursor-pointer active:bg-white/10"
-          style={{ width: "70%" }}
+          className="relative z-10 flex min-w-0 flex-1 items-center justify-end cursor-pointer active:bg-white/10"
           onClick={handleIncrement}
         >
           {showFloat && (
@@ -240,10 +279,13 @@ export default function GrapeReversePage() {
   const brandColor = machineInfo?.color ?? "#334155";
   const machineName = machineInfo?.name ?? machineId ?? "機種不明";
   const isHana = machineInfo?.category === "hana";
+  const currentCategory = machineInfo?.category ?? "juggler";
   const roleLabel = isHana ? "ベル" : "ぶどう";
   const roleIcon = isHana ? "🔔" : "🍇";
 
   const [vibrationEnabled, setVibrationEnabled] = useLocalStorage<boolean>("grape-reverse-vibration", true);
+  const [estimationResults, setEstimationResults] = useState<EstimationResult[] | null>(null);
+  const [estimationError, setEstimationError] = useState<string | null>(null);
 
   const [grapeData, setGrapeData] = useLocalStorage<Record<string, number>>(
     `grape-reverse-data-grape-mode-${machineId}`,
@@ -263,34 +305,73 @@ export default function GrapeReversePage() {
     setGrapeData({});
   };
 
-  // ─── 逆算計算 ───
-  const calcResult = useMemo(() => {
+  // ─── 逆算計算（チェリー狙い / フリー打ち） ───
+  const calcResult = useMemo((): GrapeReverseCalcResult | null => {
     if (totalGames === 0) return null;
 
-    const BIG_PAYOUT    = config?.specs?.payouts?.big    ?? 240;
-    const REG_PAYOUT    = config?.specs?.payouts?.reg    ?? 96;
-    const GRAPE_PAYOUT  = config?.specs?.payouts?.grape  ?? 8;
-    const REPLAY_DENOM  = config?.specs?.reverseCalcProbDenominators?.replay ?? 7.3;
-    const CHERRY_DENOM  = config?.specs?.reverseCalcProbDenominators?.cherry ?? 36.0;
+    const BIG_PAYOUT = config?.specs?.payouts?.big ?? REVERSE_CALC_FALLBACK.big;
+    const REG_PAYOUT = config?.specs?.payouts?.reg ?? REVERSE_CALC_FALLBACK.reg;
+    const GRAPE_PAYOUT = config?.specs?.payouts?.grape ?? REVERSE_CALC_FALLBACK.grape;
+    const REPLAY_DENOM =
+      config?.specs?.reverseCalcProbDenominators?.replay ?? REVERSE_CALC_FALLBACK.replayDenom;
+    const CHERRY_DENOM =
+      config?.specs?.reverseCalcProbDenominators?.cherry ?? REVERSE_CALC_FALLBACK.cherryDenom;
 
-    const coinIn    = totalGames * 3;
-    const payout    = coinIn - diffCoins;
-    const bonusOut  = bigCount * BIG_PAYOUT + regCount * REG_PAYOUT;
-    const correction = (totalGames / REPLAY_DENOM) * 3 + (totalGames / CHERRY_DENOM) * 2;
+    const coinIn = totalGames * 3;
+    const payout = coinIn - diffCoins;
+    const bonusOut = bigCount * BIG_PAYOUT + regCount * REG_PAYOUT;
+    const cherryCorrection = (totalGames / CHERRY_DENOM) * 2;
+    const replayCorrection = (totalGames / REPLAY_DENOM) * 3;
 
-    const grapeOut   = payout - bonusOut - correction;
-    const grapeCount = grapeOut / GRAPE_PAYOUT;
+    const cherryAim = computeGrapeModeResult(
+      payout - bonusOut - cherryCorrection,
+      GRAPE_PAYOUT,
+      totalGames,
+    );
+    const freePlay = computeGrapeModeResult(
+      payout - bonusOut - cherryCorrection - replayCorrection,
+      GRAPE_PAYOUT,
+      totalGames,
+    );
 
-    if (grapeCount <= 0) return null;
-
-    return {
-      prob: totalGames / grapeCount,
-      count: Math.round(grapeCount),
-    };
+    if (!cherryAim && !freePlay) return null;
+    return { cherryAim, freePlay };
   }, [totalGames, bigCount, regCount, diffCoins, config]);
 
-  // 差枚数バー右下に表示するテキスト
-  const diffProbText = calcResult ? `1/${calcResult.prob.toFixed(2)}` : undefined;
+  const cherryAimResult = calcResult?.cherryAim ?? null;
+
+  const estimationInputs = useMemo((): UserInputs | null => {
+    if (!cherryAimResult || cherryAimResult.count <= 0 || totalGames <= 0) return null;
+    const grapeKey = isHana ? "bell-count" : "grape-count";
+    return {
+      "total-games": totalGames,
+      "big-count": bigCount,
+      "reg-count": regCount,
+      [grapeKey]: cherryAimResult.count,
+    };
+  }, [cherryAimResult, totalGames, bigCount, regCount, isHana]);
+
+  useEffect(() => {
+    if (!config || !estimationInputs) {
+      setEstimationResults(null);
+      setEstimationError(null);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      try {
+        setEstimationError(null);
+        const results = calculateEstimation(config, estimationInputs);
+        setEstimationResults(results);
+      } catch (err) {
+        console.error("❌ ぶどう逆算・設定推定エラー:", err);
+        setEstimationError("計算中にエラーが発生しました。入力値を確認してください。");
+        setEstimationResults(null);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [config, estimationInputs]);
 
   // ゲーム数バーに表示する BIG+REG 合算確率
   const bonusTotal = bigCount + regCount;
@@ -306,7 +387,7 @@ export default function GrapeReversePage() {
         pagePath={`/${machineId}/grape`}
       />
 
-      <div className="min-h-screen w-full bg-slate-950">
+      <div className="min-h-screen w-full max-w-full overflow-x-clip bg-slate-50 dark:bg-slate-950">
 
         {/* タイトルバー（スクロールアウト） ─ MachinePageFactoryと同一 */}
         <div
@@ -356,7 +437,7 @@ export default function GrapeReversePage() {
                   setVibrationEnabled(next);
                   if (next && navigator.vibrate) navigator.vibrate(40);
                 }}
-                className={`shrink-0 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold shadow-md transition-all ${
+                className={`shrink-0 flex items-center gap-1 rounded-full px-3 py-1.5 mr-1 text-xs font-semibold shadow-md transition-all ${
                   vibrationEnabled ? "bg-emerald-600 text-white" : "bg-gray-800 text-white"
                 }`}
                 title={vibrationEnabled ? "バイブON（タップでOFF）" : "バイブOFF（タップでON）"}
@@ -388,7 +469,7 @@ export default function GrapeReversePage() {
         <div className="mx-auto w-full max-w-md space-y-4 p-4">
 
           {/* 基本データ：総ゲーム数 */}
-          <div className="rounded-2xl bg-slate-900 p-4 space-y-3 ring-1 ring-slate-800">
+          <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 space-y-3 ring-1 ring-slate-800">
             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
               基本データ
             </h2>
@@ -398,12 +479,14 @@ export default function GrapeReversePage() {
               onChange={(n) => update("total-games", n)}
               vibrationEnabled={vibrationEnabled}
               theme={THEME_GAMES}
+              digitCapacity={5}
+              maxDigits={5}
               probText={bonusProbText ? `合算 ${bonusProbText}` : undefined}
             />
           </div>
 
           {/* 差枚数（台メーター） */}
-          <div className="rounded-2xl bg-slate-900 p-4 space-y-3 ring-1 ring-slate-800">
+          <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 space-y-3 ring-1 ring-slate-800">
             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
               差枚数（台メーター）
             </h2>
@@ -413,22 +496,25 @@ export default function GrapeReversePage() {
               onChange={(n) => update("diff-coins", n)}
               vibrationEnabled={vibrationEnabled}
               theme={THEME_DIFF}
-              probText={diffProbText}
+              digitCapacity={5}
+              maxDigits={5}
             />
           </div>
 
           {/* ボーナス回数 */}
-          <div className="rounded-2xl bg-slate-900 p-4 space-y-3 ring-1 ring-slate-800">
+          <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 space-y-3 ring-1 ring-slate-800">
             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
               ボーナス回数
             </h2>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid min-w-0 grid-cols-2 gap-3">
               <GrapeCounter
                 label="BIG回数"
                 value={bigCount}
                 onChange={(n) => update("big-count", n)}
                 vibrationEnabled={vibrationEnabled}
                 theme={THEME_BIG}
+                compact
+                maxDigits={3}
                 probText={bigCount > 0 && totalGames > 0 ? `1/${(totalGames / bigCount).toFixed(1)}` : undefined}
               />
               <GrapeCounter
@@ -437,6 +523,8 @@ export default function GrapeReversePage() {
                 onChange={(n) => update("reg-count", n)}
                 vibrationEnabled={vibrationEnabled}
                 theme={THEME_REG}
+                compact
+                maxDigits={3}
                 probText={regCount > 0 && totalGames > 0 ? `1/${(totalGames / regCount).toFixed(1)}` : undefined}
               />
             </div>
@@ -446,8 +534,8 @@ export default function GrapeReversePage() {
           <div
             className={`rounded-2xl p-5 ring-1 transition-all ${
               calcResult
-                ? "bg-slate-900 ring-emerald-800/50"
-                : "bg-slate-900/40 ring-slate-800"
+                ? "bg-white dark:bg-slate-900 ring-emerald-800/50"
+                : "bg-white/60 dark:bg-slate-900/40 ring-slate-800"
             }`}
           >
             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
@@ -457,35 +545,97 @@ export default function GrapeReversePage() {
             {!calcResult ? (
               <div className="text-center py-4">
                 <div className="text-4xl mb-3 opacity-20">{roleIcon}</div>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
                   総ゲーム数・差枚数を入力すると<br />リアルタイムで計算されます
                 </p>
               </div>
             ) : (
-              <div className="text-center">
-                <span
-                  className="text-6xl font-black italic tabular-nums"
-                  style={{
-                    fontFamily: "'Urbanist', -apple-system, sans-serif",
-                    color: "#ffffff",
-                    textShadow:
-                      "0 0 20px #34d399, 0 0 40px #34d39988, 0 0 80px #34d39944",
-                    letterSpacing: "-0.02em",
-                  }}
-                >
-                  1/{calcResult.prob.toFixed(2)}
-                </span>
-                <p className="mt-3 text-xs text-slate-500">
-                  推計 {calcResult.count} 回 ／ {totalGames.toLocaleString()} G
+              <div className="space-y-3">
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800/40 dark:bg-emerald-950/50">
+                  <p className="mb-2 text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                    チェリー狙い
+                  </p>
+                  <div
+                    className="text-center text-4xl font-black italic tabular-nums sm:text-5xl"
+                    style={{
+                      fontFamily: "'Urbanist', -apple-system, sans-serif",
+                      color: calcResult.cherryAim ? "#059669" : "#94a3b8",
+                      textShadow: calcResult.cherryAim
+                        ? "0 0 16px rgba(52, 211, 153, 0.35), 0 0 32px rgba(52, 211, 153, 0.15)"
+                        : "none",
+                      letterSpacing: "-0.02em",
+                    }}
+                  >
+                    {calcResult.cherryAim
+                      ? `1/${calcResult.cherryAim.prob.toFixed(2)}`
+                      : "計算不可"}
+                  </div>
+                  {calcResult.cherryAim && (
+                    <p
+                      className="mt-2 text-center text-base font-bold tabular-nums text-emerald-800 dark:text-emerald-300 sm:text-lg"
+                      style={{ fontFamily: "'Urbanist', -apple-system, sans-serif" }}
+                    >
+                      推計 {calcResult.cherryAim.count.toLocaleString()} 回
+                    </p>
+                  )}
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700/50 dark:bg-slate-800/50">
+                  <p className="mb-2 text-xs font-bold text-slate-600 dark:text-slate-400">
+                    フリー打ち
+                  </p>
+                  <div
+                    className="text-center text-4xl font-black italic tabular-nums sm:text-5xl"
+                    style={{
+                      fontFamily: "'Urbanist', -apple-system, sans-serif",
+                      color: calcResult.freePlay ? "#475569" : "#94a3b8",
+                      letterSpacing: "-0.02em",
+                    }}
+                  >
+                    {calcResult.freePlay
+                      ? `1/${calcResult.freePlay.prob.toFixed(2)}`
+                      : "計算不可"}
+                  </div>
+                  {calcResult.freePlay && (
+                    <p
+                      className="mt-2 text-center text-base font-bold tabular-nums text-slate-700 dark:text-slate-300 sm:text-lg"
+                      style={{ fontFamily: "'Urbanist', -apple-system, sans-serif" }}
+                    >
+                      推計 {calcResult.freePlay.count.toLocaleString()} 回
+                    </p>
+                  )}
+                </div>
+
+                <p className="text-center text-xs text-slate-500 dark:text-slate-400">
+                  {totalGames.toLocaleString()} G ／ 設定推定はチェリー狙い基準
                 </p>
                 {totalGames < 1000 && (
-                  <p className="mt-2 text-xs text-amber-500/70">
+                  <p className="text-center text-xs text-amber-600/80 dark:text-amber-500/70">
                     ⚠️ ゲーム数が少ないため参考値
                   </p>
                 )}
               </div>
             )}
           </div>
+
+          {config && (
+            <GrapeReverseEstimationPanel
+              config={config}
+              inputs={estimationInputs ?? {
+                "total-games": totalGames,
+                "big-count": bigCount,
+                "reg-count": regCount,
+                ...(isHana
+                  ? { "bell-count": cherryAimResult?.count ?? 0 }
+                  : { "grape-count": cherryAimResult?.count ?? 0 }),
+              }}
+              estimationResults={estimationResults}
+              estimationError={estimationError}
+              totalGames={totalGames}
+              currentCategory={currentCategory}
+              roleLabel={roleLabel}
+            />
+          )}
 
           <div className="pb-6" />
         </div>
