@@ -9,7 +9,7 @@ const BIG_AFTER_HINTS: Record<string, string> = {
   "big-feather-yellow": "高設定期待度：低〜中",
   "big-feather-green": "高設定期待度：中",
   "big-feather-red": "高設定期待度：高",
-  "big-feather-rainbow": "高設定期待度：高（設定6濃厚）",
+  "big-feather-rainbow": "設定6濃厚",
 };
 
 const REG_AFTER_HINTS: Record<string, string> = {
