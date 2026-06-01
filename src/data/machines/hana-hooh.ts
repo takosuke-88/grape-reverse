@@ -407,6 +407,8 @@ export const hanaHoohConfig: MachineConfig = {
       big: 240,
       reg: 120,
       bell: 10,
+      grape: 10,
+      cherry: 4,
     },
     judgmentWeights: {
       grapeWeightMap: { 0: 0.1, 2000: 0.2, 4000: 0.5, 6000: 0.8, 8000: 1.0 },
@@ -416,6 +418,7 @@ export const hanaHoohConfig: MachineConfig = {
     reverseCalcProbDenominators: {
       replay: 7.3,
       cherry: 36.0,
+      cherryFreePlayRate: 2 / 3,
     },
   },
   detailedProbabilities: {

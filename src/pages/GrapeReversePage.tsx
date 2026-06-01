@@ -30,14 +30,48 @@ import {
   sanitizeCounterDigitString,
 } from "../components/dynamic-ui/counter-layout";
 
-/** 機種Config未登録時のぶどう逆算フォールバック（マイジャグラーV基準） */
+/** 機種Config未登録時の逆算フォールバック（マイジャグラーV基準） */
 const REVERSE_CALC_FALLBACK = {
   big: 240,
   reg: 96,
   grape: 8,
+  cherry: 2,
   replayDenom: 7.3,
   cherryDenom: 35.6,
+  /** フリー打ち時チェリー取得率（旧逆算ページ a6e0409 の 2/3 想定） */
+  cherryFreePlayRate: 2 / 3,
+  replayPayout: 3,
 };
+
+type ReverseCalcPayouts = NonNullable<MachineConfig["specs"]>["payouts"];
+
+/** ぶどう/ベル払出: grape → bell → カテゴリ既定 */
+function resolveRolePayout(
+  payouts: ReverseCalcPayouts | undefined,
+  isHana: boolean,
+): number {
+  return (
+    payouts?.grape ??
+    payouts?.bell ??
+    (isHana ? 10 : REVERSE_CALC_FALLBACK.grape)
+  );
+}
+
+/** チェリー払出: config → カテゴリ既定（ハナ4 / ジャグラー2） */
+function resolveCherryPayout(
+  payouts: ReverseCalcPayouts | undefined,
+  isHana: boolean,
+): number {
+  return payouts?.cherry ?? (isHana ? 4 : REVERSE_CALC_FALLBACK.cherry);
+}
+
+type ReverseCalcDenoms = NonNullable<MachineConfig["specs"]>["reverseCalcProbDenominators"];
+
+/** フリー打ち時チェリー取得率（0〜1）。未指定時は 2/3 */
+function resolveCherryFreePlayRate(denoms: ReverseCalcDenoms | undefined): number {
+  const rate = denoms?.cherryFreePlayRate ?? REVERSE_CALC_FALLBACK.cherryFreePlayRate;
+  return Math.min(1, Math.max(0, rate));
+}
 
 type GrapeReverseModeResult = {
   prob: number;
@@ -306,37 +340,47 @@ export default function GrapeReversePage() {
   };
 
   // ─── 逆算計算（チェリー狙い / フリー打ち） ───
+  // リプレイは打ち方に依存しない → 両モードで同一補正。
+  // 差分はフリー打ち時のチェリー取りこぼし（取得率）のみ。
   const calcResult = useMemo((): GrapeReverseCalcResult | null => {
     if (totalGames === 0) return null;
 
-    const BIG_PAYOUT = config?.specs?.payouts?.big ?? REVERSE_CALC_FALLBACK.big;
-    const REG_PAYOUT = config?.specs?.payouts?.reg ?? REVERSE_CALC_FALLBACK.reg;
-    const GRAPE_PAYOUT = config?.specs?.payouts?.grape ?? REVERSE_CALC_FALLBACK.grape;
-    const REPLAY_DENOM =
-      config?.specs?.reverseCalcProbDenominators?.replay ?? REVERSE_CALC_FALLBACK.replayDenom;
-    const CHERRY_DENOM =
-      config?.specs?.reverseCalcProbDenominators?.cherry ?? REVERSE_CALC_FALLBACK.cherryDenom;
+    const payouts = config?.specs?.payouts;
+    const denoms = config?.specs?.reverseCalcProbDenominators;
+    const BIG_PAYOUT = payouts?.big ?? REVERSE_CALC_FALLBACK.big;
+    const REG_PAYOUT = payouts?.reg ?? REVERSE_CALC_FALLBACK.reg;
+    const ROLE_PAYOUT = resolveRolePayout(payouts, isHana);
+    const CHERRY_PAYOUT = resolveCherryPayout(payouts, isHana);
+    const REPLAY_DENOM = denoms?.replay ?? REVERSE_CALC_FALLBACK.replayDenom;
+    const CHERRY_DENOM = denoms?.cherry ?? REVERSE_CALC_FALLBACK.cherryDenom;
+    const CHERRY_FREE_PLAY_RATE = resolveCherryFreePlayRate(denoms);
 
     const coinIn = totalGames * 3;
     const payout = coinIn - diffCoins;
     const bonusOut = bigCount * BIG_PAYOUT + regCount * REG_PAYOUT;
-    const cherryCorrection = (totalGames / CHERRY_DENOM) * 2;
-    const replayCorrection = (totalGames / REPLAY_DENOM) * 3;
+
+    const replayCorrection =
+      (totalGames / REPLAY_DENOM) * REVERSE_CALC_FALLBACK.replayPayout;
+    const cherryCorrectionAim = (totalGames / CHERRY_DENOM) * CHERRY_PAYOUT;
+    const cherryCorrectionFree =
+      cherryCorrectionAim * CHERRY_FREE_PLAY_RATE;
+
+    const roleOutBase = payout - bonusOut - replayCorrection;
 
     const cherryAim = computeGrapeModeResult(
-      payout - bonusOut - cherryCorrection,
-      GRAPE_PAYOUT,
+      roleOutBase - cherryCorrectionAim,
+      ROLE_PAYOUT,
       totalGames,
     );
     const freePlay = computeGrapeModeResult(
-      payout - bonusOut - cherryCorrection - replayCorrection,
-      GRAPE_PAYOUT,
+      roleOutBase - cherryCorrectionFree,
+      ROLE_PAYOUT,
       totalGames,
     );
 
     if (!cherryAim && !freePlay) return null;
     return { cherryAim, freePlay };
-  }, [totalGames, bigCount, regCount, diffCoins, config]);
+  }, [totalGames, bigCount, regCount, diffCoins, config, isHana]);
 
   const cherryAimResult = calcResult?.cherryAim ?? null;
 
