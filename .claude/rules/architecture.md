@@ -15,9 +15,10 @@
 - **情報の継続性**: 既存ページの改修時、設定済みのSEOパラメータ（特にディスクリプション）は、明示的な指示がない限り変更せず**維持**すること。勝手に内容を薄めたり削除したりしてはならない。
 
 ## 4. データ永続化 (State Management)
-- すべてのカウントデータ、入力履歴、差枚数データは、ブラウザのリロードやセッション切断で消失しないよう `localStorage` に保存・同期する。
-- カウンター画面と「ぶどう逆算」ページは同一のState（または `localStorage` の同一キー）を参照し、データの一貫性・自動同期を担保する。
-- ボーナス関連の項目（BIG/REG、詳細内訳）で、テンキーによる「直接入力」が行われた瞬間、および全体リセットが実行された瞬間に、履歴スタック（`bonusHistory`）の配列をクリア（`[]` にリセット）する安全ガードを実装すること。
+- すべてのカウントデータ、入力履歴、差枚数データは、ブラウザのリロードやセッション切断で消失しないよう `localStorage` に保存する。
+- **小役カウンター**（`MachinePageFactory`）: キー `grape-reverse-data-${config.id}`
+- **ぶどう/ベル逆算ページ**（`GrapeReversePage`、ルート `/:machineId/grape`）: キー `grape-reverse-data-grape-mode-${machineId}` — **カウンター画面とは別キー**（自動同期しない。逆算ページで再入力する運用）。
+- ボーナス関連の項目（BIG/REG、詳細内訳）で、数字ゾーンの直接入力（Enter確定）が行われた瞬間、および全体リセットが実行された瞬間に、履歴スタック（`bonusHistory`）をクリアする。
   - **理由**: 直接入力はタップ履歴との整合性が断絶するため。Undo（LIFO）の前提が壊れる状態で `pop` させないための防衛策。
 
 ## 5. 機種設定とファクトリーパターン
@@ -25,52 +26,55 @@
 - 小役構成・配色・判別テーブル・期待値計算は機種設定オブジェクト（`config`）に分離し、`MachinePageFactory.tsx` が機種ID（例: `myjug5`）を検知して動的にマッピング・注入する。
 - コンポーネントへのベタ書きは禁止。新機種追加は設定オブジェクトの追加で対応する。
 
-### `MachineConfig` 型（ぶどう逆算・多機種対応）
+### `MachineConfig.specs`（ぶどう/ベル逆算・多機種対応）
+
+実装は `src/types/machine-schema.ts` の `specs.payouts` / `specs.reverseCalcProbDenominators` を参照する（`GrapeReversePage.tsx`）。
 
 ```typescript
-export interface MachineConfig {
-  id: string;
-  name: string;
-  bonusPayouts: {
-    big: number;  // 例: 240（マイジャグラーV）
-    reg: number;  // 例: 96
+specs?: {
+  payouts?: {
+    big: number;
+    reg: number;
+    grape?: number;   // ジャグラーぶどう（8）
+    bell?: number;    // ハナベル（10）。逆算では grape ?? bell
+    cherry?: number;  // 逆算用。未指定: ジャグラー2 / ハナ4
   };
-  grapePayout: number;           // ぶどう1回あたりの払出枚数（例: 8）
-  baseCorrectionFactor: number;  // ぶどう・ボーナス以外の小役による1Gあたり払出期待値の合計
-}
+  reverseCalcProbDenominators?: {
+    replay: number;              // 例: 7.3
+    cherry: number;              // 例: 35.6（ジャグラー）/ 36.0（ハナ）
+    cherryFreePlayRate?: number; // 0〜1。未指定: 2/3（21コマ系理論値）
+  };
+};
 ```
 
-**主要機種の参照値（Config実装用）**
+**主要機種の参照値**
 
-| 機種 | `bonusPayouts.big` | `bonusPayouts.reg` | `grapePayout` | `baseCorrectionFactor` |
-|---|---|---|---|---|
-| マイジャグラーV（デフォルト） | 240 | 96 | 8 | 0.494 |
-| キングハナハナ-30（将来用） | — | — | 10 | 0.526 |
+| 機種 | big | reg | 小役払出 | cherry払出 | cherry分母 | 備考 |
+|---|---|---|---|---|---|---|
+| マイジャグラーV | 240 | 96 | grape 8 | 2 | 35.6 | フォールバック基準 |
+| ハナハナホウオウ等 | 240 | 120 | bell/grape 10 | 4 | 36.0 | `grape: 10` を併記推奨 |
 
-- `baseCorrectionFactor` はリプレイ・チェリー・ベル・ピエロ等を合算した「1Gあたりの払出期待枚数」。個別確率の毎回シミュレートより、Configから参照する方式を採用する。
-- 現フェーズ（`ui-sandbox`）はマイジャグラーVの値をデフォルトとして実装する。定数のハードコードは禁止し、必ず `config.*` を参照すること。
+- **`baseCorrectionFactor` は未実装**（`decisions-log.md` 参照）。リプレイ・チェリーは下記の個別控除式を使用すること。
+- 定数のマイジャグ固定ハードコードは禁止。未設定時のみ `REVERSE_CALC_FALLBACK`（`GrapeReversePage.tsx`）を使用。
 
-### ぶどう逆算の計算式
+### ぶどう/ベル逆算の計算式（`GrapeReversePage.tsx`）
 
-1. 総投入枚数 = 総ゲーム数 × 3
-2. 総払出枚数 = 総投入枚数 + 差枚数
-3. ベース補正枚数 = 総ゲーム数 × `config.baseCorrectionFactor`
-4. 推定ぶどう払出枚数 = 総払出枚数 − (BIG回数 × `config.bonusPayouts.big` + REG回数 × `config.bonusPayouts.reg`) − ベース補正枚数
-5. 推定ぶどう回数 = 推定ぶどう払出枚数 ÷ `config.grapePayout`
-6. 推定ぶどう確率 = 総ゲーム数 ÷ 推定ぶどう回数
-
-```typescript
-const baseCorrectionCoins = totalGames * config.baseCorrectionFactor;
-const estimatedGrapeCoins =
-  estimatedTotalOutCoins
-  - (bigCount * config.bonusPayouts.big + regCount * config.bonusPayouts.reg)
-  - baseCorrectionCoins;
-const estimatedGrapeCount = estimatedGrapeCoins / config.grapePayout;
-const estimatedGrapeProbability = totalGames / estimatedGrapeCount;
-```
+1. 総投入 = 総ゲーム数 × 3
+2. **総払出 = 総投入 + 差枚**（差枚は払出−投入。プラス＝勝ち）
+3. ボーナス払出 = BIG × `payouts.big` + REG × `payouts.reg`
+4. リプレイ補正 = (G / `replay`) × 3 — **チェリー狙い・フリー打ちで同一**
+5. チェリー補正（狙い）= (G / `cherry`) × チェリー払出（100%取得）
+6. チェリー補正（フリー）= 上記 × `cherryFreePlayRate`（既定 2/3）
+7. 残り小役払出 = 総払出 − ボーナス − リプレイ補正 − チェリー補正
+8. 推定回数 = 残り ÷ 小役払出（`grape ?? bell`）、確率 = G ÷ 回数
+9. 設定推定（ベイズ）には**チェリー狙い**の推計回数を使用（ハナは `bell-count`、ジャグラーは `grape-count`）
 
 ## 6. コラム（記事）コンテンツ
 - CMSは未導入。`/src/content/columns/` 等に Markdown（`.md`）を配置し、ビルド時または動的インポートでパースして展開する静的ファイル管理とする。
 
 ## 7. PWA
-- 現時点では対象外（ロードマップ上の将来像）。`manifest.json` や Service Worker によるオフラインキャッシュは、コアUI/UX（`ui-sandbox`）が安定した後のフェーズで実装する。
+- 現時点では対象外（ロードマップ上の将来像）。`manifest.json` や Service Worker によるオフラインキャッシュは、コアUI/UXが安定した後のフェーズで実装する。
+
+## 8. ハナハナ固有（ベイズ・UI）
+- フェザー/REG後ランプの示唆は `src/components/dynamic-ui/hana-lamp-hints.ts` と `bayes-estimator.ts` で下位設定を否定（設定6濃厚は「濃厚」表記、ユーザー向けに「確定」は使わない）。
+- カウンター配色: `bell-count` はアンバー、ランプ suffix（`-white` 等）は `DynamicInput.getElementTheme` で個別色。
