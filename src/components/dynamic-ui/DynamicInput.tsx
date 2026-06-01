@@ -28,10 +28,64 @@ interface ElementTheme {
   bg: string;
   minusBg: string;
   accent: string;
+  /** 背景が明るい（白・黄など）場合に数字色を暗くするためのオーバーライド */
+  textColor?: string;
+  /** 虹グラデーション用のbgはinlineスタイルで上書き */
+  bgStyle?: React.CSSProperties;
 }
 
 function getElementTheme(id: string): ElementTheme {
-  if (id.includes("grape")) {
+  // ─── ランプ色テーマ（big/reg より先にマッチさせる） ───
+  if (id.endsWith("-white")) {
+    return {
+      bg: "#e2e8f0",
+      minusBg: "linear-gradient(145deg, #cbd5e1, #94a3b8)",
+      accent: "#1e293b",
+      textColor: "#1e293b",
+    };
+  }
+  if (id.endsWith("-yellow")) {
+    return {
+      bg: "#d97706",
+      minusBg: "linear-gradient(145deg, #b45309, #92400e)",
+      accent: "#fef3c7",
+    };
+  }
+  if (id.endsWith("-green")) {
+    return {
+      bg: "#15803d",
+      minusBg: "linear-gradient(145deg, #0f6030, #0a4a24)",
+      accent: "#bbf7d0",
+    };
+  }
+  if (id.endsWith("-red")) {
+    return {
+      bg: "#b91c1c",
+      minusBg: "linear-gradient(145deg, #991515, #7a1010)",
+      accent: "#fecaca",
+    };
+  }
+  if (id.endsWith("-rainbow")) {
+    return {
+      bg: "#7c3aed",
+      minusBg: "linear-gradient(145deg, #5b21b6, #3b0764)",
+      accent: "#f0abfc",
+      bgStyle: {
+        background:
+          "linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%)",
+      },
+    };
+  }
+  if (id.endsWith("-blue")) {
+    return {
+      bg: "#1d4ed8",
+      minusBg: "linear-gradient(145deg, #1840c0, #112c9a)",
+      accent: "#bfdbfe",
+    };
+  }
+
+  // ─── 既存テーマ ───
+  if (id.includes("grape") || id.includes("bell")) {
     return {
       bg: "#15803d",
       minusBg: "linear-gradient(145deg, #0f6030, #0a4a24)",
@@ -159,6 +213,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
               minHeight: "76px",
               background: theme.bg,
               opacity: element.isReadOnly ? 0.6 : 1,
+              ...theme.bgStyle,
             }}
           >
             {/* 左: マイナス固定 + 数字ゾーン */}
@@ -173,13 +228,14 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                   handleDecrement();
                 }}
                 disabled={!!element.isReadOnly}
-                className={`flex ${COUNTER_MINUS_WIDTH_CLASS} items-center justify-center self-stretch text-2xl text-white/80 transition-all active:scale-95 touch-manipulation`}
+                className={`flex ${COUNTER_MINUS_WIDTH_CLASS} items-center justify-center self-stretch text-2xl transition-all active:scale-95 touch-manipulation`}
                 style={{
                   minHeight: "76px",
                   background: element.isReadOnly ? "transparent" : theme.minusBg,
                   boxShadow: element.isReadOnly
                     ? "none"
                     : "inset 2px 2px 4px rgba(255,255,255,0.10), inset -1px -1px 3px rgba(0,0,0,0.5), 3px 3px 8px rgba(0,0,0,0.4), -1px -1px 2px rgba(255,255,255,0.05)",
+                  color: theme.textColor ? `${theme.textColor}cc` : "rgba(255,255,255,0.8)",
                 }}
                 aria-label="減らす"
               >
@@ -208,6 +264,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 variant={useCompact ? "compact" : "default"}
                 maxDigits={maxDigits}
                 digitCapacity={digitCapacity}
+                textColor={theme.textColor ?? "#ffffff"}
               />
             </div>
 
@@ -236,7 +293,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
               )}
               <span
                 className="text-3xl font-thin pr-4 pointer-events-none select-none"
-                style={{ color: "#ffffff", opacity: element.isReadOnly ? 0.2 : 0.45 }}
+                style={{ color: theme.textColor ?? "#ffffff", opacity: element.isReadOnly ? 0.2 : 0.45 }}
               >
                 ＋
               </span>
@@ -244,7 +301,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 <span
                   className="absolute right-2 bottom-1.5 text-lg italic font-black tabular-nums pointer-events-none select-none"
                   style={{
-                    color: "rgba(255,255,255,0.92)",
+                    color: theme.textColor ? `${theme.textColor}ee` : "rgba(255,255,255,0.92)",
                     fontFamily: "'Urbanist', -apple-system, sans-serif",
                     letterSpacing: "-0.01em",
                   }}

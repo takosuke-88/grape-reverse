@@ -27,6 +27,8 @@ export interface CounterDirectInputZoneProps {
   maxDigits?: number;
   /** 想定桁数（min-width 最適化。未指定は 5 = 総G想定） */
   digitCapacity?: number;
+  /** 数字・カーソル色（白背景時など明るい背景に対応するため。デフォルト: "#ffffff"） */
+  textColor?: string;
 }
 
 export default function CounterDirectInputZone({
@@ -41,6 +43,7 @@ export default function CounterDirectInputZone({
   variant = "default",
   maxDigits,
   digitCapacity = 5,
+  textColor = "#ffffff",
 }: CounterDirectInputZoneProps) {
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -69,11 +72,11 @@ export default function CounterDirectInputZone({
 
   const textStyle = {
     fontFamily: URBANIST,
-    color: "#ffffff",
+    color: textColor,
     textShadow: numberGlow,
   };
 
-  const inputFocusedClass = `${numberSurfaceClass} m-0 box-border min-h-[76px] w-full cursor-text touch-manipulation border-0 bg-transparent text-white focus:outline-none focus:ring-0`;
+  const inputFocusedClass = `${numberSurfaceClass} m-0 box-border min-h-[76px] w-full cursor-text touch-manipulation border-0 bg-transparent focus:outline-none focus:ring-0`;
 
   const commitOrFallbackZero = () => {
     if (inputValue === "") {
@@ -156,7 +159,7 @@ export default function CounterDirectInputZone({
               className={inputFocusedClass}
               style={{
                 ...textStyle,
-                caretColor: "#ffffff",
+                caretColor: textColor,
                 WebkitAppearance: "none",
                 appearance: "none",
               }}
