@@ -67,6 +67,8 @@ export interface MachineConfig {
       reg: number;
       grape?: number;
       bell?: number;
+      /** 逆算用チェリー払出（未指定時: ジャグラー2枚 / ハナハナ4枚） */
+      cherry?: number;
     };
     judgmentWeights?: {
       grapeWeightMap?: Record<number, number>;
@@ -76,6 +78,11 @@ export interface MachineConfig {
     reverseCalcProbDenominators?: {
       replay: number;
       cherry: number;
+      /**
+       * フリー打ち時のチェリー取得率（0〜1）。
+       * チェリー狙いは常に 1.0。リプレイは打ち方に依存しないため両モード同一補正。
+       */
+      cherryFreePlayRate?: number;
     };
     settings?: number[]; // [1, 2, 3, 4, 5, 6] by default
     settingLabels?: Record<number, string>; // e.g. {6: "V"}

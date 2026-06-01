@@ -1,8 +1,9 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type {
   MachineConfig,
   EstimationResult,
+  DiscriminationElement,
 } from "../../types/machine-schema";
 import {
   calculateEstimation,
@@ -14,6 +15,7 @@ import { formatBonusText } from "../../utils/formatters";
 import EstimationResultDisplay from "./EstimationResultDisplay";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import DynamicInput from "./DynamicInput";
+import { isGridOnlyCompactCounterId } from "./counter-layout";
 
 interface MachinePageFactoryProps {
   config: MachineConfig;
@@ -22,10 +24,20 @@ interface MachinePageFactoryProps {
 const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   const navigate = useNavigate();
 
-  // モード管理
-  const [currentMode, setCurrentMode] = useLocalStorage<"simple" | "detail" | "grape">(
-    "grape-reverse-active-tab",
-    "simple"
+  // バイブレーションON/OFF
+  const [vibrationEnabled, setVibrationEnabled] = useLocalStorage<boolean>(
+    "grape-reverse-vibration",
+    true
+  );
+
+  // ボーナス入力履歴（LIFO スタック）
+  const [bigHistory, setBigHistory] = useLocalStorage<string[]>(
+    `grape-reverse-big-history-${config.id}`,
+    []
+  );
+  const [regHistory, setRegHistory] = useLocalStorage<string[]>(
+    `grape-reverse-reg-history-${config.id}`,
+    []
   );
 
   // 現在の機種のカテゴリを取得
@@ -61,14 +73,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     Record<string, number | boolean | string>
   >(`grape-reverse-data-${config.id}`, () => initializeValues());
 
-  // ユーザー入力State (ぶどう・ベル逆算専用)
-  const [grapeInputValues, setGrapeInputValues, removeGrapeInputValues] = useLocalStorage<
-    Record<string, number | boolean | string>
-  >(`grape-reverse-data-grape-mode-${config.id}`, () => initializeValues());
-
   // ルーティングで機種が切り替わった時にステートを再初期化する
   useEffect(() => {
-    setCalculatedGrapeCount(null);
     setEstimationResults(null);
 
     // 機種名（または専用に設定されたtitle）をドキュメントタイトルにセット
@@ -80,55 +86,35 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     }
   }, [config.id, config.name, currentCategory]);
 
-  // ブドウ算出結果用
-  const [calculatedGrapeCount, setCalculatedGrapeCount] = useState<
-    number | null
-  >(null);
-
   const [estimationResults, setEstimationResults] = useState<
     EstimationResult[] | null
   >(null);
 
-  // 現在のモードに応じた入力値を参照 (ブドウ逆算結果を合成)
-  const currentInputs = useMemo(() => {
-    if (currentMode === "grape") {
-      return calculatedGrapeCount !== null
-        ? { ...grapeInputValues, "grape-count": calculatedGrapeCount }
-        : grapeInputValues;
-    }
-    return inputValues;
-  }, [currentMode, inputValues, grapeInputValues, calculatedGrapeCount]);
+  const currentInputs = inputValues;
 
   const handleValueChange = (
     elementId: string,
     value: number | boolean | string,
   ) => {
-    if (currentMode === "grape") {
-      setGrapeInputValues((prev) => ({
-        ...prev,
-        [elementId]: value,
-      }));
-      return;
-    }
-
-    // 通常モードでのボーナス合計直接入力時の同期処理
-    // Total入力時に、その値を維持するようにUnknownを調整する
-    if (
-      currentMode !== "detail" &&
-      (elementId === "big-count" || elementId === "reg-count")
-    ) {
+    // ボーナス合計直接入力時の同期処理:
+    // Total - (Solo + Cherry) の差分を「契機不明」要素に自動反映する
+    if (elementId === "big-count" || elementId === "reg-count") {
       const prefix = elementId === "big-count" ? "big" : "reg";
       const numValue = Number(value);
       const solo = Number(inputValues[`${prefix}-solo-count`]) || 0;
       const cherry = Number(inputValues[`${prefix}-cherry-count`]) || 0;
-      // Total - (Solo + Cherry) = Unknown
-      // 負の値にならないように0でクリップ (Total < 内訳合計 の矛盾回避)
       const newUnknown = Math.max(0, numValue - (solo + cherry));
+
+      // 機種定義から「契機不明」要素IDを動的に探索する
+      const unknownElement = config.sections
+        .flatMap((s) => s.elements)
+        .find((e) => e.id.startsWith(prefix) && e.id.includes("unknown"));
+      const unknownId = unknownElement?.id ?? `${prefix}-unknown-count`;
 
       setInputValues((prev) => ({
         ...prev,
         [elementId]: value,
-        [`${prefix}-unknown-count`]: newUnknown,
+        [unknownId]: newUnknown,
       }));
       return;
     }
@@ -175,103 +161,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     currentInputs["reg-solo-count"],
     currentInputs["reg-cherry-count"],
     currentInputs["reg-unknown-count"],
-    currentMode, // モード切り替え時にも再計算
   ]);
 
-
-  // 依存値の変更を追跡するためのRef
-  const prevDepsRef = useRef({
-    totalGames: -1,
-    diffCoins: "" as string | number,
-    bigCount: -1,
-    regCount: -1,
-    mode: "",
-  });
-
-  useEffect(() => {
-    // currentInputsを使用
-    const currentTotalGames = Number(currentInputs["total-games"]) || 0;
-    const currentDiffCoins = currentInputs["diff-coins"];
-    const currentBig = Number(currentInputs["big-count"]) || 0;
-    const currentReg = Number(currentInputs["reg-count"]) || 0;
-
-    const prev = prevDepsRef.current;
-
-    // 依存値（総ゲーム数、差枚数、ボーナス、またはモード）が変更されたかチェック
-    const isDepChanged =
-      currentTotalGames !== prev.totalGames ||
-      currentDiffCoins !== prev.diffCoins ||
-      currentBig !== prev.bigCount ||
-      currentReg !== prev.regCount ||
-      currentMode !== prev.mode;
-
-    // 依存値が変更された場合のみ、ブドウ逆算を実行
-    if (isDepChanged) {
-      // Refを更新
-      prevDepsRef.current = {
-        totalGames: currentTotalGames,
-        diffCoins: currentDiffCoins as string | number,
-        bigCount: currentBig,
-        regCount: currentReg,
-        mode: currentMode,
-      };
-
-      // 差枚数からのブドウ逆算ロジック
-      const diffCoinsNum = Number(currentDiffCoins);
-      const hasDiffCoins = currentDiffCoins !== "" && !isNaN(diffCoinsNum);
-
-      if (
-        currentTotalGames > 0 &&
-        hasDiffCoins &&
-        config.specs?.payouts &&
-        config.specs.payouts.grape
-      ) {
-        // 定数定義
-        const PAYOUT = {
-          BIG: config.specs.payouts.big,
-          REG: config.specs.payouts.reg,
-          GRAPE: config.specs.payouts.grape,
-          CHERRY: 2,
-        };
-        const PROB_DENOM = {
-          REPLAY: config.specs.reverseCalcProbDenominators?.replay || 7.3,
-          CHERRY: config.specs.reverseCalcProbDenominators?.cherry || 36.0,
-        };
-
-        const REPLAY_PROB = 1 / PROB_DENOM.REPLAY;
-        const CHERRY_PROB = 1 / PROB_DENOM.CHERRY;
-
-        // ユーザー指定の正確な計算式に基づく逆算アルゴリズム
-        // 1. 消費枚数 = (総回転数 / 7.33 * 0) + (総回転数 * (1 - 1/7.33) * 3)
-        // ※リプレイを除いた回転数に3を乗じる
-        const coinIn = currentTotalGames * (1 - REPLAY_PROB) * 3;
-
-        // 2. ボーナス総獲得 = (BIG回数 * BIG_PAYOUT) + (REG回数 * REG_PAYOUT)
-        const bonusOut = currentBig * PAYOUT.BIG + currentReg * PAYOUT.REG;
-
-        // 3. チェリー期待枚数 = (総回転数 / 33.0) * 2
-        const cherryPayout = currentTotalGames * CHERRY_PROB * PAYOUT.CHERRY;
-
-        // 4. 推定ブドウ獲得枚数 = 差枚数 + 消費枚数 - ボーナス総獲得 - チェリー期待枚数
-        // 差枚数(diffCoinsNum)がプラスの場合は客の浮き、マイナスの場合は沈みを示すとする。
-        // 出玉の定義: 差枚数 = INとOUTの差分 (通常 差枚 = OUT - IN だが、この式では 獲得 = 差枚 + 消費 という考え方)
-        // ここでの消費枚数はすでに「純消費」
-        const grapePayout = diffCoinsNum + coinIn - bonusOut - cherryPayout;
-
-        // 5. 推定ブドウ回数 = 推定ブドウ獲得枚数 / GRAPE_PAYOUT
-        const calculatedGrapeCount = Math.round(grapePayout / PAYOUT.GRAPE);
-
-        console.log("🍇 ブドウ逆算実行 (Strict Formula):", {
-          Trigger: "Dependency Changed",
-          Calculated: calculatedGrapeCount,
-        });
-        setCalculatedGrapeCount(calculatedGrapeCount);
-      } else {
-        // 条件を満たさない場合は結果をクリア
-        setCalculatedGrapeCount(null);
-      }
-    }
-  }, [currentInputs, totalGames, config, currentMode]);
 
   // 設定推測の自動計算
   useEffect(() => {
@@ -280,22 +171,9 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
       // 総ゲーム数が入力されている場合のみ自動計算
       if (totalGames > 0) {
         setError(null);
-        console.log("🔄 自動計算開始:", {
-          機種: config.name,
-          モード: currentMode,
-          総ゲーム数: totalGames,
-          入力値: currentInputs,
-        });
         try {
           // モードに関わらず、表示中の入力値で推定を行う
           const results = calculateEstimation(config, currentInputs);
-          console.log(
-            "✅ 計算完了:",
-            results.map((r) => ({
-              設定: r.setting,
-              確率: `${r.probability.toFixed(1)}%`,
-            })),
-          );
           setEstimationResults(results);
         } catch (err) {
           console.error("❌ 自動計算エラー:", err);
@@ -309,18 +187,43 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     }, 500); // 500ms のデバウンス
 
     return () => clearTimeout(timer);
-  }, [currentInputs, totalGames, config, currentMode]);
+  }, [currentInputs, totalGames, config]);
 
   const handleReset = () => {
-    if (currentMode === "grape") {
-      // ぶどう・ベル逆算タブのリセット
-      removeGrapeInputValues();
-      setCalculatedGrapeCount(null);
-    } else {
-      // 通常・詳細タブのリセット
-      removeInputValues();
-      setEstimationResults(null);
-      setError(null);
+    if (!window.confirm("これまでのカウントデータを全てリセットしますか？")) return;
+    removeInputValues();
+    setBigHistory([]);
+    setRegHistory([]);
+    setEstimationResults(null);
+    setError(null);
+  };
+
+  // LIFO ボーナス減算：履歴が整合していればスタックpop、不整合時はフォールバック
+  const handleBonusDecrement = (prefix: "big" | "reg") => {
+    const history = prefix === "big" ? bigHistory : regHistory;
+    const setHistory = prefix === "big" ? setBigHistory : setRegHistory;
+    const current = Number(inputValues[`${prefix}-count`]) || 0;
+    if (current <= 0) return;
+
+    if (history.length === current && history.length > 0) {
+      const type = history[history.length - 1];
+      const key = `${prefix}-${type}-count`;
+      const val = Number(inputValues[key]) || 0;
+      if (val > 0) {
+        setInputValues((prev) => ({ ...prev, [key]: val - 1 }));
+        setHistory((prev) => prev.slice(0, -1));
+        return;
+      }
+    }
+
+    // フォールバック: unknown → cherry → solo の順で非ゼロを減算
+    for (const type of ["unknown", "cherry", "solo"]) {
+      const key = `${prefix}-${type}-count`;
+      const val = Number(inputValues[key]) || 0;
+      if (val > 0) {
+        setInputValues((prev) => ({ ...prev, [key]: val - 1 }));
+        return;
+      }
     }
   };
 
@@ -329,6 +232,38 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     return config.sections.flatMap((section) =>
       section.elements.filter((element) => element.isDiscriminationFactor),
     );
+  }, [config.sections]);
+
+  // 角チェリーのバーチャル要素定義
+  const CHERRY_ELEMENT: DiscriminationElement = {
+    id: "cherry-count",
+    label: "角チェリー",
+    type: "counter",
+    settingValues: {},
+    isDiscriminationFactor: false,
+  };
+
+  // 通常小役セクションをボーナスセクションより前に移動した表示順を生成
+  // さらに、normal-role-section に cherry-count がなければ grape-count の前に注入する
+  const orderedSections = useMemo(() => {
+    const sections = config.sections.map((section) => {
+      if (section.id !== "normal-role-section") return section;
+      if (section.elements.some((e) => e.id === "cherry-count")) return section;
+
+      const grapeIdx = section.elements.findIndex((e) => e.id === "grape-count");
+      const newElements = [...section.elements];
+      newElements.splice(grapeIdx >= 0 ? grapeIdx : 0, 0, CHERRY_ELEMENT);
+      return { ...section, layout: "grid" as const, elements: newElements };
+    });
+
+    const normalIdx = sections.findIndex((s) => s.id === "normal-role-section");
+    const bonusIdx = sections.findIndex((s) => s.id === "bonus-section");
+    if (normalIdx !== -1 && bonusIdx !== -1 && normalIdx > bonusIdx) {
+      const [normalSection] = sections.splice(normalIdx, 1);
+      const newBonusIdx = sections.findIndex((s) => s.id === "bonus-section");
+      sections.splice(newBonusIdx, 0, normalSection);
+    }
+    return sections;
   }, [config.sections]);
 
   // ブドウ信頼度の計算
@@ -348,231 +283,102 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   }, [estimationResults]);
 
   return (
-    <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950">
-      {/* ヘッダー（テーマカラー適用） */}
+    <div className="min-h-screen w-full max-w-full overflow-x-clip bg-slate-50 dark:bg-slate-950">
+      {/* タイトルバー（スクロールアウトする・固定しない） */}
       <div
-        className={`${themeColor} py-6 px-4 text-white shadow-lg transition-colors duration-500`}
-        style={{ backgroundColor: brandColor || undefined }} // ブランドカラー適用 (優先)
+        className={`${themeColor} py-3 px-4 text-white shadow-lg transition-colors duration-500`}
+        style={{ backgroundColor: brandColor || undefined }}
       >
         <div className="mx-auto max-w-md">
-          <div className="mb-2 flex items-center gap-2">
-            <span className="rounded-md bg-white/20 px-2.5 py-1 text-xs font-medium">
+          <div className="flex items-center gap-2">
+            <span className="rounded-md bg-white/20 px-2.5 py-1 text-xs font-medium shrink-0">
               {config.type}
             </span>
-            {/* 詳細フラグ判別中の表示を削除 */}
+            <h1 className="font-bold min-w-0">
+              <span className="block text-lg sm:text-xl font-extrabold leading-tight truncate">{config.name}</span>
+              <span className="block text-xs font-normal opacity-80 truncate">{toolLabel}</span>
+            </h1>
           </div>
-          <h1 className="font-bold">
-            <span className="block text-2xl sm:text-3xl">{config.name}</span>
-            <span className="block mt-2 text-sm sm:text-base font-normal opacity-90">
-              {toolLabel}
-            </span>
-          </h1>
         </div>
       </div>
 
-      {/* 機種選択ナビゲーション（カテゴリ一致のみ表示） */}
-      <div className="sticky top-0 z-10 bg-slate-100/95 backdrop-blur-sm py-3 px-4 shadow-md border-b border-slate-200 dark:bg-slate-900/95 dark:border-slate-800">
-        <div className="mx-auto max-w-md text-center">
-          <label className="block text-xs font-bold text-slate-500 mb-1 dark:text-slate-400">
-            ▼ 機種選択
-          </label>
-          <select
-            value={config.id}
-            onChange={(e) => {
-              const machineId = e.target.value;
-              if (machineId) {
-                navigate(`/${machineId}`);
-              }
-            }}
-            className="w-full text-center font-bold text-lg py-3 rounded-xl border-2 border-slate-300 bg-white text-slate-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"
-          >
-            {AVAILABLE_MACHINES.filter(
-              (m) => m.category === currentCategory,
-            ).map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
-          </select>
+      {/* 機種選択ナビゲーション（2行セットでsticky） */}
+      <div className="sticky top-0 z-50 bg-slate-100/95 backdrop-blur-sm py-3 px-4 shadow-md border-b border-slate-200 dark:bg-slate-900/95 dark:border-slate-800">
+        <div className="mx-auto max-w-md space-y-2">
+          {/* 機種選択 + バイブトグル + リセット */}
+          <div className="flex items-center gap-2">
+            <select
+              value={config.id}
+              onChange={(e) => {
+                const machineId = e.target.value;
+                if (machineId) navigate(`/${machineId}`);
+              }}
+              className="flex-1 text-center font-bold text-base py-2.5 rounded-xl border-2 border-slate-300 bg-white text-slate-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"
+            >
+              {AVAILABLE_MACHINES.filter((m) => m.category === currentCategory).map((m) => (
+                <option key={m.id} value={m.id}>{m.name}</option>
+              ))}
+            </select>
+            {/* リセットピルボタン */}
+            <button
+              type="button"
+              onClick={handleReset}
+              className="shrink-0 flex items-center gap-1 rounded-full bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-md transition-opacity hover:opacity-80 active:opacity-60"
+              title="データを全てリセット"
+            >
+              🗑️ リセット
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const next = !vibrationEnabled;
+                setVibrationEnabled(next);
+                if (next && navigator.vibrate) navigator.vibrate(40);
+              }}
+              className={`shrink-0 flex items-center gap-1 rounded-full px-3 py-1.5 mr-1 text-xs font-semibold shadow-md transition-all ${
+                vibrationEnabled
+                  ? "bg-emerald-600 text-white"
+                  : "bg-gray-800 text-white"
+              }`}
+              title={vibrationEnabled ? "バイブON（タップでOFF）" : "バイブOFF（タップでON）"}
+            >
+              {vibrationEnabled ? "📳 ON" : "📴 OFF"}
+            </button>
+          </div>
+          {/* ナビゲーションボタン */}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 text-xs font-bold transition-opacity hover:opacity-90 active:opacity-80"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            >
+              🎰 小役カウンター
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate(`/${config.id}/grape`)}
+              className="flex-1 rounded-lg bg-emerald-700 text-white py-2 text-xs font-bold transition-opacity hover:opacity-90 active:opacity-80"
+            >
+              {currentCategory === "hana" ? "🔔 ベル逆算へ" : "🍇 ぶどう逆算へ"}
+            </button>
+          </div>
         </div>
-      </div>
+      </div>{/* end sticky nav */}
 
       <div className="mx-auto w-full max-w-md space-y-4 p-4">
-        {/* 入力モード切り替えタブ */}
-        <div className="flex rounded-xl bg-slate-200 p-1 dark:bg-slate-800">
-          {(["simple", "detail", "grape"] as const).map((mode) => (
-            <button
-              key={mode}
-              onClick={() => setCurrentMode(mode)}
-              className={`flex-1 rounded-lg py-2 text-sm font-bold transition-all ${
-                currentMode === mode
-                  ? "bg-white text-slate-800 shadow-sm dark:bg-slate-700 dark:text-white"
-                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-              }`}
-            >
-              {mode === "simple" && "通常入力"}
-              {mode === "detail" && "詳細入力"}
-              {mode === "grape" &&
-                (currentCategory === "hana" ? "ベル逆算" : "ぶどう逆算")}
-            </button>
-          ))}
-        </div>
-
         {/* 入力フォーム */}
-        {config.sections.map((section) => {
-          // 現在のモードに基づいて表示すべき要素をフィルタリング
+        {orderedSections.map((section) => {
+          // 通常・詳細を統合して全カウンター要素を表示（grape-calc は逆算ページへ分離済み）
           const visibleElements = section.elements.filter((element) => {
             const visibility = element.visibility || "always";
-
-            if (currentMode === "simple") {
-              return visibility === "always" || visibility === "simple";
-            }
-            if (currentMode === "detail") {
-              return (
-                visibility === "always" ||
-                visibility === "simple" ||
-                visibility === "detail"
-              );
-            }
-            if (currentMode === "grape") {
-              return visibility === "always" || visibility === "grape-calc";
-            }
-            return true;
+            return (
+              visibility === "always" ||
+              visibility === "simple" ||
+              visibility === "detail"
+            );
           });
 
           if (visibleElements.length === 0) return null;
-
-          // ぶどう逆算モード: 差枚数セクション(other-section)の直後にリセットボタンを挿入
-          if (currentMode === "grape" && section.id === "other-section") {
-            return (
-              <React.Fragment key={section.id}>
-                <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
-                  <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
-                    {section.title}
-                  </h2>
-                  <div className="space-y-4">
-                    {visibleElements.map((element) => (
-                      <DynamicInput
-                        key={element.id}
-                        element={{
-                          ...element,
-                          isReadOnly: false,
-                        }}
-                        value={currentInputs[element.id]}
-                        onChange={(value: number | string | boolean) =>
-                          handleValueChange(element.id, value)
-                        }
-                        totalGames={totalGames}
-                      />
-                    ))}
-                  </div>
-                </div>
-                {/* リセットボタン（差枚数の直下） */}
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className={`w-full rounded-xl ${themeColor} px-6 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80`}
-                  style={{ backgroundColor: brandColor || undefined }}
-                >
-                  入力を全てリセット
-                </button>
-              </React.Fragment>
-            );
-          }
-
-          // ブドウ逆算モードかつ通常時小役セクションの場合、特別な結果カードを表示
-          if (currentMode === "grape" && section.id === "normal-role-section") {
-            const diffCoins = Number(currentInputs["diff-coins"]);
-            const bigCount = Number(currentInputs["big-count"]) || 0;
-            const regCount = Number(currentInputs["reg-count"]) || 0;
-
-              // --- 定数定義 (Strict Formula) ---
-              const PAYOUT = {
-                BIG: config.specs?.payouts?.big || 252,
-                REG: config.specs?.payouts?.reg || 96,
-                GRAPE: config.specs?.payouts?.grape || 8,
-                CHERRY: 2,
-              };
-              const PROB_DENOM = {
-                REPLAY:
-                  config.specs?.reverseCalcProbDenominators?.replay || 7.3,
-                CHERRY:
-                  config.specs?.reverseCalcProbDenominators?.cherry || 36.0,
-              };
-
-              const REPLAY_PROB = 1 / PROB_DENOM.REPLAY;
-              const CHERRY_PROB = 1 / PROB_DENOM.CHERRY;
-
-              // --- A. チェリー狙い (完全取得) ---
-              const CHERRY_ACQUISITION_RATE_A = 1.0;
-              const coinInA = totalGames * (1 - REPLAY_PROB) * 3;
-              const bonusOutA = bigCount * PAYOUT.BIG + regCount * PAYOUT.REG;
-              const cherryPayoutA =
-                totalGames *
-                CHERRY_PROB *
-                PAYOUT.CHERRY *
-                CHERRY_ACQUISITION_RATE_A;
-              const grapePayoutA =
-                diffCoins + coinInA - bonusOutA - cherryPayoutA;
-              const grapeCountA = grapePayoutA / PAYOUT.GRAPE;
-              const grapeProbA = grapeCountA > 0 ? totalGames / grapeCountA : 0;
-
-              // --- B. フリー打ち (チェリー取得率 約66.7% = 2/3) ---
-              // ※チェリーを取りこぼすとその分ぶどう獲得枚数が減ったように計算されるため、見かけ上のぶどう確率が悪くなる方向へ補正される
-              const CHERRY_ACQUISITION_RATE_B = 2 / 3;
-              const coinInB = totalGames * (1 - REPLAY_PROB) * 3;
-              const bonusOutB = bigCount * PAYOUT.BIG + regCount * PAYOUT.REG;
-              const cherryPayoutB =
-                totalGames *
-                CHERRY_PROB *
-                PAYOUT.CHERRY *
-                CHERRY_ACQUISITION_RATE_B;
-              const grapePayoutB =
-                diffCoins + coinInB - bonusOutB - cherryPayoutB;
-              const grapeCountB = grapePayoutB / PAYOUT.GRAPE;
-              const grapeProbB = grapeCountB > 0 ? totalGames / grapeCountB : 0;
-
-              return (
-                <div
-                  key={section.id}
-                  className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6"
-                >
-                  <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
-                    {currentCategory === "hana"
-                      ? "ベル逆算結果"
-                      : "ブドウ逆算結果"}
-                  </h2>
-
-                  <div className="space-y-3">
-                    {/* チェリー狙い */}
-                    <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 dark:border-emerald-800/30 dark:bg-emerald-900/20">
-                      <div className="mb-1 text-xs font-bold text-emerald-700 dark:text-emerald-400">
-                        チェリー狙い
-                      </div>
-                      <div className="text-center text-2xl font-bold text-slate-800 dark:text-white">
-                        {grapeProbA > 0 ? `1/${grapeProbA.toFixed(2)}` : "---"}
-                      </div>
-                      <div className="mt-1 text-center text-[10px] text-slate-400">
-                        推計回数: {Math.round(grapeCountA)}回
-                      </div>
-                    </div>
-
-                    {/* フリー打ち */}
-                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
-                      <div className="mb-1 text-xs font-bold text-slate-500 dark:text-slate-400">
-                        フリー打ち
-                      </div>
-                      <div className="text-center text-2xl font-bold text-slate-800 dark:text-white">
-                        {grapeProbB > 0 ? `1/${grapeProbB.toFixed(2)}` : "---"}
-                      </div>
-                      <div className="mt-1 text-center text-[10px] text-slate-400">
-                        推計回数: {Math.round(grapeCountB)}回
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-          }
 
           return (
             <React.Fragment key={section.id}>
@@ -584,104 +390,83 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 <div
                   className={
                     section.layout === "grid" && visibleElements.length > 1
-                      ? "grid grid-cols-2 gap-4"
+                      ? "grid min-w-0 grid-cols-2 gap-4"
                       : "space-y-4"
                   }
                 >
-                  {visibleElements.map((element) => (
+                  {visibleElements.map((element) => {
+                    const sectionUsesGrid =
+                      section.layout === "grid" && visibleElements.length > 1;
+                    const compactLayout =
+                      sectionUsesGrid || isGridOnlyCompactCounterId(element.id);
+
+                    return (
                     <div
                       key={element.id}
                       className={
                         element.colSpan === 2
-                          ? "col-span-2 grid grid-cols-2 gap-4"
-                          : ""
+                          ? "col-span-2 grid min-w-0 grid-cols-2 gap-4"
+                          : "min-w-0"
                       }
                     >
                       <div className={element.colSpan === 2 ? "col-start-1" : ""}>
                         <DynamicInput
+                          compactLayout={compactLayout}
                           element={{
                             ...element,
-                            isReadOnly: element.isReadOnly
-                              ? currentMode === "detail"
-                              : false,
+                            // BIG/REG回数は直接入力可能にする（詳細内訳と自動同期）
+                            isReadOnly:
+                              element.id === "big-count" || element.id === "reg-count"
+                                ? false
+                                : !!element.isReadOnly,
                           }}
                           value={currentInputs[element.id]}
                           onChange={(value: number | string | boolean) => handleValueChange(element.id, value)}
                           totalGames={totalGames}
+                          vibrationEnabled={vibrationEnabled}
+                          onIncrement={(() => {
+                            const m = element.id.match(/^(big|reg)-(solo|cherry|unknown)-count$/);
+                            if (!m) return undefined;
+                            const [, bonus, type] = m;
+                            return bonus === "big"
+                              ? () => setBigHistory((prev) => [...prev, type])
+                              : () => setRegHistory((prev) => [...prev, type]);
+                          })()}
+                          onDecrement={
+                            element.id === "big-count" ? () => handleBonusDecrement("big") :
+                            element.id === "reg-count" ? () => handleBonusDecrement("reg") :
+                            undefined
+                          }
+                          onDirectInput={(() => {
+                            if (/^big(-\w+)?-count$/.test(element.id)) return () => setBigHistory([]);
+                            if (/^reg(-\w+)?-count$/.test(element.id)) return () => setRegHistory([]);
+                            return undefined;
+                          })()}
                         />
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
-                {/* ボーナス合算確率（BIG/REGが含まれるセクションのみ） */}
-                {section.elements.some((e) => e.id === "big-count") &&
-                  section.elements.some((e) => e.id === "reg-count") &&
-                  (() => {
-                    const bigCount = Number(currentInputs["big-count"]) || 0;
-                    const regCount = Number(currentInputs["reg-count"]) || 0;
-                    const bonusTotal = bigCount + regCount;
-                    const prob =
-                      totalGames > 0 && bonusTotal > 0
-                        ? (totalGames / bonusTotal).toFixed(1)
-                        : "---";
-
-                    return (
-                      <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-800">
-                        <span className="text-base font-bold text-slate-800 dark:text-slate-200">
-                          ボーナス合成確率
-                        </span>
-                        <span className="text-xl font-bold text-slate-800 dark:text-white">
-                          1/{prob}
-                        </span>
-                      </div>
-                    );
-                  })()}
               </div>
 
-              {/* ハナハナシリーズの詳細入力タブ限定で、通常時小役の下にリセットボタンを追加 */}
-              {currentCategory === "hana" &&
-                currentMode === "detail" &&
-                section.id === "normal-role-section" && (
-                  <button
-                    type="button"
-                    onClick={handleReset}
-                    className={`w-full rounded-xl ${themeColor} px-6 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80`}
-                    style={{ backgroundColor: brandColor || undefined }}
-                  >
-                    入力を全てリセット
-                  </button>
-                )}
             </React.Fragment>
           );
         })}
 
-        {/* 自動計算の説明とリセットボタン */}
+        {/* 自動計算の説明 */}
         <div className="flex flex-col gap-2">
           {error && (
             <div className="mb-2 rounded-lg bg-red-100 p-3 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-400">
               {error}
             </div>
           )}
-
-          {/* 自動計算の説明 */}
           <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-3 text-center">
             <p className="text-sm text-blue-700 dark:text-blue-300">
               💡 数値を入力すると自動で判別結果が更新されます
             </p>
           </div>
-
-          {/* リセットボタン（ぶどう逆算モード以外で表示。ぶどう逆算モードでは差枚数の直下に配置済み） */}
-          {currentMode !== "grape" && (
-            <button
-              type="button"
-              onClick={handleReset}
-              className={`w-full rounded-xl ${themeColor} px-6 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80`}
-              style={{ backgroundColor: brandColor || undefined }}
-            >
-              入力を全てリセット
-            </button>
-          )}
         </div>
 
         {/* 結果表示（常時表示） */}
@@ -737,11 +522,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   return el?.settingValues;
                 })(),
               },
-              ...(currentMode === "detail"
-                ? currentCategory === "hana"
-                  ? [
-                      {
-                        label: "BIG中スイカ",
+              ...(currentCategory === "hana"
+                ? [
+                    {
+                      label: "BIG中スイカ",
                         val: (() => {
                           const bCount =
                             Number(currentInputs["big-count"]) || 0;
@@ -827,7 +611,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         })(),
                       },
                     ]
-                : []),
+              ),
               {
                 label: "合算確率",
                 val: (() => {
@@ -1175,7 +959,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                           }`}
                         >
                           {result.probability === 100 && result.setting === 6
-                            ? "設定6確定！"
+                            ? "設定6濃厚！"
                             : "最有力"}
                         </span>
                       </div>
@@ -1473,6 +1257,17 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           </div>
         )}
 
+        {/* リセットボタン（ページ最下部・破壊的操作の隔離） */}
+        <div className="mt-2 mb-4">
+          <button
+            type="button"
+            onClick={handleReset}
+            className="w-full rounded-xl bg-slate-600 dark:bg-slate-700 border border-slate-500 dark:border-slate-600 px-6 py-4 text-base font-bold text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
+          >
+            🗑️ 入力を全てリセット
+          </button>
+        </div>
+
         {/* SEOコンテンツ・独自解説テキスト */}
         {config.seoContent && config.seoContent.length > 0 && (
           <div className="mt-8 mb-12 space-y-12 px-2">
@@ -1497,9 +1292,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           </div>
         )}
 
-        {/* --- 詳細確率表 (詳細モードかつデータがある場合のみ) --- */}
-        {currentMode === "detail" &&
-          config.detailedProbabilities?.big_solo &&
+        {/* --- 詳細確率表 (データがある場合のみ) --- */}
+        {config.detailedProbabilities?.big_solo &&
           config.detailedProbabilities?.big_cherry &&
           config.detailedProbabilities?.reg_solo &&
           config.detailedProbabilities?.reg_cherry && (

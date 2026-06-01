@@ -6,6 +6,7 @@ import {
   useParams,
 } from "react-router-dom";
 import MachinePagePreview from "./pages/MachinePagePreview";
+import GrapeReversePage from "./pages/GrapeReversePage";
 import { AVAILABLE_MACHINES } from "./data/machine-list";
 import { ATTACHED_COLUMNS } from "./data/column-list";
 import MyJugglerColumn from "./pages/columns/myjuggler5-setting6-behavior";
@@ -38,14 +39,17 @@ export default function App() {
       <ScrollToTop />
       <ScrollToTopButton />
       <Header />
-      <div className="flex flex-col min-h-screen pt-16">
-        <main className="flex-1">
+      <div className="flex min-h-screen w-full max-w-full flex-col">
+        <main className="w-full max-w-full flex-1">
           <Routes>
             {/* 古いURL（/v2/preview/:id）からの301リダイレクト設定 */}
             <Route path="/v2/preview/:machineId" element={<MachineRedirect />} />
 
             {/* 古いURL（/machine/:id）からの301リダイレクト設定 */}
             <Route path="/machine/:machineId" element={<MachineRedirect />} />
+
+            {/* ぶどう/ベル逆算ページ: /:machineId/grape */}
+            <Route path="/:machineId/grape" element={<GrapeReversePage />} />
 
             {/* 本番用ルート: /myjuggler5 など */}
             <Route path="/:machineId" element={<MachinePagePreview />} />

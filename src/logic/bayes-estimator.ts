@@ -3,6 +3,7 @@ import type {
   UserInputs,
   EstimationResult,
 } from "../types/machine-schema";
+import { isHanaSetting6GuaranteeInput } from "../components/dynamic-ui/hana-lamp-hints";
 
 /**
  * 回転数に応じたブドウのウェイト（信頼度）を計算（線形補間）
@@ -63,13 +64,8 @@ export function calculateEstimation(
     }));
   }
 
-  // --- 設定6確定演出（例外処理） ---
-  // ハナハナホウオウの「reg-lamp-rainbow」等、入力が1以上の場合は設定6の期待度を100%とする
-  const isSetting6Guaranteed =
-    (Number(inputs["reg-lamp-rainbow"]) || 0) > 0 ||
-    (Number(inputs["bonus-rainbow"]) || 0) > 0; // 汎用的な別フラグも念のため
-
-  if (isSetting6Guaranteed) {
+  // --- 設定6濃厚（虹ランプ）：期待度を設定6に100%再分配 ---
+  if (isHanaSetting6GuaranteeInput(inputs)) {
     const topSetting = Math.max(...settings);
     return settings.map((setting) => ({
       setting,
