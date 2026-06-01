@@ -70,10 +70,11 @@ specs?: {
 9. 設定推定（ベイズ）には**チェリー狙い**の推計回数を使用（ハナは `bell-count`、ジャグラーは `grape-count`）
 
 ## 6. コラム（記事）コンテンツ
-- CMSは未導入。`/src/content/columns/` 等に Markdown（`.md`）を配置し、ビルド時または動的インポートでパースして展開する静的ファイル管理とする。
+- CMSは未導入。記事は **`src/pages/columns/*.tsx`** に React コンポーネントとして配置し、`src/data/column-list.ts` で一覧・ルーティング（`/columns/...`）を管理する。
+- 新規記事追加時: `.tsx` 作成 → `column-list.ts` 登録 → `App.tsx` のルート追加（必要時）→ 各記事に `Seo` を配置。
 
 ## 7. PWA
-- 現時点では対象外（ロードマップ上の将来像）。`manifest.json` や Service Worker によるオフラインキャッシュは、コアUI/UXが安定した後のフェーズで実装する。
+- 未実装（将来検討）。明示指示がない限り `manifest` / Service Worker は追加しない。
 
 ## 8. ハナハナ固有（ベイズ・UI）
 - フェザー/REG後ランプの示唆は `src/components/dynamic-ui/hana-lamp-hints.ts` と `bayes-estimator.ts` で下位設定を否定（設定6濃厚は「濃厚」表記、ユーザー向けに「確定」は使わない）。
