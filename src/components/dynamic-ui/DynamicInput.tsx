@@ -89,7 +89,15 @@ function getElementTheme(id: string): ElementTheme {
   }
 
   // ─── 既存テーマ ───
-  if (id.includes("grape") || id.includes("bell")) {
+  if (id === "bell-count") {
+    return {
+      bg: "#f59e0b",
+      minusBg: "linear-gradient(145deg, #d97706, #b45309)",
+      accent: "#fffbeb",
+      textColor: "#ffffff",
+    };
+  }
+  if (id.includes("grape")) {
     return {
       bg: "#15803d",
       minusBg: "linear-gradient(145deg, #0f6030, #0a4a24)",
