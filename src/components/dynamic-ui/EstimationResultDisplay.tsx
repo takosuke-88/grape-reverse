@@ -5,6 +5,7 @@ import type {
   MachineConfig,
 } from "../../types/machine-schema";
 import { formatBonusText } from "../../utils/formatters";
+import { getRegAfterDenialBadge } from "./hana-lamp-hints";
 
 interface EstimationResultDisplayProps {
   results: EstimationResult[];
@@ -173,65 +174,49 @@ const EstimationResultDisplay: React.FC<EstimationResultDisplayProps> = ({
                 {formatBonusText("REG後トップパネル (設定否定)")}
               </div>
               <ul className="text-xs space-y-1">
-                <li className="flex justify-between items-center text-slate-600 mb-1">
-                  <span>青</span>
-                  <div className="flex items-center gap-2">
-                    <span>{Number(inputs["reg-after-blue"]) || 0}回</span>
-                    {(Number(inputs["reg-after-blue"]) || 0) > 0 && (
-                      <span className="bg-slate-100 text-slate-500 px-1 py-0.5 rounded text-[10px]">
-                        設定1否定
-                      </span>
-                    )}
-                  </div>
-                </li>
-                <li className="flex justify-between items-center text-yellow-600 mb-1">
-                  <span>黄</span>
-                  <div className="flex items-center gap-2">
-                    <span>{Number(inputs["reg-after-yellow"]) || 0}回</span>
-                    {(Number(inputs["reg-after-yellow"]) || 0) > 0 && (
-                      <span className="bg-slate-100 text-slate-500 px-1 py-0.5 rounded text-[10px]">
-                        1・2否定
-                      </span>
-                    )}
-                  </div>
-                </li>
-                <li className="flex justify-between items-center text-green-600 font-bold mb-1">
-                  <span>緑</span>
-                  <div className="flex items-center gap-2">
-                    <span>{Number(inputs["reg-after-green"]) || 0}回</span>
-                    {(Number(inputs["reg-after-green"]) || 0) > 0 && (
-                      <span className="bg-slate-100 text-slate-500 px-1 py-0.5 rounded text-[10px]">
-                        1〜3否定
-                      </span>
-                    )}
-                  </div>
-                </li>
-                <li className="flex justify-between items-center text-red-500 font-bold mb-1">
-                  <span>赤</span>
-                  <div className="flex items-center gap-2">
-                    <span>{Number(inputs["reg-after-red"]) || 0}回</span>
-                    {(Number(inputs["reg-after-red"]) || 0) > 0 && (
-                      <span className="bg-slate-100 text-slate-500 px-1 py-0.5 rounded text-[10px]">
-                        1〜4否定
-                      </span>
-                    )}
-                  </div>
-                </li>
-                <li className="flex justify-between items-center font-bold mb-1">
-                  <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-transparent bg-clip-text">
-                    虹
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-slate-800">
-                      {Number(inputs["reg-after-rainbow"]) || 0}回
-                    </span>
-                    {(Number(inputs["reg-after-rainbow"]) || 0) > 0 && (
-                      <span className="bg-red-100 text-red-600 px-1 py-0.5 rounded text-[10px]">
-                        設定6確定
-                      </span>
-                    )}
-                  </div>
-                </li>
+                {(
+                  [
+                    ["reg-after-blue", "青", "text-slate-600", false],
+                    ["reg-after-yellow", "黄", "text-yellow-600", false],
+                    ["reg-after-green", "緑", "text-green-600", true],
+                    ["reg-after-red", "赤", "text-red-500", true],
+                    ["reg-after-rainbow", "虹", "", true],
+                  ] as const
+                ).map(([id, label, colorClass, bold]) => {
+                  const count = Number(inputs[id]) || 0;
+                  const badge = getRegAfterDenialBadge(id, count);
+                  const isRainbow = id === "reg-after-rainbow";
+                  return (
+                    <li
+                      key={id}
+                      className={`flex justify-between items-center mb-1 ${bold ? "font-bold" : ""} ${colorClass}`}
+                    >
+                      {isRainbow ? (
+                        <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-transparent bg-clip-text">
+                          {label}
+                        </span>
+                      ) : (
+                        <span>{label}</span>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <span className={isRainbow ? "text-slate-800" : undefined}>
+                          {count}回
+                        </span>
+                        {badge && (
+                          <span
+                            className={`px-1 py-0.5 rounded text-[10px] ${
+                              isRainbow
+                                ? "bg-red-100 text-red-600"
+                                : "bg-slate-100 text-slate-500"
+                            }`}
+                          >
+                            {badge}
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </div>

@@ -10,6 +10,10 @@ import {
   isGridOnlyCompactCounterId,
   sanitizeCounterDigitString,
 } from "./counter-layout";
+import {
+  getHanaFeatherLampHint,
+  isHanaSetting6GuaranteeElementId,
+} from "./hana-lamp-hints";
 
 interface DynamicInputProps {
   element: DiscriminationElement;
@@ -378,6 +382,10 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
     }
   };
 
+  const lampHint = getHanaFeatherLampHint(element.id);
+  const isSetting6RainbowLamp =
+    isHanaSetting6GuaranteeElementId(element.id) && Number(value) > 0;
+
   return (
     <div className="space-y-1.5">
       <label
@@ -388,16 +396,21 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
         {formatBonusText(element.label)}
       </label>
 
+      {lampHint && (
+        <p className="text-[10px] font-semibold leading-tight text-amber-700/90 dark:text-amber-400/90">
+          {lampHint}
+        </p>
+      )}
+
       <div className={element.type === "counter" ? "w-full" : "flex justify-center"}>
         {renderInput()}
       </div>
 
-      {(element.id === "reg-lamp-rainbow" || element.id === "bonus-rainbow") &&
-        Number(value) > 0 && (
-          <div className="text-center text-xs font-bold text-red-500 animate-pulse mt-1">
-            ※設定6確定演出として計算されます
-          </div>
-        )}
+      {isSetting6RainbowLamp && (
+        <div className="text-center text-xs font-bold text-red-500 animate-pulse mt-1">
+          ※設定6濃厚として計算されます
+        </div>
+      )}
     </div>
   );
 };

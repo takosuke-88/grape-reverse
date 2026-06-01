@@ -316,7 +316,7 @@ export default function GrapeReverseEstimationPanel({
                         }`}
                       >
                         {result.probability === 100 && result.setting === 6
-                          ? "設定6確定！"
+                          ? "設定6濃厚！"
                           : "最有力"}
                       </span>
                     </div>
