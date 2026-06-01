@@ -393,14 +393,10 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
           element.type === "counter" ? "block" : "block text-center"
         }`}
       >
-        {formatBonusText(element.label)}
+        {lampHint
+          ? `${formatBonusText(element.label)} (${lampHint})`
+          : formatBonusText(element.label)}
       </label>
-
-      {lampHint && (
-        <p className="text-[10px] font-semibold leading-tight text-amber-700/90 dark:text-amber-400/90">
-          {lampHint}
-        </p>
-      )}
 
       <div className={element.type === "counter" ? "w-full" : "flex justify-center"}>
         {renderInput()}
