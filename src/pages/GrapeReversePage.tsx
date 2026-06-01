@@ -352,11 +352,13 @@ export default function GrapeReversePage() {
     const ROLE_PAYOUT = resolveRolePayout(payouts, isHana);
     const CHERRY_PAYOUT = resolveCherryPayout(payouts, isHana);
     const REPLAY_DENOM = denoms?.replay ?? REVERSE_CALC_FALLBACK.replayDenom;
-    const CHERRY_DENOM = denoms?.cherry ?? REVERSE_CALC_FALLBACK.cherryDenom;
+    const CHERRY_DENOM =
+      denoms?.cherry ?? (isHana ? 36.0 : REVERSE_CALC_FALLBACK.cherryDenom);
     const CHERRY_FREE_PLAY_RATE = resolveCherryFreePlayRate(denoms);
 
     const coinIn = totalGames * 3;
-    const payout = coinIn - diffCoins;
+    // 差枚 = 払出 − 投入（+なら勝ち）→ 総払出 = 総投入 + 差枚
+    const payout = coinIn + diffCoins;
     const bonusOut = bigCount * BIG_PAYOUT + regCount * REG_PAYOUT;
 
     const replayCorrection =
