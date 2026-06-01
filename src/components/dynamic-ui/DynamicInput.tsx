@@ -192,9 +192,9 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 inputValue={
                   typeof value === "boolean"
                     ? ""
-                    : value === ""
-                      ? ""
-                      : String(value)
+                    : Number(value) > 0
+                      ? String(Number(value))
+                      : ""
                 }
                 onInputChange={(raw) => {
                   const digits = sanitizeCounterDigitString(raw, maxDigits);
