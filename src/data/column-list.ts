@@ -10,6 +10,15 @@ export interface ColumnArticle {
 
 export const ATTACHED_COLUMNS: ColumnArticle[] = [
   {
+    id: "neo-im-juggler-expectancy",
+    title: "今さら聞けない、ネオアイムジャグラーEXの1日の期待値 ─ 設定3・4・5・6の期待差枚数と立ち回り戦略",
+    description:
+      "ネオアイムの期待値って本当に低いの？打ち方別・設定別の期待差枚（7000G）をシミュレーションデータから徹底分析。設定3の逆転劇から設定6のポテンシャルまで、勝率を高めるためのリアルな数値を公開します。",
+    tags: ["juggler", "neo-im-juggler", "expectancy", "column"],
+    date: "2026-06-07",
+    path: "/columns/neo-im-juggler-expectancy",
+  },
+  {
     id: "gogo3-setting6-behavior",
     title: "ゴーゴージャグラー3の設定6を7000Gx10万日回すとどうなるか ─ GOD神々の軌跡との比較付き",
     description:
