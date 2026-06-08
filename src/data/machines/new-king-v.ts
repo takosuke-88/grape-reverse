@@ -72,7 +72,7 @@ export const newKingVConfig: MachineConfig = {
           label: "ベル回数",
           type: "counter",
           context: { description: "ベル（10枚役）の成立回数" },
-          settingValues: { 1: 7.62, 2: 7.55, 3: 7.48, 4: 7.41, 6: 7.26 },
+          settingValues: { 1: 7.628, 2: 7.502, 3: 7.474, 4: 7.379, 6: 7.266 },
           isDiscriminationFactor: true,
           discriminationWeight: 1.2,
         },

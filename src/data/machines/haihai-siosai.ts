@@ -63,6 +63,27 @@ export const haihaiSiosaiConfig: MachineConfig = {
         },
       ],
     },
+    {
+      id: "normal-role-section",
+      title: "通常時小役",
+      elements: [
+        {
+          id: "bell-count",
+          label: "ベル回数",
+          type: "counter",
+          context: { description: "ベル（10枚役）の成立回数" },
+          settingValues: {
+            1: 7.350,
+            2: 7.150,
+            3: 7.050,
+            5: 6.950,
+            6: 6.950,
+          },
+          isDiscriminationFactor: true,
+          discriminationWeight: 1.2,
+        },
+      ],
+    },
   ],
   specs: {
     settings: [1, 2, 3, 5, 6],
