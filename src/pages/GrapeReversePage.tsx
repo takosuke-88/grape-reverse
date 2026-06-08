@@ -21,7 +21,7 @@ import { lastUtopiaConfig } from "../data/machines/last-utopia";
 import { haihaiSiosai2Config } from "../data/machines/haihai-siosai2";
 import { haihaiSiosaiConfig } from "../data/machines/haihai-siosai";
 import type { EstimationResult, MachineConfig, UserInputs } from "../types/machine-schema";
-import { calculateEstimation } from "../logic/bayes-estimator";
+import { calculateMultinomialEstimation } from "../logic/bayes-estimator";
 import GrapeReverseEstimationPanel from "../components/grape/GrapeReverseEstimationPanel";
 import CounterDirectInputZone from "../components/dynamic-ui/CounterDirectInputZone";
 import {
@@ -407,7 +407,7 @@ export default function GrapeReversePage() {
     const timer = setTimeout(() => {
       try {
         setEstimationError(null);
-        const results = calculateEstimation(config, estimationInputs);
+        const results = calculateMultinomialEstimation(config, estimationInputs);
         setEstimationResults(results);
       } catch (err) {
         console.error("❌ ぶどう逆算・設定推定エラー:", err);

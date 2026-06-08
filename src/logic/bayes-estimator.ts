@@ -219,6 +219,166 @@ export function calculateEstimation(
 }
 
 /**
+ * 多項分布の対数尤度モデルによるベイズ推定（逆算ページ専用）
+ *
+ * ぶどう逆算ページ用に設計された3軸（BIG / REG / ぶどう）の多項分布モデル。
+ * 独自重み付け（discriminationWeight / grapeWeightMap）は使用せず、
+ * 数学的に正確な多項分布対数尤度のみで設定期待度を算出する。
+ *
+ * logL(設定X) = b*log(P_BIG) + r*log(P_REG) + k*log(P_grape)
+ *             + (n - b - r - k) * log(1 - P_BIG - P_REG - P_grape)
+ *
+ * @param config 機種の設定ファイル
+ * @param inputs ユーザーの入力値（total-games, big-count, reg-count, grape-count or bell-count）
+ * @returns 設定1〜6の期待度（%）
+ */
+export function calculateMultinomialEstimation(
+  config: MachineConfig,
+  inputs: UserInputs,
+): EstimationResult[] {
+  const settings = config.specs?.settings || [1, 2, 3, 4, 5, 6];
+  const n = Number(inputs["total-games"]) || 0;
+  const b = Number(inputs["big-count"]) || 0;
+  const r = Number(inputs["reg-count"]) || 0;
+
+  if (n === 0) {
+    return settings.map((setting) => ({
+      setting,
+      probability: 100 / settings.length,
+    }));
+  }
+
+  // ハナハナ（bell-count）かジャグラー（grape-count）かを判定
+  const allElements = config.sections.flatMap((s) => s.elements);
+  const hasBell = allElements.some((e) => e.id === "bell-count");
+  const grapeKey = hasBell ? "bell-count" : "grape-count";
+  const k = Number(inputs[grapeKey]) || 0;
+
+  // BIG / REG / ぶどう(ベル) の settingValues を取得
+  const bigEl = allElements.find((e) => e.id === "big-count");
+  const regEl = allElements.find((e) => e.id === "reg-count");
+  const grapeEl = allElements.find((e) => e.id === grapeKey);
+
+  // 要素が揃わない場合は均等確率にフォールバック
+  if (!bigEl || !regEl || !grapeEl) {
+    return settings.map((setting) => ({
+      setting,
+      probability: 100 / settings.length,
+    }));
+  }
+
+  // --- 設定6濃厚（虹ランプ）：期待度を設定6に100%再分配 ---
+  if (isHanaSetting6GuaranteeInput(inputs)) {
+    const topSetting = Math.max(...settings);
+    return settings.map((setting) => ({
+      setting,
+      probability: setting === topSetting ? 100 : 0,
+    }));
+  }
+
+  // 各設定の多項分布対数尤度を計算
+  const logLikelihoods = settings.map((setting) => {
+    const denomBig = bigEl.settingValues[setting];
+    const denomReg = regEl.settingValues[setting];
+    const denomGrape = grapeEl.settingValues[setting];
+
+    // 分母が未定義・0の設定は計算不能 → -Infinity
+    if (!denomBig || !denomReg || !denomGrape) {
+      return { setting, logLikelihood: -Infinity };
+    }
+
+    const pBig   = 1 / denomBig;
+    const pReg   = 1 / denomReg;
+    const pGrape = 1 / denomGrape;
+    const pOther = 1 - pBig - pReg - pGrape;
+
+    let logL = 0;
+
+    // b*log(P_BIG)
+    if (b > 0) {
+      if (pBig <= 0) return { setting, logLikelihood: -Infinity };
+      logL += b * Math.log(pBig);
+    }
+    // r*log(P_REG)
+    if (r > 0) {
+      if (pReg <= 0) return { setting, logLikelihood: -Infinity };
+      logL += r * Math.log(pReg);
+    }
+    // k*log(P_grape)
+    if (k > 0) {
+      if (pGrape <= 0) return { setting, logLikelihood: -Infinity };
+      logL += k * Math.log(pGrape);
+    }
+    // (n - b - r - k)*log(pOther)  ← 外れ項（設定によって変動するため省略不可）
+    const otherCount = n - b - r - k;
+    if (otherCount > 0) {
+      if (pOther <= 0) return { setting, logLikelihood: -Infinity };
+      logL += otherCount * Math.log(pOther);
+    }
+
+    return { setting, logLikelihood: logL };
+  });
+
+  // --- フェザーランプ等による設定否定ロジック（既存と同一） ---
+  const deniedSettings = new Set<number>();
+  if ((Number(inputs["reg-after-blue"]) || 0) > 0) {
+    deniedSettings.add(1);
+  }
+  if ((Number(inputs["reg-after-yellow"]) || 0) > 0) {
+    deniedSettings.add(1);
+    deniedSettings.add(2);
+  }
+  if ((Number(inputs["reg-after-green"]) || 0) > 0) {
+    deniedSettings.add(1);
+    deniedSettings.add(2);
+    deniedSettings.add(3);
+  }
+  if ((Number(inputs["reg-after-red"]) || 0) > 0) {
+    deniedSettings.add(1);
+    deniedSettings.add(2);
+    deniedSettings.add(3);
+    deniedSettings.add(4);
+  }
+  if ((Number(inputs["reg-after-rainbow"]) || 0) > 0) {
+    deniedSettings.add(1);
+    deniedSettings.add(2);
+    deniedSettings.add(3);
+    deniedSettings.add(4);
+    deniedSettings.add(5);
+  }
+
+  logLikelihoods.forEach((item) => {
+    if (deniedSettings.has(item.setting)) {
+      item.logLikelihood = -Infinity;
+    }
+  });
+
+  // 最大対数尤度でオフセット後に exp → 正規化
+  const maxLogLikelihood = Math.max(
+    ...logLikelihoods.map((l) => l.logLikelihood),
+  );
+
+  const likelihoods = logLikelihoods.map(({ setting, logLikelihood }) => ({
+    setting,
+    likelihood: Math.exp(logLikelihood - maxLogLikelihood),
+  }));
+
+  const totalLikelihood = likelihoods.reduce((sum, l) => sum + l.likelihood, 0);
+
+  if (totalLikelihood === 0) {
+    return settings.map((setting) => ({
+      setting,
+      probability: 100 / settings.length,
+    }));
+  }
+
+  return likelihoods.map(({ setting, likelihood }) => ({
+    setting,
+    probability: (likelihood / totalLikelihood) * 100,
+  }));
+}
+
+/**
  * 最も可能性の高い設定を取得
  */
 export function getMostLikelySetting(
