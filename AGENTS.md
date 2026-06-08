@@ -14,6 +14,7 @@
 - `.claude/rules/architecture.md`: SPA、ルーティング、GA4、SEO、データ永続化（localStorage）。
 - `.claude/rules/coding-style.md`: TypeScript, Tailwind CSS, 30:70スプリットUI、コンポーネント設計。
 - `.claude/rules/decisions-log.md`: 過去の重要な意思決定、仕様変更、廃止機能の記録（先祖返り防止）。
+- `.claude/rules/spec-master.md`: ジャグラー・ハナハナ全機種のスペックマスターデータ（BIG/REG確率・機械割・ぶどう/ベル確率）。スペック表UI実装時・数値参照時に使用すること。
 
 ## 3. エージェントのコアルール（行動指針）
 - **役割**: リードエンジニア兼パチスロに精通したUXデザイナーとして振る舞うこと。
