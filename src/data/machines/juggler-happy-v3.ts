@@ -174,7 +174,24 @@ export const happyV3Config: MachineConfig = {
     {
       id: "normal-role-section",
       title: "通常時小役",
+      layout: "grid",
       elements: [
+        {
+          id: "cherry-count",
+          label: "角チェリー",
+          type: "counter",
+          context: {},
+          settingValues: {
+            1: 62.24,
+            2: 62.47,
+            3: 62.95,
+            4: 64.00,
+            5: 64.57,
+            6: 65.34,
+          },
+          isDiscriminationFactor: false,
+          discriminationWeight: 0,
+        },
         {
           id: "grape-count",
           label: "ブドウ",

@@ -276,6 +276,13 @@ export function calculateMultinomialEstimation(
     }));
   }
 
+  // チェリー（ジャグラー限定・ハナハナは常に0扱い）
+  // cherry-count > 0 かつ settingValues が存在する場合のみ4軸モデルへ自動切替
+  const cherryEl = !hasBell
+    ? allElements.find((e) => e.id === "cherry-count")
+    : undefined;
+  const c = !hasBell ? (Number(inputs["cherry-count"]) || 0) : 0;
+
   // 各設定の多項分布対数尤度を計算
   const logLikelihoods = settings.map((setting) => {
     const denomBig = bigEl.settingValues[setting];
@@ -290,7 +297,13 @@ export function calculateMultinomialEstimation(
     const pBig   = 1 / denomBig;
     const pReg   = 1 / denomReg;
     const pGrape = 1 / denomGrape;
-    const pOther = 1 - pBig - pReg - pGrape;
+
+    // 4軸: チェリーの確率（ジャグラー + cherry-count > 0 + settingValues 有効時のみ）
+    const denomCherry = cherryEl?.settingValues[setting];
+    const pCherry = (c > 0 && denomCherry) ? 1 / denomCherry : 0;
+
+    // 外れ項（ハズレ+リプレイ等）= 1 - P_BIG - P_REG - P_ぶどう - P_チェリー
+    const pOther = 1 - pBig - pReg - pGrape - pCherry;
 
     let logL = 0;
 
@@ -304,13 +317,17 @@ export function calculateMultinomialEstimation(
       if (pReg <= 0) return { setting, logLikelihood: -Infinity };
       logL += r * Math.log(pReg);
     }
-    // k*log(P_grape)
+    // k*log(P_ぶどう or P_ベル)
     if (k > 0) {
       if (pGrape <= 0) return { setting, logLikelihood: -Infinity };
       logL += k * Math.log(pGrape);
     }
-    // (n - b - r - k)*log(pOther)  ← 外れ項（設定によって変動するため省略不可）
-    const otherCount = n - b - r - k;
+    // c*log(P_チェリー)  ← 4軸拡張: チェリーあり時のみ加算（多項係数は正規化で相殺されるため省略）
+    if (pCherry > 0 && c > 0) {
+      logL += c * Math.log(pCherry);
+    }
+    // (n - b - r - k - c)*log(pOther)  ← 外れ項（設定によって変動するため省略不可）
+    const otherCount = n - b - r - k - (pCherry > 0 ? c : 0);
     if (otherCount > 0) {
       if (pOther <= 0) return { setting, logLikelihood: -Infinity };
       logL += otherCount * Math.log(pOther);

@@ -174,7 +174,24 @@ export const miracleJugglerConfig: MachineConfig = {
     {
       id: "normal-role-section",
       title: "通常時小役",
+      layout: "grid",
       elements: [
+        {
+          id: "cherry-count",
+          label: "角チェリー",
+          type: "counter",
+          context: {},
+          settingValues: {
+            1: 35.10,
+            2: 35.00,
+            3: 34.80,
+            4: 34.70,
+            5: 33.50,
+            6: 33.00,
+          },
+          isDiscriminationFactor: false,
+          discriminationWeight: 0,
+        },
         {
           id: "grape-count",
           label: "ブドウ",

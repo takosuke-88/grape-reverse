@@ -174,7 +174,24 @@ export const mrJugglerConfig: MachineConfig = {
     {
       id: "normal-role-section",
       title: "通常時小役",
+      layout: "grid",
       elements: [
+        {
+          id: "cherry-count",
+          label: "角チェリー",
+          type: "counter",
+          context: {},
+          settingValues: {
+            1: 37.24,
+            2: 37.24,
+            3: 37.24,
+            4: 37.24,
+            5: 37.24,
+            6: 37.24,
+          },
+          isDiscriminationFactor: false,
+          discriminationWeight: 0,
+        },
         {
           id: "grape-count",
           label: "ブドウ",

@@ -7,6 +7,7 @@ import type {
 } from "../../types/machine-schema";
 import {
   calculateEstimation,
+  calculateMultinomialEstimation,
   calculateGrapeWeight,
 } from "../../logic/bayes-estimator";
 import { AVAILABLE_MACHINES } from "../../data/machine-list";
@@ -172,8 +173,12 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
       if (totalGames > 0) {
         setError(null);
         try {
-          // モードに関わらず、表示中の入力値で推定を行う
-          const results = calculateEstimation(config, currentInputs);
+          // ジャグラー: 多項分布モデル（cherry > 0 なら4軸、0なら3軸に自動切替）
+          // ハナハナ: 既存の重み付きモデル（ランプ・フェザー等の多要素判別を維持）
+          const isJuggler = currentCategory === "juggler";
+          const results = isJuggler
+            ? calculateMultinomialEstimation(config, currentInputs)
+            : calculateEstimation(config, currentInputs);
           setEstimationResults(results);
         } catch (err) {
           console.error("❌ 自動計算エラー:", err);
@@ -187,7 +192,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     }, 500); // 500ms のデバウンス
 
     return () => clearTimeout(timer);
-  }, [currentInputs, totalGames, config]);
+  }, [currentInputs, totalGames, config, currentCategory]);
 
   const handleReset = () => {
     if (!window.confirm("これまでのカウントデータを全てリセットしますか？")) return;

@@ -174,7 +174,24 @@ export const funkyJuggler2Config: MachineConfig = {
     {
       id: "normal-role-section",
       title: "通常時小役",
+      layout: "grid",
       elements: [
+        {
+          id: "cherry-count",
+          label: "角チェリー",
+          type: "counter",
+          context: {},
+          settingValues: {
+            1: 35.62,
+            2: 35.62,
+            3: 35.62,
+            4: 35.62,
+            5: 35.62,
+            6: 35.62,
+          },
+          isDiscriminationFactor: false,
+          discriminationWeight: 0,
+        },
         {
           id: "grape-count",
           label: "ブドウ",

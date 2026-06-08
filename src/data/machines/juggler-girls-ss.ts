@@ -174,7 +174,24 @@ export const girlsSsConfig: MachineConfig = {
     {
       id: "normal-role-section",
       title: "通常時小役",
+      layout: "grid",
       elements: [
+        {
+          id: "cherry-count",
+          label: "角チェリー",
+          type: "counter",
+          context: {},
+          settingValues: {
+            1: 33.56,
+            2: 33.47,
+            3: 33.21,
+            4: 33.15,
+            5: 33.10,
+            6: 32.97,
+          },
+          isDiscriminationFactor: false,
+          discriminationWeight: 0,
+        },
         {
           id: "grape-count",
           label: "ブドウ",
