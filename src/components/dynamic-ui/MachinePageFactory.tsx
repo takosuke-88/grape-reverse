@@ -354,7 +354,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           <div className="flex gap-2">
             <button
               type="button"
-              className="flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 text-xs font-bold transition-opacity hover:opacity-90 active:opacity-80"
+              className={`flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 ${currentCategory === "juggler" ? "text-[10px]" : "text-xs"}`}
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             >
               🎰 小役カウンター
@@ -362,10 +362,19 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             <button
               type="button"
               onClick={() => navigate(`/${config.id}/grape`)}
-              className="flex-1 rounded-lg bg-emerald-700 text-white py-2 text-xs font-bold transition-opacity hover:opacity-90 active:opacity-80"
+              className={`flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 ${currentCategory === "juggler" ? "text-[10px]" : "text-xs"}`}
             >
               {currentCategory === "hana" ? "🔔 ベル逆算へ" : "🍇 ぶどう逆算へ"}
             </button>
+            {currentCategory === "juggler" && (
+              <button
+                type="button"
+                onClick={() => navigate(`/${config.id}/specs`)}
+                className="flex-1 rounded-lg bg-indigo-700 text-white py-2 text-[10px] font-bold transition-opacity hover:opacity-90 active:opacity-80"
+              >
+                📊 機種スペック
+              </button>
+            )}
           </div>
         </div>
       </div>{/* end sticky nav */}
