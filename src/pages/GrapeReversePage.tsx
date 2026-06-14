@@ -497,16 +497,25 @@ export default function GrapeReversePage() {
               <button
                 type="button"
                 onClick={() => navigate(`/${machineId}`)}
-                className="flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 text-xs font-bold transition-opacity hover:opacity-90 active:opacity-80"
+                className={`flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 ${currentCategory === "juggler" ? "text-[10px]" : "text-xs"}`}
               >
                 🎰 小役カウンター
               </button>
               <button
                 type="button"
-                className="flex-1 rounded-lg bg-emerald-700 text-white py-2 text-xs font-bold"
+                className={`flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold ${currentCategory === "juggler" ? "text-[10px]" : "text-xs"}`}
               >
                 {roleIcon} {roleLabel}逆算
               </button>
+              {currentCategory === "juggler" && (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/${machineId}/specs`)}
+                  className="flex-1 rounded-lg bg-indigo-700 text-white py-2 text-[10px] font-bold transition-opacity hover:opacity-90 active:opacity-80"
+                >
+                  📊 機種スペック
+                </button>
+              )}
             </div>
           </div>
         </div>

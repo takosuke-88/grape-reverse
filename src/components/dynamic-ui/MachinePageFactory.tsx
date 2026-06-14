@@ -364,7 +364,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
               onClick={() => navigate(`/${config.id}/grape`)}
               className={`flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 ${currentCategory === "juggler" ? "text-[10px]" : "text-xs"}`}
             >
-              {currentCategory === "hana" ? "🔔 ベル逆算へ" : "🍇 ぶどう逆算へ"}
+              {currentCategory === "hana" ? "🔔 ベル逆算" : "🍇 ぶどう逆算"}
             </button>
             {currentCategory === "juggler" && (
               <button
