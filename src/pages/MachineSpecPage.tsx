@@ -132,26 +132,40 @@ export default function MachineSpecPage() {
     return 1 / (1 / b + 1 / r);
   };
 
-  const rowBg = (s: number) =>
-    s === topSetting ? "bg-amber-50 dark:bg-amber-900/20" : "";
+  // ── 行背景：縞模様 + 設定6アンバーハイライト ──────────────────
+  const rowBg = (s: number) => {
+    if (s === topSetting)
+      return "bg-amber-50 dark:bg-amber-950/50";
+    return s % 2 === 1
+      ? "bg-slate-50 dark:bg-slate-900/40"   // 奇数設定 (1, 3, 5)
+      : "bg-white dark:bg-slate-800/50";      // 偶数設定 (2, 4)
+  };
 
+  // ── セルテキスト色・太さ ──────────────────────────────────────
   const cellTxt = (s: number) =>
     s === topSetting
-      ? "text-amber-700 dark:text-amber-400 font-bold"
-      : "text-slate-700 dark:text-slate-200 font-semibold";
+      ? "text-amber-700 dark:text-amber-400 font-extrabold"
+      : "text-slate-800 dark:text-slate-100 font-bold";
+
+  // 設定6に追加する上部セパレーター（強調ボーダー）
+  const s6Border = (s: number) =>
+    s === topSetting
+      ? "border-t-2 border-t-amber-400 dark:border-t-amber-500"
+      : "";
 
   const settingLabel = (s: number) => {
     const lbl = config.specs?.settingLabels?.[s];
     return lbl ? `${s}(${lbl})` : String(s);
   };
 
-  // ヘッダー行：xs サイズ・太字（列名は小さくてよい）
+  // ── 共通スタイル定数 ─────────────────────────────────────────
+  // ヘッダー行：小さめ・太字で列名を明示
   const thCls =
-    "py-3 px-1 text-center text-xs font-bold text-slate-500 dark:text-slate-400 border-b-2 border-slate-200 dark:border-slate-700";
+    "py-3 px-1 text-center text-xs font-bold text-slate-500 dark:text-slate-400 border-b-2 border-slate-300 dark:border-slate-600";
 
-  // データ行：sm サイズ・cellTxt で色＋ウェイト制御
+  // データ行：text-base(16px) + tracking-tighter で横幅を維持しつつ最大サイズ
   const tdCls = (s: number) =>
-    `py-3 px-1 text-center text-sm ${cellTxt(s)} border-b border-slate-100 dark:border-slate-800`;
+    `py-4 px-1 text-center text-base tracking-tighter ${cellTxt(s)} ${s6Border(s)} border-b border-slate-200 dark:border-slate-700`;
 
   return (
     <div className="mx-auto w-full max-w-md">
@@ -196,7 +210,7 @@ export default function MachineSpecPage() {
               onToggle={() => toggle("bonusProb")}
             />
             {openState.bonusProb && (
-              <div className="overflow-x-clip px-4 pb-4">
+              <div className="overflow-x-clip pb-4">
                 <table className="table-fixed w-full">
                   <thead>
                     <tr>
@@ -211,7 +225,7 @@ export default function MachineSpecPage() {
                       const combined = getCombinedDenom(s);
                       return (
                         <tr key={s} className={rowBg(s)}>
-                          <td className={`${tdCls(s)} font-bold`}>{settingLabel(s)}</td>
+                          <td className={`${tdCls(s)} font-extrabold`}>{settingLabel(s)}</td>
                           <td className={tdCls(s)}>
                             {bigEl?.settingValues[s] ? fmt1(bigEl.settingValues[s]) : "---"}
                           </td>
@@ -240,7 +254,7 @@ export default function MachineSpecPage() {
                 onToggle={() => toggle("payoutRatio")}
               />
               {openState.payoutRatio && (
-                <div className="overflow-x-clip px-4 pb-4">
+                <div className="overflow-x-clip pb-4">
                   <table className="table-fixed w-full">
                     <thead>
                       <tr>
@@ -253,7 +267,7 @@ export default function MachineSpecPage() {
                     <tbody>
                       {settings.map((s, idx) => (
                         <tr key={s} className={rowBg(s)}>
-                          <td className={`${tdCls(s)} font-bold`}>{settingLabel(s)}</td>
+                          <td className={`${tdCls(s)} font-extrabold`}>{settingLabel(s)}</td>
                           <td className={tdCls(s)}>
                             {payoutData.free[idx] != null
                               ? `${payoutData.free[idx].toFixed(2)}%`
@@ -287,7 +301,7 @@ export default function MachineSpecPage() {
               onToggle={() => toggle("smallRole")}
             />
             {openState.smallRole && (
-              <div className="overflow-x-clip px-4 pb-4">
+              <div className="overflow-x-clip pb-4">
                 <table className="table-fixed w-full">
                   <thead>
                     <tr>
@@ -299,7 +313,7 @@ export default function MachineSpecPage() {
                   <tbody>
                     {settings.map((s) => (
                       <tr key={s} className={rowBg(s)}>
-                        <td className={`${tdCls(s)} font-bold`}>{settingLabel(s)}</td>
+                        <td className={`${tdCls(s)} font-extrabold`}>{settingLabel(s)}</td>
                         <td className={tdCls(s)}>
                           {grapeEl?.settingValues[s] ? fmt1(grapeEl.settingValues[s]) : "---"}
                         </td>
@@ -324,7 +338,7 @@ export default function MachineSpecPage() {
                 onToggle={() => toggle("bonusDetail")}
               />
               {openState.bonusDetail && (
-                <div className="overflow-x-clip px-4 pb-4">
+                <div className="overflow-x-clip pb-4">
                   <table className="table-fixed w-full">
                     <thead>
                       <tr>
@@ -345,16 +359,16 @@ export default function MachineSpecPage() {
                             <tr className={rowBg(s)}>
                               <td
                                 rowSpan={2}
-                                className={`py-3 px-1 text-center text-sm font-bold leading-relaxed align-middle border-b border-slate-100 dark:border-slate-800 ${cellTxt(s)}`}
+                                className={`py-4 px-1 text-center text-base font-extrabold tracking-tighter leading-relaxed align-middle border-b border-slate-200 dark:border-slate-700 ${s6Border(s)} ${cellTxt(s)}`}
                               >
                                 {settingLabel(s)}
                               </td>
-                              <td className={`${tdCls(s)} font-bold text-red-500`}>BIG</td>
+                              <td className={`${tdCls(s)} font-extrabold text-red-600 dark:text-red-400`}>BIG</td>
                               <td className={tdCls(s)}>{bigSolo != null ? fmt1(bigSolo) : "---"}</td>
                               <td className={tdCls(s)}>{bigCherry != null ? fmt1(bigCherry) : "---"}</td>
                             </tr>
                             <tr className={rowBg(s)}>
-                              <td className={`${tdCls(s)} font-bold text-blue-500`}>REG</td>
+                              <td className={`${tdCls(s)} font-extrabold text-blue-600 dark:text-blue-400`}>REG</td>
                               <td className={tdCls(s)}>{regSolo != null ? fmt1(regSolo) : "---"}</td>
                               <td className={tdCls(s)}>{regCherry != null ? fmt1(regCherry) : "---"}</td>
                             </tr>
@@ -363,7 +377,7 @@ export default function MachineSpecPage() {
                       })}
                     </tbody>
                   </table>
-                  <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">
+                  <p className="px-4 pt-3 text-xs text-slate-400 dark:text-slate-500">
                     ※重複確率は一部算出値を含みます
                   </p>
                 </div>
