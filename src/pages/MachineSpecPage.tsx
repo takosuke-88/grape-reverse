@@ -73,14 +73,14 @@ const AccordionHeader: React.FC<AccordionHeaderProps> = ({
   <button
     type="button"
     onClick={onToggle}
-    className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+    className="flex w-full items-center justify-between px-4 py-4 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
   >
-    <span className="flex items-center gap-2 font-bold text-slate-800 dark:text-white">
-      <span>{icon}</span>
-      <span className="text-sm">{title}</span>
+    <span className="flex items-center gap-2 text-slate-800 dark:text-white">
+      <span className="text-xl">{icon}</span>
+      <span className="text-base font-bold">{title}</span>
     </span>
     <span
-      className={`text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+      className={`text-lg text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
     >
       ▼
     </span>
@@ -137,18 +137,21 @@ export default function MachineSpecPage() {
 
   const cellTxt = (s: number) =>
     s === topSetting
-      ? "text-amber-700 dark:text-amber-400 font-semibold"
-      : "text-slate-600 dark:text-slate-400";
+      ? "text-amber-700 dark:text-amber-400 font-bold"
+      : "text-slate-700 dark:text-slate-200 font-semibold";
 
   const settingLabel = (s: number) => {
     const lbl = config.specs?.settingLabels?.[s];
     return lbl ? `${s}(${lbl})` : String(s);
   };
 
+  // ヘッダー行：xs サイズ・太字（列名は小さくてよい）
   const thCls =
-    "py-2 px-1 text-center text-[10px] font-semibold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700";
+    "py-3 px-1 text-center text-xs font-bold text-slate-500 dark:text-slate-400 border-b-2 border-slate-200 dark:border-slate-700";
+
+  // データ行：sm サイズ・cellTxt で色＋ウェイト制御
   const tdCls = (s: number) =>
-    `py-1.5 px-1 text-center text-[10px] ${cellTxt(s)} border-b border-slate-100 dark:border-slate-800`;
+    `py-3 px-1 text-center text-sm ${cellTxt(s)} border-b border-slate-100 dark:border-slate-800`;
 
   return (
     <div className="mx-auto w-full max-w-md">
@@ -160,17 +163,17 @@ export default function MachineSpecPage() {
 
       {/* Sticky ヘッダー */}
       <div
-        className="sticky top-0 z-50 flex items-center gap-3 px-4 py-3 shadow-md"
+        className="sticky top-0 z-50 flex items-center gap-3 px-4 py-4 shadow-md"
         style={{ backgroundColor: machineInfo.color }}
       >
         <button
           type="button"
           onClick={() => navigate(`/${machineId}`)}
-          className="shrink-0 rounded-lg bg-white/20 px-3 py-1.5 text-xs font-bold text-white transition-opacity hover:opacity-80 active:opacity-60"
+          className="shrink-0 rounded-lg bg-white/20 px-4 py-2 text-sm font-bold text-white transition-opacity hover:opacity-80 active:opacity-60"
         >
           ← 戻る
         </button>
-        <h1 className="min-w-0 flex-1 truncate text-sm font-extrabold text-white">
+        <h1 className="min-w-0 flex-1 truncate text-base font-extrabold text-white">
           {config.name} スペック詳細
         </h1>
       </div>
@@ -182,7 +185,7 @@ export default function MachineSpecPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-3 p-3">
+        <div className="space-y-4 p-4">
 
           {/* ① ボーナス確率 */}
           <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
@@ -193,7 +196,7 @@ export default function MachineSpecPage() {
               onToggle={() => toggle("bonusProb")}
             />
             {openState.bonusProb && (
-              <div className="overflow-x-clip px-3 pb-3">
+              <div className="overflow-x-clip px-4 pb-4">
                 <table className="table-fixed w-full">
                   <thead>
                     <tr>
@@ -237,7 +240,7 @@ export default function MachineSpecPage() {
                 onToggle={() => toggle("payoutRatio")}
               />
               {openState.payoutRatio && (
-                <div className="overflow-x-clip px-3 pb-3">
+                <div className="overflow-x-clip px-4 pb-4">
                   <table className="table-fixed w-full">
                     <thead>
                       <tr>
@@ -284,7 +287,7 @@ export default function MachineSpecPage() {
               onToggle={() => toggle("smallRole")}
             />
             {openState.smallRole && (
-              <div className="overflow-x-clip px-3 pb-3">
+              <div className="overflow-x-clip px-4 pb-4">
                 <table className="table-fixed w-full">
                   <thead>
                     <tr>
@@ -321,12 +324,12 @@ export default function MachineSpecPage() {
                 onToggle={() => toggle("bonusDetail")}
               />
               {openState.bonusDetail && (
-                <div className="overflow-x-clip px-3 pb-3">
+                <div className="overflow-x-clip px-4 pb-4">
                   <table className="table-fixed w-full">
                     <thead>
                       <tr>
                         <th className={`${thCls} w-8`}>設定</th>
-                        <th className={`${thCls} w-8`}></th>
+                        <th className={`${thCls} w-10`}></th>
                         <th className={thCls}>単独確率</th>
                         <th className={thCls}>重複確率</th>
                       </tr>
@@ -342,7 +345,7 @@ export default function MachineSpecPage() {
                             <tr className={rowBg(s)}>
                               <td
                                 rowSpan={2}
-                                className={`py-1.5 px-1 text-center text-[10px] font-bold align-middle border-b border-slate-100 dark:border-slate-800 ${cellTxt(s)}`}
+                                className={`py-3 px-1 text-center text-sm font-bold leading-relaxed align-middle border-b border-slate-100 dark:border-slate-800 ${cellTxt(s)}`}
                               >
                                 {settingLabel(s)}
                               </td>
@@ -360,7 +363,7 @@ export default function MachineSpecPage() {
                       })}
                     </tbody>
                   </table>
-                  <p className="mt-2 text-[10px] text-slate-400 dark:text-slate-500">
+                  <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">
                     ※重複確率は一部算出値を含みます
                   </p>
                 </div>
