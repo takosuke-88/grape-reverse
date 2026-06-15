@@ -524,7 +524,7 @@ export default function GrapeReversePage() {
         <div className="mx-auto w-full max-w-md space-y-4 p-4">
 
           {/* 基本データ：総ゲーム数 */}
-          <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 space-y-3 ring-1 ring-slate-800">
+          <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 space-y-3">
             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
               基本データ
             </h2>
@@ -541,7 +541,7 @@ export default function GrapeReversePage() {
           </div>
 
           {/* 差枚数（台メーター） */}
-          <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 space-y-3 ring-1 ring-slate-800">
+          <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 space-y-3">
             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
               差枚数（台メーター）
             </h2>
@@ -557,7 +557,7 @@ export default function GrapeReversePage() {
           </div>
 
           {/* ボーナス回数 */}
-          <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 space-y-3 ring-1 ring-slate-800">
+          <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 space-y-3">
             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
               ボーナス回数
             </h2>
@@ -587,10 +587,10 @@ export default function GrapeReversePage() {
 
           {/* ぶどう逆算結果 */}
           <div
-            className={`rounded-2xl p-5 ring-1 transition-all ${
+            className={`rounded-2xl p-5 transition-all ${
               calcResult
-                ? "bg-white dark:bg-slate-900 ring-emerald-800/50"
-                : "bg-white/60 dark:bg-slate-900/40 ring-slate-800"
+                ? "bg-white dark:bg-slate-900 ring-1 ring-emerald-800/50"
+                : "bg-white/60 dark:bg-slate-900/40"
             }`}
           >
             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
