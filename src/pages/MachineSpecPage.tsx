@@ -4,6 +4,7 @@ import { useLocalStorage } from "../hooks/useLocalStorage";
 import { AVAILABLE_MACHINES } from "../data/machine-list";
 import Seo from "../components/Seo";
 import { JUGGLER_PAYOUT_RATIOS_3MODE } from "../data/juggler-spec-data";
+import { JUGGLER_SPEC_ADVICE } from "../data/juggler-spec-advice";
 import type { MachineConfig } from "../types/machine-schema";
 import { hanaHoohConfig } from "../data/machines/hana-hooh";
 import { funkyJuggler2Config } from "../data/machines/funky-juggler-2";
@@ -122,6 +123,7 @@ export default function MachineSpecPage() {
   const topSetting = Math.max(...settings);
   const payoutData = JUGGLER_PAYOUT_RATIOS_3MODE[machineId];
   const detProbs   = config.detailedProbabilities;
+  const advice     = JUGGLER_SPEC_ADVICE[machineId];
 
   const fmt1 = (v: number, dec = 1) => `1/${v.toFixed(dec)}`;
 
@@ -166,6 +168,10 @@ export default function MachineSpecPage() {
   // データ行：text-base(16px) + tracking-tighter で横幅を維持しつつ最大サイズ
   const tdCls = (s: number) =>
     `py-4 px-1 text-center text-base tracking-tighter ${cellTxt(s)} ${s6Border(s)} border-b border-slate-200 dark:border-slate-700`;
+
+  // 解説テキストの共通スタイル
+  const adviceCls =
+    "px-4 pt-3 pb-2 text-[13px] leading-relaxed text-slate-600 dark:text-slate-400";
 
   return (
     <div className="mx-auto w-full max-w-md">
@@ -240,6 +246,9 @@ export default function MachineSpecPage() {
                     })}
                   </tbody>
                 </table>
+                {advice?.bonusProb && (
+                  <p className={adviceCls}>{advice.bonusProb}</p>
+                )}
               </div>
             )}
           </div>
@@ -287,6 +296,9 @@ export default function MachineSpecPage() {
                       ))}
                     </tbody>
                   </table>
+                  {advice?.payoutRatio && (
+                    <p className={adviceCls}>{advice.payoutRatio}</p>
+                  )}
                 </div>
               )}
             </div>
@@ -324,6 +336,9 @@ export default function MachineSpecPage() {
                     ))}
                   </tbody>
                 </table>
+                {advice?.smallRole && (
+                  <p className={adviceCls}>{advice.smallRole}</p>
+                )}
               </div>
             )}
           </div>
@@ -377,7 +392,10 @@ export default function MachineSpecPage() {
                       })}
                     </tbody>
                   </table>
-                  <p className="px-4 pt-3 text-xs text-slate-400 dark:text-slate-500">
+                  {advice?.bonusDetail && (
+                    <p className={adviceCls}>{advice.bonusDetail}</p>
+                  )}
+                  <p className="px-4 pt-1 pb-1 text-xs text-slate-400 dark:text-slate-500">
                     ※重複確率は一部算出値を含みます
                   </p>
                 </div>
