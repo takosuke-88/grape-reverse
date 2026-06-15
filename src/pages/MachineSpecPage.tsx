@@ -74,14 +74,14 @@ const AccordionHeader: React.FC<AccordionHeaderProps> = ({
   <button
     type="button"
     onClick={onToggle}
-    className="flex w-full items-center justify-between px-4 py-4 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+    className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
   >
-    <span className="flex items-center gap-2 text-slate-800 dark:text-white">
-      <span className="text-xl">{icon}</span>
-      <span className="text-base font-bold">{title}</span>
+    <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+      <span className="text-base">{icon}</span>
+      <span className="text-xs font-bold uppercase tracking-widest">{title}</span>
     </span>
     <span
-      className={`text-lg text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+      className={`text-sm text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
     >
       ▼
     </span>
@@ -166,17 +166,15 @@ export default function MachineSpecPage() {
   };
 
   // ── 共通スタイル定数 ─────────────────────────────────────────
-  // ヘッダー行：小さめ・太字で列名を明示
   const thCls =
-    "py-3 px-1 text-center text-xs font-bold text-slate-500 dark:text-slate-400 border-b-2 border-slate-300 dark:border-slate-600";
+    "py-2 px-1 text-center text-xs font-bold text-slate-500 dark:text-slate-400 border-b-2 border-slate-300 dark:border-slate-600";
 
-  // データ行：text-base(16px) + tracking-tighter で横幅を維持しつつ最大サイズ
   const tdCls = (s: number) =>
-    `py-4 px-1 text-center text-base tracking-tighter ${cellTxt(s)} ${s6Border(s)} border-b border-slate-200 dark:border-slate-700`;
+    `py-2.5 px-1 text-center text-sm ${cellTxt(s)} ${s6Border(s)} border-b border-slate-200 dark:border-slate-700`;
 
   // 解説テキストの共通スタイル
   const adviceCls =
-    "px-4 pt-3 pb-2 text-[13px] leading-relaxed text-slate-600 dark:text-slate-400";
+    "px-3 pt-2 pb-1 text-[13px] leading-relaxed text-slate-600 dark:text-slate-400";
 
   const currentCategory = machineInfo.category;
   const roleLabel = currentCategory === "hana" ? "ベル" : "ぶどう";
@@ -215,7 +213,7 @@ export default function MachineSpecPage() {
       {/* Sticky ナビ ─ 他ページと完全同一 */}
       <div className="sticky top-0 z-50 bg-slate-100/95 backdrop-blur-sm py-3 px-4 shadow-md border-b border-slate-200 dark:bg-slate-900/95 dark:border-slate-800">
         <div className="mx-auto max-w-md space-y-2">
-          {/* Row 1: 機種セレクター + バイブトグル */}
+          {/* Row 1: 機種セレクター + リセット幅確保（invisible）+ バイブトグル */}
           <div className="flex items-center gap-2">
             <select
               value={machineId}
@@ -226,6 +224,13 @@ export default function MachineSpecPage() {
                 <option key={m.id} value={m.id}>{m.name}</option>
               ))}
             </select>
+            {/* リセットボタンのスペースを invisible で確保（他ページとselect幅を同一に保つ） */}
+            <span
+              aria-hidden="true"
+              className="invisible shrink-0 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold"
+            >
+              🗑️ リセット
+            </span>
             <button
               type="button"
               onClick={() => {
@@ -277,7 +282,7 @@ export default function MachineSpecPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-4 p-4">
+        <div className="space-y-3 p-3">
 
           {/* ① ボーナス確率 */}
           <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
@@ -288,7 +293,7 @@ export default function MachineSpecPage() {
               onToggle={() => toggle("bonusProb")}
             />
             {openState.bonusProb && (
-              <div className="overflow-x-clip pb-4">
+              <div className="overflow-x-clip pb-2">
                 <table className="table-fixed w-full">
                   <thead>
                     <tr>
@@ -335,7 +340,7 @@ export default function MachineSpecPage() {
                 onToggle={() => toggle("payoutRatio")}
               />
               {openState.payoutRatio && (
-                <div className="overflow-x-clip pb-4">
+                <div className="overflow-x-clip pb-2">
                   <table className="table-fixed w-full">
                     <thead>
                       <tr>
@@ -385,7 +390,7 @@ export default function MachineSpecPage() {
               onToggle={() => toggle("smallRole")}
             />
             {openState.smallRole && (
-              <div className="overflow-x-clip pb-4">
+              <div className="overflow-x-clip pb-2">
                 <table className="table-fixed w-full">
                   <thead>
                     <tr>
@@ -425,7 +430,7 @@ export default function MachineSpecPage() {
                 onToggle={() => toggle("bonusDetail")}
               />
               {openState.bonusDetail && (
-                <div className="overflow-x-clip pb-4">
+                <div className="overflow-x-clip pb-2">
                   <table className="table-fixed w-full">
                     <thead>
                       <tr>
