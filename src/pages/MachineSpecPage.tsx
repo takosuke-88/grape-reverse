@@ -101,6 +101,11 @@ export default function MachineSpecPage() {
     DEFAULT_ACCORDION,
   );
 
+  const [vibrationEnabled, setVibrationEnabled] = useLocalStorage<boolean>(
+    "grape-reverse-vibration",
+    true,
+  );
+
   const toggle = (key: keyof AccordionState) => {
     setOpenState((prev) => ({ ...prev, [key]: !prev[key] }));
   };
@@ -210,7 +215,7 @@ export default function MachineSpecPage() {
       {/* Sticky ナビ ─ 他ページと完全同一 */}
       <div className="sticky top-0 z-50 bg-slate-100/95 backdrop-blur-sm py-3 px-4 shadow-md border-b border-slate-200 dark:bg-slate-900/95 dark:border-slate-800">
         <div className="mx-auto max-w-md space-y-2">
-          {/* Row 1: 機種セレクター */}
+          {/* Row 1: 機種セレクター + バイブトグル */}
           <div className="flex items-center gap-2">
             <select
               value={machineId}
@@ -221,6 +226,20 @@ export default function MachineSpecPage() {
                 <option key={m.id} value={m.id}>{m.name}</option>
               ))}
             </select>
+            <button
+              type="button"
+              onClick={() => {
+                const next = !vibrationEnabled;
+                setVibrationEnabled(next);
+                if (next && navigator.vibrate) navigator.vibrate(40);
+              }}
+              className={`shrink-0 flex items-center gap-1 rounded-full px-3 py-1.5 mr-1 text-xs font-semibold shadow-md transition-all ${
+                vibrationEnabled ? "bg-emerald-600 text-white" : "bg-gray-800 text-white"
+              }`}
+              title={vibrationEnabled ? "バイブON（タップでOFF）" : "バイブOFF（タップでON）"}
+            >
+              {vibrationEnabled ? "📳 ON" : "📴 OFF"}
+            </button>
           </div>
           {/* Row 2: ナビゲーション */}
           <div className="flex gap-2">
