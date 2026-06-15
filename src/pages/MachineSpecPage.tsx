@@ -173,31 +173,84 @@ export default function MachineSpecPage() {
   const adviceCls =
     "px-4 pt-3 pb-2 text-[13px] leading-relaxed text-slate-600 dark:text-slate-400";
 
+  const currentCategory = machineInfo.category;
+  const roleLabel = currentCategory === "hana" ? "ベル" : "ぶどう";
+  const roleIcon  = currentCategory === "hana" ? "🔔" : "🍇";
+
   return (
-    <div className="mx-auto w-full max-w-md">
+    <div className="min-h-screen w-full max-w-full overflow-x-clip bg-slate-50 dark:bg-slate-950">
       <Seo
         pageTitle={`${config.name} スペック詳細｜GrapeReverse`}
         pageDescription={`${config.name}のボーナス確率・機械割・小役確率・重複ボーナス確率を設定1〜6で比較。パチスロ設定判別に役立つスペック一覧です。`}
         pagePath={`/${machineId}/specs`}
       />
 
-      {/* Sticky ヘッダー */}
+      {/* タイトルバー（スクロールアウト） ─ 他ページと同一構造 */}
       <div
-        className="sticky top-0 z-50 flex items-center gap-3 px-4 py-4 shadow-md"
+        className="py-3 px-4 text-white shadow-lg"
         style={{ backgroundColor: machineInfo.color }}
       >
-        <button
-          type="button"
-          onClick={() => navigate(`/${machineId}`)}
-          className="shrink-0 rounded-lg bg-white/20 px-4 py-2 text-sm font-bold text-white transition-opacity hover:opacity-80 active:opacity-60"
-        >
-          ← 戻る
-        </button>
-        <h1 className="min-w-0 flex-1 truncate text-base font-extrabold text-white">
-          {config.name} スペック詳細
-        </h1>
+        <div className="mx-auto max-w-md">
+          <div className="flex items-center gap-2">
+            <span className="rounded-md bg-white/20 px-2.5 py-1 text-xs font-medium shrink-0">
+              {config.type}
+            </span>
+            <h1 className="font-bold min-w-0">
+              <span className="block text-lg sm:text-xl font-extrabold leading-tight truncate">
+                {config.name}
+              </span>
+              <span className="block text-xs font-normal opacity-80 truncate">
+                機種スペック詳細
+              </span>
+            </h1>
+          </div>
+        </div>
       </div>
 
+      {/* Sticky ナビ ─ 他ページと完全同一 */}
+      <div className="sticky top-0 z-50 bg-slate-100/95 backdrop-blur-sm py-3 px-4 shadow-md border-b border-slate-200 dark:bg-slate-900/95 dark:border-slate-800">
+        <div className="mx-auto max-w-md space-y-2">
+          {/* Row 1: 機種セレクター */}
+          <div className="flex items-center gap-2">
+            <select
+              value={machineId}
+              onChange={(e) => { if (e.target.value) navigate(`/${e.target.value}/specs`); }}
+              className="flex-1 text-center font-bold text-base py-2.5 rounded-xl border-2 border-slate-300 bg-white text-slate-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"
+            >
+              {AVAILABLE_MACHINES.filter((m) => m.category === currentCategory).map((m) => (
+                <option key={m.id} value={m.id}>{m.name}</option>
+              ))}
+            </select>
+          </div>
+          {/* Row 2: ナビゲーション */}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => navigate(`/${machineId}`)}
+              className={`flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 ${currentCategory === "juggler" ? "text-[10px]" : "text-xs"}`}
+            >
+              🎰 小役カウンター
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate(`/${machineId}/grape`)}
+              className={`flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 ${currentCategory === "juggler" ? "text-[10px]" : "text-xs"}`}
+            >
+              {roleIcon} {roleLabel}逆算
+            </button>
+            {currentCategory === "juggler" && (
+              <button
+                type="button"
+                className="flex-1 rounded-lg bg-indigo-500 text-white py-2 text-[10px] font-bold ring-2 ring-indigo-300 dark:ring-indigo-600"
+              >
+                📊 機種スペック
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto w-full max-w-md">
       {!isJuggler ? (
         <div className="m-6 rounded-2xl bg-white p-8 text-center shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
           <p className="text-slate-500 dark:text-slate-400">
@@ -405,6 +458,7 @@ export default function MachineSpecPage() {
 
         </div>
       )}
+      </div>
     </div>
   );
 }
