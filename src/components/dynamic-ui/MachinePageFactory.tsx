@@ -397,7 +397,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           return (
             <React.Fragment key={section.id}>
               <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
-                <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
+                <h2 className="mb-2 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
                   {section.title}
                 </h2>
 
@@ -485,7 +485,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
         {/* 結果表示（常時表示） */}
         <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
-          <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
+          <h2 className="mb-2 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
             詳細判別
           </h2>
 
@@ -734,7 +734,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           </div>
 
           {/* 設定別期待度見出しとAIアドバイス */}
-          <h3 className="mb-4 text-center text-lg font-bold text-slate-700 dark:text-slate-200">
+          <h3 className="mb-2 text-center text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
             設定別期待度
           </h3>
 
@@ -1023,7 +1023,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
         {discriminationElements.length > 0 && (
           <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-slate-800 dark:text-white">
+              <h2 className="text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
                 確率・設定差一覧
               </h2>
               {config.specs?.baseGamesPerMedal && (
