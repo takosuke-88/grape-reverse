@@ -167,10 +167,10 @@ export default function MachineSpecPage() {
 
   // ── 共通スタイル定数 ─────────────────────────────────────────
   const thCls =
-    "py-2 px-1 text-center text-xs font-bold text-slate-500 dark:text-slate-400 border-b-2 border-slate-300 dark:border-slate-600";
+    "py-2.5 px-1 text-center text-xs font-bold text-slate-500 dark:text-slate-400 border-b-2 border-slate-300 dark:border-slate-600";
 
   const tdCls = (s: number) =>
-    `py-2.5 px-1 text-center text-sm ${cellTxt(s)} ${s6Border(s)} border-b border-slate-200 dark:border-slate-700`;
+    `py-3 px-1 text-center text-sm ${cellTxt(s)} ${s6Border(s)} border-b border-slate-200 dark:border-slate-700`;
 
   // 解説テキストの共通スタイル
   const adviceCls =
