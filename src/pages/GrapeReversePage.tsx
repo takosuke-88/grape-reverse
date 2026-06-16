@@ -20,15 +20,10 @@ import { newKingVConfig } from "../data/machines/new-king-v";
 import { lastUtopiaConfig } from "../data/machines/last-utopia";
 import { haihaiSiosai2Config } from "../data/machines/haihai-siosai2";
 import { haihaiSiosaiConfig } from "../data/machines/haihai-siosai";
-import type { EstimationResult, MachineConfig, UserInputs } from "../types/machine-schema";
+import type { DiscriminationElement, EstimationResult, MachineConfig, UserInputs } from "../types/machine-schema";
 import { calculateMultinomialEstimation } from "../logic/bayes-estimator";
 import GrapeReverseEstimationPanel from "../components/grape/GrapeReverseEstimationPanel";
-import CounterDirectInputZone from "../components/dynamic-ui/CounterDirectInputZone";
-import {
-  COUNTER_MINUS_WIDTH_CLASS,
-  counterMaxValueForDigits,
-  sanitizeCounterDigitString,
-} from "../components/dynamic-ui/counter-layout";
+import DynamicInput from "../components/dynamic-ui/DynamicInput";
 
 /** 機種Config未登録時の逆算フォールバック（マイジャグラーV基準） */
 const REVERSE_CALC_FALLBACK = {
@@ -116,195 +111,22 @@ const CONFIG_MAP: Record<string, MachineConfig> = {
   "haihai-siosai": haihaiSiosaiConfig,
 };
 
-// ─────────────────────────────────────────────
-// DynamicInput の counter を完全再現したコンポーネント
-// ─────────────────────────────────────────────
-interface CounterTheme {
-  bg: string;
-  minusBg: string;
-  accent: string;
-}
-
-interface GrapeCounterProps {
-  label: string;
-  value: number;
-  onChange: (n: number) => void;
-  vibrationEnabled: boolean;
-  theme: CounterTheme;
-  probText?: string;       // バー右下に白斜体で表示
-  onDirectInput?: () => void;
-  /** BIG/REG：コンパクト数字ゾーン（3桁分固定タップ幅） */
-  compact?: boolean;
-  /** 長いバー想定桁数（4〜5桁カウンター用） */
-  digitCapacity?: number;
-  /** 最大桁数（入力ブロック） */
-  maxDigits?: number;
-}
-
-function GrapeCounter({
-  label,
-  value,
-  onChange,
-  vibrationEnabled,
-  theme,
-  probText,
-  onDirectInput,
-  compact = false,
-  digitCapacity = 5,
-  maxDigits = 5,
-}: GrapeCounterProps) {
-  const [showFloat, setShowFloat] = useState(false);
-  const [showGlow, setShowGlow] = useState(false);
-
-  const triggerVibration = (type: "inc" | "dec") => {
-    if (!vibrationEnabled) return;
-    try { window.navigator?.vibrate?.(type === "inc" ? 15 : 40); } catch (_) {}
-  };
-
-  const cap = counterMaxValueForDigits(maxDigits);
-  const clampValue = (n: number) => Math.min(cap, Math.max(0, n));
-
-  const handleIncrement = () => {
-    if (value >= cap) return;
-    onChange(clampValue(value + 1));
-    triggerVibration("inc");
-    setShowGlow(true);
-    setShowFloat(true);
-    setTimeout(() => setShowGlow(false), 450);
-    setTimeout(() => setShowFloat(false), 620);
-  };
-
-  const handleDecrement = () => {
-    if (value <= 0) return;
-    onChange(value - 1);
-    triggerVibration("dec");
-  };
-
-  const numFontSize = compact ? "text-2xl" : "text-3xl";
-
-  const numberGlow = showGlow
-    ? `0 0 20px ${theme.accent}, 0 0 40px ${theme.accent}, 0 0 60px ${theme.accent}`
-    : `0 0 10px ${theme.accent}cc, 0 0 22px ${theme.accent}88`;
-
-  return (
-    <div className="space-y-1.5">
-      <label className="block text-sm font-bold text-slate-700 dark:text-slate-200">
-        {label}
-      </label>
-      <div
-        className="relative flex w-full min-w-0 max-w-full rounded-xl overflow-hidden select-none"
-        style={{
-          minHeight: "76px",
-          background: theme.bg,
-          boxShadow: "inset 0 1px 1px rgba(255,255,255,0.12), 0 4px 12px rgba(0,0,0,0.30)",
-        }}
-      >
-        {/* 左: マイナス固定 + 数字ゾーン */}
-        <div
-          className="flex shrink-0 items-stretch"
-          style={compact ? undefined : { width: "30%" }}
-        >
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDecrement();
-            }}
-            disabled={value <= 0}
-            className={`flex ${COUNTER_MINUS_WIDTH_CLASS} items-center justify-center self-stretch text-2xl transition-all active:scale-95 touch-manipulation`}
-            style={{
-              minHeight: "76px",
-              background: theme.minusBg,
-              boxShadow:
-                "inset 2px 2px 4px rgba(255,255,255,0.10), inset -1px -1px 3px rgba(0,0,0,0.5), 3px 3px 8px rgba(0,0,0,0.4), -1px -1px 2px rgba(255,255,255,0.05)",
-              color: "rgba(255,255,255,0.8)",
-              opacity: value <= 0 ? 0.25 : 1,
-            }}
-            aria-label="減らす"
-          >
-            −
-          </button>
-          <CounterDirectInputZone
-            label={label}
-            displayValue={value}
-            inputValue={value > 0 ? String(value) : ""}
-            onInputChange={(raw) => {
-              const digits = sanitizeCounterDigitString(raw, maxDigits);
-              if (digits === "") onChange(0);
-              else onChange(clampValue(parseInt(digits, 10) || 0));
-            }}
-            numFontSize={numFontSize}
-            numberGlow={numberGlow}
-            onDirectInput={onDirectInput}
-            variant={compact ? "compact" : "default"}
-            maxDigits={maxDigits}
-            digitCapacity={compact ? 3 : digitCapacity}
-            textColor="#ffffff"
-          />
-        </div>
-
-        {/* 右: プラスエリア */}
-        <div
-          className="relative flex min-w-0 flex-1 items-center justify-end cursor-pointer active:bg-white/10"
-          onClick={handleIncrement}
-        >
-          {showFloat && (
-            <span
-              className="counter-float-anim absolute font-black text-xl pointer-events-none"
-              style={{
-                left: "40%", top: "50%",
-                color: "#ffffff",
-                textShadow: `0 0 14px ${theme.accent}`,
-                zIndex: 10,
-              }}
-            >
-              +1
-            </span>
-          )}
-          <span
-            className="text-3xl font-thin pr-4 pointer-events-none select-none"
-            style={{ color: "#ffffff", opacity: 0.45 }}
-          >
-            ＋
-          </span>
-          {probText && (
-            <span
-              className="absolute right-2 bottom-1.5 text-lg italic font-black tabular-nums pointer-events-none select-none"
-              style={{
-                color: "rgba(255,255,255,0.92)",
-                fontFamily: "'Urbanist', -apple-system, sans-serif",
-                letterSpacing: "-0.01em",
-              }}
-            >
-              {probText}
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// テーマ定義
-const THEME_GAMES: CounterTheme = {
-  bg: "#334155",
-  minusBg: "linear-gradient(145deg, #253447, #182232)",
-  accent: "#e2e8f0",
+// 各カウンター要素定義（DynamicInput に直接渡す）
+const ELEM_TOTAL_GAMES: DiscriminationElement = {
+  id: "total-games", label: "総ゲーム数", type: "counter",
+  settingValues: {}, isDiscriminationFactor: false,
 };
-const THEME_DIFF: CounterTheme = {
-  bg: "#78350f",
-  minusBg: "linear-gradient(145deg, #5c2a0c, #3f1a07)",
-  accent: "#fde68a",
+const ELEM_DIFF_COINS: DiscriminationElement = {
+  id: "diff-coins", label: "差枚数", type: "counter",
+  settingValues: {}, isDiscriminationFactor: false,
 };
-const THEME_BIG: CounterTheme = {
-  bg: "#b91c1c",
-  minusBg: "linear-gradient(145deg, #991515, #7a1010)",
-  accent: "#fecaca",
+const ELEM_BIG: DiscriminationElement = {
+  id: "big-count", label: "BIG回数", type: "counter",
+  settingValues: {}, isDiscriminationFactor: false,
 };
-const THEME_REG: CounterTheme = {
-  bg: "#1d4ed8",
-  minusBg: "linear-gradient(145deg, #1840c0, #112c9a)",
-  accent: "#bfdbfe",
+const ELEM_REG: DiscriminationElement = {
+  id: "reg-count", label: "REG回数", type: "counter",
+  settingValues: {}, isDiscriminationFactor: false,
 };
 
 // ─────────────────────────────────────────────
@@ -534,15 +356,13 @@ export default function GrapeReversePage() {
             <h2 className="mb-2 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
               基本データ
             </h2>
-            <GrapeCounter
-              label="総ゲーム数"
+            <DynamicInput
+              element={ELEM_TOTAL_GAMES}
               value={totalGames}
-              onChange={(n) => update("total-games", n)}
+              onChange={(v) => update("total-games", Number(v) || 0)}
+              totalGames={totalGames}
               vibrationEnabled={vibrationEnabled}
-              theme={THEME_GAMES}
-              digitCapacity={5}
-              maxDigits={5}
-              probText={bonusProbText ? `合算 ${bonusProbText}` : undefined}
+              overrideProbText={bonusProbText ? `合算 ${bonusProbText}` : undefined}
             />
           </div>
 
@@ -551,14 +371,11 @@ export default function GrapeReversePage() {
             <h2 className="mb-2 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
               差枚数（台メーター）
             </h2>
-            <GrapeCounter
-              label="差枚数"
+            <DynamicInput
+              element={ELEM_DIFF_COINS}
               value={diffCoins}
-              onChange={(n) => update("diff-coins", n)}
+              onChange={(v) => update("diff-coins", Number(v) || 0)}
               vibrationEnabled={vibrationEnabled}
-              theme={THEME_DIFF}
-              digitCapacity={5}
-              maxDigits={5}
             />
           </div>
 
@@ -568,25 +385,21 @@ export default function GrapeReversePage() {
               ボーナス回数
             </h2>
             <div className="grid min-w-0 grid-cols-2 gap-4">
-              <GrapeCounter
-                label="BIG回数"
+              <DynamicInput
+                element={ELEM_BIG}
                 value={bigCount}
-                onChange={(n) => update("big-count", n)}
+                onChange={(v) => update("big-count", Number(v) || 0)}
+                totalGames={totalGames}
                 vibrationEnabled={vibrationEnabled}
-                theme={THEME_BIG}
-                compact
-                maxDigits={3}
-                probText={bigCount > 0 && totalGames > 0 ? `1/${(totalGames / bigCount).toFixed(1)}` : undefined}
+                compactLayout
               />
-              <GrapeCounter
-                label="REG回数"
+              <DynamicInput
+                element={ELEM_REG}
                 value={regCount}
-                onChange={(n) => update("reg-count", n)}
+                onChange={(v) => update("reg-count", Number(v) || 0)}
+                totalGames={totalGames}
                 vibrationEnabled={vibrationEnabled}
-                theme={THEME_REG}
-                compact
-                maxDigits={3}
-                probText={regCount > 0 && totalGames > 0 ? `1/${(totalGames / regCount).toFixed(1)}` : undefined}
+                compactLayout
               />
             </div>
           </div>

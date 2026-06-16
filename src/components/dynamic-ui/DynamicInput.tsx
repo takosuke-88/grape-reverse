@@ -26,6 +26,8 @@ interface DynamicInputProps {
   onDirectInput?: () => void;
   /** 2列グリッド内のカウンター（ぶどう・内訳など） */
   compactLayout?: boolean;
+  /** 確率テキストを強制上書き（例: total-games の合算確率表示） */
+  overrideProbText?: string;
 }
 
 interface ElementTheme {
@@ -125,6 +127,13 @@ function getElementTheme(id: string): ElementTheme {
       accent: "#fbcfe8",
     };
   }
+  if (id === "diff-coins") {
+    return {
+      bg: "#78350f",
+      minusBg: "linear-gradient(145deg, #5c2a0c, #3f1a07)",
+      accent: "#fde68a",
+    };
+  }
   return {
     bg: "#334155",
     minusBg: "linear-gradient(145deg, #253447, #182232)",
@@ -142,6 +151,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   onDecrement,
   onDirectInput,
   compactLayout = false,
+  overrideProbText,
 }) => {
   const [showFloat, setShowFloat] = useState(false);
   const [showGlow, setShowGlow] = useState(false);
@@ -202,9 +212,10 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
           totalGames != null &&
           totalGames > 0 &&
           displayValue > 0;
-        const probText = showProb
+        const autoProbText = showProb
           ? `1/${(totalGames! / displayValue).toFixed(1)}`
           : null;
+        const probText = overrideProbText ?? autoProbText;
         const useCompact =
           compactLayout || isGridOnlyCompactCounterId(element.id);
         const maxDigits = getCounterMaxDigits(element.id);
