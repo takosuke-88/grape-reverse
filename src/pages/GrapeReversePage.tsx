@@ -193,12 +193,16 @@ function GrapeCounter({
       </label>
       <div
         className="relative flex w-full min-w-0 max-w-full rounded-xl overflow-hidden select-none"
-        style={{ minHeight: "76px", background: theme.bg }}
+        style={{
+          minHeight: "76px",
+          background: theme.bg,
+          boxShadow: "inset 0 1px 1px rgba(255,255,255,0.12), 0 4px 12px rgba(0,0,0,0.30)",
+        }}
       >
         {/* 左: マイナス固定 + 数字ゾーン */}
         <div
           className="flex shrink-0 items-stretch"
-          style={compact ? { maxWidth: "50%" } : { width: "30%" }}
+          style={compact ? undefined : { width: "30%" }}
         >
           <button
             type="button"
@@ -207,12 +211,13 @@ function GrapeCounter({
               handleDecrement();
             }}
             disabled={value <= 0}
-            className={`flex ${COUNTER_MINUS_WIDTH_CLASS} items-center justify-center self-stretch text-2xl text-white/80 transition-all active:scale-95 touch-manipulation`}
+            className={`flex ${COUNTER_MINUS_WIDTH_CLASS} items-center justify-center self-stretch text-2xl transition-all active:scale-95 touch-manipulation`}
             style={{
               minHeight: "76px",
               background: theme.minusBg,
               boxShadow:
                 "inset 2px 2px 4px rgba(255,255,255,0.10), inset -1px -1px 3px rgba(0,0,0,0.5), 3px 3px 8px rgba(0,0,0,0.4), -1px -1px 2px rgba(255,255,255,0.05)",
+              color: "rgba(255,255,255,0.8)",
               opacity: value <= 0 ? 0.25 : 1,
             }}
             aria-label="減らす"
@@ -234,12 +239,13 @@ function GrapeCounter({
             variant={compact ? "compact" : "default"}
             maxDigits={maxDigits}
             digitCapacity={compact ? 3 : digitCapacity}
+            textColor="#ffffff"
           />
         </div>
 
-        {/* 右: プラスエリア（z-10で数字ゾーンの上に確実に前面配置） */}
+        {/* 右: プラスエリア */}
         <div
-          className="relative z-10 flex min-w-0 flex-1 items-center justify-end cursor-pointer active:bg-white/10"
+          className="relative flex min-w-0 flex-1 items-center justify-end cursor-pointer active:bg-white/10"
           onClick={handleIncrement}
         >
           {showFloat && (
