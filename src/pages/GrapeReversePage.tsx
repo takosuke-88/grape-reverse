@@ -524,8 +524,8 @@ export default function GrapeReversePage() {
         <div className="mx-auto w-full max-w-md space-y-4 p-4">
 
           {/* 基本データ：総ゲーム数 */}
-          <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 space-y-3 shadow-md">
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+          <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 shadow-lg ring-1 ring-slate-200 dark:ring-slate-800 sm:p-6">
+            <h2 className="mb-2 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
               基本データ
             </h2>
             <GrapeCounter
@@ -541,8 +541,8 @@ export default function GrapeReversePage() {
           </div>
 
           {/* 差枚数（台メーター） */}
-          <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 space-y-3 shadow-md">
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+          <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 shadow-lg ring-1 ring-slate-200 dark:ring-slate-800 sm:p-6">
+            <h2 className="mb-2 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
               差枚数（台メーター）
             </h2>
             <GrapeCounter
@@ -557,11 +557,11 @@ export default function GrapeReversePage() {
           </div>
 
           {/* ボーナス回数 */}
-          <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 space-y-3 shadow-md">
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+          <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 shadow-lg ring-1 ring-slate-200 dark:ring-slate-800 sm:p-6">
+            <h2 className="mb-2 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
               ボーナス回数
             </h2>
-            <div className="grid min-w-0 grid-cols-2 gap-3">
+            <div className="grid min-w-0 grid-cols-2 gap-4">
               <GrapeCounter
                 label="BIG回数"
                 value={bigCount}
@@ -593,7 +593,7 @@ export default function GrapeReversePage() {
                 : "bg-white/60 dark:bg-slate-900/40"
             }`}
           >
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
+            <h2 className="mb-2 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
               {roleIcon} {roleLabel}逆算結果
             </h2>
 
