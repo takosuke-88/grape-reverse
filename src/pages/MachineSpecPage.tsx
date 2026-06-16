@@ -76,9 +76,9 @@ const AccordionHeader: React.FC<AccordionHeaderProps> = ({
     onClick={onToggle}
     className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
   >
-    <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+    <span className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
       <span className="text-base">{icon}</span>
-      <span className="text-xs font-medium tracking-widest">{title}</span>
+      <span className="text-xs font-bold tracking-widest">{title}</span>
     </span>
     <span
       className={`text-sm text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
@@ -174,7 +174,7 @@ export default function MachineSpecPage() {
 
   // 解説テキストの共通スタイル
   const adviceCls =
-    "px-3 pt-2 pb-1 text-[13px] leading-relaxed text-slate-600 dark:text-slate-400";
+    "px-3 pt-2 pb-3 text-[13px] leading-relaxed font-medium text-slate-700 dark:text-slate-200";
 
   const currentCategory = machineInfo.category;
   const roleLabel = currentCategory === "hana" ? "ベル" : "ぶどう";
