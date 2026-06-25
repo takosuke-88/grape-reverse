@@ -45,6 +45,7 @@ const CONFIG_MAP: Record<string, MachineConfig> = {
 };
 
 interface AccordionState {
+  strategy: boolean;
   bonusProb: boolean;
   payoutRatio: boolean;
   smallRole: boolean;
@@ -52,6 +53,7 @@ interface AccordionState {
 }
 
 const DEFAULT_ACCORDION: AccordionState = {
+  strategy: true,
   bonusProb: true,
   payoutRatio: true,
   smallRole: true,
@@ -283,6 +285,21 @@ export default function MachineSpecPage() {
         </div>
       ) : (
         <div className="space-y-3 p-3">
+
+          {/* 🎯 攻略アドバイス（strategy がある機種のみ表示） */}
+          {advice?.strategy && (
+            <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <AccordionHeader
+                title={`${config.name}の攻略アドバイス`}
+                icon="🎯"
+                isOpen={openState.strategy ?? true}
+                onToggle={() => toggle("strategy")}
+              />
+              {(openState.strategy ?? true) && (
+                <p className={`${adviceCls} whitespace-pre-line`}>{advice.strategy}</p>
+              )}
+            </div>
+          )}
 
           {/* ① ボーナス確率 */}
           <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
