@@ -80,7 +80,7 @@ const AccordionHeader: React.FC<AccordionHeaderProps> = ({
   >
     <span className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
       <span className="text-base">{icon}</span>
-      <span className="text-xs font-bold tracking-widest">{title}</span>
+      <span className="text-sm font-extrabold tracking-wide">{title}</span>
     </span>
     <span
       className={`text-sm text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
