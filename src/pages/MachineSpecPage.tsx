@@ -125,6 +125,7 @@ export default function MachineSpecPage() {
   const regEl    = allElements.find((e) => e.id === "reg-count");
   const grapeEl  = allElements.find((e) => e.id === "grape-count");
   const cherryEl = allElements.find((e) => e.id === "cherry-count");
+  const bellEl   = allElements.find((e) => e.id === "bell-count");
 
   const settings   = config.specs?.settings ?? [1, 2, 3, 4, 5, 6];
   const topSetting = Math.max(...settings);
@@ -133,6 +134,7 @@ export default function MachineSpecPage() {
   const advice     = JUGGLER_SPEC_ADVICE[machineId];
 
   const fmt1 = (v: number, dec = 1) => `1/${v.toFixed(dec)}`;
+  const pct = (v?: number) => (v != null ? `${(v * 100).toFixed(1)}%` : "---");
 
   const getCombinedDenom = (s: number): number | null => {
     const b = bigEl?.settingValues[s];
@@ -179,6 +181,12 @@ export default function MachineSpecPage() {
     "px-3 pt-2 pb-3 text-[13px] leading-relaxed font-medium text-slate-700 dark:text-slate-200";
 
   const currentCategory = machineInfo.category;
+  const isHana = currentCategory === "hana";
+  const hasSpec = isJuggler || isHana;
+  const hanaPayout = config.specs?.payoutRatio;
+  const strategyText =
+    advice?.strategy ??
+    (isHana ? `${config.name}の攻略アドバイス・解析まとめテキストは準備中です。` : undefined);
   const roleLabel = currentCategory === "hana" ? "ベル" : "ぶどう";
   const roleIcon  = currentCategory === "hana" ? "🔔" : "🍇";
 
@@ -253,31 +261,29 @@ export default function MachineSpecPage() {
             <button
               type="button"
               onClick={() => navigate(`/${machineId}`)}
-              className={`flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 ${currentCategory === "juggler" ? "text-[10px]" : "text-xs"}`}
+              className="flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-[10px]"
             >
               🎰 小役カウンター
             </button>
             <button
               type="button"
               onClick={() => navigate(`/${machineId}/grape`)}
-              className={`flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 ${currentCategory === "juggler" ? "text-[10px]" : "text-xs"}`}
+              className="flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-[10px]"
             >
               {roleIcon} {roleLabel}逆算
             </button>
-            {currentCategory === "juggler" && (
-              <button
-                type="button"
-                className="flex-1 rounded-lg bg-indigo-500 text-white py-2 text-[10px] font-bold ring-2 ring-indigo-300 dark:ring-indigo-600"
-              >
-                📊 機種スペック
-              </button>
-            )}
+            <button
+              type="button"
+              className="flex-1 rounded-lg bg-indigo-500 text-white py-2 text-[10px] font-bold ring-2 ring-indigo-300 dark:ring-indigo-600"
+            >
+              📊 機種スペック
+            </button>
           </div>
         </div>
       </div>
 
       <div className="mx-auto w-full max-w-md">
-      {!isJuggler ? (
+      {!hasSpec ? (
         <div className="m-6 rounded-2xl bg-white p-8 text-center shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
           <p className="text-slate-500 dark:text-slate-400">
             このシリーズのスペック詳細は準備中です。
@@ -286,8 +292,8 @@ export default function MachineSpecPage() {
       ) : (
         <div className="space-y-3 p-3">
 
-          {/* 🎯 攻略アドバイス（strategy がある機種のみ表示） */}
-          {advice?.strategy && (
+          {/* 🎯 攻略アドバイス（strategy / プレースホルダーがある機種のみ表示） */}
+          {strategyText && (
             <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
               <AccordionHeader
                 title={`${config.name}の攻略アドバイス`}
@@ -296,7 +302,7 @@ export default function MachineSpecPage() {
                 onToggle={() => toggle("strategy")}
               />
               {(openState.strategy ?? true) && (
-                <p className={`${adviceCls} whitespace-pre-line`}>{advice.strategy}</p>
+                <p className={`${adviceCls} whitespace-pre-line`}>{strategyText}</p>
               )}
             </div>
           )}
@@ -347,11 +353,11 @@ export default function MachineSpecPage() {
             )}
           </div>
 
-          {/* ② 打ち方別機械割 */}
-          {payoutData && (
+          {/* ② 機械割（ジャグラー: 打ち方別3モード / ハナハナ: 公表機械割） */}
+          {(payoutData || (isHana && hanaPayout)) && (
             <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
               <AccordionHeader
-                title="打ち方別 機械割"
+                title={isHana ? "機械割" : "打ち方別 機械割"}
                 icon="💹"
                 isOpen={openState.payoutRatio}
                 onToggle={() => toggle("payoutRatio")}
@@ -362,30 +368,46 @@ export default function MachineSpecPage() {
                     <thead>
                       <tr>
                         <th className={`${thCls} w-8`}>設定</th>
-                        <th className={thCls}>公表値</th>
-                        <th className={thCls}>チェリー狙</th>
-                        <th className={thCls}>フル攻略</th>
+                        {isHana ? (
+                          <th className={thCls}>公表機械割</th>
+                        ) : (
+                          <>
+                            <th className={thCls}>公表値</th>
+                            <th className={thCls}>チェリー狙</th>
+                            <th className={thCls}>フル攻略</th>
+                          </>
+                        )}
                       </tr>
                     </thead>
                     <tbody>
                       {settings.map((s, idx) => (
                         <tr key={s} className={rowBg(s)}>
                           <td className={`${tdCls(s)} font-extrabold`}>{settingLabel(s)}</td>
-                          <td className={tdCls(s)}>
-                            {payoutData.free[idx] != null
-                              ? `${payoutData.free[idx].toFixed(2)}%`
-                              : "---"}
-                          </td>
-                          <td className={tdCls(s)}>
-                            {payoutData.cherry[idx] != null
-                              ? `${payoutData.cherry[idx].toFixed(2)}%`
-                              : "---"}
-                          </td>
-                          <td className={tdCls(s)}>
-                            {payoutData.full[idx] != null
-                              ? `${payoutData.full[idx].toFixed(2)}%`
-                              : "---"}
-                          </td>
+                          {isHana ? (
+                            <td className={tdCls(s)}>
+                              {hanaPayout?.[idx] != null
+                                ? `${hanaPayout[idx].toFixed(1)}%`
+                                : "---"}
+                            </td>
+                          ) : (
+                            <>
+                              <td className={tdCls(s)}>
+                                {payoutData?.free?.[idx] != null
+                                  ? `${payoutData.free[idx].toFixed(2)}%`
+                                  : "---"}
+                              </td>
+                              <td className={tdCls(s)}>
+                                {payoutData?.cherry?.[idx] != null
+                                  ? `${payoutData.cherry[idx].toFixed(2)}%`
+                                  : "---"}
+                              </td>
+                              <td className={tdCls(s)}>
+                                {payoutData?.full?.[idx] != null
+                                  ? `${payoutData.full[idx].toFixed(2)}%`
+                                  : "---"}
+                              </td>
+                            </>
+                          )}
                         </tr>
                       ))}
                     </tbody>
@@ -398,47 +420,73 @@ export default function MachineSpecPage() {
             </div>
           )}
 
-          {/* ③ 通常時小役確率 */}
-          <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-            <AccordionHeader
-              title="通常時小役確率"
-              icon="🍇"
-              isOpen={openState.smallRole}
-              onToggle={() => toggle("smallRole")}
-            />
-            {openState.smallRole && (
-              <div className="overflow-x-clip pb-2">
-                <table className="table-fixed w-full">
-                  <thead>
-                    <tr>
-                      <th className={`${thCls} w-8`}>設定</th>
-                      <th className={thCls}>ぶどう確率</th>
-                      <th className={thCls}>チェリー確率</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {settings.map((s) => (
-                      <tr key={s} className={rowBg(s)}>
-                        <td className={`${tdCls(s)} font-extrabold`}>{settingLabel(s)}</td>
-                        <td className={tdCls(s)}>
-                          {grapeEl?.settingValues[s] ? fmt1(grapeEl.settingValues[s]) : "---"}
-                        </td>
-                        <td className={tdCls(s)}>
-                          {cherryEl?.settingValues[s] ? fmt1(cherryEl.settingValues[s]) : "---"}
-                        </td>
+          {/* ③ 通常時小役（ジャグラー: ぶどう/チェリー / ハナハナ: ベル/BIGスイカ） */}
+          {(isJuggler || (isHana && bellEl)) && (
+            <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <AccordionHeader
+                title={isHana ? "通常時小役・BIG中スイカ" : "通常時小役確率"}
+                icon={isHana ? "🔔" : "🍇"}
+                isOpen={openState.smallRole}
+                onToggle={() => toggle("smallRole")}
+              />
+              {openState.smallRole && (
+                <div className="overflow-x-clip pb-2">
+                  <table className="table-fixed w-full">
+                    <thead>
+                      <tr>
+                        <th className={`${thCls} w-8`}>設定</th>
+                        {isHana ? (
+                          <>
+                            <th className={thCls}>ベル確率</th>
+                            <th className={thCls}>BIG中スイカ</th>
+                          </>
+                        ) : (
+                          <>
+                            <th className={thCls}>ぶどう確率</th>
+                            <th className={thCls}>チェリー確率</th>
+                          </>
+                        )}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {advice?.smallRole && (
-                  <p className={adviceCls}>{advice.smallRole}</p>
-                )}
-              </div>
-            )}
-          </div>
+                    </thead>
+                    <tbody>
+                      {settings.map((s, idx) => (
+                        <tr key={s} className={rowBg(s)}>
+                          <td className={`${tdCls(s)} font-extrabold`}>{settingLabel(s)}</td>
+                          {isHana ? (
+                            <>
+                              <td className={tdCls(s)}>
+                                {bellEl?.settingValues[s] ? fmt1(bellEl.settingValues[s], 2) : "---"}
+                              </td>
+                              <td className={tdCls(s)}>
+                                {detProbs?.big_suika_raw?.[idx] != null
+                                  ? fmt1(detProbs.big_suika_raw[idx], 2)
+                                  : "---"}
+                              </td>
+                            </>
+                          ) : (
+                            <>
+                              <td className={tdCls(s)}>
+                                {grapeEl?.settingValues[s] ? fmt1(grapeEl.settingValues[s]) : "---"}
+                              </td>
+                              <td className={tdCls(s)}>
+                                {cherryEl?.settingValues[s] ? fmt1(cherryEl.settingValues[s]) : "---"}
+                              </td>
+                            </>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {advice?.smallRole && (
+                    <p className={adviceCls}>{advice.smallRole}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
-          {/* ④ 単独・重複ボーナス確率 */}
-          {detProbs?.big_solo && (
+          {/* ④ 単独・重複ボーナス確率（ジャグラー） */}
+          {!isHana && detProbs?.big_solo && (
             <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
               <AccordionHeader
                 title="単独・重複ボーナス確率"
@@ -491,6 +539,47 @@ export default function MachineSpecPage() {
                   )}
                   <p className="px-4 pt-1 pb-1 text-xs text-slate-400 dark:text-slate-500">
                     ※重複確率は一部算出値を含みます
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ④ REGビタ押しサイドランプ示唆（ハナハナ） */}
+          {isHana && detProbs?.reg_lamp_blue_raw && (
+            <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <AccordionHeader
+                title="REGビタ押しサイドランプ示唆"
+                icon="💡"
+                isOpen={openState.bonusDetail}
+                onToggle={() => toggle("bonusDetail")}
+              />
+              {openState.bonusDetail && (
+                <div className="overflow-x-clip pb-2">
+                  <table className="table-fixed w-full">
+                    <thead>
+                      <tr>
+                        <th className={`${thCls} w-8`}>設定</th>
+                        <th className={thCls}>青</th>
+                        <th className={thCls}>黄</th>
+                        <th className={thCls}>緑</th>
+                        <th className={thCls}>赤</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {settings.map((s, idx) => (
+                        <tr key={s} className={rowBg(s)}>
+                          <td className={`${tdCls(s)} font-extrabold`}>{settingLabel(s)}</td>
+                          <td className={tdCls(s)}>{pct(detProbs?.reg_lamp_blue_raw?.[idx])}</td>
+                          <td className={tdCls(s)}>{pct(detProbs?.reg_lamp_yellow_raw?.[idx])}</td>
+                          <td className={tdCls(s)}>{pct(detProbs?.reg_lamp_green_raw?.[idx])}</td>
+                          <td className={tdCls(s)}>{pct(detProbs?.reg_lamp_red_raw?.[idx])}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <p className={adviceCls}>
+                    青=奇数示唆／黄=偶数示唆／緑=奇数強示唆／赤=偶数強示唆。出現比率が均等に近いほど高設定示唆。各色の出現割合（%）で設定の奇遇傾向を推測できます。
                   </p>
                 </div>
               )}
