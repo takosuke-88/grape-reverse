@@ -5,6 +5,7 @@ import { AVAILABLE_MACHINES } from "../data/machine-list";
 import Seo from "../components/Seo";
 import { JUGGLER_PAYOUT_RATIOS_3MODE } from "../data/juggler-spec-data";
 import { JUGGLER_SPEC_ADVICE } from "../data/juggler-spec-advice";
+import { HANAHANA_SPEC_ADVICE } from "../data/hanahana-spec-advice";
 import type { MachineConfig } from "../types/machine-schema";
 import { hanaHoohConfig } from "../data/machines/hana-hooh";
 import { funkyJuggler2Config } from "../data/machines/funky-juggler-2";
@@ -131,7 +132,7 @@ export default function MachineSpecPage() {
   const topSetting = Math.max(...settings);
   const payoutData = JUGGLER_PAYOUT_RATIOS_3MODE[machineId];
   const detProbs   = config.detailedProbabilities;
-  const advice     = JUGGLER_SPEC_ADVICE[machineId];
+  const advice     = JUGGLER_SPEC_ADVICE[machineId] ?? HANAHANA_SPEC_ADVICE[machineId];
 
   const fmt1 = (v: number, dec = 1) => `1/${v.toFixed(dec)}`;
   const pct = (v?: number) => (v != null ? `${(v * 100).toFixed(1)}%` : "---");
@@ -578,9 +579,13 @@ export default function MachineSpecPage() {
                       ))}
                     </tbody>
                   </table>
-                  <p className={adviceCls}>
-                    青=奇数示唆／黄=偶数示唆／緑=奇数強示唆／赤=偶数強示唆。出現比率が均等に近いほど高設定示唆。各色の出現割合（%）で設定の奇遇傾向を推測できます。
-                  </p>
+                  {advice?.bonusDetail ? (
+                    <p className={adviceCls}>{advice.bonusDetail}</p>
+                  ) : (
+                    <p className={adviceCls}>
+                      青=奇数示唆／黄=偶数示唆／緑=奇数強示唆／赤=偶数強示唆。出現比率が均等に近いほど高設定示唆。各色の出現割合（%）で設定の奇遇傾向を推測できます。
+                    </p>
+                  )}
                 </div>
               )}
             </div>
