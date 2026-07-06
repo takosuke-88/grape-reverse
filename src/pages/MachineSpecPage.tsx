@@ -185,9 +185,7 @@ export default function MachineSpecPage() {
   const isHana = currentCategory === "hana";
   const hasSpec = isJuggler || isHana;
   const hanaPayout = config.specs?.payoutRatio;
-  const strategyText =
-    advice?.strategy ??
-    (isHana ? `${config.name}の攻略アドバイス・解析まとめテキストは準備中です。` : undefined);
+  const strategyText = advice?.strategy;
   const roleLabel = currentCategory === "hana" ? "ベル" : "ぶどう";
   const roleIcon  = currentCategory === "hana" ? "🔔" : "🍇";
 
