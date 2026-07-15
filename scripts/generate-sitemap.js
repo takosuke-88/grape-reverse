@@ -11,7 +11,10 @@ const MACHINE_LIST_PATH = path.resolve(
   __dirname,
   "../src/data/machine-list.ts",
 );
-const COLUMN_LIST_PATH = path.resolve(__dirname, "../src/data/column-list.ts");
+const COLUMNS_CONTENT_DIR = path.resolve(
+  __dirname,
+  "../src/content/columns",
+);
 
 // Function to extract IDs from TS array of objects
 function extractIdsFromFile(filePath, regex) {
@@ -71,19 +74,37 @@ async function generateSitemap() {
   urls.push(urlElement(`${BASE_URL}/columns`, today, "weekly", "0.9"));
 
   // 4. Column Article Pages
-  // Regex looks for path: "/columns/something"
-  const columnPathRegex = /path:\s*["']\/columns\/([^"']+)["']/g;
-  const columnIds = extractIdsFromFile(COLUMN_LIST_PATH, columnPathRegex);
+  // src/content/columns/*.md のファイル名をslugとして使用し、
+  // フロントマターの draft: true が付いた記事は除外する
+  const frontmatterBlockRegex = /^---\r?\n([\s\S]*?)\r?\n---/;
+  let columnSlugs = [];
+  try {
+    columnSlugs = fs
+      .readdirSync(COLUMNS_CONTENT_DIR)
+      .filter((file) => file.endsWith(".md"))
+      .filter((file) => {
+        const content = fs.readFileSync(
+          path.join(COLUMNS_CONTENT_DIR, file),
+          "utf-8",
+        );
+        const match = content.match(frontmatterBlockRegex);
+        const frontmatter = match ? match[1] : "";
+        return !/draft:\s*true/.test(frontmatter);
+      })
+      .map((file) => file.replace(/\.md$/, ""));
+  } catch (error) {
+    console.error(`Error reading ${COLUMNS_CONTENT_DIR}:`, error);
+  }
 
-  if (columnIds.length === 0) {
+  if (columnSlugs.length === 0) {
     console.warn(
-      "⚠️ No column paths found in column-list.ts. Check the file structure.",
+      "⚠️ No column articles found in src/content/columns. Check the directory.",
     );
   } else {
-    console.log(`✅ Found ${columnIds.length} columns`);
-    columnIds.forEach((id) => {
+    console.log(`✅ Found ${columnSlugs.length} columns`);
+    columnSlugs.forEach((slug) => {
       urls.push(
-        urlElement(`${BASE_URL}/columns/${id}`, today, "monthly", "0.7"),
+        urlElement(`${BASE_URL}/columns/${slug}`, today, "monthly", "0.7"),
       );
     });
   }

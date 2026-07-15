@@ -11,7 +11,7 @@ import {
   calculateGrapeWeight,
 } from "../../logic/bayes-estimator";
 import { AVAILABLE_MACHINES } from "../../data/machine-list";
-import { ATTACHED_COLUMNS } from "../../data/column-list";
+import { ALL_COLUMNS, type ColumnEntry } from "../../data/column-content";
 import { formatBonusText } from "../../utils/formatters";
 import EstimationResultDisplay from "./EstimationResultDisplay";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
@@ -1372,22 +1372,23 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           );
           const currentCategory = currentMachineInfo?.category || "other";
 
-          const sortedColumns = [...ATTACHED_COLUMNS].sort(
-            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-          );
+          // ALL_COLUMNS は日付降順ソート済み
+          const sortedColumns = ALL_COLUMNS;
 
           // STEP 1: 機種に関連するコラム
           const specificRelated = sortedColumns
             .filter(
-              (col) =>
-                col.tags.includes(config.id) ||
-                col.tags.includes(currentCategory),
+              (entry) =>
+                entry.frontmatter.tags.includes(config.id) ||
+                entry.frontmatter.tags.includes(currentCategory),
             )
             .slice(0, 3);
 
           // STEP 2: サイト全体の最新コラム (STEP 1と重複しないもの)
           const siteWideLatest = sortedColumns
-            .filter((col) => !specificRelated.find((r) => r.id === col.id))
+            .filter(
+              (entry) => !specificRelated.find((r) => r.slug === entry.slug),
+            )
             .slice(0, 3);
 
           if (specificRelated.length === 0 && siteWideLatest.length === 0)
@@ -1403,8 +1404,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                     この機種の攻略コラム
                   </h2>
                   <div className="flex flex-col gap-4">
-                    {specificRelated.map((col) => (
-                      <ColumnCard key={col.id} col={col} />
+                    {specificRelated.map((entry) => (
+                      <ColumnCard key={entry.slug} entry={entry} />
                     ))}
                   </div>
                 </div>
@@ -1418,8 +1419,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                     最新のパチスロ・業界コラム
                   </h2>
                   <div className="flex flex-col gap-4">
-                    {siteWideLatest.map((col) => (
-                      <ColumnCard key={col.id} col={col} />
+                    {siteWideLatest.map((entry) => (
+                      <ColumnCard key={entry.slug} entry={entry} />
                     ))}
                   </div>
                 </div>
@@ -1433,13 +1434,13 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 };
 
 // 共通カードコンポーネント
-const ColumnCard = ({ col }: { col: (typeof ATTACHED_COLUMNS)[0] }) => (
+const ColumnCard = ({ entry }: { entry: ColumnEntry }) => (
   <a
-    href={col.path}
+    href={`/columns/${entry.slug}`}
     className="block p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:scale-[1.01] hover:border-indigo-400 group"
   >
     <div className="flex gap-2 mb-2">
-      {col.tags.slice(0, 3).map((tag) => (
+      {entry.frontmatter.tags.slice(0, 3).map((tag) => (
         <span
           key={tag}
           className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold rounded-full"
@@ -1449,10 +1450,10 @@ const ColumnCard = ({ col }: { col: (typeof ATTACHED_COLUMNS)[0] }) => (
       ))}
     </div>
     <h3 className="text-[15px] font-bold text-slate-800 dark:text-slate-100 mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-      {col.title}
+      {entry.frontmatter.title}
     </h3>
     <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">
-      {col.description}
+      {entry.frontmatter.description}
     </p>
   </a>
 );

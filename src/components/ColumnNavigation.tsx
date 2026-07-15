@@ -1,17 +1,17 @@
 import { Link } from "react-router-dom";
-import { ATTACHED_COLUMNS } from "../data/column-list";
+import { ALL_COLUMNS } from "../data/column-content";
 
 interface Props {
   currentId: string;
 }
 
 const ColumnNavigation = ({ currentId }: Props) => {
-  // 日付の降順（新しい順）にソート
-  const sortedColumns = [...ATTACHED_COLUMNS].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
+  // ALL_COLUMNS は日付降順（新しい順）にソート済み
+  const sortedColumns = ALL_COLUMNS;
 
-  const currentIndex = sortedColumns.findIndex((col) => col.id === currentId);
+  const currentIndex = sortedColumns.findIndex(
+    (entry) => entry.slug === currentId,
+  );
 
   // 「次の記事」は現在の記事より新しいもの（インデックスが1小さい）
   const nextArticle = currentIndex > 0 ? sortedColumns[currentIndex - 1] : null;
@@ -28,14 +28,14 @@ const ColumnNavigation = ({ currentId }: Props) => {
         <div className="flex-1 min-w-0">
           {nextArticle ? (
             <Link
-              to={nextArticle.path}
+              to={`/columns/${nextArticle.slug}`}
               className="group flex flex-col items-start gap-1 p-4 -m-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
             >
               <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
                 ← 次の記事
               </span>
               <span className="text-sm md:text-base font-bold text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-800 dark:group-hover:text-indigo-300 truncate w-full">
-                {nextArticle.title}
+                {nextArticle.frontmatter.title}
               </span>
             </Link>
           ) : (
@@ -57,14 +57,14 @@ const ColumnNavigation = ({ currentId }: Props) => {
         <div className="flex-1 min-w-0 text-right">
           {prevArticle ? (
             <Link
-              to={prevArticle.path}
+              to={`/columns/${prevArticle.slug}`}
               className="group flex flex-col items-end gap-1 p-4 -m-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
             >
               <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
                 前の記事 →
               </span>
               <span className="text-sm md:text-base font-bold text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-800 dark:group-hover:text-indigo-300 truncate w-full">
-                {prevArticle.title}
+                {prevArticle.frontmatter.title}
               </span>
             </Link>
           ) : (

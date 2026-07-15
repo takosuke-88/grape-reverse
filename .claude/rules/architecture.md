@@ -70,8 +70,14 @@ specs?: {
 9. 設定推定（ベイズ）には**チェリー狙い**の推計回数を使用（ハナは `bell-count`、ジャグラーは `grape-count`）
 
 ## 6. コラム（記事）コンテンツ
-- CMSは未導入。記事は **`src/pages/columns/*.tsx`** に React コンポーネントとして配置し、`src/data/column-list.ts` で一覧・ルーティング（`/columns/...`）を管理する。
-- 新規記事追加時: `.tsx` 作成 → `column-list.ts` 登録 → `App.tsx` のルート追加（必要時）→ 各記事に `Seo` を配置。
+- 記事は **`src/content/columns/<slug>.md`** に Markdown（YAML フロントマター + 本文）として配置する。ルーティングは動的ルート **`/columns/:slug`**（`src/pages/columns/ColumnDetailPage.tsx`）一本で処理し、記事ごとの `.tsx`/個別 `<Route>` は追加しない。
+- **フロントマター**: `title` / `description` / `date`（`YYYY-MM-DD`）/ `tags: string[]` / `draft: boolean` / `showRelatedColumns?: boolean`（既定 `false`。記事末尾に関連記事セクションを出す場合のみ `true`）。単一の `category` フィールドは持たない（パチンコ/パチスロどちらとも言えない記事があるため `tags` の自由記述で表現する）。
+- **読み込み**: `src/data/column-content.ts` が `import.meta.glob("/src/content/columns/*.md", { query: "?raw", import: "default", eager: true })` で全記事を読み込み、`front-matter` パッケージ（`gray-matter` ではない — Node組み込み依存がなくブラウザバンドルでもポリフィル不要なため採用）でフロントマターと本文をパース。`draft: true` を除外し日付降順ソート済みの `ALL_COLUMNS` と `getColumnBySlug(slug)` を export する。一覧ページ（`index.tsx`）・`ColumnNavigation`・`RelatedColumns`・機種ページの関連コラム表示（`MachinePageFactory.tsx`）・ホームの最新コラムはすべてこの1モジュールを参照する。**`ATTACHED_COLUMNS` や `column-list.ts` は廃止**（再導入禁止）。
+- **本文の描画**: `ColumnDetailPage.tsx` が `react-markdown` + `rehype-raw` で本文をレンダリングする。見出し（h1〜h3）・table・CTAボタン・コールアウトボックス・パンくずなど「単純な段落/太字/リストに収まらない要素」は Tailwind クラス付きの**生HTMLを `.md` 本文にそのまま埋め込み**、`not-prose` でラップして `@tailwindcss/typography` の `prose` スタイルと衝突させない。平文の `<p>`/`<strong>`/単純な `<ul><li>` のみ素の Markdown 記法にする。
+- **`@tailwindcss/typography`**: `tailwind.config.js` の `plugins` に導入済み（`theme.extend.typography` にサイトのトーンに合わせたデフォルト値を定義）。既存記事の見出し等は上記の通り生HTML側で個別スタイルを維持しているため、この typography 設定は主に将来の「素の Markdown 見出しで書かれる自動生成記事」向けの土台。
+- **内部リンク**: 本文中の `<a href="/...">`（生HTML埋め込み分も含む）は `ReactMarkdown` の `components={{ a: ... }}` オーバーライドで内部パスのみ `react-router` の `<Link>` に差し替え、SPA内遷移を維持する。
+- **エラー耐性**: 本文レンダリングは `src/components/ColumnRenderErrorBoundary.tsx` でラップする。将来の自動生成記事でMarkdown/HTMLが壊れていても、そのページだけがフォールバック表示になり他ページに影響しない。
+- **ビルド/サイトマップ**: `scripts/generate-sitemap.js` は `src/content/columns/*.md` を直接スキャンしてコラムURLを生成する（`draft: true` は除外）。新規記事追加は `.md` ファイルをこのディレクトリに置くだけで一覧・ナビ・サイトマップに自動反映される（`App.tsx` 等のコード変更は不要）。
 
 ## 7. PWA
 - 未実装（将来検討）。明示指示がない限り `manifest` / Service Worker は追加しない。
