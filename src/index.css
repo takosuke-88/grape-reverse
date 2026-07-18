@@ -10,6 +10,48 @@
   }
 }
 
+@layer components {
+  /* コラム記事: 生HTML(not-prose)内に埋め込まれた見出し・テーブルも
+     サイト共通のデザインに統一するためのクラス。
+     @tailwindcss/typography の `.prose` セレクタは `not-prose` 配下を
+     対象から除外する仕様のため、prose/not-prose に依存しない独立クラスとして定義する。
+     コラム記事のMarkdown本文（src/content/columns/*.md）では h2/h3/table/th/td に
+     個別のclassやstyleを一切付けず、素のタグのみを使うこと。 */
+  /* 「97%→110%（差13%）」のような、数字・記号・矢印が連続する非CJK文字列は
+     デフォルトでは折り返し禁止の1語として扱われ、狭い画面幅（Pixel10等 ~393px）で
+     横方向にはみ出すことがある。overflow-wrap: anywhere で強制的に折り返す。
+     `.column-article` に付与するだけで prose/not-prose 問わず配下全体に継承される。 */
+  .column-article {
+    overflow-wrap: anywhere;
+  }
+  .column-article h2 {
+    @apply mt-10 mb-4 border-b border-gray-300 pb-2 text-2xl font-bold text-gray-900 dark:border-gray-700 dark:text-white;
+  }
+  .column-article h3 {
+    @apply mt-6 mb-2 text-lg font-bold text-indigo-600 dark:text-indigo-400;
+  }
+  .column-article table {
+    @apply w-auto max-w-full border-collapse text-xs;
+  }
+  .column-article thead {
+    @apply bg-gray-100 dark:bg-gray-800;
+  }
+  .column-article th,
+  .column-article td {
+    @apply border-b border-gray-200 px-2 py-1 text-left dark:border-gray-700;
+  }
+  /* 表内で特に注目させたい数値の強調表示。色は記事ごとに変えず、この1クラスで一元管理する。
+     記事側では意味だけを示す `<strong class="highlight">` として使うこと。 */
+  .column-article strong.highlight {
+    @apply text-red-600 dark:text-red-400;
+  }
+  /* 記事末尾の「この機種の判別ツールへ」CTAボタン。記事ごとに色・形を変えず、
+     このクラス1つで統一する（文言のみ記事側で変える）。 */
+  .column-article a.cta-button {
+    @apply inline-block rounded-full bg-indigo-600 px-8 py-4 text-center font-bold text-white shadow-lg transition hover:scale-105 hover:bg-indigo-700 active:scale-95;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

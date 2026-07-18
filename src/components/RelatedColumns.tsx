@@ -1,16 +1,16 @@
 import { Link } from "react-router-dom";
-import { ATTACHED_COLUMNS } from "../data/column-list";
+import { ALL_COLUMNS } from "../data/column-content";
 
 interface RelatedColumnsProps {
   currentId: string;
 }
 
 const RelatedColumns = ({ currentId }: RelatedColumnsProps) => {
-  // 現在の記事を除外し、最新の3件を取得
-  const related = ATTACHED_COLUMNS
-    .filter((col) => col.id !== currentId)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 3);
+  // ALL_COLUMNS は日付降順ソート済み。現在の記事を除外し最新の3件を取得
+  const related = ALL_COLUMNS.filter((entry) => entry.slug !== currentId).slice(
+    0,
+    3,
+  );
 
   if (related.length === 0) return null;
 
@@ -20,15 +20,15 @@ const RelatedColumns = ({ currentId }: RelatedColumnsProps) => {
         <span className="text-indigo-500">📖</span> こちらのコラムもおすすめ
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {related.map((col) => (
+        {related.map((entry) => (
           <Link
-            key={col.id}
-            to={col.path}
+            key={entry.slug}
+            to={`/columns/${entry.slug}`}
             className="group flex flex-col bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl overflow-hidden hover:shadow-lg transition-all hover:-translate-y-1"
           >
             <div className="p-5 flex-1 flex flex-col">
               <div className="flex gap-2 mb-3">
-                {col.tags.slice(0, 2).map((tag) => (
+                {entry.frontmatter.tags.slice(0, 2).map((tag) => (
                   <span
                     key={tag}
                     className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 text-[10px] font-bold rounded-full uppercase tracking-wider"
@@ -38,10 +38,10 @@ const RelatedColumns = ({ currentId }: RelatedColumnsProps) => {
                 ))}
               </div>
               <h3 className="text-base font-bold mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
-                {col.title}
+                {entry.frontmatter.title}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-4">
-                {col.description}
+                {entry.frontmatter.description}
               </p>
               <div className="mt-auto text-indigo-600 dark:text-indigo-400 text-xs font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
                 続きを読む <span>→</span>

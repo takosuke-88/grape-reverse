@@ -9,24 +9,9 @@ import MachinePagePreview from "./pages/MachinePagePreview";
 import GrapeReversePage from "./pages/GrapeReversePage";
 import MachineSpecPage from "./pages/MachineSpecPage";
 import { AVAILABLE_MACHINES } from "./data/machine-list";
-import { ATTACHED_COLUMNS } from "./data/column-list";
-import MyJugglerColumn from "./pages/columns/myjuggler5-setting6-behavior";
-import MyJugglerStrategyColumn from "./pages/columns/myjuggler5-strategy-trap";
-import Funky2Column from "./pages/columns/funky2-setting6-behavior";
-import ImJugglerColumn from "./pages/columns/imjuggler-setting4-behavior";
-import MrJugglerColumn from "./pages/columns/mrjuggler-expectations";
-import HanahanaLosingPatternsColumn from "./pages/columns/hanahana-losing-patterns";
-import HanahanaStrategyDifferencesColumn from "./pages/columns/hanahana-strategy-differences";
-import NeoImColumn from "./pages/columns/neo-im-juggler-setting6-behavior";
-import AreGuestPerformersNecessaryColumn from "./pages/columns/are-guest-performers-necessary";
-import EveningJugglerStrategyColumn from "./pages/columns/evening-juggler-strategy";
-import RemakeBoomAnalysisColumn from "./pages/columns/remake-boom-analysis";
-import PachinkoVsSlotMarket2026Column from "./pages/columns/pachinko-vs-slot-market-2026";
-import KingHanahana2026Column from "./pages/columns/king-hanahana-2026";
-import Gogo3Column from "./pages/columns/gogo3-setting6-behavior";
-import WeeklyNews202604Week4Column from "./pages/columns/news-2026-04-week4";
-import NeoImJugglerExpectancyColumn from "./pages/columns/neo-im-juggler-expectancy";
+import { ALL_COLUMNS } from "./data/column-content";
 import ColumnIndexPage from "./pages/columns/index";
+import ColumnDetailPage from "./pages/columns/ColumnDetailPage";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToTopButton from "./components/ScrollToTopButton";
@@ -61,70 +46,7 @@ export default function App() {
 
             {/* コラム記事 */}
             <Route path="/columns" element={<ColumnIndexPage />} />
-            <Route
-              path="/columns/news-2026-04-week4"
-              element={<WeeklyNews202604Week4Column />}
-            />
-            <Route
-              path="/columns/king-hanahana-2026"
-              element={<KingHanahana2026Column />}
-            />
-            <Route
-              path="/columns/remake-boom-analysis"
-              element={<RemakeBoomAnalysisColumn />}
-            />
-            <Route
-              path="/columns/pachinko-vs-slot-market-2026"
-              element={<PachinkoVsSlotMarket2026Column />}
-            />
-            <Route
-              path="/columns/myjuggler5-setting6-behavior"
-              element={<MyJugglerColumn />}
-            />
-            <Route
-              path="/columns/myjuggler5-strategy-trap"
-              element={<MyJugglerStrategyColumn />}
-            />
-            <Route
-              path="/columns/funky2-setting6-behavior"
-              element={<Funky2Column />}
-            />
-            <Route
-              path="/columns/imjuggler-setting4-behavior"
-              element={<ImJugglerColumn />}
-            />
-            <Route
-              path="/columns/mrjuggler-expectations"
-              element={<MrJugglerColumn />}
-            />
-            <Route
-              path="/columns/hanahana-losing-patterns"
-              element={<HanahanaLosingPatternsColumn />}
-            />
-            <Route
-              path="/columns/hanahana-strategy-differences"
-              element={<HanahanaStrategyDifferencesColumn />}
-            />
-            <Route
-              path="/columns/neo-im-juggler-setting6-behavior"
-              element={<NeoImColumn />}
-            />
-            <Route
-              path="/columns/neo-im-juggler-expectancy"
-              element={<NeoImJugglerExpectancyColumn />}
-            />
-            <Route
-              path="/columns/gogo3-setting6-behavior"
-              element={<Gogo3Column />}
-            />
-            <Route
-              path="/columns/are-guest-performers-necessary"
-              element={<AreGuestPerformersNecessaryColumn />}
-            />
-            <Route
-              path="/columns/evening-juggler-strategy"
-              element={<EveningJugglerStrategyColumn />}
-            />
+            <Route path="/columns/:slug" element={<ColumnDetailPage />} />
 
             {/* デフォルトルート */}
             <Route
@@ -216,27 +138,20 @@ export default function App() {
                         <span className="w-8 h-1 bg-indigo-500 rounded-full"></span>
                       </h2>
                       <div className="flex flex-col gap-4 text-left mx-auto max-w-xl">
-                        {[...ATTACHED_COLUMNS]
-                          .sort(
-                            (a, b) =>
-                              new Date(b.date).getTime() -
-                              new Date(a.date).getTime(),
-                          )
-                          .slice(0, 3)
-                          .map((col) => (
-                            <a
-                              key={col.id}
-                              href={col.path}
-                              className="block p-4 bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:scale-[1.02] hover:shadow-md hover:border-indigo-300 group"
-                            >
-                              <h3 className="text-lg font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">
-                                {col.title}
-                              </h3>
-                              <p className="text-sm text-slate-500 line-clamp-2">
-                                {col.description}
-                              </p>
-                            </a>
-                          ))}
+                        {ALL_COLUMNS.slice(0, 3).map((entry) => (
+                          <a
+                            key={entry.slug}
+                            href={`/columns/${entry.slug}`}
+                            className="block p-4 bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:scale-[1.02] hover:shadow-md hover:border-indigo-300 group"
+                          >
+                            <h3 className="text-lg font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">
+                              {entry.frontmatter.title}
+                            </h3>
+                            <p className="text-sm text-slate-500 line-clamp-2">
+                              {entry.frontmatter.description}
+                            </p>
+                          </a>
+                        ))}
                       </div>
                     </div>
                   </div>
