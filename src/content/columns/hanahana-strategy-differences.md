@@ -22,7 +22,7 @@ showRelatedColumns: false
 機種が変わってもベル数えてBIG中のスイカ見てフェザーランプ確認して……この流れ自体は変わらない。基本骨格は一緒だ。ただ、「どうせ全部同じハナハナでしょ」って感覚で座ると、機種ごとに仕込まれてる微妙な差異を見逃す。で、気づいたときには判断が狂ってる。そういう経験、ない？
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   まず押さえるべき「変わらない部分」
 </h2>
 </div>
@@ -40,7 +40,7 @@ showRelatedColumns: false
 この3本柱はキング系だろうがプレミアムだろうが揺るがない。ベルカウンター持たずに座るとか、フラッシュの色を適当に流してるとか、そんな状態なら機種がどうこう以前の話。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   スペックの「振れ幅」が意外とバラバラ
 </h2>
 </div>
@@ -58,7 +58,7 @@ showRelatedColumns: false
 この幅、馬鹿にできない。差が広い機種ほど低設定を引いたときの逃げ足が勝負を分ける。逆に言えば粘って負けたときのダメージがエグい。設定6の天井も機種で変わるから、イベント狙いするなら「今日この店に入ってる機種は何か」まで見ないと期待値の計算そのものがズレる。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   フェザーランプの「文法」が機種で変わる罠
 </h2>
 </div>
@@ -70,7 +70,7 @@ showRelatedColumns: false
 つまり。朝一で赤フラッシュ出て「よっしゃ高設定！！」って喜ぶのは早とちり。それ、据え置きか変更かを教えてるだけ。機種変えてこのルール知らないまま打つと、全く意味の違う情報を設定判別の材料にしちゃう。これ、致命的。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   ベルの設定差も機種で濃淡がある
 </h2>
 </div>
@@ -87,7 +87,7 @@ showRelatedColumns: false
 正直、この差を1日1万回転回して「あ、これ設定6だわ」って体感で判断するのは無理ゲー。ベル単体で確定させようとするんじゃなくて、合算・BIG比率・フェザーと全部合わせて見る。GrapeReverseみたいなツールで小役逆算しながら多角的に詰めていく——この姿勢はどの機種打つときも変わらない。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   結局どうすりゃいいのか
 </h2>
 </div>
@@ -98,14 +98,11 @@ showRelatedColumns: false
 
 <div class="not-prose">
 <div class="my-10 text-center">
-  <h2 class="text-lg font-bold mb-4 text-gray-900 dark:text-white">
+  <h2>
     今の台のベル確率、足りてる？逆算ツールでチェック！
   </h2>
-  <a
-    href="/#hana"
-    class="inline-block bg-gradient-to-r from-purple-600 to-red-600 hover:from-purple-700 hover:to-red-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform transition hover:scale-105"
-  >
-    ハナハナシリーズの設定判別・ベル逆算ツール一覧へ
+  <a href="/#hana" class="cta-button">
+    ハナハナシリーズの設定判別ツール一覧へ
   </a>
 </div>
 </div>

@@ -25,7 +25,7 @@ showRelatedColumns: false
   むしろスペックはアイムより上だ。
 </p>
 
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   基本スペックを確認する
 </h2>
 
@@ -34,51 +34,51 @@ showRelatedColumns: false
 メーカー（北電子）公表のスペックは以下の通り。
 
 <div class="not-prose overflow-x-auto my-6">
-  <table class="min-w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm sm:text-base">
+  <table>
     <thead>
-      <tr class="bg-gray-100 dark:bg-gray-700">
-        <th class="py-2 px-4 border-b dark:border-gray-600 text-left text-gray-800 dark:text-gray-200">設定</th>
-        <th class="py-2 px-4 border-b dark:border-gray-600 text-left text-gray-800 dark:text-gray-200">BIG確率</th>
-        <th class="py-2 px-4 border-b dark:border-gray-600 text-left text-gray-800 dark:text-gray-200">REG確率</th>
-        <th class="py-2 px-4 border-b dark:border-gray-600 text-left text-gray-800 dark:text-gray-200">合算確率</th>
-        <th class="py-2 px-4 border-b dark:border-gray-600 text-left text-gray-800 dark:text-gray-200">公表機械割</th>
+      <tr>
+        <th>設定</th>
+        <th>BIG確率</th>
+        <th>REG確率</th>
+        <th>合算確率</th>
+        <th>公表機械割</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">1</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">1/268.6</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">1/374.5</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">1/156.4</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">97.0%</td>
+        <td>1</td>
+        <td>1/268.6</td>
+        <td>1/374.5</td>
+        <td>1/156.4</td>
+        <td>97.0%</td>
       </tr>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">3</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">1/260.1</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">1/331.0</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">1/145.6</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">99.8%</td>
+        <td>3</td>
+        <td>1/260.1</td>
+        <td>1/331.0</td>
+        <td>1/145.6</td>
+        <td>99.8%</td>
       </tr>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300 font-bold">4</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">1/249.2</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">1/291.3</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">1/134.3</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 font-bold text-red-600">102.7%</td>
+        <td><strong>4</strong></td>
+        <td>1/249.2</td>
+        <td>1/291.3</td>
+        <td>1/134.3</td>
+        <td><strong class="highlight">102.7%</strong></td>
       </tr>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">5</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">1/240.9</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">1/257.0</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">1/124.4</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">105.5%</td>
+        <td>5</td>
+        <td>1/240.9</td>
+        <td>1/257.0</td>
+        <td>1/124.4</td>
+        <td>105.5%</td>
       </tr>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300 font-bold">6</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">1/237.4</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">1/237.4</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">1/118.7</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 font-bold text-red-600">107.3%</td>
+        <td><strong>6</strong></td>
+        <td>1/237.4</td>
+        <td>1/237.4</td>
+        <td>1/118.7</td>
+        <td><strong class="highlight">107.3%</strong></td>
       </tr>
     </tbody>
   </table>
@@ -91,7 +91,7 @@ showRelatedColumns: false
 設定判別の要であるぶどう確率にも設定差がある。設定1が1/6.13、設定6で1/5.82。差としては小さいが、<a href="/">GrapeReverse</a>みたいなぶどう逆算ツールで丁寧に追えば、設定域の絞り込みには使える。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   打ち方別の機械割：ここが最重要
 </h2>
 </div>
@@ -99,45 +99,45 @@ showRelatedColumns: false
 「難しそう」の正体はここだ。ミスタージャグラーにはチェリー狙い・中押しフル攻略など複数の打ち方があって、機械割がけっこう変わる。スロットライター・ガリぞう氏の試算がもっとも信頼できる。
 
 <div class="not-prose overflow-x-auto my-6">
-  <table class="min-w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm sm:text-base">
+  <table>
     <thead>
-      <tr class="bg-gray-100 dark:bg-gray-700">
-        <th class="py-2 px-4 border-b dark:border-gray-600 text-left text-gray-800 dark:text-gray-200">設定</th>
-        <th class="py-2 px-4 border-b dark:border-gray-600 text-left text-gray-800 dark:text-gray-200">適当打ち（公表値）</th>
-        <th class="py-2 px-4 border-b dark:border-gray-600 text-left text-gray-800 dark:text-gray-200">チェリー狙い</th>
-        <th class="py-2 px-4 border-b dark:border-gray-600 text-left text-gray-800 dark:text-gray-200">フル攻略（中押し）</th>
+      <tr>
+        <th>設定</th>
+        <th>適当打ち（公表値）</th>
+        <th>チェリー狙い</th>
+        <th>フル攻略（中押し）</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">1</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">97.0%</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">98.1%</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">99.5%</td>
+        <td>1</td>
+        <td>97.0%</td>
+        <td>98.1%</td>
+        <td>99.5%</td>
       </tr>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300 font-bold">3</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">99.8%</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 font-bold text-blue-600">101.0%</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">102.4%</td>
+        <td><strong>3</strong></td>
+        <td>99.8%</td>
+        <td><strong class="highlight">101.0%</strong></td>
+        <td>102.4%</td>
       </tr>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300 font-bold">4</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">102.7%</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 font-bold text-red-600">103.8%</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">105.2%</td>
+        <td><strong>4</strong></td>
+        <td>102.7%</td>
+        <td><strong class="highlight">103.8%</strong></td>
+        <td>105.2%</td>
       </tr>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">5</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">105.5%</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 font-bold text-red-600">106.7%</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">108.1%</td>
+        <td>5</td>
+        <td>105.5%</td>
+        <td><strong class="highlight">106.7%</strong></td>
+        <td>108.1%</td>
       </tr>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300 font-bold">6</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">107.3%</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 font-bold text-red-600">108.5%</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">109.9%</td>
+        <td><strong>6</strong></td>
+        <td>107.3%</td>
+        <td><strong class="highlight">108.5%</strong></td>
+        <td>109.9%</td>
       </tr>
     </tbody>
   </table>
@@ -146,7 +146,7 @@ showRelatedColumns: false
 注目すべきは<strong>設定3でさえチェリー狙いで101.0%に届く点</strong>だ。アイムの設定3（チェリー狙いで100.2%前後）より明確に上。
 
 <div class="not-prose my-8 p-6 bg-blue-50 dark:bg-gray-800 rounded-lg border border-blue-100 dark:border-gray-700">
-  <h3 class="text-xl font-bold mb-4 text-blue-800 dark:text-blue-300">
+  <h3>
     チェリー狙いだけで十分、フル攻略は「余力があれば」
   </h3>
   <p class="text-gray-700 dark:text-gray-300 mb-4">
@@ -159,7 +159,7 @@ showRelatedColumns: false
 </div>
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   設置状況とホールの設定事情
 </h2>
 </div>
@@ -174,16 +174,13 @@ showRelatedColumns: false
   <p class="text-lg font-bold mb-4 text-gray-900 dark:text-white">
     その台の「本当の姿」を今すぐチェック！
   </p>
-  <a
-    href="/mrjuggler"
-    class="inline-block bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform transition hover:scale-105"
-  >
-    GrapeReverseで判別する
+  <a href="/mr" class="cta-button">
+    ミスタージャグラーの設定判別ツールを使う
   </a>
 </div>
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   結論：初心者でも勝てる？打つ価値は？
 </h2>
 </div>
@@ -202,17 +199,14 @@ showRelatedColumns: false
 </p>
 
 <div class="mt-12 p-8 bg-gray-100 dark:bg-gray-800 rounded-xl text-center">
-  <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+  <h2>
     さあ、ホールで答え合わせをしよう
   </h2>
   <p class="mb-6 text-gray-600 dark:text-gray-300">
     登録不要・完全無料で使えます。
   </p>
-  <a
-    href="/mrjuggler"
-    class="inline-block bg-[#D81B60] hover:bg-pink-700 text-white font-bold py-3 px-10 rounded-lg shadow-md transition"
-  >
-    今すぐツールで判別する
+  <a href="/mr" class="cta-button">
+    ミスタージャグラーの設定判別ツールを使う
   </a>
 </div>
 </div>

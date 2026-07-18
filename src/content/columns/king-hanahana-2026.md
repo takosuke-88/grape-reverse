@@ -28,7 +28,7 @@ showRelatedColumns: false
 そこを間違えると、ずっと1〜2を回し続けることになる。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   ホールの本音：設定が入るのはイベント日だけ
 </h2>
 </div>
@@ -48,7 +48,7 @@ showRelatedColumns: false
 </div>
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   問題は、ニューキングVが来たこと
 </h2>
 </div>
@@ -70,7 +70,7 @@ showRelatedColumns: false
 導入したばかりの新台に集中投下するのがホールの定石だ。旧機種に設定を分けるのは、よほど特定イベントか周年の場面に絞られてくる。旧キングに設定が入りやすくなる日は来ない。これは断言できる。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   それでもキングハナハナを打つなら
 </h2>
 </div>
@@ -82,7 +82,7 @@ showRelatedColumns: false
 
 <div class="space-y-8 bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 mb-10">
   <div>
-    <h3 class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-2 flex items-center gap-2">
+    <h3>
       <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 text-white text-xs">1</span>
       取材・周年・大型イベントを確認してから行く
     </h3>
@@ -92,7 +92,7 @@ showRelatedColumns: false
   </div>
 
   <div>
-    <h3 class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-2 flex items-center gap-2">
+    <h3>
       <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 text-white text-xs">2</span>
       ベルとぶどうは必ずカウントする
     </h3>
@@ -104,7 +104,7 @@ showRelatedColumns: false
   </div>
 
   <div>
-    <h3 class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-2 flex items-center gap-2">
+    <h3>
       <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 text-white text-xs">3</span>
       ニューキングVも選択肢に入れる
     </h3>
@@ -126,16 +126,13 @@ showRelatedColumns: false
 結局のところ、それだけの話だ。
 
 <div class="not-prose mt-12 p-8 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-center border border-indigo-100 dark:border-indigo-900">
-  <h2 class="text-2xl font-bold mb-4 text-indigo-900 dark:text-white">
+  <h2>
     本当に「今座っている台」は追うべきか？
   </h2>
   <p class="mb-6 text-gray-600 dark:text-gray-300">
     今のデータを見切る基準として、ツールを活用してみよう。
   </p>
-  <a
-    href="/king-hanahana"
-    class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-10 rounded-lg shadow-md transition"
-  >
-    今すぐツールで判別する
+  <a href="/king-hanahana" class="cta-button">
+    キングハナハナ-30の設定判別ツールを使う
   </a>
 </div>

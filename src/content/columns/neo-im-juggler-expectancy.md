@@ -26,7 +26,7 @@ showRelatedColumns: false
   ジャグラーシリーズの代名詞とも言える「アイムジャグラー」シリーズ。その6号機における最新形、ネオアイムジャグラーEXの期待値を本気で掘り下げてみよう。本機は「甘くない」と切り捨てられがちだが、打ち方ひとつで期待値は劇的に変化する。
 </p>
 
-<h2 class="text-xl font-bold mt-12 mb-6 border-b-2 border-red-200 dark:border-red-800 pb-2 flex items-center gap-2">
+<h2>
   <span class="bg-red-600 text-white p-1 rounded text-sm font-mono">SPEC</span>
   打ち方別・設定別の期待差枚（7000G）
 </h2>
@@ -37,58 +37,58 @@ showRelatedColumns: false
 </p>
 
 <div class="overflow-x-auto my-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-  <table class="min-w-full text-sm text-left border-collapse">
-    <thead class="bg-gray-100 dark:bg-gray-800">
+  <table>
+    <thead>
       <tr>
-        <th class="px-4 py-3 border-b dark:border-gray-700 font-bold">設定</th>
-        <th class="px-4 py-3 border-b dark:border-gray-700 font-bold text-center">適当打ち 機械割</th>
-        <th class="px-4 py-3 border-b dark:border-gray-700 font-bold text-center">適当打ち 期待差枚</th>
-        <th class="px-4 py-3 border-b dark:border-gray-700 font-bold text-center">チェリー狙い 機械割</th>
-        <th class="px-4 py-3 border-b dark:border-gray-700 font-bold text-center">チェリー狙い 期待差枚</th>
+        <th><strong>設定</strong></th>
+        <th><strong>適当打ち 機械割</strong></th>
+        <th><strong>適当打ち 期待差枚</strong></th>
+        <th><strong>チェリー狙い 機械割</strong></th>
+        <th><strong>チェリー狙い 期待差枚</strong></th>
       </tr>
     </thead>
     <tbody>
-      <tr class="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-700">
-        <td class="px-4 py-3 font-bold">設定1</td>
-        <td class="px-4 py-3 text-center">97.0%</td>
-        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400">-630枚</td>
-        <td class="px-4 py-3 text-center">98.4%</td>
-        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400">-336枚</td>
+      <tr>
+        <td><strong>設定1</strong></td>
+        <td>97.0%</td>
+        <td>-630枚</td>
+        <td>98.4%</td>
+        <td>-336枚</td>
       </tr>
-      <tr class="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-700">
-        <td class="px-4 py-3 font-bold">設定2</td>
-        <td class="px-4 py-3 text-center">98.0%</td>
-        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400">-420枚</td>
-        <td class="px-4 py-3 text-center">99.4%</td>
-        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400">-126枚</td>
+      <tr>
+        <td><strong>設定2</strong></td>
+        <td>98.0%</td>
+        <td>-420枚</td>
+        <td>99.4%</td>
+        <td>-126枚</td>
       </tr>
-      <tr class="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-700">
-        <td class="px-4 py-3 font-bold">設定3</td>
-        <td class="px-4 py-3 text-center">99.5%</td>
-        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400">-105枚</td>
-        <td class="px-4 py-3 text-center">100.9%</td>
-        <td class="px-4 py-3 text-center text-red-600 dark:text-red-400 font-bold">+376枚</td>
+      <tr>
+        <td><strong>設定3</strong></td>
+        <td>99.5%</td>
+        <td>-105枚</td>
+        <td>100.9%</td>
+        <td><strong class="highlight">+376枚</strong></td>
       </tr>
-      <tr class="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-700">
-        <td class="px-4 py-3 font-bold">設定4</td>
-        <td class="px-4 py-3 text-center">101.1%</td>
-        <td class="px-4 py-3 text-center text-red-600 dark:text-red-400 font-bold">+231%</td>
-        <td class="px-4 py-3 text-center">102.5%</td>
-        <td class="px-4 py-3 text-center text-red-600 dark:text-red-400 font-bold">+531枚</td>
+      <tr>
+        <td><strong>設定4</strong></td>
+        <td>101.1%</td>
+        <td><strong class="highlight">+231%</strong></td>
+        <td>102.5%</td>
+        <td><strong class="highlight">+531枚</strong></td>
       </tr>
-      <tr class="bg-yellow-50 dark:bg-yellow-900/20 border-b border-gray-200 dark:border-gray-700 font-bold">
-        <td class="px-4 py-3 text-gray-900 dark:text-white">設定5</td>
-        <td class="px-4 py-3 text-center text-gray-900 dark:text-white">103.3%</td>
-        <td class="px-4 py-3 text-center text-red-600 dark:text-red-400 font-bold">+693枚</td>
-        <td class="px-4 py-3 text-center text-gray-900 dark:text-white">104.9%</td>
-        <td class="px-4 py-3 text-center text-red-600 dark:text-red-400 font-bold">+1,035枚</td>
+      <tr>
+        <td>設定5</td>
+        <td>103.3%</td>
+        <td><strong class="highlight">+693枚</strong></td>
+        <td>104.9%</td>
+        <td><strong class="highlight">+1,035枚</strong></td>
       </tr>
-      <tr class="bg-yellow-50 dark:bg-yellow-900/20 border-b border-gray-200 dark:border-gray-700 font-bold">
-        <td class="px-4 py-3 text-gray-900 dark:text-white">設定6</td>
-        <td class="px-4 py-3 text-center text-gray-900 dark:text-white">105.5%</td>
-        <td class="px-4 py-3 text-center text-red-600 dark:text-red-400 font-bold">+1,155枚</td>
-        <td class="px-4 py-3 text-center text-gray-900 dark:text-white">107.3%</td>
-        <td class="px-4 py-3 text-center text-red-600 dark:text-red-400 font-bold">+1,531枚</td>
+      <tr>
+        <td>設定6</td>
+        <td>105.5%</td>
+        <td><strong class="highlight">+1,155枚</strong></td>
+        <td>107.3%</td>
+        <td><strong class="highlight">+1,531枚</strong></td>
       </tr>
     </tbody>
   </table>
@@ -98,14 +98,14 @@ showRelatedColumns: false
   ※期待差枚は 7000G × 3枚 × (機械割 - 100)% に基づき、チェリー狙い補正を加味したシミュレーション値。
 </p>
 
-<h2 class="text-xl font-bold mt-12 mb-6 border-b-2 border-red-200 dark:border-red-800 pb-2">
+<h2>
   各設定のリアルな期待度と戦略
 </h2>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">
   <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-orange-100 dark:border-orange-900/30 shadow-sm flex flex-col justify-between">
     <div>
-      <h3 class="text-lg font-bold mb-2 text-orange-700 dark:text-orange-400 mt-0 flex items-center gap-2">
+      <h3>
         <span>⚠️</span> 設定3の位置づけ
       </h3>
       <p class="text-sm text-gray-700 dark:text-gray-300 m-0">
@@ -120,7 +120,7 @@ showRelatedColumns: false
 
   <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm flex flex-col justify-between">
     <div>
-      <h3 class="text-lg font-bold mb-2 text-emerald-700 dark:text-emerald-400 mt-0 flex items-center gap-2">
+      <h3>
         <span>📈</span> 設定4以上で一気に変わる
       </h3>
       <p class="text-sm text-gray-700 dark:text-gray-300 m-0">
@@ -135,7 +135,7 @@ showRelatedColumns: false
 
   <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-blue-100 dark:border-blue-900/30 shadow-sm flex flex-col justify-between">
     <div>
-      <h3 class="text-lg font-bold mb-2 text-blue-700 dark:text-blue-400 mt-0 flex items-center gap-2">
+      <h3>
         <span>💎</span> 設定5の十分なポテンシャル
       </h3>
       <p class="text-sm text-gray-700 dark:text-gray-300 m-0">
@@ -150,7 +150,7 @@ showRelatedColumns: false
 
   <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-pink-100 dark:border-pink-900/30 shadow-sm flex flex-col justify-between">
     <div>
-      <h3 class="text-lg font-bold mb-2 text-pink-700 dark:text-pink-400 mt-0 flex items-center gap-2">
+      <h3>
         <span>🔥</span> 設定6は最高到達点
       </h3>
       <p class="text-sm text-gray-700 dark:text-gray-300 m-0">
@@ -164,7 +164,7 @@ showRelatedColumns: false
   </div>
 </div>
 
-<h2 class="text-xl font-bold mt-12 mb-6 border-b-2 border-red-200 dark:border-red-800 pb-2">
+<h2>
   期待値が一番低い機種は本当に「勝てない」のか？
 </h2>
 <p class="mb-6">
@@ -177,7 +177,7 @@ showRelatedColumns: false
   「単体スペックの期待値」だけで台を選ぶのではなく、「ホールでのツモりやすさを含めた実質期待値」で考えることこそが、常勝への鍵となる。
 </p>
 
-<h2 class="text-xl font-bold mt-12 mb-6 border-b-2 border-red-200 dark:border-red-800 pb-2">
+<h2>
   結論：ネオアイムをどう打つか
 </h2>
 <p class="mb-6">
@@ -190,18 +190,14 @@ showRelatedColumns: false
 </ul>
 
 <div class="bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/10 dark:to-pink-900/10 p-8 rounded-3xl mt-16 text-center border border-red-100 dark:border-red-800/30">
-  <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">確実な設定判別こそが勝利への近道</h2>
+  <h2>確実な設定判別こそが勝利への近道</h2>
   <p class="text-sm text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
     ネオアイムの真価を引き出すには、正確な数値把握が不可欠。
     <br />
     一時の波に惑わされない、データに基づいた堅実な立ち回りを。
   </p>
-  <a
-    href="/aimex"
-    class="inline-flex items-center gap-3 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-bold py-4 px-10 rounded-full shadow-xl transform transition hover:scale-105 active:scale-95 animate-pulse"
-  >
-    <span>🍇</span>
-    ネオアイムジャグラーの設定判別ページ
+  <a href="/aimex" class="cta-button">
+    ネオアイムジャグラーEXの設定判別ツールを使う
   </a>
 </div>
 

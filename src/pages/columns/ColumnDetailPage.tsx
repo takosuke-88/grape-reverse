@@ -44,7 +44,7 @@ const ColumnDetailPage = () => {
         pagePath={`/columns/${entry.slug}`}
       />
       <main className="container mx-auto px-4 py-8 max-w-3xl">
-        <div className="prose dark:prose-invert max-w-none">
+        <div className="column-article prose dark:prose-invert max-w-none">
           <ColumnRenderErrorBoundary>
             <ReactMarkdown
               rehypePlugins={[rehypeRaw]}

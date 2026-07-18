@@ -31,7 +31,7 @@ showRelatedColumns: true
   </p>
 </div>
 
-<h2 class="text-2xl font-bold mt-12 mb-6 border-l-4 border-indigo-500 pl-4 py-1 text-slate-900 dark:text-white">
+<h2>
   リメイクが量産される構造的な理由
 </h2>
 
@@ -46,7 +46,7 @@ showRelatedColumns: true
 つまりリメイクブームは、業界が新しいものを作れなくなったからじゃない。<strong>新しいものを作るリスクを取れなくなったことの裏返しなんだ。</strong>
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-12 mb-6 border-l-4 border-indigo-500 pl-4 py-1 text-slate-900 dark:text-white">
+<h2>
   吉宗とミリゴの「期待と不安」
 </h2>
 </div>
@@ -60,7 +60,7 @@ showRelatedColumns: true
 シリーズの象徴である「GODを引く」体験の希少性が上がった。だがそれは「一生GODが来ない」という絶望感と表裏一体でもある。設定4で機械割106.9%という数字は申し分ないが、この確率設計を受け入れられるかどうかが評価の分かれ目になる。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-12 mb-6 border-l-4 border-indigo-500 pl-4 py-1 text-slate-900 dark:text-white">
+<h2>
   「懐かし台」は本当に懐かしさで打たれているのか
 </h2>
 </div>
@@ -72,7 +72,7 @@ showRelatedColumns: true
 つまりリメイクブームは、ユーザーの懐古心を狙っているように見えて、実際には<strong>「聞いたことがある名前は打ちやすい」という心理的ハードルの低さ</strong>を利用したマーケティングに近い。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-12 mb-6 border-l-4 border-indigo-500 pl-4 py-1 text-slate-900 dark:text-white">
+<h2>
   ノーマル機との向き合い方という視点
 </h2>
 </div>

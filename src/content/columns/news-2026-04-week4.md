@@ -13,7 +13,7 @@ showRelatedColumns: false
   今週のパチンコ・パチスロニュース（2026年4月20日〜26日）
 </h1>
 
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   4月20日、GW突入前の新台6機種導入
 </h2>
 
@@ -28,7 +28,7 @@ showRelatedColumns: false
 タイミングとしては、GW直前の月曜導入。狙い方によっては新台開放初日が使えるけど、逆にいうと「GWに向けて設定を絞る前の一瞬」でもある。初週データの読み方が勝負を分ける週になる。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   GW商戦2026、ホールは「出す」のか「抜く」のか
 </h2>
 </div>
@@ -44,7 +44,7 @@ showRelatedColumns: false
 今年のGWにどのホールが信頼を積みに行くのか。それを見極めるのも立ち回りのうちだ。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   「パチスロがパチンコを超える年」になるかもしれない
 </h2>
 </div>
@@ -62,7 +62,7 @@ showRelatedColumns: false
 ホール側の設備投資コストの問題もある。パチンコ台を全部スマスロに切り替えようとすると、イニシャルコストが重くのしかかる。何を育て、何を手放すか——その判断が今、各ホールに突きつけられてる。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   来月注目：スマスロ ビッグドリーム THE GOLDEN PUSHER（5/11導入）
 </h2>
 </div>

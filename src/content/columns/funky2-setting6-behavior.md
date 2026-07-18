@@ -29,7 +29,7 @@ showRelatedColumns: false
   ファンキージャグラー2で勝つには、派手さの裏にある「地味な数字」を見なきゃダメなんです。
 </p>
 
-<h2 class="text-xl font-bold mt-10 mb-4 border-b-2 border-purple-200 dark:border-purple-800 pb-2">
+<h2>
   BIG確率は無視してOK！設定1でも引けちゃうんです
 </h2>
 <p class="mb-4">
@@ -38,21 +38,21 @@ showRelatedColumns: false
 </p>
 
 <div class="my-6 overflow-x-auto">
-  <table class="min-w-full text-sm text-left border border-gray-300 dark:border-gray-700">
-    <thead class="bg-gray-100 dark:bg-gray-800">
+  <table>
+    <thead>
       <tr>
-        <th class="px-4 py-2 border-b dark:border-gray-700">設定</th>
-        <th class="px-4 py-2 border-b dark:border-gray-700">BIG確率</th>
+        <th>設定</th>
+        <th>BIG確率</th>
       </tr>
     </thead>
     <tbody>
-      <tr class="bg-white dark:bg-gray-900">
-        <td class="px-4 py-2 border-b dark:border-gray-700">設定1</td>
-        <td class="px-4 py-2 border-b dark:border-gray-700">1/266</td>
+      <tr>
+        <td>設定1</td>
+        <td>1/266</td>
       </tr>
-      <tr class="bg-purple-50 dark:bg-gray-800 font-bold">
-        <td class="px-4 py-2 border-b dark:border-gray-700">設定6</td>
-        <td class="px-4 py-2 border-b dark:border-gray-700 text-purple-600 dark:text-purple-300">1/219</td>
+      <tr>
+        <td>設定6</td>
+        <td><strong class="highlight">1/219</strong></td>
       </tr>
     </tbody>
   </table>
@@ -67,7 +67,7 @@ showRelatedColumns: false
   短期的な勝負なら、設定1でも平気で1/200を切ってきます。「BIGが走ってるから高設定」という考え方。これが私がボコボコにされた原因でした。
 </p>
 
-<h2 class="text-xl font-bold mt-10 mb-4 border-b-2 border-purple-200 dark:border-purple-800 pb-2">
+<h2>
   ファンキージャグラー2の設定6判別は「単独REG」がカギ！
 </h2>
 <p class="mb-4">
@@ -77,21 +77,21 @@ showRelatedColumns: false
 </p>
 
 <div class="my-6 overflow-x-auto">
-  <table class="min-w-full text-sm text-left border border-gray-300 dark:border-gray-700">
-    <thead class="bg-gray-100 dark:bg-gray-800">
+  <table>
+    <thead>
       <tr>
-        <th class="px-4 py-2 border-b dark:border-gray-700">設定</th>
-        <th class="px-4 py-2 border-b dark:border-gray-700">単独REG確率</th>
+        <th>設定</th>
+        <th>単独REG確率</th>
       </tr>
     </thead>
     <tbody>
-      <tr class="bg-white dark:bg-gray-900">
-        <td class="px-4 py-2 border-b dark:border-gray-700">設定1</td>
-        <td class="px-4 py-2 border-b dark:border-gray-700">約 1/460</td>
+      <tr>
+        <td>設定1</td>
+        <td>約 1/460</td>
       </tr>
-      <tr class="bg-purple-50 dark:bg-gray-800 font-bold">
-        <td class="px-4 py-2 border-b dark:border-gray-700">設定6</td>
-        <td class="px-4 py-2 border-b dark:border-gray-700 text-purple-600 dark:text-purple-300">約 1/330</td>
+      <tr>
+        <td>設定6</td>
+        <td><strong class="highlight">約 1/330</strong></td>
       </tr>
     </tbody>
   </table>
@@ -103,7 +103,7 @@ showRelatedColumns: false
   。体感できるレベルで違います。
 </p>
 <div class="bg-yellow-50 dark:bg-yellow-900/30 p-4 rounded-lg border border-yellow-200 dark:border-yellow-700 my-4">
-  <h3 class="font-bold text-yellow-800 dark:text-yellow-200 mb-2">
+  <h3>
     ホールのデータ機の落とし穴
   </h3>
   <p class="text-sm">
@@ -114,7 +114,7 @@ showRelatedColumns: false
   </p>
 </div>
 
-<h2 class="text-xl font-bold mt-10 mb-4 border-b-2 border-purple-200 dark:border-purple-800 pb-2">
+<h2>
   ファンキージャグラー2はぶどう確率も裏切らない
 </h2>
 <p class="mb-4">
@@ -123,21 +123,21 @@ showRelatedColumns: false
 </p>
 
 <div class="my-6 overflow-x-auto">
-  <table class="min-w-full text-sm text-left border border-gray-300 dark:border-gray-700">
-    <thead class="bg-gray-100 dark:bg-gray-800">
+  <table>
+    <thead>
       <tr>
-        <th class="px-4 py-2 border-b dark:border-gray-700">設定</th>
-        <th class="px-4 py-2 border-b dark:border-gray-700">ぶどう確率</th>
+        <th>設定</th>
+        <th>ぶどう確率</th>
       </tr>
     </thead>
     <tbody>
-      <tr class="bg-white dark:bg-gray-900">
-        <td class="px-4 py-2 border-b dark:border-gray-700">設定1</td>
-        <td class="px-4 py-2 border-b dark:border-gray-700">約 1/5.85</td>
+      <tr>
+        <td>設定1</td>
+        <td>約 1/5.85</td>
       </tr>
-      <tr class="bg-purple-50 dark:bg-gray-800 font-bold">
-        <td class="px-4 py-2 border-b dark:border-gray-700">設定6</td>
-        <td class="px-4 py-2 border-b dark:border-gray-700 text-purple-600 dark:text-purple-300">約 1/5.60</td>
+      <tr>
+        <td>設定6</td>
+        <td><strong class="highlight">約 1/5.60</strong></td>
       </tr>
     </tbody>
   </table>
@@ -152,7 +152,7 @@ showRelatedColumns: false
 </p>
 
 <div class="bg-gray-100 dark:bg-gray-800 p-6 rounded-xl mt-10">
-  <h2 class="text-xl font-bold mb-4">まとめ</h2>
+  <h2>まとめ</h2>
   <ul class="list-disc pl-5 space-y-2 mb-6">
     <li>BIG確率は参考程度（設定差が小さい）</li>
     <li><strong>単独REG確率</strong>が最重要（1/460 vs 1/330）</li>
@@ -164,11 +164,8 @@ showRelatedColumns: false
   </p>
 
   <div class="text-center">
-    <a
-      href="/funky2"
-      class="inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform transition hover:scale-105"
-    >
-      ファンキー2 設定判別ツールを使う
+    <a href="/funky2" class="cta-button">
+      ファンキージャグラー2の設定判別ツールを使う
     </a>
   </div>
 </div>

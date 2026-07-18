@@ -25,7 +25,7 @@ showRelatedColumns: false
   メーカー公表の適当打ちだと105.5%。チェリーきっちり狙うと107.3%まで伸びる。数字だけ見ると「おお、強い」って感じるんだけど、後で他機種と比べるとちょっと印象変わるかもしれない。
 </p>
 
-<h2 class="text-xl font-bold mt-12 mb-6 border-b-2 border-red-200 dark:border-red-800 pb-2 flex items-center gap-2">
+<h2>
   <span class="bg-red-600 text-white p-1 rounded text-sm">DATA</span>
   7000G回したシミュレーション（10万日分）の結果
 </h2>
@@ -53,13 +53,13 @@ showRelatedColumns: false
   勝率85.5%。裏を返せば、約15%は負ける。設定6でも7日打ったら1日は負ける計算。これ、意外と見落とされがち。
 </p>
 
-<h2 class="text-xl font-bold mt-12 mb-6 border-b-2 border-red-200 dark:border-red-800 pb-2">
+<h2>
   設定6の「勝ちグラフ」、パターンは3つ
 </h2>
 
 <div class="space-y-6">
   <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
-    <h3 class="text-lg font-bold mb-3 flex items-center gap-2 text-emerald-700 dark:text-emerald-400 mt-0">
+    <h3>
       📈 パターンA：王道の右肩上がり（+2,000〜+3,500枚）
     </h3>
     <p class="text-sm m-0">
@@ -68,7 +68,7 @@ showRelatedColumns: false
   </div>
 
   <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
-    <h3 class="text-lg font-bold mb-3 flex items-center gap-2 text-emerald-700 dark:text-emerald-400 mt-0">
+    <h3>
       📈 パターンB：中盤まで死んで後半に息を吹き返す（+1,000〜+2,000枚）
     </h3>
     <p class="text-sm m-0">
@@ -77,7 +77,7 @@ showRelatedColumns: false
   </div>
 
   <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
-    <h3 class="text-lg font-bold mb-3 flex items-center gap-2 text-emerald-700 dark:text-emerald-400 mt-0">
+    <h3>
       📈 パターンC：淡々とプラス維持（+500〜+1,500枚）
     </h3>
     <p class="text-sm m-0">
@@ -86,7 +86,7 @@ showRelatedColumns: false
   </div>
 </div>
 
-<h2 class="text-xl font-bold mt-12 mb-6 border-b-2 border-red-200 dark:border-red-800 pb-2">
+<h2>
   「負けグラフ」も存在する——設定6なのに
 </h2>
 <p class="mb-6">
@@ -95,7 +95,7 @@ showRelatedColumns: false
 
 <div class="space-y-6">
   <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-orange-100 dark:border-orange-900/30 shadow-sm">
-    <h3 class="text-lg font-bold mb-3 flex items-center gap-2 text-orange-700 dark:text-orange-400 mt-0">
+    <h3>
       📉 パターンD：BIG偏りでREG不発（−300〜−800枚）
     </h3>
     <p class="text-sm m-0 text-orange-950 dark:text-orange-200/80">
@@ -104,7 +104,7 @@ showRelatedColumns: false
   </div>
 
   <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-red-100 dark:border-red-900/30 shadow-sm">
-    <h3 class="text-lg font-bold mb-3 flex items-center gap-2 text-red-700 dark:text-red-400 mt-0">
+    <h3>
       📉 パターンE：終日ハマり連打（−1,000〜−2,000枚）
     </h3>
     <p class="text-sm m-0 text-red-950 dark:text-red-200/80">
@@ -113,38 +113,38 @@ showRelatedColumns: false
   </div>
 </div>
 
-<h2 class="text-xl font-bold mt-12 mb-6 border-b-2 border-red-200 dark:border-red-800 pb-2">
+<h2>
   AT機（北斗転生2・スマスロGOD）と並べてみる
 </h2>
 
 <div class="overflow-x-auto my-6 rounded-xl border border-gray-200 dark:border-gray-700">
-  <table class="min-w-full text-sm text-left border-collapse">
-    <thead class="bg-gray-100 dark:bg-gray-800">
+  <table>
+    <thead>
       <tr>
-        <th class="px-4 py-3 border-b dark:border-gray-700 font-bold">機種</th>
-        <th class="px-4 py-3 border-b dark:border-gray-700 font-bold text-center">設定6機械割</th>
-        <th class="px-4 py-3 border-b dark:border-gray-700 font-bold text-center">設定1機械割</th>
-        <th class="px-4 py-3 border-b dark:border-gray-700 font-bold">特徴</th>
+        <th><strong>機種</strong></th>
+        <th><strong>設定6機械割</strong></th>
+        <th><strong>設定1機械割</strong></th>
+        <th><strong>特徴</strong></th>
       </tr>
     </thead>
     <tbody>
-      <tr class="bg-yellow-50 dark:bg-yellow-900/20 font-bold border-b border-gray-200 dark:border-gray-700">
-        <td class="px-4 py-4 text-gray-900 dark:text-white">ネオアイムジャグラーEX（チェリー狙い）</td>
-        <td class="px-4 py-4 text-center text-red-600 dark:text-red-400">107.8%</td>
-        <td class="px-4 py-4 text-center">97.4%</td>
-        <td class="px-4 py-4">低分散・安定</td>
+      <tr>
+        <td>ネオアイムジャグラーEX（チェリー狙い）</td>
+        <td><strong class="highlight">107.8%</strong></td>
+        <td>97.4%</td>
+        <td>低分散・安定</td>
       </tr>
-      <tr class="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-700">
-        <td class="px-4 py-4">スマスロ 北斗の拳 転生の章2</td>
-        <td class="px-4 py-4 text-center">114.9%</td>
-        <td class="px-4 py-4 text-center">97.2%</td>
-        <td class="px-4 py-4">攻撃的スペック・高ボラ</td>
+      <tr>
+        <td>スマスロ 北斗の拳 転生の章2</td>
+        <td>114.9%</td>
+        <td>97.2%</td>
+        <td>攻撃的スペック・高ボラ</td>
       </tr>
-      <tr class="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-700">
-        <td class="px-4 py-4">Lミリオンゴッド－神々の軌跡－</td>
-        <td class="px-4 py-4 text-center">114.6%</td>
-        <td class="px-4 py-4 text-center">97.6%</td>
-        <td class="px-4 py-4">一撃特化・超荒波</td>
+      <tr>
+        <td>Lミリオンゴッド－神々の軌跡－</td>
+        <td>114.6%</td>
+        <td>97.6%</td>
+        <td>一撃特化・超荒波</td>
       </tr>
     </tbody>
   </table>
@@ -156,7 +156,7 @@ showRelatedColumns: false
   AT機の設定6は確保が難しいが、ネオアイムは台数多くて確保しやすく、安定して期待値積めるのが強み。
 </p>
 
-<h2 class="text-xl font-bold mt-12 mb-6 border-b-2 border-red-200 dark:border-red-800 pb-2">
+<h2>
   結論：設定6は「仕事をする台」、でも爆発力は期待するな
 </h2>
 <p class="mb-6">
@@ -166,18 +166,14 @@ showRelatedColumns: false
 </p>
 
 <div class="bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/10 dark:to-pink-900/10 p-8 rounded-3xl mt-16 text-center border border-red-100 dark:border-red-800/30">
-  <h2 class="text-xl font-bold mb-4">確実な設定判別こそが勝利への近道</h2>
+  <h2>確実な設定判別こそが勝利への近道</h2>
   <p class="text-sm text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
     機種の癖を知り、ツールで正確な数値を導き出す。
     <br />
     一時の波に惑わされない、データに基づいた立ち回りを。
   </p>
-  <a
-    href="/aimex"
-    class="inline-flex items-center gap-3 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-bold py-4 px-10 rounded-full shadow-xl transform transition hover:scale-105 active:scale-95"
-  >
-    <span>🍇</span>
-    ぶどう逆算で設定6を見極める
+  <a href="/aimex" class="cta-button">
+    ネオアイムジャグラーEXの設定判別ツールを使う
   </a>
 </div>
 

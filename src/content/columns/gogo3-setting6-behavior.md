@@ -23,7 +23,7 @@ showRelatedColumns: false
   </p>
 </div>
 
-<h2 class="text-xl font-bold mt-12 mb-6 border-b-2 border-red-200 dark:border-red-800 pb-2 flex items-center gap-2">
+<h2>
   <span class="bg-red-600 text-white p-1 rounded text-sm">DATA</span>
   7000G回したシミュレーション（10万日分）の結果
 </h2>
@@ -47,7 +47,7 @@ showRelatedColumns: false
   </div>
 </div>
 
-<h2 class="text-xl font-bold mt-12 mb-6 border-b-2 border-red-200 dark:border-red-800 pb-2">
+<h2>
   「勝率82.75%」は何を意味するか
 </h2>
 <p class="mb-6">
@@ -56,7 +56,7 @@ showRelatedColumns: false
   つまり、5日に1日弱は負ける計算になる。7000Gをみっちり回して、設定6を掴んで、それでも5回に1回はコインが減って帰ることになる。これが「設定6の正直な姿」だ。
 </p>
 
-<h3 class="text-lg font-bold mt-8 mb-4">何枚以上取れる確率はどれくらいか</h3>
+<h3>何枚以上取れる確率はどれくらいか</h3>
 <p class="mb-6">
   「勝った」でひとくくりにするより、枚数ごとの確率を見た方が実感が湧く。
   <br />
@@ -65,44 +65,44 @@ showRelatedColumns: false
   打った感覚と照らし合わせると、「終日回してプラス2万前後が一番多いパターン」という表現がかなり現実に近い。しかし、最大マイナスとして「−4,460枚」という地獄のデータも存在することは忘れてはいけない。
 </p>
 
-<h2 class="text-xl font-bold mt-12 mb-6 border-b-2 border-red-200 dark:border-red-800 pb-2">
+<h2>
   他機種とのスペック比較
 </h2>
 
 <div class="overflow-x-auto my-6 rounded-xl border border-gray-200 dark:border-gray-700">
-  <table class="min-w-full text-sm text-left border-collapse">
-    <thead class="bg-gray-100 dark:bg-gray-800">
+  <table>
+    <thead>
       <tr>
-        <th class="px-4 py-3 border-b dark:border-gray-700 font-bold">比較項目</th>
-        <th class="px-4 py-3 border-b dark:border-gray-700 font-bold text-center">ゴージャグ3 設定6</th>
-        <th class="px-4 py-3 border-b dark:border-gray-700 font-bold text-center">スマスロGOD神々の軌跡 設定6</th>
+        <th><strong>比較項目</strong></th>
+        <th><strong>ゴージャグ3 設定6</strong></th>
+        <th><strong>スマスロGOD神々の軌跡 設定6</strong></th>
       </tr>
     </thead>
     <tbody>
-      <tr class="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-700">
-        <td class="px-4 py-4 font-bold">機械割</td>
-        <td class="px-4 py-4 text-center">107.81%</td>
-        <td class="px-4 py-4 text-center">114.6%</td>
+      <tr>
+        <td><strong>機械割</strong></td>
+        <td>107.81%</td>
+        <td>114.6%</td>
       </tr>
-      <tr class="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-700">
-        <td class="px-4 py-4 font-bold">初当り/合算</td>
-        <td class="px-4 py-4 text-center">合算1/117.4</td>
-        <td class="px-4 py-4 text-center">AT初当り1/295</td>
+      <tr>
+        <td><strong>初当り/合算</strong></td>
+        <td>合算1/117.4</td>
+        <td>AT初当り1/295</td>
       </tr>
-      <tr class="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-700">
-        <td class="px-4 py-4 font-bold">出玉仕様</td>
-        <td class="px-4 py-4 text-center">Aタイプ(BIG約240枚/REG約96枚)</td>
-        <td class="px-4 py-4 text-center">純増約7.0枚/G</td>
+      <tr>
+        <td><strong>出玉仕様</strong></td>
+        <td>Aタイプ(BIG約240枚/REG約96枚)</td>
+        <td>純増約7.0枚/G</td>
       </tr>
-      <tr class="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-700">
-        <td class="px-4 py-4 font-bold">勝率</td>
-        <td class="px-4 py-4 text-center">82.75%</td>
-        <td class="px-4 py-4 text-center">約63%</td>
+      <tr>
+        <td><strong>勝率</strong></td>
+        <td>82.75%</td>
+        <td>約63%</td>
       </tr>
-      <tr class="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-700">
-        <td class="px-4 py-4 font-bold">1日の波</td>
-        <td class="px-4 py-4 text-center">安定（最大マイナス約4,500枚）</td>
-        <td class="px-4 py-4 text-center">荒波（万枚超え〜マイナス7,000枚級まで）</td>
+      <tr>
+        <td><strong>1日の波</strong></td>
+        <td>安定（最大マイナス約4,500枚）</td>
+        <td>荒波（万枚超え〜マイナス7,000枚級まで）</td>
       </tr>
     </tbody>
   </table>
@@ -116,14 +116,14 @@ showRelatedColumns: false
   ゴージャグ3は反対に、機械割の低さをボラの低さで補う設計になっている。1日の振れ幅が狭いから、高設定を掴んだときに「きちんとプラスで帰れる日」の割合が高い。
 </p>
 
-<h3 class="text-lg font-bold mt-8 mb-4">平均投資額の違い</h3>
+<h3>平均投資額の違い</h3>
 <p class="mb-6">
   ゴージャグ3設定6の平均投資は362枚前後（20円スロで7,230円）が実戦ベースの目安だ。
   <br />
   対してGODは、初当りが1/295、ベース31G/50枚を前提にすると、初当り1回だけで約480枚（約9,600円） になる。複数回ハマれば、高設定でも平気で20,000〜30,000円規模の投資が先行する。資金ショートすると理論値を回収しきれずに終わるリスクがある。
 </p>
 
-<h3 class="text-lg font-bold mt-8 mb-4">どちらを選ぶか</h3>
+<h3>どちらを選ぶか</h3>
 <p class="mb-6">
   「期待値を最大化したい」なら、GOD設定6の方が理にかなっている。ただし「設定6を掴んだ日に確実にプラスで帰りやすい」という観点では、ゴージャグ3の方が優れている。
   <br />
@@ -133,18 +133,14 @@ showRelatedColumns: false
 </p>
 
 <div class="bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/10 dark:to-pink-900/10 p-8 rounded-3xl mt-16 text-center border border-red-100 dark:border-red-800/30">
-  <h2 class="text-xl font-bold mb-4">確実な設定判別こそが勝利への近道</h2>
+  <h2>確実な設定判別こそが勝利への近道</h2>
   <p class="text-sm text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
     当ページ上部にある逆算ツールを使えば、現在のぶどう確率から設定推測が可能です。
     <br />
     一時の波に惑わされない、データに基づいた立ち回りを。
   </p>
-  <a
-    href="/gogo3"
-    class="inline-flex items-center gap-3 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-bold py-4 px-10 rounded-full shadow-xl transform transition hover:scale-105 active:scale-95"
-  >
-    <span>🍇</span>
-    ゴージャグ3の逆算ツールで設定6を見極める
+  <a href="/gogo3" class="cta-button">
+    ゴーゴージャグラー3の設定判別ツールを使う
   </a>
 </div>
 

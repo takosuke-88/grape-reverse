@@ -17,7 +17,7 @@ showRelatedColumns: false
   夕方のホールで「合算1/142前後、RBもそこそこ出てる空き台」を見つけたとき、「これ設定4っぽいな」と感じたことはないだろうか。設定4が入っていたとして、果たしてそれは打ち続ける価値があるのか——今回はデータをもとにシビアに答えを出す。
 </p>
 
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   基本スペックの確認
 </h2>
 
@@ -26,29 +26,29 @@ showRelatedColumns: false
 公式数値から整理しよう。ネオアイムジャグラー（SアイムジャグラーEXはスペック同一）設定4のメーカー公表スペックは以下だ。
 
 <div class="not-prose overflow-x-auto my-6">
-  <table class="min-w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm sm:text-base">
+  <table>
     <thead>
-      <tr class="bg-gray-100 dark:bg-gray-700">
-        <th class="py-2 px-4 border-b dark:border-gray-600 text-left text-gray-800 dark:text-gray-200">項目</th>
-        <th class="py-2 px-4 border-b dark:border-gray-600 text-left text-gray-800 dark:text-gray-200">設定4</th>
+      <tr>
+        <th>項目</th>
+        <th>設定4</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">BIG確率</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 font-bold text-gray-700 dark:text-gray-300">1/259.0</td>
+        <td>BIG確率</td>
+        <td><strong>1/259.0</strong></td>
       </tr>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">REG確率</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 font-bold text-gray-700 dark:text-gray-300">1/315.1</td>
+        <td>REG確率</td>
+        <td><strong>1/315.1</strong></td>
       </tr>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">合算確率</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 font-bold text-gray-700 dark:text-gray-300">1/142.2</td>
+        <td>合算確率</td>
+        <td><strong>1/142.2</strong></td>
       </tr>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">公表機械割</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 font-bold text-gray-700 dark:text-gray-300">101.1%</td>
+        <td>公表機械割</td>
+        <td><strong>101.1%</strong></td>
       </tr>
     </tbody>
   </table>
@@ -57,7 +57,7 @@ showRelatedColumns: false
 合算1/142はちょうど設定4と設定5の境目付近。設定3（1/148.6）と設定5（1/128.5）の間に位置し、REG比率で設定3との区別が重要になる。機械割101.1%は「一応プラス」だが、これはあくまでメーカーの適当打ち基準値だ。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   チェリー狙い時の実質機械割
 </h2>
 </div>
@@ -65,25 +65,25 @@ showRelatedColumns: false
 ネオアイムジャグラーでは打ち方で機械割が大きく変わる点を絶対に理解しておかなければならない。
 
 <div class="not-prose overflow-x-auto my-6">
-  <table class="min-w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm sm:text-base">
+  <table>
     <thead>
-      <tr class="bg-gray-100 dark:bg-gray-700">
-        <th class="py-2 px-4 border-b dark:border-gray-600 text-left text-gray-800 dark:text-gray-200">打ち方</th>
-        <th class="py-2 px-4 border-b dark:border-gray-600 text-left text-gray-800 dark:text-gray-200">設定4の機械割</th>
+      <tr>
+        <th>打ち方</th>
+        <th>設定4の機械割</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">適当打ち（メーカー公表値）</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 font-bold text-gray-700 dark:text-gray-300">101.1%</td>
-      </tr>
-      <tr class="bg-blue-50 dark:bg-gray-700/50">
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-800 dark:text-gray-200 font-bold">チェリー狙い＋ぶどう抜き</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 font-bold text-blue-600 dark:text-blue-400">101.9%</td>
+        <td>適当打ち（メーカー公表値）</td>
+        <td><strong>101.1%</strong></td>
       </tr>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">フル攻略（逆押し小役完全奪取）</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 font-bold text-gray-700 dark:text-gray-300">102.80%</td>
+        <td><strong>チェリー狙い＋ぶどう抜き</strong></td>
+        <td><strong class="highlight">101.9%</strong></td>
+      </tr>
+      <tr>
+        <td>フル攻略（逆押し小役完全奪取）</td>
+        <td><strong>102.80%</strong></td>
       </tr>
     </tbody>
   </table>
@@ -94,7 +94,7 @@ showRelatedColumns: false
 逆に言えば、チェリーを取りこぼしているプレイヤーはただでさえ薄い設定4のアドバンテージを自ら削っていることになる。ここで役立つのが<strong>GrapeReverse（グレープリバース）</strong>のようなぶどう逆算ツールだ。差枚数・ゲーム数・ボーナス回数を入力するだけで実際のぶどう確率を逆算でき、「チェリー狙いができているか」「本当に設定4以上があるのか」の2点を同時に検証できる。設定判別の精度を上げたいなら、ぶどう逆算は必須の手順と言える。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   期待差枚数シミュレーション（チェリー狙い基準）
 </h2>
 </div>
@@ -102,7 +102,7 @@ showRelatedColumns: false
 チェリー狙い時の機械割101.90%をベースに試算する。1ゲームあたりの平均ベットは3枚、1時間あたり約750ゲームと仮定する。
 
 <div class="not-prose">
-<h3 class="text-lg font-bold mt-6 mb-2 text-gray-800 dark:text-gray-200">▶ 夕方スタート（約4,000G）の場合</h3>
+<h3>▶ 夕方スタート（約4,000G）の場合</h3>
 </div>
 
 期待差枚数：4,000G × 3枚 × 0.019 ≒ <strong>+約228枚（約+4,500円）</strong>
@@ -110,7 +110,7 @@ showRelatedColumns: false
 標準偏差が大きいジャグラーの性質上、4,000Gでは勝率はおよそ55〜58%程度
 
 <div class="not-prose">
-<h3 class="text-lg font-bold mt-6 mb-2 text-gray-800 dark:text-gray-200">▶ 終日稼働（約8,000G）の場合</h3>
+<h3>▶ 終日稼働（約8,000G）の場合</h3>
 </div>
 
 チェリー狙い時の8,000G期待収支は公表データより<strong>+約9,120円</strong>。終日回せば期待値は積み上がるが、標準偏差の影響から勝率は60〜65%程度に留まる。ジャグラーの分散はシビアで、設定4を一日回しても負け越すシナリオは珍しくない。
@@ -118,7 +118,7 @@ showRelatedColumns: false
 時給換算では4,000Gを約5〜6時間とすると時給+750円〜900円程度。決して高くはないが、確実に設定4以上があると確信できるなら悪い数字ではない。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   現実的な結論：設定4は「打つ価値あり」か？
 </h2>
 
@@ -137,17 +137,14 @@ showRelatedColumns: false
 
 <div class="not-prose">
 <div class="mt-12 p-8 bg-gray-100 dark:bg-gray-800 rounded-xl text-center">
-  <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+  <h2>
     さあ、ホールで答え合わせをしよう
   </h2>
   <p class="mb-6 text-gray-600 dark:text-gray-300">
     アイムジャグラーを判別するなら
   </p>
-  <a
-    href="/aimex"
-    class="inline-block bg-[#D81B60] hover:bg-pink-700 text-white font-bold py-3 px-10 rounded-lg shadow-md transition"
-  >
-    今すぐツールで判別する
+  <a href="/aimex" class="cta-button">
+    ネオアイムジャグラーEXの設定判別ツールを使う
   </a>
 </div>
 </div>

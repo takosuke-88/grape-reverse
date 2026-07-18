@@ -29,7 +29,7 @@ showRelatedColumns: true
   </p>
 </div>
 
-<h2 class="text-2xl font-bold mt-12 mb-6 border-l-4 border-indigo-500 pl-4 py-1 text-slate-900 dark:text-white">
+<h2>
   パチンコが失速している本当の理由
 </h2>
 
@@ -42,7 +42,7 @@ showRelatedColumns: true
 加えてパチンコは演出の過剰インフレが続いている。リーチがかかるたびに期待するのが疲れる——そういう離脱理由が一定数のプレイヤーに共有されているんだよね。熱くなれないゲーム性は、稼働に直結して響く。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-12 mb-6 border-l-4 border-indigo-500 pl-4 py-1 text-slate-900 dark:text-white">
+<h2>
   パチスロが持ちこたえている理由
 </h2>
 </div>
@@ -56,7 +56,7 @@ showRelatedColumns: true
 さらにノーマルタイプ（Aタイプ）の復権という現象も業界関係者の間で語られている。スマスロ時代になってもリアルボーナスを搭載したノーマル機の人気は根強く、「AT機の爆発は狙えないが、コツコツ期待値を積みたい」という層の受け皿になっている。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-12 mb-6 border-l-4 border-indigo-500 pl-4 py-1 text-slate-900 dark:text-white">
+<h2>
   「稼働格差」がホールの運営に与える影響
 </h2>
 </div>
@@ -68,7 +68,7 @@ showRelatedColumns: true
 これはシンプルに<strong>「スロットコーナーが充実している店を選ぶべき」</strong>という立ち回りの根拠になる。設置台数が多く、稼働に力を入れているホールほど、イベント日や特定日に高設定を使う動機が生まれやすい。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-12 mb-6 border-l-4 border-indigo-500 pl-4 py-1 text-slate-900 dark:text-white">
+<h2>
   データで読む「今後の市場」
 </h2>
 </div>

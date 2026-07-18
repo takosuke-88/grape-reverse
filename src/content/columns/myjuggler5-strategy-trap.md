@@ -19,7 +19,7 @@ showRelatedColumns: false
   </p>
 </blockquote>
 
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   看板機種ゆえの、皮肉な罠
 </h2>
 
@@ -30,7 +30,7 @@ showRelatedColumns: false
 夕方、ふらっと入ったホールで「合算はそこまで悪くないのに、なぜかREGだけ引けない」台に座ったことがある人は多いと思う。で、気付いたら追加投資が止まらなくなって、財布の中身が寂しくなっていく――あの感覚。あれ、単なる運の問題じゃなくて、設定2のゾーンを踏んでいる可能性が結構高い。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   設定2という"見えない地雷"
 </h2>
 </div>
@@ -38,24 +38,24 @@ showRelatedColumns: false
 北電子が公表しているフリー打ち基準の出玉率を見ると、設定2は98.0%。つまり長い目で見れば確実にマイナスが積み重なる数値だ。
 
 <div class="not-prose overflow-x-auto my-6">
-  <table class="min-w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm sm:text-base">
+  <table>
     <thead>
-      <tr class="bg-gray-100 dark:bg-gray-700">
-        <th class="py-2 px-4 border-b dark:border-gray-600 text-left text-gray-800 dark:text-gray-200">打ち方</th>
-        <th class="py-2 px-4 border-b dark:border-gray-600 text-left text-gray-800 dark:text-gray-200">設定2 (出玉率)</th>
-        <th class="py-2 px-4 border-b dark:border-gray-600 text-left text-gray-800 dark:text-gray-200">設定3 (出玉率)</th>
+      <tr>
+        <th>打ち方</th>
+        <th>設定2 (出玉率)</th>
+        <th>設定3 (出玉率)</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">フリー打ち</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 font-bold text-slate-600">98.0%</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 font-bold text-slate-600">99.9%</td>
+        <td>フリー打ち</td>
+        <td><strong>98.0%</strong></td>
+        <td><strong>99.9%</strong></td>
       </tr>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">チェリー狙い</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 font-bold text-slate-600">99.00%</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 font-bold text-purple-600 dark:text-purple-400">100.95%</td>
+        <td>チェリー狙い</td>
+        <td><strong>99.00%</strong></td>
+        <td><strong class="highlight">100.95%</strong></td>
       </tr>
     </tbody>
   </table>
@@ -64,7 +64,7 @@ showRelatedColumns: false
 厄介なのは、チェリー狙いみたいにちゃんと打っても99.00%止まりという点。100%の壁を越えられない以上、どう頑張っても負ける構造になっている。ところが設定3になった途端、チェリー狙いで100.95%まで跳ね上がる。この「2と3の境目」がやたらとデカくて、ここを見誤ると勝ち負けが180度変わってくる。だからマイジャグって、見た目以上に設定判別がシビアなんだと思う。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   設定1は、もう「論外」
 </h2>
 </div>
@@ -74,7 +74,7 @@ showRelatedColumns: false
 「ジャグラーなんて光ればいいんでしょ？」みたいな軽いノリで座ると、設定1〜2の"削り性能"にあっという間に飲み込まれる。アイムジャグラーの低設定より「なんとなく遊べてる感」が出やすい分、気付いた時には負け額がかなり膨らんでいる――そういう怖さがある。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   高設定は、まるで別のゲーム
 </h2>
 </div>
@@ -93,7 +93,7 @@ showRelatedColumns: false
 実際に打った体感としても、「REGがちゃんと付いてくる」「ブドウがしっかり落ちる」「合算が軽い」という条件が揃ったマイジャグは、現金投資がほとんど伸びない。派手な爆連が来なくても、ジワジワと増えていって最終的にまとまったプラスで終われる――そういう"安定感"がある。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   結局、どう立ち回ればいいのか
 </h2>
 </div>
@@ -109,17 +109,14 @@ showRelatedColumns: false
 
 <div class="not-prose">
 <div class="mt-12 p-8 bg-purple-50 dark:bg-gray-800 rounded-xl text-center border border-purple-100 dark:border-purple-900">
-  <h2 class="text-2xl font-bold mb-4 text-purple-900 dark:text-white">
+  <h2>
     本当に「今座っている台」は追うべきか？
   </h2>
   <p class="mb-6 text-gray-600 dark:text-gray-300">
     今のデータを見切る基準として、ツールを活用してみよう。
   </p>
-  <a
-    href="/myjuggler5"
-    class="inline-block bg-[#D81B60] hover:bg-pink-700 text-white font-bold py-3 px-10 rounded-lg shadow-md transition"
-  >
-    今すぐツールで判別する
+  <a href="/myjuggler5" class="cta-button">
+    マイジャグラーVの設定判別ツールを使う
   </a>
 </div>
 </div>

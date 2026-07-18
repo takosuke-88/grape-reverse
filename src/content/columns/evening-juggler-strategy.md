@@ -26,7 +26,7 @@ showRelatedColumns: false
 今回は、その「やってはいけない3つの行動」を整理する。読んで気づいてほしい。自分がどれだけ罠にハマってきたか、を。
 
 <div class="not-prose">
-<h2 class="border-l-4 border-indigo-500 pl-4 py-1 text-slate-900 dark:text-white font-bold text-2xl mt-12 mb-6">
+<h2>
   ① BIG先行で合算が良いだけの「罠台」に座る
 </h2>
 </div>
@@ -44,7 +44,7 @@ showRelatedColumns: false
   夕方からの立ち回りでは、合算なんて二の次。まずREG確率を見ろ。アイムなら1/315以内、ファンキーなら1/300以内。それが最初のフィルタになる。REGが付いてない台は、どれだけ合算が良くても座るな。
 </p>
 
-<h2 class="border-l-4 border-indigo-500 pl-4 py-1 text-slate-900 dark:text-white font-bold text-2xl mt-12 mb-6">
+<h2>
   ② 総回転数が浅い台（2000G未満）の履歴を過信する
 </h2>
 </div>
@@ -62,7 +62,7 @@ showRelatedColumns: false
   夕方の稼働前データとして信頼できるのは、<strong class="underline decoration-indigo-500 decoration-2">最低でも3000G以上。できれば5000G以上。</strong>浅いゲーム数の台は「何もわからない」と割り切れ。「良く見える」のと「良い」のは、全くの別物だ。
 </p>
 
-<h2 class="border-l-4 border-indigo-500 pl-4 py-1 text-slate-900 dark:text-white font-bold text-2xl mt-12 mb-6">
+<h2>
   ③ ボーナス確率だけで判断し、「ぶどう」を無視する
 </h2>
 </div>
@@ -80,7 +80,7 @@ showRelatedColumns: false
   つまり、ホールデータの表面だけを見て台を選ぶことは、前の打ち手が捨てた理由を無視して座ることと同義になる。
 </p>
 
-<h2 class="border-l-4 border-indigo-500 pl-4 py-1 text-slate-900 dark:text-white font-bold text-2xl mt-12 mb-6">
+<h2>
   結論：夕方から勝率を上げる唯一の武器は「ぶどう逆算」
 </h2>
 </div>
@@ -103,14 +103,11 @@ showRelatedColumns: false
 </p>
 
 <div class="my-12 text-center not-prose">
-  <h2 class="text-xl font-bold mb-6 text-slate-900 dark:text-white">
+  <h2>
     ジャグラーシリーズのぶどう逆算ツール一覧へ
   </h2>
-  <a
-    href="/#juggler"
-    class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-10 rounded-full shadow-lg transform transition hover:scale-105 active:scale-95 no-underline"
-  >
-    今すぐツールで判別する
+  <a href="/#juggler" class="cta-button">
+    ジャグラーシリーズの設定判別ツール一覧へ
   </a>
 </div>
 </div>

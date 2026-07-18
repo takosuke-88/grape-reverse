@@ -31,7 +31,7 @@ showRelatedColumns: true
   </p>
 </div>
 
-<h2 class="text-2xl font-bold mt-12 mb-6 border-l-4 border-indigo-500 pl-4 py-1 text-slate-900 dark:text-white">
+<h2>
   7,000人の応募と、膨れ上がる演者市場
 </h2>
 
@@ -44,7 +44,7 @@ showRelatedColumns: true
 2024年のパチスロ参加人口は<strong>690万人</strong>。前年比で30万人も増えて、業界はコンテンツ投資を拡大してる局面にある。演者市場はその波に乗って、膨れ上がり続けてきた。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-12 mb-6 border-l-4 border-indigo-500 pl-4 py-1 text-slate-900 dark:text-white">
+<h2>
   構造上の歪みと、表面化した「疑惑」
 </h2>
 </div>
@@ -64,7 +64,7 @@ showRelatedColumns: true
 個々の事情は違うんだろう。でも、演者っていう不安定な立場に置かれた人間が起こすトラブルが、ホールと視聴者の両方に波及するっていう構造——これ、全然変わってない。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-12 mb-6 border-l-4 border-indigo-500 pl-4 py-1 text-slate-900 dark:text-white">
+<h2>
   演者は「誰のため」に機能しているのか？
 </h2>
 </div>
@@ -80,7 +80,7 @@ showRelatedColumns: true
 ホールから見ればマーケティングコスト。演者にとっては収入源。メディア側にとっては視聴数と影響力の強化。で、視聴者や来店者は——その構造の上にポンと乗っかった「お客さん」なわけだ。「演者が来た日は高設定が入る」っていうのは期待であって保証じゃない。その期待に乗っかって台に座る行動が毎回正しい立ち回りになるわけ、ないよね。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-12 mb-6 border-l-4 border-indigo-500 pl-4 py-1 text-slate-900 dark:text-white">
+<h2>
   本当に必要なのは「演者」ではなく「透明性」
 </h2>
 </div>

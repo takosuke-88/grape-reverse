@@ -29,7 +29,7 @@ showRelatedColumns: false
 
 <div class="not-prose">
 <div class="my-8 p-6 bg-blue-50 dark:bg-gray-800 rounded-lg border border-blue-100 dark:border-gray-700">
-  <h2 class="text-xl font-bold mb-4 text-blue-800 dark:text-blue-300">
+  <h2>
     この記事の結論
   </h2>
   <ul class="list-disc pl-5 space-y-2 text-gray-700 dark:text-gray-300">
@@ -40,7 +40,7 @@ showRelatedColumns: false
   </ul>
 </div>
 
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   データで見る「設定1の誤爆」の恐怖
 </h2>
 </div>
@@ -52,21 +52,21 @@ showRelatedColumns: false
 実は、<strong>設定1（機械割97%）を3000回転回した時、約10回に1回はこのような「設定6以上の数値」になってしまう</strong>のです。
 
 <div class="not-prose overflow-x-auto my-6">
-  <table class="min-w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm sm:text-base">
+  <table>
     <thead>
-      <tr class="bg-gray-100 dark:bg-gray-700">
-        <th class="py-2 px-4 border-b dark:border-gray-600 text-left text-gray-800 dark:text-gray-200">検証項目 (3000G試行)</th>
-        <th class="py-2 px-4 border-b dark:border-gray-600 text-left text-gray-800 dark:text-gray-200">確率・頻度</th>
+      <tr>
+        <th>検証項目 (3000G試行)</th>
+        <th>確率・頻度</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">設定1が設定6以上の合算になる確率</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 font-bold text-red-600">10〜15%</td>
+        <td>設定1が設定6以上の合算になる確率</td>
+        <td><strong class="highlight">10〜15%</strong></td>
       </tr>
       <tr>
-        <td class="py-2 px-4 border-b dark:border-gray-600 text-gray-700 dark:text-gray-300">設定6が設定1以下の合算になる確率</td>
-        <td class="py-2 px-4 border-b dark:border-gray-600 font-bold text-blue-600">12〜18%</td>
+        <td>設定6が設定1以下の合算になる確率</td>
+        <td><strong class="highlight">12〜18%</strong></td>
       </tr>
     </tbody>
   </table>
@@ -80,7 +80,7 @@ showRelatedColumns: false
 夕方から履歴打ちをして負ける原因のほとんどがコレです。
 
 <div class="not-prose">
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   なぜ「ぶどう逆算」が最強なのか
 </h2>
 </div>
@@ -105,15 +105,12 @@ showRelatedColumns: false
   <p class="text-lg font-bold mb-4 text-gray-900 dark:text-white">
     その台の「本当の姿」を今すぐチェック！
   </p>
-  <a
-    href="/myjuggler5"
-    class="inline-block bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform transition hover:scale-105"
-  >
-    マイジャグ5 設定判別ツールを使う
+  <a href="/myjuggler5" class="cta-button">
+    マイジャグラーVの設定判別ツールを使う
   </a>
 </div>
 
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   勝つための立ち回り：ツール活用術
 </h2>
 </div>
@@ -123,19 +120,19 @@ showRelatedColumns: false
 当サイトの「逆算ツール」を使った、明日から使えるテクニックを紹介します。
 
 <div class="not-prose">
-<h3 class="text-lg font-bold mt-6 mb-2 text-gray-800 dark:text-gray-200">1. まずは「合算が良い台」を探す</h3>
+<h3>1. まずは「合算が良い台」を探す</h3>
 </div>
 
 いくらぶどうが良くても、ボーナスが引けていない台はリスクが高いです。まずは履歴が良い台（合算1/130以上目安）をピックアップしましょう。
 
 <div class="not-prose">
-<h3 class="text-lg font-bold mt-6 mb-2 text-gray-800 dark:text-gray-200">2. 「差枚数」からぶどうを逆算する</h3>
+<h3>2. 「差枚数」からぶどうを逆算する</h3>
 </div>
 
 ここが重要です。台の「総回転数」「BIG回数」「REG回数」そして<strong>「現在の差枚数（スランプグラフから読み取る）」</strong>をツールに入力してください。
 
 <div class="not-prose">
-<h3 class="text-lg font-bold mt-6 mb-2 text-gray-800 dark:text-gray-200">3. 判定結果を見る</h3>
+<h3>3. 判定結果を見る</h3>
 </div>
 
 ツールが算出した「逆算ぶどう確率」を見てください。
@@ -146,7 +143,7 @@ showRelatedColumns: false
   <li><strong>1/6.0 以下なら：</strong> 危険信号。それは「上振れした設定1」かもしれません。触らないのが無難です。</li>
 </ul>
 
-<h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 dark:text-white border-b pb-2 border-gray-300 dark:border-gray-700">
+<h2>
   まとめ
 </h2>
 </div>
@@ -159,17 +156,14 @@ showRelatedColumns: false
 
 <div class="not-prose">
 <div class="mt-12 p-8 bg-gray-100 dark:bg-gray-800 rounded-xl text-center">
-  <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+  <h2>
     さあ、ホールで答え合わせをしよう
   </h2>
   <p class="mb-6 text-gray-600 dark:text-gray-300">
     登録不要・完全無料で使えます。
   </p>
-  <a
-    href="/myjuggler5"
-    class="inline-block bg-[#D81B60] hover:bg-pink-700 text-white font-bold py-3 px-10 rounded-lg shadow-md transition"
-  >
-    今すぐツールで判別する
+  <a href="/myjuggler5" class="cta-button">
+    マイジャグラーVの設定判別ツールを使う
   </a>
 </div>
 
