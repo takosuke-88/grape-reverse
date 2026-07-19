@@ -74,6 +74,59 @@ export const haihaiSiosai2Config: MachineConfig = {
       grape: 10,
     },
   },
+  specialAdvice: {
+    tiers: [
+      {
+        maxGames: 2000,
+        introHtml:
+          '序盤戦です。この機種は<span class="font-bold underline decoration-indigo-400 decoration-2">ボーナス合算確率の維持</span>が最重要になります。',
+        brackets: [
+          {
+            minProb: 50,
+            html: "現在の合算は非常に優秀です。このペースを維持できるか注目しましょう。",
+          },
+          {
+            maxProb: 30,
+            html: "ボーナスが重い立ち上がりです。合算が回復しない場合は深追い禁物です。",
+          },
+        ],
+      },
+      {
+        maxGames: 4000,
+        introHtml: "中盤戦に差し掛かりました。",
+        brackets: [
+          {
+            minProb: 50,
+            html: "ボーナス合算がしっかり引けており、高設定の期待が持てる展開です。引き続き数値を注視しましょう。",
+          },
+          {
+            html: "合算確率が落ちてきています。周囲の状況等も踏まえ、設定の見切り時を探る必要があります。",
+          },
+        ],
+      },
+      {
+        maxGames: null,
+        introHtml: "終盤戦です。サンプルは十分に集まりました。",
+        brackets: [
+          {
+            minProb: 70,
+            html: '<span class="font-bold text-purple-600 dark:text-purple-400">圧巻のボーナス合算です。間違いなく高設定挙動ですので、閉店まで回し切りましょう！</span>',
+          },
+          {
+            minProb: 50,
+            html: '<span class="font-bold text-red-600 dark:text-red-400">合算確率は良好な水準をキープしています。設定5・6の可能性を意識して続行を推奨します。</span>',
+          },
+          {
+            minProb: 30,
+            html: '<span class="font-bold text-yellow-600 dark:text-yellow-400">中間設定寄りの数値です。悪くはないですが、これ以上の伸び悩みが見えたら撤退も視野に。</span>',
+          },
+          {
+            html: '<span class="font-bold text-slate-500">ボーナス合算が設定1以下の数値です。これ以上の投資は危険が高いと言えます。</span>',
+          },
+        ],
+      },
+    ],
+  },
   seoContent: [
     {
       title: "夕方からハイハイシオサイ2を打つ際の絶対条件と「空き台のリアル」",

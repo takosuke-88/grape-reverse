@@ -86,6 +86,16 @@ export interface MachineConfig {
     };
     settings?: number[]; // [1, 2, 3, 4, 5, 6] by default
     settingLabels?: Record<number, string>; // e.g. {6: "V"}
+    /**
+     * 4大指標カードの近似設定ラベル用の特例。
+     * 特定のsettingValueが複数設定で一致してしまう機種（アイムジャグラーEX等）向け。
+     * item.settingValues[approxSetting] が matchValue と一致した場合、通常の
+     * 「(設定X近似)」の代わりに label をそのまま表示する。
+     */
+    approximationLabelOverride?: {
+      matchValue: number;
+      label: string;
+    };
   };
   detailedProbabilities?: {
     // 各配列は [設定1, 設定2, 設定3, 設定4, 設定5, 設定6] の順
@@ -107,6 +117,37 @@ export interface MachineConfig {
     description: string;
   }[];
   seoContent?: SEOSection[];
+  /**
+   * 標準（ジャグラー/ハナハナ）と異なる進行のAIアドバイス文言を持つ機種向け。
+   * 指定があれば MachinePageFactory はこちらを優先表示する。
+   */
+  specialAdvice?: {
+    tiers: SpecialAdviceTier[];
+  };
+}
+
+/**
+ * 総ゲーム数の区切り(段階)ごとに切り替わるAIアドバイス文言の1段階分。
+ */
+export interface SpecialAdviceTier {
+  /** このtierが適用される総ゲーム数の上限（null = 上限なし・最終tier） */
+  maxGames: number | null;
+  /** tier冒頭に常に表示するHTML（dangerouslySetInnerHTMLで描画） */
+  introHtml: string;
+  /**
+   * highSettingProb（設定5・6の合算期待度%）に応じて先頭から順に判定し、
+   * 最初にマッチしたものを introHtml の直後に表示する。該当なしなら何も追加しない。
+   */
+  brackets: SpecialAdviceBracket[];
+}
+
+export interface SpecialAdviceBracket {
+  /** highSettingProb がこの値以上のときマッチ（省略時は下限なし） */
+  minProb?: number;
+  /** highSettingProb がこの値未満のときマッチ（省略時は上限なし） */
+  maxProb?: number;
+  /** マッチ時に表示するHTML（dangerouslySetInnerHTMLで描画） */
+  html: string;
 }
 
 /**

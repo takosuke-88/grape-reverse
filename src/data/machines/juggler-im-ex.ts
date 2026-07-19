@@ -229,6 +229,12 @@ export const imJugglerExConfig: MachineConfig = {
       replay: 7.33,
       cherry: 33.0,
     },
+    // BIG払出が252枚（他ジャグラーは240枚）のため、設定5・6のBIG確率が
+    // 255.0で一致してしまい「(設定5近似)」等の表示では誤解を招く
+    approximationLabelOverride: {
+      matchValue: 255.0,
+      label: "(設定5・6近似)",
+    },
   },
   detailedProbabilities: {
     big_solo: [431.16, 422.81, 422.81, 417.43, 417.43, 407.06],

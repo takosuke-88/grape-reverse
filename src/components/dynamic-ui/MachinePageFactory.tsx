@@ -720,9 +720,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                           : "text-blue-500 dark:text-blue-400"
                       }`}
                     >
-                      {config.id === "aimex" &&
-                      item.settingValues![approxSetting] === 255.0
-                        ? "(設定5・6近似)"
+                      {config.specs?.approximationLabelOverride &&
+                      item.settingValues![approxSetting] ===
+                        config.specs.approximationLabelOverride.matchValue
+                        ? config.specs.approximationLabelOverride.label
                         : `(設定${config.specs?.settingLabels?.[approxSetting] || approxSetting}近似)`}
                     </div>
                   )}
@@ -768,6 +769,23 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
               rankIcon = "⚠️";
             }
 
+            // 機種固有のAIアドバイス（config.specialAdvice）が定義されていれば
+            // 総ゲーム数のtierとhighSettingProbのbracketから該当HTMLを解決する
+            const specialAdviceHtml = (() => {
+              if (!config.specialAdvice) return null;
+              const { tiers } = config.specialAdvice;
+              const tier =
+                tiers.find(
+                  (t) => t.maxGames !== null && totalGames <= t.maxGames,
+                ) ?? tiers[tiers.length - 1];
+              const bracket = tier.brackets.find(
+                (b) =>
+                  (b.minProb === undefined || highSettingProb >= b.minProb) &&
+                  (b.maxProb === undefined || highSettingProb < b.maxProb),
+              );
+              return tier.introHtml + (bracket?.html ?? "");
+            })();
+
             return (
               <div
                 className={`mb-4 rounded-lg border p-4 transition-colors duration-300 ${rankStyle}`}
@@ -779,57 +797,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   </div>
                 </div>
                 <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-                  {config.id.includes("siosai") ||
-                  config.id === "last-utopia" ? (
-                    // ハイハイシオサイ・ラストユートピア専用アドバイスロジック
-                    <>
-                      {totalGames <= 2000 && (
-                        <>
-                          序盤戦です。この機種は
-                          <span className="font-bold underline decoration-indigo-400 decoration-2">
-                            ボーナス合算確率の維持
-                          </span>
-                          が最重要になります。
-                          {highSettingProb >= 50 &&
-                            "現在の合算は非常に優秀です。このペースを維持できるか注目しましょう。"}
-                          {highSettingProb < 30 &&
-                            "ボーナスが重い立ち上がりです。合算が回復しない場合は深追い禁物です。"}
-                        </>
-                      )}
-                      {totalGames > 2000 && totalGames <= 4000 && (
-                        <>
-                          中盤戦に差し掛かりました。
-                          {highSettingProb >= 50
-                            ? "ボーナス合算がしっかり引けており、高設定の期待が持てる展開です。引き続き数値を注視しましょう。"
-                            : "合算確率が落ちてきています。周囲の状況等も踏まえ、設定の見切り時を探る必要があります。"}
-                        </>
-                      )}
-                      {totalGames > 4000 && (
-                        <>
-                          終盤戦です。サンプルは十分に集まりました。
-                          {highSettingProb >= 70 && (
-                            <span className="font-bold text-purple-600 dark:text-purple-400">
-                              圧巻のボーナス合算です。間違いなく高設定挙動ですので、閉店まで回し切りましょう！
-                            </span>
-                          )}
-                          {highSettingProb >= 50 && highSettingProb < 70 && (
-                            <span className="font-bold text-red-600 dark:text-red-400">
-                              合算確率は良好な水準をキープしています。設定5・6の可能性を意識して続行を推奨します。
-                            </span>
-                          )}
-                          {highSettingProb >= 30 && highSettingProb < 50 && (
-                            <span className="font-bold text-yellow-600 dark:text-yellow-400">
-                              中間設定寄りの数値です。悪くはないですが、これ以上の伸び悩みが見えたら撤退も視野に。
-                            </span>
-                          )}
-                          {highSettingProb < 30 && (
-                            <span className="font-bold text-slate-500">
-                              ボーナス合算が設定1以下の数値です。これ以上の投資は危険が高いと言えます。
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </>
+                  {specialAdviceHtml !== null ? (
+                    <span
+                      dangerouslySetInnerHTML={{ __html: specialAdviceHtml }}
+                    />
                   ) : currentCategory === "hana" ? (
                     // ハナハナ専用アドバイスロジック
                     <>

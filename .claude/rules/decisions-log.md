@@ -114,6 +114,12 @@
   - **`LatestColumnsTeaser.tsx`のような専用コンポーネント切り出しはしていない**。ホームの「最新コラム3件」表示は`App.tsx`内に残したまま、参照データだけ`ALL_COLUMNS`に差し替えた（最小差分を優先）。将来切り出す場合も機能的な変更ではないことに注意。
 - **教訓**: Tailwindの`content`設定は「クラス文字列が物理的に存在する全てのファイル」を含める必要があり、`.tsx`以外の新しいコンテンツ形式（今回は`.md`）を追加する際は真っ先に確認すべき項目。今回はビルドも`tsc`も通ってしまい、目視で気づくまで発覚しなかった（型エラーにもコンパイルエラーにもならない性質の不具合のため）。
 
+## 2026-07-19: MachinePageFactory.tsx の機種IDハードコード分岐を撤廃、config専用フィールド方式を採用
+- **決定事項**: `MachinePageFactory.tsx`内にあった`config.id.includes("siosai")`・`config.id === "last-utopia"`・`config.id === "aimex"`という機種IDのハードコード分岐を撤廃した。ハイハイシオサイ系・ラストユートピアのAIアドバイス文言は`MachineConfig.specialAdvice`（`SpecialAdviceTier`/`SpecialAdviceBracket`、`src/types/machine-schema.ts`）に、アイムジャグラーEXの近似設定ラベル特例（BIG払出252枚により設定5・6の確率値が255.0で一致する問題）は`MachineConfig.specs.approximationLabelOverride`に、それぞれ専用フィールドとして分離した。
+- **理由**: この2つは見た目こそ両方「機種固有の特殊表示」だが、データの形状が根本的に異なる（前者は総ゲーム数×確率閾値によるテキスト分岐、後者は数値一致による単純なラベル置換）。共通の汎用フィールド（例: 何でも入る`overrides: Record<string, any>`）に無理やり統合すると型安全性が失われ、結局`MachinePageFactory.tsx`側に「このoverride種別の場合はこう解釈する」という分岐が復活し、撤廃したはずの「機種IDハードコード」が「フラグ種別ハードコード」に形を変えて再発するリスクがあった。
+- **今後の判断基準（先祖返り防止）**: 今後3つ目以降の異なる性質の特殊対応が必要になった場合も、**性質が異なるなら安易に既存フィールド（`specialAdvice`等）や汎用フラグに寄せず、都度その性質に合った専用フィールドを`MachineConfig`に追加してよい**。共通化（例えば`specialCases: SpecialCase[]`のような汎用配列への統合）を検討するのは、**同じ形状の特殊対応が4〜5機種分たまった時点**で十分。まだ1〜2件しかない段階での早すぎる共通化（premature abstraction）は行わない。
+- **現行仕様**: 実装例は `src/data/machines/haihai-siosai.ts` / `haihai-siosai2.ts` / `last-utopia.ts`（`specialAdvice`）、`src/data/machines/juggler-im-ex.ts`（`specs.approximationLabelOverride`）。詳細は `architecture.md` §5参照。
+
 ## 参考（明示指示なき限り実施しない）
 
 - CMS導入、PWA（manifest / Service Worker）
