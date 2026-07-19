@@ -25,6 +25,7 @@
 - UIコア（`DynamicInput.tsx` 等の30:70スプリット、Glow等）は**完全共通化**する。
 - 小役構成・配色・判別テーブル・期待値計算は機種設定オブジェクト（`config`）に分離し、`MachinePageFactory.tsx` が機種ID（例: `myjug5`）を検知して動的にマッピング・注入する。
 - コンポーネントへのベタ書きは禁止。新機種追加は設定オブジェクトの追加で対応する。
+- **機種ID → `MachineConfig` の対応表（CONFIG_MAP）は `src/data/machine-config-map.ts` に一元管理する**（2026-07-19統合）。`GrapeReversePage.tsx` / `MachineSpecPage.tsx` / `MachinePagePreview.tsx` はこのファイルから`CONFIG_MAP`をimportするだけで、各ページに個別のマッピングを持たない。**新機種を追加する場合は `src/data/machines/<slug>.ts` の作成、`machine-list.ts`（`AVAILABLE_MACHINES`）への登録、そして `machine-config-map.ts` への1エントリ追加のみでよい**（以前は3ファイルへの重複追加が必要で、更新漏れによる「特定ページだけ機種が見つからない」不具合のリスクがあった）。
 
 ### `MachineConfig.specs`（ぶどう/ベル逆算・多機種対応）
 

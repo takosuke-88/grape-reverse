@@ -2,24 +2,7 @@ import { useParams } from "react-router-dom";
 import MachinePageFactory from "../components/dynamic-ui/MachinePageFactory";
 import Seo from "../components/Seo";
 import { AVAILABLE_MACHINES } from "../data/machine-list";
-import { hanaHoohConfig } from "../data/machines/hana-hooh";
-import { funkyJuggler2Config } from "../data/machines/funky-juggler-2";
-import { myJuggler5Config } from "../data/machines/juggler-my5";
-import { imJugglerExConfig } from "../data/machines/juggler-im-ex";
-import { gogoJuggler3Config } from "../data/machines/juggler-gogo3";
-import { girlsSsConfig } from "../data/machines/juggler-girls-ss";
-import { mrJugglerConfig } from "../data/machines/juggler-mr";
-import { miracleJugglerConfig } from "../data/machines/juggler-miracle";
-import { happyV3Config } from "../data/machines/juggler-happy-v3";
-import { kingHanahanaConfig } from "../data/machines/king-hanahana";
-import { dragonSenkoConfig } from "../data/machines/dragon-senko";
-import { starHanahanaConfig } from "../data/machines/star-hanahana";
-import { newHanahanaGoldConfig } from "../data/machines/new-hanahana-gold";
-import { newKingVConfig } from "../data/machines/new-king-v";
-import { lastUtopiaConfig } from "../data/machines/last-utopia";
-import { haihaiSiosai2Config } from "../data/machines/haihai-siosai2";
-import { haihaiSiosaiConfig } from "../data/machines/haihai-siosai";
-import type { MachineConfig } from "../types/machine-schema";
+import { CONFIG_MAP as configMap } from "../data/machine-config-map";
 
 /**
  * 動的UIファクトリーのプレビューページ
@@ -27,27 +10,6 @@ import type { MachineConfig } from "../types/machine-schema";
  */
 export default function MachinePagePreview() {
   const { machineId } = useParams<{ machineId: string }>();
-
-  // 機種IDと設定ファイルのマッピング
-  const configMap: Record<string, MachineConfig> = {
-    "hana-hooh": hanaHoohConfig,
-    funky2: funkyJuggler2Config,
-    myjuggler5: myJuggler5Config,
-    aimex: imJugglerExConfig,
-    gogo3: gogoJuggler3Config,
-    girlsss: girlsSsConfig,
-    mr: mrJugglerConfig,
-    miracle: miracleJugglerConfig,
-    happyv3: happyV3Config,
-    "king-hanahana": kingHanahanaConfig,
-    "dragon-senko": dragonSenkoConfig,
-    "star-hanahana": starHanahanaConfig,
-    "new-king-v": newKingVConfig,
-    "new-hanahana-gold": newHanahanaGoldConfig,
-    "last-utopia": lastUtopiaConfig,
-    "haihai-siosai2": haihaiSiosai2Config,
-    "haihai-siosai": haihaiSiosaiConfig,
-  };
 
   const config = machineId ? configMap[machineId] : null;
 
