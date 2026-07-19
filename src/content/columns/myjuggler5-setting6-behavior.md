@@ -2,6 +2,7 @@
 title: "【マイジャグ5】設定6はこう動く！"
 description: "「合算1/120の台が空いた！」←実はそれ、罠かもしれません。AIシミュレーションと実戦データから導き出した、マイジャグ5の本当の狙い方を解説します。"
 date: "2026-02-20"
+updatedAt: "2026-02-20"
 tags: ["juggler", "myjuggler5"]
 draft: false
 showRelatedColumns: false

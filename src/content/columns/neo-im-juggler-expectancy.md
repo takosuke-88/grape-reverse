@@ -2,6 +2,7 @@
 title: "今さら聞けない、ネオアイムジャグラーEXの1日の期待値"
 description: "ネオアイムの期待値って本当に低いの？打ち方別・設定別の期待差枚（7000G）をシミュレーションデータから徹底分析。設定3の逆転劇から設定6のポテンシャルまで、勝率を高めるためのリアルな数値を公開します。"
 date: "2026-06-07"
+updatedAt: "2026-06-07"
 tags: ["juggler", "neo-im-juggler", "expectancy", "column"]
 draft: false
 showRelatedColumns: false

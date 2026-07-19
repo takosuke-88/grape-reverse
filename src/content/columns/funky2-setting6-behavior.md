@@ -2,6 +2,7 @@
 title: "ファンキージャグラー2の設定6は別格？"
 description: "BIG確率だけで設定判別していませんか？ファンキー2で勝つために見落とされがちな「単独REG」と「ぶどう」の重要性を徹底解説。"
 date: "2026-02-20"
+updatedAt: "2026-02-20"
 tags: ["juggler", "funky2"]
 draft: false
 showRelatedColumns: false

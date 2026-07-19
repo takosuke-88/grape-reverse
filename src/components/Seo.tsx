@@ -1,17 +1,30 @@
 import { useEffect } from "react";
 
+interface ArticleMeta {
+  headline: string;
+  datePublished: string;
+  dateModified: string;
+}
+
 interface SeoProps {
   pageTitle: string;
   pageDescription: string;
   pagePath: string;
   pageImg?: string;
+  articleMeta?: ArticleMeta;
 }
 
 /**
  * SPA用のSEOコンポーネント
  * ReactのuseEffectを使用して、ドキュメントのタイトルとメタタグを動的に更新します。
  */
-const Seo = ({ pageTitle, pageDescription, pagePath, pageImg }: SeoProps) => {
+const Seo = ({
+  pageTitle,
+  pageDescription,
+  pagePath,
+  pageImg,
+  articleMeta,
+}: SeoProps) => {
   useEffect(() => {
     // 1. タイトルの更新
     document.title = pageTitle;
@@ -57,7 +70,34 @@ const Seo = ({ pageTitle, pageDescription, pagePath, pageImg }: SeoProps) => {
       document.head.appendChild(canonical);
     }
     canonical.setAttribute("href", fullUrl);
-  }, [pageTitle, pageDescription, pagePath, pageImg]);
+
+    // 構造化データ (JSON-LD): 記事ページのみ
+    const jsonLdId = "structured-data-jsonld";
+    let jsonLdScript = document.getElementById(
+      jsonLdId,
+    ) as HTMLScriptElement | null;
+
+    if (articleMeta) {
+      if (!jsonLdScript) {
+        jsonLdScript = document.createElement("script");
+        jsonLdScript.id = jsonLdId;
+        jsonLdScript.type = "application/ld+json";
+        document.head.appendChild(jsonLdScript);
+      }
+      jsonLdScript.textContent = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        headline: articleMeta.headline,
+        description: pageDescription,
+        datePublished: articleMeta.datePublished,
+        dateModified: articleMeta.dateModified,
+        url: fullUrl,
+        image: pageImg || defaultImg,
+      });
+    } else if (jsonLdScript) {
+      jsonLdScript.remove();
+    }
+  }, [pageTitle, pageDescription, pagePath, pageImg, articleMeta]);
 
   return null;
 };

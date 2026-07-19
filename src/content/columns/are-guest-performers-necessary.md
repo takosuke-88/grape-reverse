@@ -2,6 +2,7 @@
 title: "来店演者って「いらなくない？」"
 description: "7,000人の応募、数十万人のフォロワー、そしてリークされる「指定台」の疑い。集客の切り札として定着した来店演者バブルの裏側にある歪みと、業界が本当に必要としている『透明性』について考える。"
 date: "2026-03-22"
+updatedAt: "2026-03-22"
 tags: ["column", "opinion", "strategy"]
 draft: false
 showRelatedColumns: true

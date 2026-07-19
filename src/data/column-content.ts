@@ -4,6 +4,7 @@ export interface ColumnFrontmatter {
   title: string;
   description: string;
   date: string;
+  updatedAt: string;
   tags: string[];
   draft: boolean;
   showRelatedColumns?: boolean;

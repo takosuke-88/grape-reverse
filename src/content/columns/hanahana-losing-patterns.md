@@ -2,6 +2,7 @@
 title: "ハナハナで負け続ける人には共通点があった！"
 description: "ハナハナで負け続ける人の多くは、台が悪いのではなく判断の根拠が演出任せになっています。フラッシュの色に踊らされず、ベル確率を重視するなど、勝つための「判断の癖」を解説します。"
 date: "2026-03-08"
+updatedAt: "2026-03-08"
 tags: ["hana", "hanahana", "strategy", "column"]
 draft: false
 showRelatedColumns: false

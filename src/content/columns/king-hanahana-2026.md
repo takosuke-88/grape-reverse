@@ -2,6 +2,7 @@
 title: "キングハナハナはまだ狙えるか？ニューキングV導入後の設定状況と立ち回り"
 description: "2026年のキングハナハナはまだ勝てるのか？認定満期やスマスロ『ニューキングハナハナV-30』導入によるホール状況の変化、設定6をツモるための必須条件を徹底解説します。"
 date: "2026-04-26"
+updatedAt: "2026-04-26"
 tags: ["column", "hana", "strategy"]
 draft: false
 showRelatedColumns: false

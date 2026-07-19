@@ -2,6 +2,7 @@
 title: "ゴーゴージャグラー3の設定6を7000Gx10万日回すとどうなるか ─ GOD神々の軌跡との比較付き"
 description: "ゴージャグ3の設定6は本当に勝てるのか？10万日のシミュレーションデータから勝率、最大マイナス、平均差枚を算出。スマスロ『ミリオンゴッド-神々の軌跡-』設定6との比較から、最適な立ち回りを考察します。"
 date: "2026-05-09"
+updatedAt: "2026-05-09"
 tags: ["juggler", "gogo-juggler-3", "setting6", "column"]
 draft: false
 showRelatedColumns: false

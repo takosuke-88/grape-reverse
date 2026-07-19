@@ -2,6 +2,7 @@
 title: "「マイジャグVは負けやすい」の真実。設定2の地雷を避ける立ち回り術"
 description: "看板機種ゆえの皮肉。実はフリー打ち設定2で98.0%、確実なマイナス構造に潜む「見えない地雷」を避けるための必須知識を解説します。"
 date: "2026-03-04"
+updatedAt: "2026-03-04"
 tags: ["juggler", "myjuggler5", "strategy", "column"]
 draft: false
 showRelatedColumns: false

@@ -2,6 +2,7 @@
 title: "ネオアイムジャグラーの設定6、実際どう動くのか？"
 description: "設定6引いたら絶対勝てる——そう思ってる人、多い。でも現実はちょっと違う。「ほぼ勝てる。けど、普通に負ける日もある」これが正直なところ。シミュレーションと実戦データから、設定6のリアルな姿を洗い出してみる。"
 date: "2026-03-19"
+updatedAt: "2026-03-19"
 tags: ["neo-im-juggler", "setting6", "column"]
 draft: false
 showRelatedColumns: false

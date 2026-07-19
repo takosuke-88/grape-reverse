@@ -2,6 +2,7 @@
 title: "【2026年4月第4週】パチンコ・パチスロニュース｜GW営業予想と最新台情報"
 description: "2026年4月20日〜26日の業界動向。GW直前の新台6機種導入、ホールの『出す/抜く』営業予想、パチスロ市場シェア逆転の可能性、5月導入の注目スマスロまで、立ち回りに直結する今週のニュースを総まとめ。"
 date: "2026-04-26"
+updatedAt: "2026-04-26"
 tags: ["column", "news", "analysis"]
 draft: false
 showRelatedColumns: false

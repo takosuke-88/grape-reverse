@@ -2,6 +2,7 @@
 title: "ハナハナの立ち回り、機種が変わっても同じでいいのか？"
 description: "機種が変わってもベル数えてBIG中のスイカ見てフェザーランプ確認して……この流れ自体は変わらない。基本骨格は一緒だ。ただ、「どうせ全部同じハナハナでしょ」って感覚で座ると、機種ごとに仕込まれてる微妙な差異を見逃す。"
 date: "2026-03-10"
+updatedAt: "2026-03-10"
 tags: ["hana", "hanahana", "strategy", "column"]
 draft: false
 showRelatedColumns: false

@@ -26,6 +26,11 @@ const markdownComponents: Components = {
   a: InternalLinkAwareAnchor,
 };
 
+const formatJaDate = (dateStr: string): string => {
+  const [y, m, d] = dateStr.split("-");
+  return `${y}年${parseInt(m, 10)}月${parseInt(d, 10)}日`;
+};
+
 const ColumnDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const entry = slug ? getColumnBySlug(slug) : undefined;
@@ -42,8 +47,21 @@ const ColumnDetailPage = () => {
         pageTitle={`${frontmatter.title}｜GrapeReverse`}
         pageDescription={frontmatter.description}
         pagePath={`/columns/${entry.slug}`}
+        articleMeta={{
+          headline: frontmatter.title,
+          datePublished: frontmatter.date,
+          dateModified: frontmatter.updatedAt,
+        }}
       />
       <main className="container mx-auto px-4 py-8 max-w-3xl">
+        <div className="mb-4 text-sm text-slate-500 dark:text-slate-400">
+          <span>公開日：{formatJaDate(frontmatter.date)}</span>
+          {frontmatter.updatedAt !== frontmatter.date && (
+            <span className="ml-4">
+              更新日：{formatJaDate(frontmatter.updatedAt)}
+            </span>
+          )}
+        </div>
         <div className="column-article prose dark:prose-invert max-w-none">
           <ColumnRenderErrorBoundary>
             <ReactMarkdown

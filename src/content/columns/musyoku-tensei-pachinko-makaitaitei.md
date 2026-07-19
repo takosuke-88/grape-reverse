@@ -2,6 +2,7 @@
 title: "無職転生パチンコ、ヒトガミ拒否で発展する超魔界大帝の作り込み"
 description: "無職転生のパチンコでヒトガミに従わない選択をした際の超魔界大帝チャレンジ発展演出がSNSで話題。作り込みの深さとユーザーの反応を解説する。"
 date: "2026-07-15"
+updatedAt: "2026-07-15"
 tags: ["column", "pachinko", "news"]
 draft: false
 showRelatedColumns: false
