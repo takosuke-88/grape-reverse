@@ -1,8 +1,8 @@
 ---
 title: "パチスロ筐体無能選手権が話題。「この下皿は何を置く想定なのか」に共感の嵐"
 description: "妙な形状の下皿写真とともに投稿された「パチスロ筐体無能選手権」がXで拡散。プレイヤーあるあるを突いたミームが笑いを呼んだ理由と、下皿という装備の現在地を考える。"
-date: "2026-07-15"
-updatedAt: "2026-07-15"
+date: "2026-07-21"
+updatedAt: "2026-07-21"
 tags: ["column", "pachinko", "news"]
 draft: false
 showRelatedColumns: false

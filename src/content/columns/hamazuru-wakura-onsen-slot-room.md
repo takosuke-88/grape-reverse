@@ -1,8 +1,8 @@
 ---
 title: "パチスロ62台に宿泊64名。和倉温泉はまづるの「だがそれがいい」がじわる"
 description: "パチスロルームを備えた和倉温泉の旅館はまづるが、宿泊64名に対し利用10名という実態をユーモア込みで報告。共感を呼んだ理由と、レトロ機ラインナップの魅力を解説する。"
-date: "2026-07-15"
-updatedAt: "2026-07-15"
+date: "2026-07-20"
+updatedAt: "2026-07-20"
 tags: ["column", "pachinko", "news"]
 draft: false
 showRelatedColumns: false

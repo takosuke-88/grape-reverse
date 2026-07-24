@@ -1,8 +1,8 @@
 ---
 title: "8月4日はパチスロの日。サミット公式のフォロー&リポストキャンペーンが盛況"
 description: "パチスロサミット公式が8月4日「パチスロの日」記念キャンペーンを告知。メーカーグッズお楽しみBOXが抽選10名に当たる簡単応募が拡散中。参加方法と応募時の注意点を解説。"
-date: "2026-07-15"
-updatedAt: "2026-07-15"
+date: "2026-07-21"
+updatedAt: "2026-07-21"
 tags: ["column", "pachinko", "news"]
 draft: false
 showRelatedColumns: false

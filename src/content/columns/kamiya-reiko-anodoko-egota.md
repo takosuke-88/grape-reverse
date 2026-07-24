@@ -1,8 +1,8 @@
 ---
 title: "神谷玲子さんが『あのどこ』収録を告知。舞台はヒノマルパチンコ江古田店"
 description: "パチスロ演者・神谷玲子さんが7月20日にヒノマルパチンコ江古田店で番組『あのどこ』の収録を行うと告知。応援中心の反応と、江古田店の遊びやすさを管理人目線で紹介する。"
-date: "2026-07-15"
-updatedAt: "2026-07-15"
+date: "2026-07-20"
+updatedAt: "2026-07-20"
 tags: ["column", "pachinko", "news"]
 draft: false
 showRelatedColumns: false

@@ -1,8 +1,8 @@
 ---
 title: "パチ屋で超大物OBが激ギレ!? Xで爆笑を呼んだ「夢オチ」ポストの話"
 description: "パチ屋の入場列で元プロ野球選手が激ギレ…という衝撃の目撃談、実は「夢」。Xで1300いいねを集めた夢オチポストがなぜウケたのか、元パチプロ目線で解説。"
-date: "2026-07-15"
-updatedAt: "2026-07-15"
+date: "2026-07-23"
+updatedAt: "2026-07-23"
 tags: ["column", "pachinko", "news"]
 draft: false
 showRelatedColumns: false

@@ -1,8 +1,8 @@
 ---
 title: "コン・バトラーVの合体シーン、パチンコ演出との相性の良さが話題に"
 description: "コン・バトラーVのアレンジと合体シーンがパチンコのムービー演出と好相性だとする動画付き投稿が拡散。懐かしさとクオリティ評価が交錯する反応を整理する。"
-date: "2026-07-15"
-updatedAt: "2026-07-15"
+date: "2026-07-19"
+updatedAt: "2026-07-19"
 tags: ["column", "pachinko", "news"]
 draft: false
 showRelatedColumns: false
