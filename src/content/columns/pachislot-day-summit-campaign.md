@@ -16,7 +16,7 @@ showRelatedColumns: false
 
 <h2>フォローとリポストだけ。それでリポスト2400超え</h2>
 
-8月4日は「パチスロの日」。これに合わせて、パチスロサミット公式アカウント（@pachislotsummit）がキャンペーン告知を投稿し、リポスト数が2400を超える盛り上がりを見せている。
+8月4日は「パチスロの日」。これに合わせて、パチスロサミット公式アカウント（@pachislotsummit）がキャンペーン告知を投稿し、リポスト数が2400を超える盛り上がりを見せている。（そもそもなぜ8月4日が記念日なのか、由来から知りたい方は<a href="/columns/pachislot-day-yurai-2026">こちらの記事</a>で解説している）
 
 <div class="not-prose my-6">
 <a href="https://x.com/pachislotsummit/status/2079095478516690971" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 hover:shadow-md transition-shadow">
