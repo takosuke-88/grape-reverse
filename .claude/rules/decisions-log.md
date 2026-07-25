@@ -18,7 +18,8 @@
 | コラム記事を `src/pages/columns/*.tsx` にベタ書き＋`column-list.ts`へ手動登録 | 廃止（2026-07-15）。`src/content/columns/*.md` ＋ 動的ルート `/columns/:slug`（`architecture.md` §6） |
 | コラム記事の `<h2>`/`<h3>`/`<table>`/`<th>`/`<td>` への個別class/style付与 | 禁止（2026-07-16）。`src/index.css` の `.column-article` で一元管理（`architecture.md` §6） |
 | コラム記事CTAボタンへの個別グラデーション・色指定 | 禁止（2026-07-16）。`<a href="/機種id" class="cta-button">` のみ使用 |
-| 表内の数値強調に個別色クラス（`text-red-600`等）を直接指定 | 禁止（2026-07-16）。`<strong class="highlight">` のみ使用（色は`.column-article strong.highlight`が一元管理） |
+| 表内の数値強調に個別色クラス（`text-red-600`等）を直接指定 | 禁止（2026-07-16）。`<strong class="highlight">` のみ使用（色は`.column-article strong.highlight`が一元管理）
+| コラム記事のフロントマター`date`を、ユーザー提供ドラフトの値をそのままコピーする | 禁止（2026-07-25）。ドラフトには前回記事からの使い回しと思われる仮の日付が入っていることがあり、そのまま採用すると実際の公開日と一致しない。**実装前に「今日の実際の作業日」を確認し、`date`/`updatedAt`に設定すること**（詳細は下記エントリ参照） |
 | `tailwind.config.js` の `content` から `.md` パスを外す（`src/content/` 配下に新ディレクトリを追加した際の更新漏れも含む） | 禁止・要注意。外れているとその配下のクラスが静かに未生成になる（2026-07-16に実際発生、同日エントリ参照） |
 
 ## 2026-04以前: ボーナス履歴 LIFO
@@ -119,6 +120,31 @@
 - **理由**: この2つは見た目こそ両方「機種固有の特殊表示」だが、データの形状が根本的に異なる（前者は総ゲーム数×確率閾値によるテキスト分岐、後者は数値一致による単純なラベル置換）。共通の汎用フィールド（例: 何でも入る`overrides: Record<string, any>`）に無理やり統合すると型安全性が失われ、結局`MachinePageFactory.tsx`側に「このoverride種別の場合はこう解釈する」という分岐が復活し、撤廃したはずの「機種IDハードコード」が「フラグ種別ハードコード」に形を変えて再発するリスクがあった。
 - **今後の判断基準（先祖返り防止）**: 今後3つ目以降の異なる性質の特殊対応が必要になった場合も、**性質が異なるなら安易に既存フィールド（`specialAdvice`等）や汎用フラグに寄せず、都度その性質に合った専用フィールドを`MachineConfig`に追加してよい**。共通化（例えば`specialCases: SpecialCase[]`のような汎用配列への統合）を検討するのは、**同じ形状の特殊対応が4〜5機種分たまった時点**で十分。まだ1〜2件しかない段階での早すぎる共通化（premature abstraction）は行わない。
 - **現行仕様**: 実装例は `src/data/machines/haihai-siosai.ts` / `haihai-siosai2.ts` / `last-utopia.ts`（`specialAdvice`）、`src/data/machines/juggler-im-ex.ts`（`specs.approximationLabelOverride`）。詳細は `architecture.md` §5参照。
+
+## 2026-07-25: コラム記事date不整合の発覚と修正、X投稿リンクカードパターンの確立
+
+- **決定事項**: 2026-07-19〜23にかけて追加した新規コラム記事7本すべてで、フロントマターの`date`が実際の公開日と異なり「2026-07-15」に固定されていた不具合を修正した。あわせて、記事中でXの元投稿を紹介する際のリンクカードHTMLパターンを標準化した。
+- **理由（date不整合）**: ユーザーから渡される記事ドラフトには`date: "2026-07-15"`という値が毎回そのまま含まれており、これは「その日最初に書いたドラフトの日付」が使い回されたものだった。Claude側がこの値を無条件にコピーしてフロントマターへ採用し続けた結果、`ALL_COLUMNS`のdate降順ソートで7本が同日タイになり、コラム一覧・関連コラム表示で「最新記事」が実態を反映しない状態になった。ユーザーが「本番のコラムの最終投稿日時が7月15日から更新されていない」と気づくまで、ビルドもtscも通過してしまい発覚しなかった（型エラー・コンパイルエラーにならない性質の不具合という点で、2026-07-16のtailwind content漏れの教訓と同種）。
+- **現行仕様**: 記事を新規作成・テスト環境実装する際、フロントマターの`date`は**ドラフトの値をそのまま使わず、その日の実際の作業日を確認してから設定する**。`updatedAt`は初回公開時`date`と同値で初期化するルール（`architecture.md` §6）は従来通り。
+- **X投稿リンクカードの標準形**（2026-07-15以降、複数記事で反復使用し安定したパターン）:
+  ```html
+  <div class="not-prose my-6">
+  <a href="{X投稿URL}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 hover:shadow-md transition-shadow">
+    <svg class="w-8 h-8 flex-shrink-0 text-slate-900 dark:text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+    <div>
+      <p class="text-sm font-bold text-slate-900 dark:text-white">@{ハンドル名} の投稿を見る</p>
+      <p class="text-xs text-slate-500 dark:text-slate-400">X（旧Twitter）で元の投稿を確認する</p>
+    </div>
+  </a>
+  </div>
+  ```
+  記事本文中で最初にその投稿へ言及する段落の直後に配置する。1記事に複数のX投稿（元ネタ＋関連投稿など）を貼る場合は、それぞれの言及箇所の直後に個別配置してよい（`hamazuru-wakura-onsen-slot-room.md`が実装例）。実在アカウントの表示名は、本人確認が取れない限り**ハンドル名（@から始まる文字列）のみを使い、日本語の表示名を推測で補完しない**（誤った人物紐付けのリスクを避けるため）。
+
+## 2026-07-25: Google AdSenseスニペットはindex.html 1箇所に集約
+
+- **決定事項**: Google AdSenseの所有者確認・自動広告用スクリプトを`index.html`の`<head>`先頭（GA4タグの直前）に設置した。
+- **理由**: 本プロジェクトはVite製のSPAで、Next.jsの`_document.tsx`のようなサーバーサイドテンプレートは存在せず、全ルート（ツール・コラム・機種スペック含む）が単一の`index.html`から配信される。そのため「共通レイアウトファイル」は実質`index.html`の1ファイルのみであり、ここに1回だけ設置すれば全ページに反映される。
+- **現行仕様**: 今後、他の第三者スクリプト（広告・解析タグ等）を追加する場合も同様に`index.html`に集約する。ページ単位でのhead操作が必要になった場合のみ`react-helmet`等の導入を検討する（現時点では不要、SEO用の動的head操作は既存の`Seo.tsx`で足りている）。
 
 ## 参考（明示指示なき限り実施しない）
 
