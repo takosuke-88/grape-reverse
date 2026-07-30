@@ -21,6 +21,8 @@
 | 表内の数値強調に個別色クラス（`text-red-600`等）を直接指定 | 禁止（2026-07-16）。`<strong class="highlight">` のみ使用（色は`.column-article strong.highlight`が一元管理）
 | コラム記事のフロントマター`date`を、ユーザー提供ドラフトの値をそのままコピーする | 禁止（2026-07-25）。ドラフトには前回記事からの使い回しと思われる仮の日付が入っていることがあり、そのまま採用すると実際の公開日と一致しない。**実装前に「今日の実際の作業日」を確認し、`date`/`updatedAt`に設定すること**（詳細は下記エントリ参照） |
 | `tailwind.config.js` の `content` から `.md` パスを外す（`src/content/` 配下に新ディレクトリを追加した際の更新漏れも含む） | 禁止・要注意。外れているとその配下のクラスが静かに未生成になる（2026-07-16に実際発生、同日エントリ参照） |
+| ビルド時プリレンダリングで通常の `playwright` パッケージ（標準Chromiumダウンロード）をそのままVercelビルドで使う | 禁止（2026-07-29）。VercelのビルドコンテナはAmazon Linuxベースでroot権限が無く、標準Chromiumが依存する共有ライブラリ（`libnspr4.so`等）が存在せず起動失敗する。**`playwright-core` + `@sparticuz/chromium`**（サーバーレス環境向け自己完結ビルド）を`process.env.VERCEL`判定で切り替える方式が必須（`scripts/generate-seo-shells.mjs`） |
+| 新しいページ種別（ルート）を追加した際、`scripts/generate-sitemap.js`への登録を忘れる | 要注意（2026-07-29）。`/:machineId/grape`・`/:machineId/specs`ページは2026年6月の実装当初からsitemap.xmlに一度も登録されておらず、AIクローラー（Perplexity等）がページを発見できない状態が長期間放置されていた。**新しいルートパターンを追加する際は必ず`generate-sitemap.js`の対象に含めること**（詳細は下記エントリ参照） |
 
 ## 2026-04以前: ボーナス履歴 LIFO
 - **現行仕様**: `bonusHistory` を `localStorage` に保持。「−」は直前の契機から `pop`。直接入力・全体リセット時はスタッククリア。
@@ -145,6 +147,27 @@
 - **決定事項**: Google AdSenseの所有者確認・自動広告用スクリプトを`index.html`の`<head>`先頭（GA4タグの直前）に設置した。
 - **理由**: 本プロジェクトはVite製のSPAで、Next.jsの`_document.tsx`のようなサーバーサイドテンプレートは存在せず、全ルート（ツール・コラム・機種スペック含む）が単一の`index.html`から配信される。そのため「共通レイアウトファイル」は実質`index.html`の1ファイルのみであり、ここに1回だけ設置すれば全ページに反映される。
 - **現行仕様**: 今後、他の第三者スクリプト（広告・解析タグ等）を追加する場合も同様に`index.html`に集約する。ページ単位でのhead操作が必要になった場合のみ`react-helmet`等の導入を検討する（現時点では不要、SEO用の動的head操作は既存の`Seo.tsx`で足りている）。
+
+## 2026-07-29: SEO静的シェル生成（ビルド時プリレンダリング）を導入
+
+- **決定事項**: 外部SEOツールが41ページで「title重複」「meta description重複」「h1タグなし」「文字数不足」を同時指摘した問題に対し、Next.js移行やSSR化は行わず、**`vite build`後にPlaywrightで全ルートを実レンダリングし、ルートごとの静的HTMLシェルを`dist/`配下に書き出すビルドステップ**（`scripts/generate-seo-shells.mjs`）を追加した。Reactアプリ本体のロジックは無変更。
+- **理由**: 調査の結果、原因は個々のページの作り込み不足ではなく、**サイト全体が完全CSRのSPAで、`index.html`が全ルート共通の静的meta情報しか持たず`<div id="root"></div>`が空**という単一の構造的問題だった。ページごとのtitle/description/h1はすべて`Seo.tsx`のクライアント側`useEffect`で生成されており、JSを実行しない（または実行前にHTMLを取得する）クローラーには、どのURLも同一の空HTMLに見えていた。
+- **却下した選択肢**: Next.js等フレームワークへの全面移行、React.lazyによるコード分割導入（いずれも2026-07-16に不採用済みの方針と同じ理由＝実装コストと効果が見合わない）。SSR化も、Vite SPA構成を維持したまま解決できる問題であるため見送った。
+- **現行仕様**: `npm run build`が`generate-sitemap.js → tsc → vite build → generate-seo-shells.mjs`の順に実行される。全80ルート（home 1 + 機種17×3 + columns一覧1 + コラム記事N）を**メモリ上に集めてから一括で`dist/`へ書き込む**設計（トップページの出力が先に`dist/index.html`を上書きし、後続ルートの検証結果を壊す事故を防ぐため）。待機処理は`networkidle`ではなく`domcontentloaded`＋固定ウェイト（`networkidle`は遅延読み込みやアニメーションがあると解決しないケースがあるため）。
+
+## 2026-07-29: Vercelビルド環境でのPlaywright Chromium起動失敗と`@sparticuz/chromium`への切り替え
+
+- **決定事項**: 上記のSEOシェル生成をVercelへデプロイしたところ、`chrome-headless-shell: error while loading shared libraries: libnspr4.so: cannot open shared object file`でビルドが失敗した。**`playwright-core` + `@sparticuz/chromium`**（サーバーレス環境向けに共有ライブラリを同梱した自己完結Chromiumビルド）に切り替えて解決した。
+- **理由**: VercelのビルドコンテナはAmazon Linuxベースで`apt-get`のようなパッケージマネージャへのroot権限が無く、標準Playwright Chromiumが前提とするOS側の共有ライブラリ（NSPR/NSS等）をインストールする手段が存在しない。ローカル（Windows）では問題なく動作したため、この環境差に気づけなかった。`--with-deps`オプションはapt-get前提のためAmazon Linuxでは使用不可。
+- **教訓**: ヘッドレスブラウザをビルドステップに組み込む場合、**ローカルでの動作確認だけでは不十分**。デプロイ先のビルド環境（Vercel/Amazon Linux等）がroot権限・パッケージマネージャの有無でOSレベルの依存関係を解決できるかを事前に確認する必要がある。幸い、Vercelは新デプロイのビルドが失敗しても直前の成功デプロイを配信し続けるため、この種の失敗が本番ダウンタイムに直結しなかった。
+- **現行仕様**: `scripts/generate-seo-shells.mjs`は`playwright-core`をimportし、`process.env.VERCEL`が真の場合のみ`@sparticuz/chromium`の`executablePath()`/`args`を`launch()`に渡す。ローカル開発（Windows/macOS）では`playwright`パッケージ経由でダウンロードした標準Chromiumをそのまま使う（`scripts/postinstall.mjs`が`process.env.VERCEL`で分岐し、Vercel上では標準Chromiumのダウンロード自体をスキップする）。
+
+## 2026-07-29: sitemap.xmlに`/grape`・`/specs`ページが未登録だった不具合を修正
+
+- **決定事項**: SEOシェル導入後もPerplexityが`/:machineId/grape`ページ群だけを読み取れないという報告を受けて調査した結果、`scripts/generate-sitemap.js`が機種ページとして`/:machineId`のみを登録し、**`/:machineId/grape`・`/:machineId/specs`を実装当初（2026年6月）から一度も登録していなかった**ことが判明。34件（17機種×2）を追加登録した。
+- **理由**: canonical・noindex・プリレンダリング内容はすべて正常で、原因はページ側ではなくサイトマップ生成ロジックの元々の設計漏れだった。`/grape`・`/specs`へは各ページのナビゲーションボタンから内部リンクは張られていたが、クロール予算の限られた（特に新しいドメインに対する）クローラーはサイトマップ経由の発見を優先しやすく、長期間見つけてもらえない状態が続いていたとみられる。
+- **教訓**: 新しいルートパターン（ページ種別）を追加する際は、そのページが実際にユーザーの目に触れて機能するかだけでなく、**`generate-sitemap.js`の対象に含まれているか必ず確認すること**。今回は「動いている・リンクもある」ことに気を取られ、サイトマップ登録という地味な工程が長期間見落とされていた。ビルドもtscも通過してしまう性質の不具合という点で、2026-07-16のtailwind content漏れ・2026-07-25のdate不整合と同種の教訓。
+- **現行仕様**: `scripts/generate-sitemap.js`は機種1件につき`/:id`・`/:id/grape`・`/:id/specs`の3URLを登録する。サイトマップ総URL数（80件）が`generate-seo-shells.mjs`のプリレンダリング対象ルート数と一致することを、今後の変更時の整合性チェックの目安にする。
 
 ## 参考（明示指示なき限り実施しない）
 
