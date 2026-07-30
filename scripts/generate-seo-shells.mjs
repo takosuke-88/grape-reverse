@@ -5,7 +5,7 @@
 // 目的: 本サイトは完全CSRのSPAで、index.html は全ルート共通の静的meta情報しか
 // 持たない。JSを実行しないSEOクローラーにはどのURLも同一の空HTMLに見えるため、
 // ビルド成果物側にルートごとの完成形HTMLを追加で用意する（Reactロジックは無変更）。
-import { chromium } from "playwright";
+import { chromium } from "playwright-core";
 import { preview } from "vite";
 import fs from "fs";
 import path from "path";
@@ -90,7 +90,24 @@ async function main() {
   });
   const baseUrl = `http://localhost:${PREVIEW_PORT}`;
 
-  const browser = await chromium.launch();
+  // Vercelのビルドコンテナ（Amazon Linux、root権限なし）には
+  // Playwright標準Chromiumが必要とする共有ライブラリ（libnspr4.so等）が無く
+  // 起動に失敗するため、サーバーレス環境向けの自己完結ビルドである
+  // @sparticuz/chromium に切り替える。ローカル開発では
+  // `playwright install chromium` でダウンロードした標準Chromiumを使う。
+  let launchOptions = {};
+  if (process.env.VERCEL) {
+    const { default: sparticuzChromium } = await import(
+      "@sparticuz/chromium"
+    );
+    launchOptions = {
+      args: sparticuzChromium.args,
+      executablePath: await sparticuzChromium.executablePath(),
+      headless: true,
+    };
+  }
+
+  const browser = await chromium.launch(launchOptions);
   const page = await browser.newPage();
 
   // 全ルートの出力をメモリ上に集めてから最後に一括で書き込む。
