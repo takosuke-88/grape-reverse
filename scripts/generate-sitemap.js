@@ -67,6 +67,12 @@ async function generateSitemap() {
     console.log(`✅ Found ${machineIds.length} machines`);
     machineIds.forEach((id) => {
       urls.push(urlElement(`${BASE_URL}/${id}`, today, "weekly", "0.8"));
+      urls.push(
+        urlElement(`${BASE_URL}/${id}/grape`, today, "weekly", "0.7"),
+      );
+      urls.push(
+        urlElement(`${BASE_URL}/${id}/specs`, today, "weekly", "0.7"),
+      );
     });
   }
 
