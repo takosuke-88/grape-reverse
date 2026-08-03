@@ -1,8 +1,8 @@
 ---
 title: "エデンズゼロ＆ガンダムSEEDクライマックス　初日報告と両機の違いを整理｜GrapeReverse"
 description: "8月3日に同時導入されたe EDENS ZERO〜究極LT〜とeFガンダムSEEDクライマックス。初日の実戦報告と、似て見える2台の設計思想の違いを元パチプロが解説します。"
-date: "2026-08-04"
-updatedAt: "2026-08-04"
+date: "2026-08-03"
+updatedAt: "2026-08-03"
 tags: ["column", "pachinko", "news"]
 draft: false
 showRelatedColumns: false
