@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import type { DiscriminationElement } from "../../types/machine-schema";
 import { formatBonusText } from "../../utils/formatters";
 import CounterDirectInputZone from "./CounterDirectInputZone";
@@ -153,8 +153,19 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   compactLayout = false,
   overrideProbText,
 }) => {
-  const [showFloat, setShowFloat] = useState(false);
+  // 「＋1」「−1」の飛び出し演出。dir: 1 = 上へ（加算）/ -1 = 下へ（減算）
+  const [floats, setFloats] = useState<{ id: number; dir: 1 | -1 }[]>([]);
+  const floatIdRef = useRef(0);
   const [showGlow, setShowGlow] = useState(false);
+
+  /** 連打した回数分だけバッジを積み上げる（1つのbooleanで使い回さない） */
+  const pushFloat = (dir: 1 | -1) => {
+    const floatId = ++floatIdRef.current;
+    setFloats((prev) => [...prev, { id: floatId, dir }]);
+    setTimeout(() => {
+      setFloats((prev) => prev.filter((f) => f.id !== floatId));
+    }, 750);
+  };
 
   const triggerVibration = (type: "inc" | "dec") => {
     if (!vibrationEnabled) return;
@@ -183,22 +194,24 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
     onIncrement?.();
     triggerVibration("inc");
     setShowGlow(true);
-    setShowFloat(true);
     setTimeout(() => setShowGlow(false), 450);
-    setTimeout(() => setShowFloat(false), 620);
+    pushFloat(1);
   };
 
   const handleDecrement = () => {
     if (element.isReadOnly) return;
+    // 実際に減る場合のみ「−1」を出す（0のときや履歴切れで見た目だけ減るのを防ぐ）
+    const current = Number(value) || 0;
     if (onDecrement) {
       onDecrement();
       triggerVibration("dec");
+      if (current > 0) pushFloat(-1);
       return;
     }
-    const current = Number(value) || 0;
     if (current <= 0) return;
     onChange(current - 1);
     triggerVibration("dec");
+    pushFloat(-1);
   };
 
   const theme = getElementTheme(element.id);
@@ -230,8 +243,11 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
           : `0 0 10px ${theme.accent}cc, 0 0 22px ${theme.accent}88`;
 
         return (
+          // 外側はoverflow-hiddenを持たない。「+1」は枠外（画面上方向）まで
+          // 飛び出す演出のため、角丸クリップ用のoverflow-hiddenは内側のみに限定する。
+          <div className="relative w-full min-w-0 max-w-full select-none">
           <div
-            className="relative flex w-full min-w-0 max-w-full rounded-xl overflow-hidden select-none"
+            className="relative flex w-full min-w-0 max-w-full rounded-xl overflow-hidden"
             style={{
               minHeight: "76px",
               background: theme.bg,
@@ -300,20 +316,6 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
               }`}
               onClick={handleIncrement}
             >
-              {showFloat && (
-                <span
-                  className="counter-float-anim absolute font-black text-xl pointer-events-none"
-                  style={{
-                    left: "40%",
-                    top: "50%",
-                    color: "#ffffff",
-                    textShadow: `0 0 14px ${theme.accent}`,
-                    zIndex: 10,
-                  }}
-                >
-                  +1
-                </span>
-              )}
               <span
                 className="text-3xl font-thin pr-4 pointer-events-none select-none"
                 style={{ color: theme.textColor ?? "#ffffff", opacity: element.isReadOnly ? 0.2 : 0.45 }}
@@ -333,6 +335,28 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 </span>
               )}
             </div>
+          </div>
+          {floats.map((f) => (
+            <span
+              key={f.id}
+              className="counter-float-anim absolute rounded-full px-2.5 py-0.5 font-black text-lg leading-none pointer-events-none"
+              style={{
+                // どちらも上へ飛ばす（下方向はタップしている指で隠れて見えないため）。
+                // 起点だけ押したボタンの真上に置いて＋/−を区別する。
+                left: f.dir === 1 ? "72%" : "24px",
+                top: "50%",
+                // バーの外（明るいカード背景）まで飛び出すため、白文字だけだと
+                // ライトモードで消えて見える。バー本体と同じ濃色のピル背景を敷き、
+                // 影で輪郭を出すことで背景色に依存せず視認できるようにする。
+                background: theme.bg,
+                color: theme.textColor ?? "#ffffff",
+                boxShadow: `0 2px 10px rgba(0,0,0,0.35), 0 0 14px ${theme.accent}`,
+                zIndex: 10,
+              }}
+            >
+              {f.dir === 1 ? "+1" : "−1"}
+            </span>
+          ))}
           </div>
         );
       }

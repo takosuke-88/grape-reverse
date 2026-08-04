@@ -318,7 +318,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 const machineId = e.target.value;
                 if (machineId) navigate(`/${machineId}`);
               }}
-              className="flex-1 text-center font-bold text-base py-2.5 rounded-xl border-2 border-slate-300 bg-white text-slate-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"
+              className="min-w-0 flex-1 text-center font-bold text-base py-2.5 rounded-xl border-2 border-slate-300 bg-white text-slate-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"
             >
               {AVAILABLE_MACHINES.filter((m) => m.category === currentCategory).map((m) => (
                 <option key={m.id} value={m.id}>{m.name}</option>
@@ -460,6 +460,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                     );
                   })}
                 </div>
+
+                <p className="mt-3 text-center text-xs text-slate-400 dark:text-slate-500">
+                  － タップで減算　数字タップで直接入力　＋ タップで加算
+                </p>
 
               </div>
 

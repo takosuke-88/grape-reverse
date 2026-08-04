@@ -65,15 +65,23 @@
 
 @keyframes floatUp {
   0% {
-    opacity: 0.65;
-    transform: translateX(-50%) translateY(0) scale(1);
+    opacity: 0;
+    transform: translateX(-50%) translateY(0) scale(0.6);
   }
-  60% {
-    opacity: 0.4;
+  18% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-14px) scale(1.4);
+  }
+  38% {
+    transform: translateX(-50%) translateY(-28px) scale(1.05);
+  }
+  75% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-76px) scale(1.15);
   }
   100% {
     opacity: 0;
-    transform: translateX(-50%) translateY(-42px) scale(1.2);
+    transform: translateX(-50%) translateY(-96px) scale(1.05);
   }
 }
 
@@ -84,7 +92,7 @@
 }
 
 .counter-float-anim {
-  animation: floatUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: floatUp 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   pointer-events: none;
 }
 
