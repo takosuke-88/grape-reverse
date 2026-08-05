@@ -24,6 +24,16 @@ showRelatedColumns: false
 
 <p>そのうえで、自分は朝イチの抽選で新台に並んで勝負すると宣言し、「業界の皆さんもホールに足を運んで盛り上げませんか」と続けています。</p>
 
+<div class="not-prose my-6">
+<a href="https://x.com/makimono5656/status/2084447391822774769" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 hover:shadow-md transition-shadow">
+  <svg class="w-8 h-8 flex-shrink-0 text-slate-900 dark:text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+  <div>
+    <p class="text-sm font-bold text-slate-900 dark:text-white">@makimono5656 の投稿を見る</p>
+    <p class="text-xs text-slate-500 dark:text-slate-400">X（旧Twitter）で元の投稿を確認する</p>
+  </div>
+</a>
+</div>
+
 <p>打ち手からすると「そりゃ打つでしょ」と思うかもしれません。でも、<strong>これを業界の内側にいる人が言うのは、意味合いがだいぶ違います</strong>。</p>
 
 <h3>なぜ業界人は打たなくなるのか</h3>

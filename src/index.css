@@ -31,14 +31,14 @@
     @apply mt-6 mb-2 text-lg font-bold text-indigo-600 dark:text-indigo-400;
   }
   .column-article table {
-    @apply w-auto max-w-full border-collapse text-xs;
+    @apply w-auto max-w-full border-collapse text-base leading-relaxed;
   }
   .column-article thead {
     @apply bg-gray-100 dark:bg-gray-800;
   }
   .column-article th,
   .column-article td {
-    @apply border-b border-gray-200 px-2 py-1 text-left dark:border-gray-700;
+    @apply border-b border-gray-200 px-3 py-3 text-left dark:border-gray-700;
   }
   /* 表内で特に注目させたい数値の強調表示。色は記事ごとに変えず、この1クラスで一元管理する。
      記事側では意味だけを示す `<strong class="highlight">` として使うこと。 */

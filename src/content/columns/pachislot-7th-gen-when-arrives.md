@@ -20,6 +20,16 @@ showRelatedColumns: false
 
 <p>画像付きの、シンプルな問いかけです。難しい規制論ではなく、<strong>「次はどんな機能が来るんだろう」と想像するだけの遊び</strong>。その気軽さが良くて、リプ欄がなかなか賑わっていました。</p>
 
+<div class="not-prose my-6">
+<a href="https://x.com/tanhukuda/status/2084557174551068911" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 hover:shadow-md transition-shadow">
+  <svg class="w-8 h-8 flex-shrink-0 text-slate-900 dark:text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+  <div>
+    <p class="text-sm font-bold text-slate-900 dark:text-white">@tanhukuda の投稿を見る</p>
+    <p class="text-xs text-slate-500 dark:text-slate-400">X（旧Twitter）で元の投稿を確認する</p>
+  </div>
+</a>
+</div>
+
 <p>ただ、この手のネタが盛り上がるとき、必ず出てくるのが「そもそも7号機っていつ来るの？」という素朴な疑問です。せっかくなので、そこを調べてみました。<strong>結論から言うと、想像している人が思っているより遠い</strong>です。</p>
 
 <h3>初心者向け：「号機」とは何なのか</h3>
