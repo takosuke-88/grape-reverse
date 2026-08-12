@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { AVAILABLE_MACHINES } from "../data/machine-list";
 import Seo from "../components/Seo";
@@ -220,20 +220,18 @@ export default function MachineSpecPage() {
           </div>
           {/* Row 2: ナビゲーション */}
           <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => navigate(`/${machineId}`)}
-              className="flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-[10px]"
+            <Link
+              to={`/${machineId}`}
+              className="flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-[10px] text-center"
             >
               🎰 小役カウンター
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate(`/${machineId}/grape`)}
-              className="flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-[10px]"
+            </Link>
+            <Link
+              to={`/${machineId}/grape`}
+              className="flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-[10px] text-center"
             >
               {roleIcon} {roleLabel}逆算
-            </button>
+            </Link>
             <button
               type="button"
               className="flex-1 rounded-lg bg-indigo-500 text-white py-2 text-[10px] font-bold ring-2 ring-indigo-300 dark:ring-indigo-600"

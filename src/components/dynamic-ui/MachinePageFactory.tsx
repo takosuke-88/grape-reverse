@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import type {
   MachineConfig,
   EstimationResult,
@@ -359,20 +359,18 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             >
               🎰 小役カウンター
             </button>
-            <button
-              type="button"
-              onClick={() => navigate(`/${config.id}/grape`)}
-              className={`flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-[10px]`}
+            <Link
+              to={`/${config.id}/grape`}
+              className="flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-[10px] text-center"
             >
               {currentCategory === "hana" ? "🔔 ベル逆算" : "🍇 ぶどう逆算"}
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate(`/${config.id}/specs`)}
-              className="flex-1 rounded-lg bg-indigo-700 text-white py-2 text-[10px] font-bold transition-opacity hover:opacity-90 active:opacity-80"
+            </Link>
+            <Link
+              to={`/${config.id}/specs`}
+              className="flex-1 rounded-lg bg-indigo-700 text-white py-2 text-[10px] font-bold transition-opacity hover:opacity-90 active:opacity-80 text-center"
             >
               📊 機種スペック
-            </button>
+            </Link>
           </div>
         </div>
       </div>{/* end sticky nav */}
