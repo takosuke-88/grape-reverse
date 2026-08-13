@@ -24,7 +24,11 @@
 | ビルド時プリレンダリングで通常の `playwright` パッケージ（標準Chromiumダウンロード）をそのままVercelビルドで使う | 禁止（2026-07-29）。VercelのビルドコンテナはAmazon Linuxベースでroot権限が無く、標準Chromiumが依存する共有ライブラリ（`libnspr4.so`等）が存在せず起動失敗する。**`playwright-core` + `@sparticuz/chromium`**（サーバーレス環境向け自己完結ビルド）を`process.env.VERCEL`判定で切り替える方式が必須（`scripts/generate-seo-shells.mjs`） |
 | 新しいページ種別（ルート）を追加した際、`scripts/generate-sitemap.js`への登録を忘れる | 要注意（2026-07-29）。`/:machineId/grape`・`/:machineId/specs`ページは2026年6月の実装当初からsitemap.xmlに一度も登録されておらず、AIクローラー（Perplexity等）がページを発見できない状態が長期間放置されていた。**新しいルートパターンを追加する際は必ず`generate-sitemap.js`の対象に含めること**（詳細は下記エントリ参照） |
 | カウンターの「＋1／−1」フィードバックを減算側だけ下方向（`floatDown`）に飛ばす | 禁止（2026-08-05）。タップしている指に隠れて見えない。**＋1／−1とも上方向、起点の水平位置のみで区別**（詳細は下記エントリ参照） |
+| `vercel.json`に`{ "source": "/(.*)", "destination": "/index.html" }`のcatch-all rewriteを復活させる | 禁止（2026-08-13）。存在しないURLがHTTP 200を返すソフト404状態に逆戻りする。正規URLは全てビルド時プリレンダリング済みの静的ファイルとして`dist/`に実在するため、catch-allが無くても正規URLの配信には影響しない（詳細は下記エントリ参照） |
 | `flex-1`を付けた可変幅要素（`<select>`等）を固定幅ボタンと同じflex行に並べる際、`min-w-0`を省略する | 要注意（2026-08-05）。Flexboxのデフォルト`min-width: auto`により、コンテンツの実寸分だけ縮まなくなり狭い画面幅で隣接要素が見切れる（詳細は下記エントリ参照） |
+| ページ間ナビゲーションを `<button onClick={() => navigate(...)}>` で実装する | 禁止（2026-08-13）。`<a href>` が出力されずGooglebotがリンクとして認識できない。内部リンクとして機能させたい遷移は必ず `react-router-dom` の `<Link to>` を使う（詳細は下記エントリ参照） |
+| コラム記事のフロントマター`title`に「｜GrapeReverse」を含める | 禁止（2026-08-13）。`ColumnDetailPage.tsx`が常に付与するため二重になる。`title`はサイト名を含まない記事タイトルのみ（詳細は下記エントリ参照） |
+| sitemap.xmlの`lastmod`に、更新日を管理していないURLのビルド日を出力する | 禁止（2026-08-13）。全URLが常に「今日」だと鮮度シグナルとして機能しない。実更新日を管理しているコラム記事のみ出力し、それ以外はタグごと省略（詳細は下記エントリ参照） |
 
 ## 2026-04以前: ボーナス履歴 LIFO
 - **現行仕様**: `bonusHistory` を `localStorage` に保持。「−」は直前の契機から `pop`。直接入力・全体リセット時はスタッククリア。
@@ -193,6 +197,32 @@
 - **決定事項**: ユーザーから提供されたコラム記事ドラフトに含まれていた`<cite index="242-1">...</cite>`のような出典マークアップは、コラム本文への実装時にタグを除去しテキストのみを残す（除去してもドラフト末尾の出典注記〔`<small>`内の参照元一覧〕に情報は残っているため、情報の欠落はない）。
 - **理由**: `index`属性付き`<cite>`タグは本サイトのMarkdown本文（`architecture.md` §6）が定めるマークアップ規約に存在しない、リサーチツール側が自動付与したと見られる出典トラッキング用マークアップであり、`.column-article`のスタイル管理外でレンダリング結果が意図せず崩れる／不要なデータ属性が本文に残るリスクがある。
 - **今後の判断基準**: 今後もリサーチツール経由で生成されたドラフトを記事化する際は、`<cite>`・その他track用と思われる見慣れない属性付きタグが混入していないか確認し、テキストのみを残す形で正規化してから`.md`に反映する。
+
+## 2026-08-13: GSC「検出 - インデックス未登録」39件の技術監査と3つの原因の修正
+
+- **決定事項**: 外部からの指摘（Search Consoleで39URLが「検出 - インデックス未登録」「前回のクロール：該当なし」）を受けて技術監査を実施し、**noindex・robots.txt・canonical・プリレンダリングHTMLはすべて健全**であること、原因は別の3点であることを特定して修正した。
+  1. `/grape`・`/specs`への内部リンクが`<a href>`としてサイト全体に1件も存在しなかった（機種34URL）
+  2. コラム28記事で`<title>`が「…｜GrapeReverse｜GrapeReverse」と重複していた
+  3. sitemap.xmlの`lastmod`が全URL常にビルド日だった
+- **理由（①内部リンク）**: `MachinePageFactory.tsx`/`GrapeReversePage.tsx`/`MachineSpecPage.tsx`の3ページとも、ページ間ナビゲーションを`<button type="button" onClick={() => navigate(...)}>`で実装していた。**`<button onClick>`はhref属性を持たないためGooglebotがリンクとして辿れない**。sitemap.xmlには2026-07-29に登録済みだったが、内部リンクがゼロのURLはクロール優先度が低く判定されるため、「検出はされたがクロールされない」状態が続いていた。`<Link to>`（`react-router-dom`）に置換して実際の`<a href>`を出力させ、カウンター/逆算/スペックの3ページが相互リンクされる状態にした。SPAのクライアント遷移は`<Link>`でも維持される（フルリロードは発生しない）。
+- **理由（②title重複）**: `ColumnDetailPage.tsx:47`が``pageTitle={`${frontmatter.title}｜GrapeReverse`}``と常にサフィックスを付与する実装なのに対し、2026-07-30以降に追加した28記事は**フロントマターの`title`自体にすでに「｜GrapeReverse」が含まれていた**ため二重になっていた。フロントマター側から除去して解消。7/19〜7/28の11記事は元々サフィックス無しで正しかった。
+- **理由（③lastmod）**: `generate-sitemap.js`が全URLに`today`（ビルド実行日）を書き込んでいたため、7月公開の記事も当日追加の記事も同じ「たった今更新された」という信号になり、Googleが再クロール要否を判断する材料として機能していなかった。
+- **現行仕様**:
+  - ページ間の遷移を内部リンクとしてクローラーに認識させたい場合は`<Link to>`を使う。`navigate()`は、遷移先が無い（同一ページ内スクロール等）・遷移がユーザー操作の副作用である場合に限る。
+  - コラムのフロントマター`title`はサイト名を含めない（記事タイトルのみ）。
+  - sitemapの`lastmod`は「実際に更新日を管理できているURL」のみ出力する。`urlElement()`は`lastmod`が`undefined`のときタグ自体を省略する（sitemapプロトコル上`lastmod`は任意）。現状これに該当するのはコラム記事（frontmatterの`updatedAt`／`date`）のみで、トップ・機種ページ（root/grape/specs）・コラム一覧は省略。frontmatterがパースできない場合も`today`で埋めず省略する。
+- **教訓**: **プリレンダリングでHTMLが完璧でも、内部リンクが無ければクロールされない。** 2026-07-29にSEO静的シェルとsitemap登録の両方を整備したにもかかわらず改善しなかったのは、「HTMLの中身」と「sitemapへの登録」だけを見て**サイト内のリンクグラフを確認していなかった**ため。今後SEO調査を行う際は、`curl`で取得した生HTMLに対象URLへの`<a href>`が実在するかを必ず確認する（ブラウザ上でボタンが機能することは、クローラーにとってのリンク存在を意味しない）。ビルドも`tsc`も通り、実機でも正常に動作してしまう性質の不具合という点で、2026-07-16のtailwind content漏れ・2026-07-25のdate不整合・2026-08-05の`min-w-0`と同種。
+
+## 2026-08-13: ソフト404（存在しないURLがHTTP 200を返す問題）の解消と独自404ページの実装 — 完了
+
+- **決定事項**: `vercel.json`の`{ "source": "/(.*)", "destination": "/index.html" }`という無条件catch-all rewriteを削除し、**存在しないURLがHTTP 200で`index.html`を返す**（ソフト404）状態を解消した。あわせて`public/404.html`に独自404ページを実装し、実HTTP 404のまま自サイトのトーンに合わせた画面を表示できるようにした。手動のルート列挙もEdge Middlewareも使用していない。
+- **却下した案（重要）**: 当初「`vercel.json`のrewriteを既知ルートのみに限定する」案を検討したが、その中の`{ "source": "/columns/(.*)", "destination": "/index.html" }`というワイルドカード指定は、**存在しないコラムURLも200のままになるため解決にならない**。機種IDを手動列挙する方式も、新機種追加のたびに`vercel.json`の更新が必要で、更新漏れが「新機種ページが本物の404になる」という実害に直結するため不採用。Edge Middleware案も、新しいランタイム概念の導入となるため見送った。
+- **採用した方式**: `generate-seo-shells.mjs`が**全ルートを物理ファイル（`dist/<path>/index.html`）としてプリレンダリング済み**であるため、catch-all rewriteを1行削除するだけで、正規URLはVercelの静的ファイル配信で200を返し、存在しないURLは標準の実404に落ちることを検証で確認した。根拠として、本番で`/aimex/specs`のレスポンスに`Content-Disposition: inline; filename="specs"`が付いており、rewriteを経由せず静的ファイルが直接ヒットしていることを観測している。
+- **独自404ページ（`public/404.html`）の実装方針**: Vercelは静的出力ルートに`404.html`があると、存在しないURLに対して**HTTP 404ステータス付きで**その内容を配信する。React側（SPA本体）で404画面を描画する方式はHTTP 200になりソフト404に逆戻りするため**採用していない**。ビルド済みCSSはハッシュ付きファイル名で参照できないため、スタイルは全てファイル内にインラインで持たせた自己完結ページとした。`<meta name="robots" content="noindex">`を付与し、ホーム／設定判別ツール一覧（`/#juggler`）／攻略コラム一覧（`/columns`）への`<a href>`導線を設置。
+- **検証手順**: 検証専用ブランチ（`verify/soft-404-no-catchall-2` → `verify/custom-404`）でPreviewデプロイを作成し、都度VercelのDeployment Protection（Vercel Authentication）をユーザーが一時的にDisabled→検証後Enabledへ戻す運用で計測した。Deployment Protection Exceptionsは**ドメイン単位**の除外機能で自動生成Preview URLの個別指定には使えず、per-deploymentのShareable Linkは実質Bypassシークレットと同種のため不採用。**本番ドメインは元々この保護の対象外**（匿名アクセスに200を返す）のため、Preview側のみの一時解除は本番の公開状態に影響しない。
+- **本番検証結果**: 全17機種×root/grape/specs（51URL）・全57コラム記事、いずれも200。`/nonexistent-machine-xyz`・`/columns/nonexistent-slug-xyz`・`/aimex/nonexistent-path`の3URLは全て実HTTP 404かつ独自404画面を表示（`X-Vercel-Error`ヘッダの消失、`Content-Type: text/html`、`<title>ページが見つかりません（404）｜GrapeReverse</title>`で確認）。`/api/chat`は405（ルーティング健全）、`sitemap.xml`・`robots.txt`・`ads.txt`は200。独自404画面の3導線（ホーム／設定判別ツール一覧／攻略コラム一覧）もブラウザ実クリックで遷移を確認済み。
+- **今後の判断基準**: `vercel.json`にcatch-all rewriteを再度追加しない（先祖返り禁止テーブル参照）。新機種・新記事はプリレンダリング（`generate-seo-shells.mjs`）が自動でカバーするため`vercel.json`側の追加対応は不要だが、**プリレンダリングがビルド失敗した場合そのURLが実404になる**ため、ビルド失敗を静かに見逃さない体制（現状`generate-seo-shells.mjs`は1ルートでも失敗すると`process.exit(1)`で書き込みを中止する設計）を維持すること。
+- **補足（調査で判明した事実）**: フロントエンド（`src/`配下）には`fetch()`が1箇所も存在せず、**`/api/chat`はSPAから呼ばれていない**（`api/chat.js`はサーバーレス関数として存在するのみ）。
 
 ## 参考（明示指示なき限り実施しない）
 
