@@ -5,6 +5,7 @@ import Seo from "../../components/Seo";
 import ColumnNavigation from "../../components/ColumnNavigation";
 import RelatedColumns from "../../components/RelatedColumns";
 import ColumnRenderErrorBoundary from "../../components/ColumnRenderErrorBoundary";
+import ColumnShareButtons from "../../components/ColumnShareButtons";
 import { getColumnBySlug } from "../../data/column-content";
 
 const InternalLinkAwareAnchor: Components["a"] = ({ href, children, ...rest }) => {
@@ -62,6 +63,10 @@ const ColumnDetailPage = () => {
             </span>
           )}
         </div>
+        <ColumnShareButtons
+          title={frontmatter.title}
+          path={`/columns/${entry.slug}`}
+        />
         <div className="column-article prose dark:prose-invert max-w-none">
           <ColumnRenderErrorBoundary>
             <ReactMarkdown
@@ -72,6 +77,10 @@ const ColumnDetailPage = () => {
             </ReactMarkdown>
           </ColumnRenderErrorBoundary>
         </div>
+        <ColumnShareButtons
+          title={frontmatter.title}
+          path={`/columns/${entry.slug}`}
+        />
 
         {frontmatter.showRelatedColumns && (
           <RelatedColumns currentId={entry.slug} />
