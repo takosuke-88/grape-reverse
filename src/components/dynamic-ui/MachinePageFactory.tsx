@@ -83,7 +83,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
       document.title = config.title;
     } else {
       const categoryLiteral = currentCategory === "hana" ? "ベル逆算" : currentCategory === "juggler" ? "ぶどう逆算" : "ぶどう/ベル逆算";
-      document.title = `${config.name}の攻略・設定判別 ${categoryLiteral}｜GrapeReverse`;
+      document.title = `【即計算】${config.name} ${categoryLiteral}・設定判別｜GrapeReverse`;
     }
   }, [config.id, config.name, currentCategory]);
 

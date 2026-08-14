@@ -23,7 +23,6 @@ export const AVAILABLE_MACHINES: MachineInfo[] = [
   {
     id: "aimex",
     name: "ネオアイムジャグラーEX",
-    title: "【即計算】ネオアイムジャグラーEX ぶどう逆算・設定判別｜GrapeReverse",
     category: "juggler",
     color: "#C62828",
   },
