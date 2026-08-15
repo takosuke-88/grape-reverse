@@ -29,6 +29,10 @@
 | ページ間ナビゲーションを `<button onClick={() => navigate(...)}>` で実装する | 禁止（2026-08-13）。`<a href>` が出力されずGooglebotがリンクとして認識できない。内部リンクとして機能させたい遷移は必ず `react-router-dom` の `<Link to>` を使う（詳細は下記エントリ参照） |
 | コラム記事のフロントマター`title`に「｜GrapeReverse」を含める | 禁止（2026-08-13）。`ColumnDetailPage.tsx`が常に付与するため二重になる。`title`はサイト名を含まない記事タイトルのみ（詳細は下記エントリ参照） |
 | sitemap.xmlの`lastmod`に、更新日を管理していないURLのビルド日を出力する | 禁止（2026-08-13）。全URLが常に「今日」だと鮮度シグナルとして機能しない。実更新日を管理しているコラム記事のみ出力し、それ以外はタグごと省略（詳細は下記エントリ参照） |
+| カウンターの**−button**に背景（`theme.minusBg`）・boxShadowを戻して立体化する | 禁止（2026-08-16）。立体的な見た目は**＋側**が持つ。−は`background: transparent`のフラット（詳細は下記エントリ参照） |
+| ＋の視覚装飾divから`pointer-events-none`を外す／＋エリア外側に背景・boxShadowを付ける | 禁止（2026-08-16）。クリック判定は横長の＋エリア全体に残す設計。装飾divが判定を奪うと打感が変わる |
+| ＋エリアに`active:bg-white/10`（バー全体の白フラッシュ）を戻す | 禁止（2026-08-16）。加算フィードバックの発光は数字の`textShadow`（`dynamicGlow`）のみが担う |
+| `flex-1`の`<select>`に`min-w-0`を付け忘れる | 要注意（2026-08-05制定→2026-08-16に`GrapeReversePage`/`MachineSpecPage`で再発）。狭幅で隣接ボタンが画面外へ押し出される |
 
 ## 2026-04以前: ボーナス履歴 LIFO
 - **現行仕様**: `bonusHistory` を `localStorage` に保持。「−」は直前の契機から `pop`。直接入力・全体リセット時はスタッククリア。
@@ -223,6 +227,27 @@
 - **本番検証結果**: 全17機種×root/grape/specs（51URL）・全57コラム記事、いずれも200。`/nonexistent-machine-xyz`・`/columns/nonexistent-slug-xyz`・`/aimex/nonexistent-path`の3URLは全て実HTTP 404かつ独自404画面を表示（`X-Vercel-Error`ヘッダの消失、`Content-Type: text/html`、`<title>ページが見つかりません（404）｜GrapeReverse</title>`で確認）。`/api/chat`は405（ルーティング健全）、`sitemap.xml`・`robots.txt`・`ads.txt`は200。独自404画面の3導線（ホーム／設定判別ツール一覧／攻略コラム一覧）もブラウザ実クリックで遷移を確認済み。
 - **今後の判断基準**: `vercel.json`にcatch-all rewriteを再度追加しない（先祖返り禁止テーブル参照）。新機種・新記事はプリレンダリング（`generate-seo-shells.mjs`）が自動でカバーするため`vercel.json`側の追加対応は不要だが、**プリレンダリングがビルド失敗した場合そのURLが実404になる**ため、ビルド失敗を静かに見逃さない体制（現状`generate-seo-shells.mjs`は1ルートでも失敗すると`process.exit(1)`で書き込みを中止する設計）を維持すること。
 - **補足（調査で判明した事実）**: フロントエンド（`src/`配下）には`fetch()`が1箇所も存在せず、**`/api/chat`はSPAから呼ばれていない**（`api/chat.js`はサーバーレス関数として存在するのみ）。
+
+## 2026-08-16: カウンター＋／−の視覚的優先順位を反転（レイアウトは不変）
+
+- **決定事項**: 実戦で頻繁に押す**＋を主操作として立体的に**、**−を訂正操作として控えめなフラット**に見せる。ただし**レイアウトには一切手を入れない**（行高76px、横長＋エリアの`flex-1`構造、probTextの`absolute right-2 bottom-1.5`、compact 2列グリッド、30:70の幅配分はすべてHEAD時点のまま）。
+- **理由**: 従来は−だけが濃い立体ボタンで、主操作の＋が`opacity: 0.45`の薄い文字だった。実戦の使用頻度と視覚的な強さが逆転していた。
+- **却下した実装（重要）**: この結論に至るまでに3案を試作して破棄している。**同じ道を再度たどらないこと。**
+  1. **＋エリア自体を48px固定幅にする案** → 横長バーが消え、probTextが＋ボタンと40px重なる。ユーザー却下。
+  2. **probTextを中央領域の下段へ通常フロー配置する案（3領域flex構造）** → 重なりは完全に解消できたが、**行高が76px→102pxに増加**し、確率表示の位置・バーの太さ・スマホ時のグリッド構成が変わるため却下。
+  3. **横長要素へのboxShadow再設計** → boxShadowのoffset/blurは絶対px値のため、48px用の値を200〜700px幅の面に当てても端しか効かず、中央が平坦に見える。横長要素で立体感を出そうとしないこと。
+- **現行仕様（`DynamicInput.tsx`）**:
+  - **−button**: `background: "transparent"`、boxShadowなし、`color: theme.textColor ?? "#ffffff"`（不透明）。幅・`onClick`・`disabled`・`aria-label`は不変。
+  - **＋**: 外側の横長divは**構造・クリック判定とも従来どおり**（`relative flex min-w-0 flex-1 items-center justify-end` ＋ `onClick={handleIncrement}`、背景・影なし）。その内側に**視覚装飾専用のdiv**を`absolute right-0 top-0` ＋ `pointer-events-none`で重ね、旧−buttonの`theme.minusBg`とboxShadowを適用する。幅は非compactで`COUNTER_MINUS_WIDTH_CLASS`（48px）、compactでは`w-full`（親幅に追従。375px時19.5px。48pxを押し込むとoverflowするため）。
+  - **外側drop shadowのみX反転**（`3px 3px 8px` → **`-3px 3px 8px`**）。右端配置では右方向の影が親の`overflow-hidden`で切られるため、左下＝カード内側へ落とす。他3レイヤーは旧−buttonの値のまま。
+  - **加算フィードバックの発光は数字のみ**。＋エリアの`active:bg-white/10`（バー全体が白くフラッシュ）を削除し、`dynamicGlow`（数字の`textShadow`が10/22px→20/40/60pxへ変化）だけが残る。
+  - **compact行ではprobTextと＋装飾が重なる**が、これはHEAD時点から存在する既存の制約（probTextの座標を変更していないため）であり、今回の変更で発生したものではない。
+
+## 2026-08-16: `<select>`の`min-w-0`欠落が2ページで再発（2026-08-05エントリの再掲）
+
+- **決定事項**: `GrapeReversePage.tsx`・`MachineSpecPage.tsx`の機種選択`<select>`に`min-w-0`を追加し、`MachinePageFactory.tsx`（`min-w-0 flex-1`）と同一の見た目に揃えた。
+- **症状**: 375px幅で他2ページのselectが232pxまでしか縮まず（基準は169.2px）、バイブトグルが`r417.8`＝**画面幅375pxを42px超えて見切れていた**。原因はFlexboxのデフォルト`min-width: auto`。
+- **教訓**: 2026-08-05に`MachinePageFactory.tsx`で同じ不具合を修正した際、**同型のUIを持つ他2ページを確認していなかった**。今後この種の共通ヘッダーUIを修正する場合は、`MachinePageFactory` / `GrapeReversePage` / `MachineSpecPage` の**3ページすべて**を対象に含めること（3ページは共通コンポーネント化されておらず、それぞれ独立にヘッダー行を持つ）。
 
 ## 参考（明示指示なき限り実施しない）
 
