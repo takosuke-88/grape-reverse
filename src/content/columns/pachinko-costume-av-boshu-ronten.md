@@ -18,6 +18,16 @@ showRelatedColumns: false
 
 <p>投稿の骨子は、週2日のパチンコ店勤務をしながら、店員のコスプレでファン向け有料プラットフォームのアダルト動画にも出演する女性を、高額報酬を提示して募集するというもの。リプライ欄には条件を尋ねる問い合わせが並ぶ一方で、「業界の闇では」といった反応も集まりました。</p>
 
+<div class="not-prose my-6">
+<a href="https://x.com/ShinjukuSokai/status/2089341259697807560" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 hover:shadow-md transition-shadow">
+  <svg class="w-8 h-8 flex-shrink-0 text-slate-900 dark:text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+  <div>
+    <p class="text-sm font-bold text-slate-900 dark:text-white">@ShinjukuSokai の投稿を見る</p>
+    <p class="text-xs text-slate-500 dark:text-slate-400">X（旧Twitter）で元の投稿を確認する</p>
+  </div>
+</a>
+</div>
+
 <p>先に整理しておくと、成人が合意のうえでアダルトコンテンツに出演すること自体は違法ではありません。この記事も「その仕事をする人がおかしい」という話ではなく、<strong>募集の設計と、パチンコ店という記号の使われ方</strong>に論点を絞ります。</p>
 
 <p>なお、この募集が実在する店舗を伴うものなのか、実際に案件が動いているのかは外部から確認できません。以下は「そう受け取られたことで何が起きたか」という整理になります。</p>
