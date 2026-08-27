@@ -266,6 +266,18 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://grape-reverse.com/columns/1399-kisei-500-999-genjitsu</loc>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/4fun-taizai-44200yen-report</loc>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://grape-reverse.com/columns/are-guest-performers-necessary</loc>
     <lastmod>2026-03-22</lastmod>
     <changefreq>monthly</changefreq>
@@ -274,6 +286,12 @@
   <url>
     <loc>https://grape-reverse.com/columns/bokuto-aori-unten-pachinko-arrest</loc>
     <lastmod>2026-07-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/chiba-sakura-shinsui-kado-sekinin</loc>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -464,6 +482,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://grape-reverse.com/columns/obon-makeru-hito-tokucho-4sen</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://grape-reverse.com/columns/obon-noriuchi-boshu-rules</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>monthly</changefreq>
@@ -472,6 +496,12 @@
   <url>
     <loc>https://grape-reverse.com/columns/obon-slot-kachikata-boshu</loc>
     <lastmod>2026-08-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/pachi-chokin-sando-nayami</loc>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

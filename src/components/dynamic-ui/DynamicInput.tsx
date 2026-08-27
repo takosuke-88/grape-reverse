@@ -270,11 +270,8 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 className={`flex ${COUNTER_MINUS_WIDTH_CLASS} items-center justify-center self-stretch text-2xl transition-all active:scale-95 touch-manipulation`}
                 style={{
                   minHeight: "76px",
-                  background: element.isReadOnly ? "transparent" : theme.minusBg,
-                  boxShadow: element.isReadOnly
-                    ? "none"
-                    : "inset 2px 2px 4px rgba(255,255,255,0.10), inset -1px -1px 3px rgba(0,0,0,0.5), 3px 3px 8px rgba(0,0,0,0.4), -1px -1px 2px rgba(255,255,255,0.05)",
-                  color: theme.textColor ? `${theme.textColor}cc` : "rgba(255,255,255,0.8)",
+                  background: "transparent",
+                  color: theme.textColor ?? "#ffffff",
                 }}
                 aria-label="減らす"
               >
@@ -310,18 +307,32 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
             {/* 右: プラスエリア */}
             <div
               className={`relative flex min-w-0 flex-1 items-center justify-end ${
-                element.isReadOnly
-                  ? "pointer-events-none"
-                  : "cursor-pointer active:bg-white/10"
+                element.isReadOnly ? "pointer-events-none" : "cursor-pointer"
               }`}
               onClick={handleIncrement}
             >
-              <span
-                className="text-3xl font-thin pr-4 pointer-events-none select-none"
-                style={{ color: theme.textColor ?? "#ffffff", opacity: element.isReadOnly ? 0.2 : 0.45 }}
+              {/* ＋の視覚装飾のみ。クリック判定は外側の横長＋エリアが担う（pointer-events-none）。
+                  compact時は親＋エリアが48pxより狭く縮むため w-full で親幅に追従し、はみ出しを防ぐ。 */}
+              <div
+                className={`pointer-events-none absolute right-0 top-0 flex h-full items-center justify-center ${
+                  useCompact ? "w-full" : COUNTER_MINUS_WIDTH_CLASS
+                }`}
+                style={{
+                  background: element.isReadOnly ? "transparent" : theme.minusBg,
+                  boxShadow: element.isReadOnly
+                    ? "none"
+                    // 外側drop shadowのみX反転（-3px）。右端配置では右方向の影が
+                    // 親のoverflow-hiddenで切られるため、左下＝カード内側へ落とす。
+                    : "inset 2px 2px 4px rgba(255,255,255,0.10), inset -1px -1px 3px rgba(0,0,0,0.5), -3px 3px 8px rgba(0,0,0,0.4), -1px -1px 2px rgba(255,255,255,0.05)",
+                }}
               >
-                ＋
-              </span>
+                <span
+                  className="text-2xl pointer-events-none select-none"
+                  style={{ color: theme.textColor ? `${theme.textColor}cc` : "rgba(255,255,255,0.8)" }}
+                >
+                  ＋
+                </span>
+              </div>
               {probText && (
                 <span
                   className="absolute right-2 bottom-1.5 text-lg italic font-black tabular-nums pointer-events-none select-none"

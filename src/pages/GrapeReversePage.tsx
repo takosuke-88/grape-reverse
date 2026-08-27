@@ -254,7 +254,7 @@ export default function GrapeReversePage() {
               <select
                 value={machineId ?? ""}
                 onChange={(e) => { if (e.target.value) navigate(`/${e.target.value}/grape`); }}
-                className="flex-1 text-center font-bold text-base py-2.5 rounded-xl border-2 border-slate-300 bg-white text-slate-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"
+                className="min-w-0 flex-1 text-center font-bold text-base py-2.5 rounded-xl border-2 border-slate-300 bg-white text-slate-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"
               >
                 {AVAILABLE_MACHINES.filter((m) => m.category === (machineInfo?.category ?? "juggler")).map((m) => (
                   <option key={m.id} value={m.id}>{m.name}</option>
