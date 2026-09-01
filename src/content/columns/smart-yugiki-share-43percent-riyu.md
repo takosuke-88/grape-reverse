@@ -3,7 +3,7 @@ title: "スマート遊技機シェア43.7%　登場4年でまだ過半数に届
 description: "スマスロ61.3%、スマパチ29.1%、全体では43.7%。数字を分解すると、なぜ過半数に届かないのかがはっきり見えてきます。混在型が続く構造を解説します。"
 date: "2026-08-28"
 updatedAt: "2026-08-28"
-tags: ["column", "pachinko", "pachislot", "news"]
+tags: ["業界・市場"]
 draft: false
 showRelatedColumns: false
 ---

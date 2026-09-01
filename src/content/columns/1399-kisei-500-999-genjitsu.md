@@ -3,7 +3,7 @@ title: "「1/399は規制されたはずでは」　1/500・1/999が並ぶ現状
 description: "「昔は1/399で死人が出ると言われた」という批判が話題。MAX機撤去から10年、規則上の下限は1/320のはずが、なぜ体感確率はそれより重い台が並ぶのか。構造を解説します。"
 date: "2026-08-12"
 updatedAt: "2026-08-12"
-tags: ["column", "pachinko", "news"]
+tags: ["業界・市場"]
 draft: false
 showRelatedColumns: false
 ---

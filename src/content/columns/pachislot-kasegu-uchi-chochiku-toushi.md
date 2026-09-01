@@ -3,7 +3,7 @@ title: "「パチスロで稼げているうちに貯蓄・投資を」は正論
 description: "パチスロで稼いでいる人ほど余剰を貯蓄・投資に回すべき、という投稿が話題に。規制で環境が激変してきた歴史、税務上の扱い、負けている人が取るべき対応まで整理します。"
 date: "2026-08-20"
 updatedAt: "2026-08-20"
-tags: ["column", "pachislot", "news"]
+tags: ["収支・資金管理"]
 draft: false
 showRelatedColumns: false
 ---

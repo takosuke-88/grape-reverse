@@ -3,7 +3,7 @@ title: "「釘ガー・玉粗利ガーは老害」発言が波紋　衰退の主
 description: "現役設定師による「釘や玉粗利のせいにするのは老害」という投稿が物議に。趣味の多様化と機歴・抱き合わせ販売という構造問題から、パチンコ衰退の主因を初心者にも分かる形で整理します。"
 date: "2026-08-23"
 updatedAt: "2026-08-23"
-tags: ["column", "pachinko", "news"]
+tags: ["業界・市場"]
 draft: false
 showRelatedColumns: false
 ---

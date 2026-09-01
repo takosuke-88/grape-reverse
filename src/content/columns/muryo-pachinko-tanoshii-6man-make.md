@@ -3,7 +3,7 @@ title: "「無料パチンコ楽しい ※現在6万負け」が60万ビュー�
 description: "「無料」と言いながら6万負けを併記した投稿が大バズり。なぜこの矛盾に共感が集まるのか、サンクコスト効果と「玉が減っていない錯覚」から解説します。"
 date: "2026-08-11"
 updatedAt: "2026-08-11"
-tags: ["column", "pachinko", "news"]
+tags: ["ユーザー心理", "収支・資金管理"]
 draft: false
 showRelatedColumns: false
 ---

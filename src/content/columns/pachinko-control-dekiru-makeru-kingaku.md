@@ -3,7 +3,7 @@ title: "パチンコでコントロールできるのは「負ける金額」だ
 description: "「パチンコ屋でコントロールできるのは負ける金額だけ」という投稿が話題に。抽選結果は選べないが投資上限は選べる。0％でない限り最悪は起こるという前提で組み立てる考え方を解説します。"
 date: "2026-08-19"
 updatedAt: "2026-08-19"
-tags: ["column", "pachinko", "pachislot", "news"]
+tags: ["収支・資金管理"]
 draft: false
 showRelatedColumns: false
 ---

@@ -3,7 +3,7 @@ title: "ホール経営法人が10年で半減、売上は増加　寡占化の�
 description: "帝国データバンクの調査でホール経営法人が1,130社まで減少。一方で総売上は12兆円台に回復しました。この2つの数字が同時に成立する構造と、打ち手への影響を読み解きます。"
 date: "2026-08-24"
 updatedAt: "2026-08-24"
-tags: ["column", "pachinko", "news"]
+tags: ["業界・市場", "ホール運営"]
 draft: false
 showRelatedColumns: false
 ---

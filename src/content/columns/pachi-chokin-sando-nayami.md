@@ -3,7 +3,7 @@ title: "「打ってる人ってどうやって貯金してるの？」　全部
 description: "「気づいたら全部サンドに入れてる」という素直な悩みが共感を集めています。機種選びと線引き、そして貯金を成立させる仕組みづくりを、責めない方向で考えます。"
 date: "2026-08-15"
 updatedAt: "2026-08-15"
-tags: ["column", "pachislot", "news"]
+tags: ["収支・資金管理"]
 draft: false
 showRelatedColumns: false
 ---

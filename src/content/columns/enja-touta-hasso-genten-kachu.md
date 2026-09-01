@@ -3,7 +3,7 @@ title: "「演者の淘汰はすでに始まっている」　発注元が半減
 description: "人気だった演者のスケジュールが空いているという指摘が議論を呼んでいます。ギャラの二極化、ホール法人の半減、そして打ち手が来店イベントをどう見るべきかを整理します。"
 date: "2026-08-26"
 updatedAt: "2026-08-26"
-tags: ["column", "pachislot", "news"]
+tags: ["来店演者"]
 draft: false
 showRelatedColumns: false
 ---
