@@ -82,9 +82,9 @@ const ColumnDetailPage = () => {
           path={`/columns/${entry.slug}`}
         />
 
-        {frontmatter.showRelatedColumns && (
-          <RelatedColumns currentId={entry.slug} />
-        )}
+        {/* 表示するかどうかは RelatedColumns 側の候補件数に委ねる
+            （関連が無ければ null を返すため、ここでのフラグ制御は不要） */}
+        <RelatedColumns currentId={entry.slug} />
         <ColumnNavigation currentId={entry.slug} />
       </main>
     </div>

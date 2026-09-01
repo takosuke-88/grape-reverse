@@ -1,16 +1,14 @@
 import { Link } from "react-router-dom";
-import { ALL_COLUMNS } from "../data/column-content";
+import { getRelatedColumns } from "../data/column-content";
 
 interface RelatedColumnsProps {
   currentId: string;
 }
 
 const RelatedColumns = ({ currentId }: RelatedColumnsProps) => {
-  // ALL_COLUMNS は日付降順ソート済み。現在の記事を除外し最新の3件を取得
-  const related = ALL_COLUMNS.filter((entry) => entry.slug !== currentId).slice(
-    0,
-    3,
-  );
+  // 固有タグ・機種CTAの一致を根拠に最大3件。関連がなければ0件が返り、
+  // 「最新記事で穴埋め」はしない（無関係な記事へリンクしないため）
+  const related = getRelatedColumns(currentId, 3);
 
   if (related.length === 0) return null;
 
