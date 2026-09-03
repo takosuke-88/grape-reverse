@@ -23,6 +23,20 @@ const PREVIEW_PORT = 4321;
 // domcontentloaded + 固定ウェイトで、React本体とSeo.tsxのuseEffectの実行を待つ。
 const POST_LOAD_WAIT_MS = 1200;
 
+// AdSense実行後DOMを示す固有文字列。標準スクリプトタグ
+// (pagead/js/adsbygoogle.js) 自体はこれに該当しない。
+const AD_DOM_MARKERS = [
+  "adsbygoogle-noablate",
+  "data-adsbygoogle-status",
+  "data-ad-status=",
+  "aswift_",
+  "google_esf",
+  "show_ads_impl.js",
+  "data-checked-head=",
+  '<ins class="adsbygoogle"',
+  "recaptcha/api2/aframe",
+];
+
 function extractIdsFromFile(filePath, regex) {
   const content = fs.readFileSync(filePath, "utf-8");
   const ids = [];
@@ -110,6 +124,14 @@ async function main() {
   const browser = await chromium.launch(launchOptions);
   const page = await browser.newPage();
 
+  // page.content() はライブDOMをシリアライズするため、プリレンダリング中に
+  // Auto adsが実行されると広告DOMが静的HTMLへ混入する。ビルド時のブラウザ内だけで
+  // 遮断し、本番の閲覧者ブラウザは index.html の標準スクリプトから初回実行する。
+  await page.route(
+    /googlesyndication\.com|doubleclick\.net|googletagservices\.com|adservice\.google\./,
+    (route) => route.abort(),
+  );
+
   // 全ルートの出力をメモリ上に集めてから最後に一括で書き込む。
   // 途中で dist/index.html を上書きすると、SPAフォールバックで配信されている
   // 未処理ルートの検証結果が壊れるため。
@@ -122,6 +144,13 @@ async function main() {
       await page.goto(url, { waitUntil: "domcontentloaded" });
       await page.waitForTimeout(POST_LOAD_WAIT_MS);
       const html = await page.content();
+
+      const adHits = AD_DOM_MARKERS.filter((marker) => html.includes(marker));
+      if (adHits.length > 0) {
+        throw new Error(
+          `AdSense実行後DOMが混入しています（${url}）: ${adHits.join(", ")}`,
+        );
+      }
 
       const titleMatch = html.match(/<title>([^<]*)<\/title>/);
       const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/);
