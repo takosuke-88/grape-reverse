@@ -8,6 +8,8 @@ import type { DiscriminationElement, EstimationResult, MachineConfig, UserInputs
 import { calculateMultinomialEstimation } from "../logic/bayes-estimator";
 import GrapeReverseEstimationPanel from "../components/grape/GrapeReverseEstimationPanel";
 import DynamicInput from "../components/dynamic-ui/DynamicInput";
+import DiffSignToggle, { DIFF_SIGN_KEY } from "../components/grape/DiffSignToggle";
+import type { DiffSign } from "../components/grape/DiffSignToggle";
 
 /** 機種Config未登録時の逆算フォールバック（マイジャグラーV基準） */
 const REVERSE_CALC_FALLBACK = {
@@ -121,7 +123,21 @@ export default function GrapeReversePage() {
   const totalGames = Math.max(0, grapeData["total-games"] ?? 0);
   const bigCount   = Math.max(0, grapeData["big-count"]   ?? 0);
   const regCount   = Math.max(0, grapeData["reg-count"]   ?? 0);
-  const diffCoins  = Math.max(0, grapeData["diff-coins"]  ?? 0);
+  // 差枚は絶対値（カウンター表示用）と符号（トグル）を分けて保持する。
+  // 符号キーが無い既存データは + として扱うため、従来の入力値はそのまま維持される。
+  const diffAbs    = Math.max(0, grapeData["diff-coins"]  ?? 0);
+  const diffSign: DiffSign = grapeData[DIFF_SIGN_KEY] === -1 ? -1 : 1;
+  const diffCoins  = diffAbs * diffSign;
+
+  // 符号はカウンター直上のラベルにも出す（バー内の数字は絶対値のため、
+  // 数字だけを見て符号を誤読しないようにする）。DynamicInput側は無変更。
+  const elemDiffCoins = useMemo<DiscriminationElement>(
+    () => ({
+      ...ELEM_DIFF_COINS,
+      label: diffSign === -1 ? "差枚数（マイナス）" : "差枚数（プラス）",
+    }),
+    [diffSign],
+  );
 
   const update = (key: string, v: number) =>
     setGrapeData((prev) => ({ ...prev, [key]: v }));
@@ -328,12 +344,13 @@ export default function GrapeReversePage() {
 
           {/* 差枚数（台メーター） */}
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 shadow-lg ring-1 ring-slate-200 dark:ring-slate-800 sm:p-6">
-            <h2 className="mb-2 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
-              差枚数（台メーター）
-            </h2>
+            <DiffSignToggle
+              sign={diffSign}
+              onChange={(sign) => update(DIFF_SIGN_KEY, sign)}
+            />
             <DynamicInput
-              element={ELEM_DIFF_COINS}
-              value={diffCoins}
+              element={elemDiffCoins}
+              value={diffAbs}
               onChange={(v) => update("diff-coins", Number(v) || 0)}
               vibrationEnabled={vibrationEnabled}
             />
