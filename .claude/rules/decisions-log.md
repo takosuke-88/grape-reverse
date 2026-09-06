@@ -37,10 +37,17 @@
 | `grid-cols-1` の親に `col-span-2` を残す | 禁止（2026-08-16）。暗黙の2列目が生成されレイアウトが崩れる。1列時は `col-span-1` にする |
 | インラインstyleに `background` を持たない要素のTailwind背景クラスを「死んだCSS」と判定して削除する | 禁止（2026-08-16）。競合するのは同一要素にインライン`background`がある場合のみ。要素ごとに実機で確認すること（詳細は下記エントリ参照） |
 | コミット済み `public/sitemap.xml` の内容が古いことをSEO不具合として緊急対応する | 不要（2026-08-16）。ビルド時に `generate-sitemap.js` が再生成するため本番は常に最新。git上の差分ノイズにすぎない |
+| 関連記事の候補選定に `column` / `news` / `pachinko` / `pachislot` を根拠として使う | 禁止（2026-09-01）。全記事に付いており識別力ゼロ。`GENERIC_RELATED_TAGS` から外さない（詳細は下記エントリ参照） |
+| 関連記事が0件のとき、最新記事3件でフォールバック表示する | 禁止（2026-09-01）。無関係リンクは内部リンクグラフの品質を下げる。0件は非表示が正解 |
+| `showRelatedColumns` のゲートを `ColumnDetailPage` へ復活させる | 禁止（2026-09-01）。表示可否は `getRelatedColumns()` の候補件数のみで決まる。フラグは未参照（`architecture.md` §6 参照） |
+| コラムのフロントマターに新規の形式タグ（`column` / `news` 等）を足す | 非推奨（2026-09-01）。意味タグ（業界・市場／ホール運営／来店演者／ユーザー心理／収支・資金管理）を1〜2個付ける |
+| プリレンダリング中にAdSense関連通信を遮断する `page.route()` を外す | 禁止（2026-09-03）。ビルドマシンで Auto ads が実行され、広告iframe・処理済み属性が静的HTMLへ焼き込まれて本番の広告配信が止まる（詳細は下記エントリ参照） |
+| 混入したAdSense実行後DOMを、HTML文字列の正規表現置換で削除して続行する | 禁止（2026-09-03）。ビルドマシンからの無効インプレッションが残り、AdSense側のDOM構造変更で静かに機能しなくなる。検出したらビルドを失敗させる |
 | `GrapeReversePage` で差枚を `Math.max(0, …)` に丸めて逆算へ渡す | 禁止（2026-09-05）。台メーターのマイナスが黙って正値になり、負けている台ほど過大に良い確率が出る。差枚は `絶対値 × 符号` で扱う（詳細は下記エントリ参照） |
 | 差枚の符号入力を、直接入力欄で `-` を受け付ける方式だけで済ませる | 禁止（2026-09-05）。`type="tel"` / `inputMode="numeric"` の数字キーパッドには iOS・Android とも `-` が無く、実機で入力手段が存在しない |
 | 差枚の符号トグルの見出しを「差枚数（台メーター）」へ戻したまま横並びを維持する | 禁止（2026-09-05）。実測で390pxでも溢れて二段になる。横並びのままなら見出しは「台メーター」（詳細は下記エントリ参照） |
 | 符号トグルのマイナス側を `bg-red-600` にする | 要注意（2026-09-05）。赤は破壊的操作（リセット）専用（`coding-style.md` §2）。同一画面にリセットボタンが常駐するため現状は青（`bg-blue-600`） |
+| commit時に出る ``.git/worktrees/...: Permission denied`` を不具合として調査する | 不要（2026-09-06）。中身が空のディレクトリが残っているだけで `gitdir`/`HEAD` は削除済み、`git worktree list` にも出ない。`git fsck --no-reflogs` もerror/fatal 0件で、commit・pushへの影響はない。`git worktree prune` を実行しても同じ `rmdir` に失敗するため解決しない |
 
 ## 2026-04以前: ボーナス履歴 LIFO
 - **現行仕様**: `bonusHistory` を `localStorage` に保持。「−」は直前の契機から `pop`。直接入力・全体リセット時はスタッククリア。
@@ -295,6 +302,31 @@
 - **結論: 本番への実害はない**。`package.json` の `build` は `node scripts/generate-sitemap.js && tsc && vite build && …` の順で、**Vercelのビルド時に必ず再生成**され `public/` → `dist/` へコピーされる。配信されるsitemapは常に最新。
 - **実務上の扱い**: `public/sitemap.xml` はgit管理下にあるため、ローカルで `npm run build` を実行するたびに `git status` へ差分として現れる。記事追加コミットに含めても含めなくても本番は変わらないので、**「sitemapが古い」ことを単独のSEO不具合として調査・緊急対応しないこと**。気になる場合は `.gitignore` に追加してトラッキングを外す選択肢もある（現状は未対応・要判断）。
 - **2026-07-29エントリとの区別**: あちらは「`generate-sitemap.js` が `/grape`・`/specs` を**そもそも生成していなかった**」というロジックの欠陥であり本番に実害があった。今回の「生成はされるがコミットされていない」ケースとは性質が異なる。
+
+## 2026-09-01: コラム関連記事を「最新3件」から関連性ベースの選定へ変更
+
+- **決定事項**: `RelatedColumns.tsx` の候補取得を `ALL_COLUMNS.slice(0, 3)`（単なる最新3件）から `getRelatedColumns(slug, 3)`（`column-content.ts` に新設、+223行）へ差し替えた。関連の根拠が無ければ**0件を返し、セクション自体を非表示**にする。`ColumnDetailPage.tsx` の `showRelatedColumns` ゲートは撤去した。UI・カードデザイン・タグバッジは無変更。
+- **理由**: 時事系コラム中心で本文へ毎回手動リンクを埋め込めないため自動表示が必要だが、「最新3件」では記事内容と無関係なリンクが並び、内部リンクとしての価値が無かった。
+- **候補に入る条件（ゲート）**: 固有タグ・機種CTA・カテゴリCTAのいずれか1つ以上が一致すること（`if (tagMatches === 0 && ctaMatches === 0) continue;`）。titleの2-gram一致は**加点のみ**で、単独では候補にならない。
+- **スコア**: 固有タグ = IDF重み `Math.log(total / df)` ／ 機種CTA `+6.0` ／ カテゴリCTA `+2.0` ／ title 2-gram `+0.25`（`df > 8` のgramは無視、合計上限1.5）。同点は日付降順（`ALL_COLUMNS` が日付降順 × `Array#sort` の安定性）。
+- **汎用タグの除外**: `GENERIC_RELATED_TAGS = { column, news, pachinko, pachislot }`。実データで `column` 85件・`news` 72件・`pachinko` 52件と全記事に付いており識別力がゼロで、これらだけの一致を関連とすると全記事が相互リンクする。**検証で、汎用タグしか持たない65記事が他記事の候補に出現した回数は0回**。
+- **IDFを選んだ理由（却下案との対比）**: 単純なタグ一致数のカウントでは汎用タグ問題を解決できず、解決には過去記事のフロントマター全書き換えが必要になる。IDFなら**計算側で吸収でき、既存記事に触らずに済む**（`myjuggler5` df=3 → 約3.37点、`juggler` df=9 → 約2.27点）。
+- **却下した案**: 関連0件時に最新記事で穴埋めするフォールバック。無関係リンクは読者にとって「関連記事」を信用できないものにし、0件非表示より害が大きい。外部API・ベクトルDB・検索サービスの利用も、依存を増やすため不採用。
+- **機種CTAをシグナルに使う判断**: フロントマターに機種情報を持たない既存記事から機種関連性を得る唯一の手段。本文中の `class="cta-button"` の `href` を抽出する（13記事が該当）。
+- **タグ正規化（同日 `2811016`）**: 既存11記事のタグを日本語の閉じた語彙（業界・市場／ホール運営／来店演者／ユーザー心理／収支・資金管理）へ統一。同義語・表記ゆれ・独自タグの氾濫を防ぐため。`are-guest-performers-necessary` の `strategy` 誤付与により来店演者記事にジャグラー立ち回り記事が並んでいた不自然な関連も解消。**結果、関連記事が表示される記事は20件 → 31件へ増加し、既存20記事のカード内容の変化は0件**。
+- **残課題（未着手）**: 関連記事が出る記事の最新日付は 2026-08-07 で、**8月8日以降の記事はほぼ全て0件**。原因は運用側のタグ付け固定化で、月別の固有タグ付与率は **2〜6月100% → 7月20% → 8月5%**。新規記事に意味タグを1〜2個付ける運用ルール化が必要。
+- **形式タグの扱い**: `column`/`news`/`pachinko`/`pachislot` の参照箇所を全走査した結果、`GENERIC_RELATED_TAGS` の除外定義とバッジ描画3箇所のみで、sitemap・canonical・JSON-LD・meta・タグ検索での使用は**ゼロ**。段階的廃止は安全だが未実施（要判断）。
+
+## 2026-09-03: 本番HTMLへAdSense実行後DOMが焼き込まれていた不具合を修正
+
+- **決定事項**: `scripts/generate-seo-shells.mjs` で、PlaywrightのPage生成直後・`page.goto()` の前に `page.route()` を張り、`googlesyndication.com` / `doubleclick.net` / `googletagservices.com` / `adservice.google.` への通信を `abort()` する。さらに `page.content()` 取得直後にAdSense実行後DOMのマーカーを検査し、1つでも含まれていればビルドを失敗させる。
+- **背景**: Google Publisher Support から「本番HTMLにビルド環境で生成されたAdSenseコンテナ・iframe・広告状態が含まれ、広告リクエストエラーと広告非表示が起きている可能性」を指摘された。`page.content()` は**ライブDOMをシリアライズする**ため、ビルドマシン上で Auto ads が実行されるとその結果が丸ごと静的HTMLへ入る。本番の25URLを実測して25/25で混入を確認した。
+- **混入していたもの**: `<ins class="adsbygoogle adsbygoogle-noablate" data-adsbygoogle-status="done" data-ad-status="unfilled">`（**「処理済み・在庫なし」の状態が焼き付き、閲覧者のブラウザで再入札されない**）／ `<iframe id="aswift_0" src="...doubleclick.net/pagead/ads?...lmt=1788360109">`（**ビルド時刻の署名を持つ広告リクエストが全閲覧者から毎回送信される**。`width:undefinedpx`）／ バージョン固定の `show_ads_impl.js` と `google_esf` iframe ／ AdSense由来のreCAPTCHA aframe ／ 標準タグへの `data-checked-head="true"` 付与。
+- **却下した案**: `page.content()` 後にHTML文字列から広告DOMを正規表現で削除する後処理。①記事本文に類似文字列があると誤削除しうる ②**ビルドマシンからの広告リクエスト自体は止まらず、無効インプレッションが継続する** ③AdSense側のDOM構造変更で静かに機能しなくなる。「結果を掃除する」のではなく「原因を断つ」方式を採った。
+- **検出マーカー**: `adsbygoogle-noablate` / `data-adsbygoogle-status` / `data-ad-status=` / `aswift_` / `google_esf` / `show_ads_impl.js` / `data-checked-head=` / `<ins class="adsbygoogle"` / `recaptcha/api2/aframe`。**標準タグ `pagead/js/adsbygoogle.js` はどれにも一致しない**ため、正常なスニペットがビルドを止めることはない。`<iframe>` 全般も禁止していない。
+- **教訓（2026-07-29と同種の環境差）**: **ローカルビルドでは問題が再現しなかった**。実行環境が googlesyndication.com への通信を遮断しており `adsbygoogle.js` が実行されなかったため。「ローカルの `dist/` がクリーン＝直っている」と判断すると誤る。**この種の検証は必ず本番デプロイ後の `curl` で確認すること**。ローカルとVercelの環境差に起因する点で、2026-07-29のChromium起動失敗と同じ構図。
+- **影響範囲**: React・広告配置・`adsbygoogle.push()`・`ads.txt`・AdSense設定・Vercel設定は無変更。`index.html` の標準スニペット1個はそのまま出力され、閲覧者のブラウザはクリーンな初回状態から Auto ads を実行する。
+- **確認コマンド**: `curl -s https://grape-reverse.com/ | grep -cE "aswift_|adsbygoogle-noablate|data-ad-status"` が `0`、`grep -c "pagead/js/adsbygoogle.js"` が `1` であること。
 
 ## 2026-09-05: ぶどう/ベル逆算の差枚数をマイナス対応（絶対値＋符号トグル方式）
 
