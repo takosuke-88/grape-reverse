@@ -122,10 +122,10 @@ export default function MachineSpecPage() {
       ? "text-amber-700 dark:text-amber-400 font-extrabold"
       : "text-slate-800 dark:text-slate-100 font-bold";
 
-  // 設定6に追加する上部セパレーター（強調ボーダー）
+  // 設定6に追加する上部セパレーター（他の境界線と同じ太さ・色）
   const s6Border = (s: number) =>
     s === topSetting
-      ? "border-t-2 border-t-amber-400 dark:border-t-amber-500"
+      ? "border-t border-t-slate-200 dark:border-t-slate-700"
       : "";
 
   const settingLabel = (s: number) => {
@@ -135,14 +135,14 @@ export default function MachineSpecPage() {
 
   // ── 共通スタイル定数 ─────────────────────────────────────────
   const thCls =
-    "py-3 px-1 text-center text-xs font-bold text-slate-500 dark:text-slate-400 border-b-2 border-slate-300 dark:border-slate-600";
+    "py-3 px-1 text-center text-sm font-bold text-slate-500 dark:text-slate-400 border-b-2 border-slate-300 dark:border-slate-600";
 
   const tdCls = (s: number) =>
-    `py-4 px-1 text-center text-sm ${cellTxt(s)} ${s6Border(s)} border-b border-slate-200 dark:border-slate-700`;
+    `py-4 px-1 text-center text-base ${cellTxt(s)} ${s6Border(s)} border-b border-slate-200 dark:border-slate-700`;
 
   // 解説テキストの共通スタイル
   const adviceCls =
-    "px-3 pt-2 pb-3 text-[13px] leading-relaxed font-medium text-slate-700 dark:text-slate-200";
+    "px-3 pt-2 pb-3 text-sm leading-relaxed font-medium text-slate-700 dark:text-slate-200";
 
   const currentCategory = machineInfo.category;
   const isHana = currentCategory === "hana";
@@ -151,6 +151,70 @@ export default function MachineSpecPage() {
   const strategyText = advice?.strategy;
   const roleLabel = currentCategory === "hana" ? "ベル" : "ぶどう";
   const roleIcon  = currentCategory === "hana" ? "🔔" : "🍇";
+
+  const smallRoleBlock = (isJuggler || (isHana && bellEl)) && (
+    <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+      <AccordionHeader
+        title={isHana ? "通常時小役・BIG中スイカ" : "通常時小役確率"}
+        icon={isHana ? "🔔" : "🍇"}
+        isOpen={openState.smallRole}
+        onToggle={() => toggle("smallRole")}
+      />
+      {openState.smallRole && (
+        <div className="overflow-x-clip pb-2">
+          <table className="table-fixed w-full">
+            <thead>
+              <tr>
+                <th className={`${thCls} w-8`}>設定</th>
+                {isHana ? (
+                  <>
+                    <th className={thCls}>ベル確率</th>
+                    <th className={thCls}>BIG中スイカ</th>
+                  </>
+                ) : (
+                  <>
+                    <th className={thCls}>ぶどう確率</th>
+                    <th className={thCls}>チェリー確率</th>
+                  </>
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {settings.map((s, idx) => (
+                <tr key={s} className={rowBg(s)}>
+                  <td className={`${tdCls(s)} font-extrabold`}>{settingLabel(s)}</td>
+                  {isHana ? (
+                    <>
+                      <td className={tdCls(s)}>
+                        {bellEl?.settingValues[s] ? fmt1(bellEl.settingValues[s], 2) : "---"}
+                      </td>
+                      <td className={tdCls(s)}>
+                        {detProbs?.big_suika_raw?.[idx] != null
+                          ? fmt1(detProbs.big_suika_raw[idx], 2)
+                          : "---"}
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className={tdCls(s)}>
+                        {grapeEl?.settingValues[s] ? fmt1(grapeEl.settingValues[s]) : "---"}
+                      </td>
+                      <td className={tdCls(s)}>
+                        {cherryEl?.settingValues[s] ? fmt1(cherryEl.settingValues[s]) : "---"}
+                      </td>
+                    </>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {advice?.smallRole && (
+            <p className={adviceCls}>{advice.smallRole}</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-clip bg-slate-50 dark:bg-slate-950">
@@ -199,7 +263,7 @@ export default function MachineSpecPage() {
             {/* リセットボタンのスペースを invisible で確保（他ページとselect幅を同一に保つ） */}
             <span
               aria-hidden="true"
-              className="invisible shrink-0 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold"
+              className="invisible shrink-0 flex items-center gap-1 rounded-full px-2.5 py-1.5 text-sm font-semibold"
             >
               🗑️ リセット
             </span>
@@ -210,7 +274,7 @@ export default function MachineSpecPage() {
                 setVibrationEnabled(next);
                 if (next && navigator.vibrate) navigator.vibrate(40);
               }}
-              className={`shrink-0 flex items-center gap-1 rounded-full px-3 py-1.5 mr-1 text-xs font-semibold shadow-md transition-all ${
+              className={`shrink-0 flex items-center gap-1 rounded-full px-2.5 py-1.5 mr-1 text-sm font-semibold shadow-md transition-all ${
                 vibrationEnabled ? "bg-emerald-600 text-white" : "bg-gray-800 text-white"
               }`}
               title={vibrationEnabled ? "バイブON（タップでOFF）" : "バイブOFF（タップでON）"}
@@ -222,19 +286,19 @@ export default function MachineSpecPage() {
           <div className="flex gap-2">
             <Link
               to={`/${machineId}`}
-              className="flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-[10px] text-center"
+              className="flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
             >
               🎰 小役カウンター
             </Link>
             <Link
               to={`/${machineId}/grape`}
-              className="flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-[10px] text-center"
+              className="flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
             >
               {roleIcon} {roleLabel}逆算
             </Link>
             <button
               type="button"
-              className="flex-1 rounded-lg bg-indigo-500 text-white py-2 text-[10px] font-bold ring-2 ring-indigo-300 dark:ring-indigo-600"
+              className="flex-1 rounded-lg bg-indigo-500 text-white py-2 text-xs font-bold ring-2 ring-indigo-300 dark:ring-indigo-600"
             >
               📊 機種スペック
             </button>
@@ -313,6 +377,9 @@ export default function MachineSpecPage() {
             )}
           </div>
 
+          {/* ③ 通常時小役（ジャグラー: ぶどう/チェリー / ハナハナ: ベル・BIGスイカ。ボーナス確率の直後に表示） */}
+          {smallRoleBlock}
+
           {/* ② 機械割（ジャグラー: 打ち方別3モード / ハナハナ: 公表機械割） */}
           {(payoutData || (isHana && hanaPayout)) && (
             <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
@@ -380,71 +447,6 @@ export default function MachineSpecPage() {
             </div>
           )}
 
-          {/* ③ 通常時小役（ジャグラー: ぶどう/チェリー / ハナハナ: ベル/BIGスイカ） */}
-          {(isJuggler || (isHana && bellEl)) && (
-            <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-              <AccordionHeader
-                title={isHana ? "通常時小役・BIG中スイカ" : "通常時小役確率"}
-                icon={isHana ? "🔔" : "🍇"}
-                isOpen={openState.smallRole}
-                onToggle={() => toggle("smallRole")}
-              />
-              {openState.smallRole && (
-                <div className="overflow-x-clip pb-2">
-                  <table className="table-fixed w-full">
-                    <thead>
-                      <tr>
-                        <th className={`${thCls} w-8`}>設定</th>
-                        {isHana ? (
-                          <>
-                            <th className={thCls}>ベル確率</th>
-                            <th className={thCls}>BIG中スイカ</th>
-                          </>
-                        ) : (
-                          <>
-                            <th className={thCls}>ぶどう確率</th>
-                            <th className={thCls}>チェリー確率</th>
-                          </>
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {settings.map((s, idx) => (
-                        <tr key={s} className={rowBg(s)}>
-                          <td className={`${tdCls(s)} font-extrabold`}>{settingLabel(s)}</td>
-                          {isHana ? (
-                            <>
-                              <td className={tdCls(s)}>
-                                {bellEl?.settingValues[s] ? fmt1(bellEl.settingValues[s], 2) : "---"}
-                              </td>
-                              <td className={tdCls(s)}>
-                                {detProbs?.big_suika_raw?.[idx] != null
-                                  ? fmt1(detProbs.big_suika_raw[idx], 2)
-                                  : "---"}
-                              </td>
-                            </>
-                          ) : (
-                            <>
-                              <td className={tdCls(s)}>
-                                {grapeEl?.settingValues[s] ? fmt1(grapeEl.settingValues[s]) : "---"}
-                              </td>
-                              <td className={tdCls(s)}>
-                                {cherryEl?.settingValues[s] ? fmt1(cherryEl.settingValues[s]) : "---"}
-                              </td>
-                            </>
-                          )}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {advice?.smallRole && (
-                    <p className={adviceCls}>{advice.smallRole}</p>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
           {/* ④ 単独・重複ボーナス確率（ジャグラー） */}
           {!isHana && detProbs?.big_solo && (
             <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
@@ -460,9 +462,10 @@ export default function MachineSpecPage() {
                     <thead>
                       <tr>
                         <th className={`${thCls} w-8`}>設定</th>
-                        <th className={`${thCls} w-10`}></th>
-                        <th className={thCls}>単独確率</th>
-                        <th className={thCls}>重複確率</th>
+                        <th className={thCls}>単独BIG</th>
+                        <th className={thCls}>単独REG</th>
+                        <th className={thCls}>重複BIG</th>
+                        <th className={thCls}>重複REG</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -472,24 +475,13 @@ export default function MachineSpecPage() {
                         const regSolo   = detProbs.reg_solo?.[idx];
                         const regCherry = detProbs.reg_cherry?.[idx];
                         return (
-                          <React.Fragment key={s}>
-                            <tr className={rowBg(s)}>
-                              <td
-                                rowSpan={2}
-                                className={`py-4 px-1 text-center text-base font-extrabold tracking-tighter leading-relaxed align-middle border-b border-slate-200 dark:border-slate-700 ${s6Border(s)} ${cellTxt(s)}`}
-                              >
-                                {settingLabel(s)}
-                              </td>
-                              <td className={`${tdCls(s)} font-extrabold text-red-600 dark:text-red-400`}>BIG</td>
-                              <td className={tdCls(s)}>{bigSolo != null ? fmt1(bigSolo) : "---"}</td>
-                              <td className={tdCls(s)}>{bigCherry != null ? fmt1(bigCherry) : "---"}</td>
-                            </tr>
-                            <tr className={rowBg(s)}>
-                              <td className={`${tdCls(s)} font-extrabold text-blue-600 dark:text-blue-400`}>REG</td>
-                              <td className={tdCls(s)}>{regSolo != null ? fmt1(regSolo) : "---"}</td>
-                              <td className={tdCls(s)}>{regCherry != null ? fmt1(regCherry) : "---"}</td>
-                            </tr>
-                          </React.Fragment>
+                          <tr key={s} className={rowBg(s)}>
+                            <td className={`${tdCls(s)} font-extrabold`}>{settingLabel(s)}</td>
+                            <td className={tdCls(s)}>{bigSolo != null ? fmt1(bigSolo) : "---"}</td>
+                            <td className={tdCls(s)}>{regSolo != null ? fmt1(regSolo) : "---"}</td>
+                            <td className={tdCls(s)}>{bigCherry != null ? fmt1(bigCherry) : "---"}</td>
+                            <td className={tdCls(s)}>{regCherry != null ? fmt1(regCherry) : "---"}</td>
+                          </tr>
                         );
                       })}
                     </tbody>

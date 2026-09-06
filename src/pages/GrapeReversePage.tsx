@@ -279,7 +279,7 @@ export default function GrapeReversePage() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="shrink-0 flex items-center gap-1 rounded-full bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-md transition-opacity hover:opacity-80 active:opacity-60"
+                className="shrink-0 flex items-center gap-1 rounded-full bg-red-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-md transition-opacity hover:opacity-80 active:opacity-60"
                 title="データを全てリセット"
               >
                 🗑️ リセット
@@ -291,7 +291,7 @@ export default function GrapeReversePage() {
                   setVibrationEnabled(next);
                   if (next && navigator.vibrate) navigator.vibrate(40);
                 }}
-                className={`shrink-0 flex items-center gap-1 rounded-full px-3 py-1.5 mr-1 text-xs font-semibold shadow-md transition-all ${
+                className={`shrink-0 flex items-center gap-1 rounded-full px-2.5 py-1.5 mr-1 text-sm font-semibold shadow-md transition-all ${
                   vibrationEnabled ? "bg-emerald-600 text-white" : "bg-gray-800 text-white"
                 }`}
                 title={vibrationEnabled ? "バイブON（タップでOFF）" : "バイブOFF（タップでON）"}
@@ -304,19 +304,19 @@ export default function GrapeReversePage() {
             <div className="flex gap-2">
               <Link
                 to={`/${machineId}`}
-                className="flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-[10px] text-center"
+                className="flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
               >
                 🎰 小役カウンター
               </Link>
               <button
                 type="button"
-                className="flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold text-[10px]"
+                className="flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold text-xs"
               >
                 {roleIcon} {roleLabel}逆算
               </button>
               <Link
                 to={`/${machineId}/specs`}
-                className="flex-1 rounded-lg bg-indigo-700 text-white py-2 text-[10px] font-bold transition-opacity hover:opacity-90 active:opacity-80 text-center"
+                className="flex-1 rounded-lg bg-indigo-700 text-white py-2 text-xs font-bold transition-opacity hover:opacity-90 active:opacity-80 text-center"
               >
                 📊 機種スペック
               </Link>
