@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useLocalStorage } from "../hooks/useLocalStorage";
+import { previousDataStorageKey } from "../data/previous-data-storage";
 import { AVAILABLE_MACHINES } from "../data/machine-list";
 import Seo from "../components/Seo";
 import { CONFIG_MAP } from "../data/machine-config-map";
@@ -129,15 +130,9 @@ export default function GrapeReversePage() {
   const diffSign: DiffSign = grapeData[DIFF_SIGN_KEY] === -1 ? -1 : 1;
   const diffCoins  = diffAbs * diffSign;
 
-  // 符号はカウンター直上のラベルにも出す（バー内の数字は絶対値のため、
-  // 数字だけを見て符号を誤読しないようにする）。DynamicInput側は無変更。
-  const elemDiffCoins = useMemo<DiscriminationElement>(
-    () => ({
-      ...ELEM_DIFF_COINS,
-      label: diffSign === -1 ? "差枚数（マイナス）" : "差枚数（プラス）",
-    }),
-    [diffSign],
-  );
+  // 符号は隣接する DiffSignToggle が示すため、ラベルは「差枚数」のまま。
+  // かつて「差枚数（マイナス）」と連動させていたが、トグルを見出し右へ重ねる
+  // レイアウトにした結果ラベルがトグルの下へ潜り込むため取りやめた（2026-09-10）。
 
   const update = (key: string, v: number) =>
     setGrapeData((prev) => ({ ...prev, [key]: v }));
@@ -145,6 +140,8 @@ export default function GrapeReversePage() {
   const handleReset = () => {
     if (!window.confirm(`${roleLabel}逆算の入力を全てリセットしますか？`)) return;
     setGrapeData({});
+    // 前任者タブのデータも一緒に消す（台を移れば両方不要になるため）
+    window.localStorage.removeItem(previousDataStorageKey(machineId ?? ""));
   };
 
   // ─── 逆算計算（チェリー狙い / フリー打ち） ───
@@ -343,13 +340,20 @@ export default function GrapeReversePage() {
           </div>
 
           {/* 差枚数（台メーター） */}
-          <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 shadow-lg ring-1 ring-slate-200 dark:ring-slate-800 sm:p-6">
-            <DiffSignToggle
-              sign={diffSign}
-              onChange={(sign) => update(DIFF_SIGN_KEY, sign)}
-            />
+          <div className="relative rounded-2xl bg-white dark:bg-slate-900 p-4 shadow-lg ring-1 ring-slate-200 dark:ring-slate-800 sm:p-6">
+            <h2 className="mb-2 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
+              台メーター
+            </h2>
+            {/* 小役カウンターページの 現在／前任者 トグルと同じ寸法・同じ縦位置。
+                absolute で重ねるため、カードの高さは増えない。 */}
+            <div className="absolute right-4 top-3 sm:right-6 sm:top-4">
+              <DiffSignToggle
+                sign={diffSign}
+                onChange={(sign) => update(DIFF_SIGN_KEY, sign)}
+              />
+            </div>
             <DynamicInput
-              element={elemDiffCoins}
+              element={ELEM_DIFF_COINS}
               value={diffAbs}
               onChange={(v) => update("diff-coins", Number(v) || 0)}
               vibrationEnabled={vibrationEnabled}

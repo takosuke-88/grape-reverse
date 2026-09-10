@@ -76,6 +76,7 @@ function buildRouteList() {
     routes.push(`/${id}`);
     routes.push(`/${id}/grape`);
     routes.push(`/${id}/specs`);
+    routes.push(`/${id}/prev`);
   });
   routes.push("/columns");
   columnSlugs.forEach((slug) => routes.push(`/columns/${slug}`));

@@ -81,6 +81,9 @@ async function generateSitemap() {
       urls.push(
         urlElement(`${BASE_URL}/${id}/specs`, undefined, "weekly", "0.7"),
       );
+      urls.push(
+        urlElement(`${BASE_URL}/${id}/prev`, undefined, "weekly", "0.6"),
+      );
     });
   }
 

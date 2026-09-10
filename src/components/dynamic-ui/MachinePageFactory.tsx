@@ -15,6 +15,8 @@ import { ALL_COLUMNS, type ColumnEntry } from "../../data/column-content";
 import { formatBonusText } from "../../utils/formatters";
 import EstimationResultDisplay from "./EstimationResultDisplay";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
+import { previousDataStorageKey } from "../../data/previous-data-storage";
+import CurrentPreviousToggle from "../machine/CurrentPreviousToggle";
 import DynamicInput from "./DynamicInput";
 import { isGridOnlyCompactCounterId } from "./counter-layout";
 
@@ -197,6 +199,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   const handleReset = () => {
     if (!window.confirm("これまでのカウントデータを全てリセットしますか？")) return;
     removeInputValues();
+    // 前任者タブのデータも一緒に消す（台を移れば両方不要になるため）
+    window.localStorage.removeItem(previousDataStorageKey(config.id));
     setBigHistory([]);
     setRegHistory([]);
     setEstimationResults(null);
@@ -392,10 +396,19 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
           return (
             <React.Fragment key={section.id}>
-              <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
+              <div className="relative rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
                 <h2 className="mb-2 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
                   {section.title}
                 </h2>
+
+                {/* 基本データのカードだけ、見出し右の余白へ 現在／前任者 トグルを重ねる。
+                    absolute で通常フローから外すため、カードの高さは増えない
+                    （行として置くと 52px 分だけ縦に伸びる）。 */}
+                {section.id === "basic-data" && (
+                  <div className="absolute right-4 top-3 sm:right-6 sm:top-4">
+                    <CurrentPreviousToggle machineId={config.id} active="current" />
+                  </div>
+                )}
 
                 <div
                   className={
