@@ -102,9 +102,6 @@ export default function PreviousDataPage() {
     }
   }, [config, totalGames, bigCount, regCount, isHana]);
 
-  // 信頼度は小役カウンター・逆算ページと完全に同一の計算（総ゲーム数のみを見る）。
-  // ぶどう未計測の分だけ実際の判別力は落ちるが、それはグラフ下の注記で伝える。
-  // ページ間で同じ名前・同じ数字になることを優先した（2026-09-11決定）。
   // 詳細判別カードに出す確率指標。ぶどう未計測なので BIG / REG / 合算 の3つだけ
   // （単独REG・チェリーREG・ぶどう確率は出さない）。
   const metrics = useMemo(() => {
@@ -144,6 +141,9 @@ export default function PreviousDataPage() {
     ];
   }, [config, totalGames, bigCount, regCount, settings]);
 
+  // 信頼度は小役カウンター・逆算ページと完全に同一の計算（総ゲーム数のみを見る）。
+  // ぶどう未計測の分だけ実際の判別力は落ちるが、それはグラフ下の注記で伝える。
+  // ページ間で同じ名前・同じ数字になることを優先した（2026-09-11決定）。
   const grapeReliability = useMemo(
     () =>
       calculateGrapeWeight(
