@@ -17,6 +17,8 @@ import EstimationResultDisplay from "./EstimationResultDisplay";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { previousDataStorageKey } from "../../data/previous-data-storage";
 import CurrentPreviousToggle from "../machine/CurrentPreviousToggle";
+import SettingProbabilityChart from "./SettingProbabilityChart";
+import ProbabilityMetricCard from "./ProbabilityMetricCard";
 import DynamicInput from "./DynamicInput";
 import { isGridOnlyCompactCounterId } from "./counter-layout";
 
@@ -697,54 +699,16 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   return el?.settingValues;
                 })(),
               },
-            ].map((item, idx) => {
-              let approxSetting: number | null = null;
-              if (item.val > 0 && item.settingValues) {
-                let minDiff = Infinity;
-                const settings = config.specs?.settings || [1, 2, 3, 4, 5, 6];
-                settings.forEach((setting) => {
-                  const settingVal = (
-                    item.settingValues as Record<number, number>
-                  )[setting];
-                  if (settingVal) {
-                    const diff = Math.abs(item.val - settingVal);
-                    if (diff < minDiff) {
-                      minDiff = diff;
-                      approxSetting = setting;
-                    }
-                  }
-                });
-              }
-
-              return (
-                <div
-                  key={idx}
-                  className="flex flex-col items-center justify-center rounded-lg border border-slate-100 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-800"
-                >
-                  <div className="text-xs text-slate-500 dark:text-slate-400">
-                    {formatBonusText(item.label)}
-                  </div>
-                  <div className="text-xl font-bold text-slate-800 dark:text-white">
-                    {item.val > 0 ? `1/${item.format(item.val)}` : "---"}
-                  </div>
-                  {approxSetting && (
-                    <div
-                      className={`text-xs font-bold ${
-                        approxSetting >= 5
-                          ? "text-red-500 dark:text-red-400"
-                          : "text-blue-500 dark:text-blue-400"
-                      }`}
-                    >
-                      {config.specs?.approximationLabelOverride &&
-                      item.settingValues![approxSetting] ===
-                        config.specs.approximationLabelOverride.matchValue
-                        ? config.specs.approximationLabelOverride.label
-                        : `(設定${config.specs?.settingLabels?.[approxSetting] || approxSetting}近似)`}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+            ].map((item, idx) => (
+              <ProbabilityMetricCard
+                key={idx}
+                label={item.label}
+                val={item.val}
+                format={item.format}
+                settingValues={item.settingValues}
+                config={config}
+              />
+            ))}
           </div>
 
           {/* 設定別期待度見出しとAIアドバイス */}
@@ -913,94 +877,11 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             );
           })()}
 
-          {/* グラフ描画エリア（縦棒グラフ） - h-48に拡大して視認性向上 */}
-          <div className="flex items-end justify-around gap-2 h-48 border-b border-slate-200 pb-1 dark:border-slate-700 mt-6">
-            {(
-              estimationResults ||
-              (config.specs?.settings || [1, 2, 3, 4, 5, 6]).map((s) => ({
-                setting: s,
-                probability: 0,
-              }))
-            ).map((result, index, arr) => {
-              const colors = [
-                { bg: "bg-slate-400", text: "text-slate-600" }, // 1
-                { bg: "bg-slate-400", text: "text-slate-600" }, // 2
-                { bg: "bg-slate-400", text: "text-slate-600" }, // 3
-                { bg: "bg-blue-500", text: "text-blue-600" }, // 4
-                { bg: "bg-amber-500", text: "text-amber-600" }, // 5
-                { bg: "bg-rose-600", text: "text-rose-600" }, // 6
-              ];
-              const colorObj = colors[index] || colors[0];
-              const maxResult = arr.reduce((max, current) =>
-                current.probability > max.probability ? current : max,
-              );
-              const isMax =
-                result.setting === maxResult.setting && result.probability > 0;
-              const percentage = Math.max(result.probability, 1); // 最小1%確保
-
-              return (
-                <div
-                  key={result.setting}
-                  className="flex flex-col items-center flex-1 h-full justify-end group mt-4"
-                >
-                  <div className="relative w-full flex-1 flex items-end justify-center px-1">
-                    {isMax && (
-                      <div
-                        className="absolute w-full flex justify-center z-10 pointer-events-none"
-                        style={{ bottom: `calc(${percentage}% + 18px)` }}
-                      >
-                        <span
-                          className={`text-[9px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap shadow-sm ${
-                            result.probability === 100 && result.setting === 6
-                              ? "bg-gradient-to-r from-red-500 via-yellow-500 to-blue-500 text-white animate-pulse"
-                              : "bg-blue-100 text-blue-600"
-                          }`}
-                        >
-                          {result.probability === 100 && result.setting === 6
-                            ? "設定6濃厚！"
-                            : "最有力"}
-                        </span>
-                      </div>
-                    )}
-                    <div
-                      className={`w-full rounded-t-sm transition-all duration-700 hover:opacity-80 ${
-                        result.probability === 100 && result.setting === 6
-                          ? "bg-gradient-to-t from-purple-500 via-pink-500 to-red-500 animate-pulse"
-                          : colorObj.bg
-                      }`}
-                      style={{
-                        height: `${percentage}%`,
-                      }}
-                    ></div>
-                    {/* 確率表示（バーの上） */}
-                    <span
-                      className={`absolute mb-0.5 tabular-nums font-bold ${
-                        isMax
-                          ? result.probability === 100 && result.setting === 6
-                            ? "text-red-500 text-sm"
-                            : colorObj.text + " text-xs"
-                          : "text-slate-600 text-xs dark:text-slate-400"
-                      }`}
-                      style={{ bottom: `${percentage}%` }}
-                    >
-                      {result.probability.toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="mt-2 text-xs flex flex-col items-center">
-                    <span
-                      className={`font-bold ${isMax ? colorObj.text : "text-slate-500"}`}
-                    >
-                      設定{result.setting}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="mt-4 text-xs text-slate-500 dark:text-slate-400 text-center">
-            ※ベイズ推定による確率分布
-          </div>
+          {/* 確率分布グラフ（前任者ページと共用のためコンポーネント化） */}
+          <SettingProbabilityChart
+            results={estimationResults}
+            settings={config.specs?.settings || [1, 2, 3, 4, 5, 6]}
+          />
         </div>
 
         {/* 確率・設定差一覧表（一番下に配置） */}

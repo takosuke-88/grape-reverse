@@ -232,10 +232,24 @@ export function calculateEstimation(
  * @param inputs ユーザーの入力値（total-games, big-count, reg-count, grape-count or bell-count）
  * @returns 設定1〜6の期待度（%）
  */
+/**
+ * 多項分布モデルによる設定推定。
+ *
+ * options.ignoreGrape: ぶどう（ベル）を計測していない入力に対して使う。
+ *   通常モデルはハズレ確率を「1 − BIG − REG − ぶどう」で求めるため、ぶどうが
+ *   未計測（0回）のまま渡すと「全ハズレの中でぶどうが1度も出ていない」という
+ *   偽情報になり、ぶどう確率の低い低設定ほど尤度が跳ね上がる。実測では
+ *   マイジャグラーV 3250G/BIG12/REG9 で設定1が99.7%という誤判定になった。
+ *   このフラグを立てるとぶどう・チェリーを観測対象から外し、
+ *   ハズレ確率を「1 − BIG − REG」とする3項モデルに切り替える
+ *   （同条件で 20.6/21.7/21.5/17.0/13.0/6.2% と妥当な分布になる）。
+ */
 export function calculateMultinomialEstimation(
   config: MachineConfig,
   inputs: UserInputs,
+  options?: { ignoreGrape?: boolean },
 ): EstimationResult[] {
+  const ignoreGrape = options?.ignoreGrape === true;
   const settings = config.specs?.settings || [1, 2, 3, 4, 5, 6];
   const n = Number(inputs["total-games"]) || 0;
   const b = Number(inputs["big-count"]) || 0;
@@ -252,7 +266,7 @@ export function calculateMultinomialEstimation(
   const allElements = config.sections.flatMap((s) => s.elements);
   const hasBell = allElements.some((e) => e.id === "bell-count");
   const grapeKey = hasBell ? "bell-count" : "grape-count";
-  const k = Number(inputs[grapeKey]) || 0;
+  const k = ignoreGrape ? 0 : Number(inputs[grapeKey]) || 0;
 
   // BIG / REG / ぶどう(ベル) の settingValues を取得
   const bigEl = allElements.find((e) => e.id === "big-count");
@@ -260,7 +274,8 @@ export function calculateMultinomialEstimation(
   const grapeEl = allElements.find((e) => e.id === grapeKey);
 
   // 要素が揃わない場合は均等確率にフォールバック
-  if (!bigEl || !regEl || !grapeEl) {
+  // （ignoreGrape 時はぶどう要素を使わないので存在しなくてよい）
+  if (!bigEl || !regEl || (!grapeEl && !ignoreGrape)) {
     return settings.map((setting) => ({
       setting,
       probability: 100 / settings.length,
@@ -281,26 +296,27 @@ export function calculateMultinomialEstimation(
   const cherryEl = !hasBell
     ? allElements.find((e) => e.id === "cherry-count")
     : undefined;
-  const c = !hasBell ? (Number(inputs["cherry-count"]) || 0) : 0;
+  const c = !hasBell && !ignoreGrape ? (Number(inputs["cherry-count"]) || 0) : 0;
 
   // 各設定の多項分布対数尤度を計算
   const logLikelihoods = settings.map((setting) => {
     const denomBig = bigEl.settingValues[setting];
     const denomReg = regEl.settingValues[setting];
-    const denomGrape = grapeEl.settingValues[setting];
+    const denomGrape = grapeEl?.settingValues[setting];
 
     // 分母が未定義・0の設定は計算不能 → -Infinity
-    if (!denomBig || !denomReg || !denomGrape) {
+    if (!denomBig || !denomReg || (!denomGrape && !ignoreGrape)) {
       return { setting, logLikelihood: -Infinity };
     }
 
     const pBig   = 1 / denomBig;
     const pReg   = 1 / denomReg;
-    const pGrape = 1 / denomGrape;
+    // ignoreGrape 時はぶどうを観測対象から外すため、ハズレ確率から差し引かない
+    const pGrape = ignoreGrape || !denomGrape ? 0 : 1 / denomGrape;
 
     // 4軸: チェリーの確率（ジャグラー + cherry-count > 0 + settingValues 有効時のみ）
     const denomCherry = cherryEl?.settingValues[setting];
-    const pCherry = (c > 0 && denomCherry) ? 1 / denomCherry : 0;
+    const pCherry = (!ignoreGrape && c > 0 && denomCherry) ? 1 / denomCherry : 0;
 
     // 外れ項（ハズレ+リプレイ等）= 1 - P_BIG - P_REG - P_ぶどう - P_チェリー
     const pOther = 1 - pBig - pReg - pGrape - pCherry;

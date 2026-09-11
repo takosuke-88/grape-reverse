@@ -7,6 +7,7 @@
 //   一切渡さない。前任者のぶどう回数は数えようがないため、総ゲーム数だけ増えると
 //   ぶどう確率が実際の数倍悪く計算され、判別が壊れる。
 
+import { useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { AVAILABLE_MACHINES } from "../data/machine-list";
@@ -14,7 +15,19 @@ import { CONFIG_MAP } from "../data/machine-config-map";
 import Seo from "../components/Seo";
 import DynamicInput from "../components/dynamic-ui/DynamicInput";
 import CurrentPreviousToggle from "../components/machine/CurrentPreviousToggle";
-import type { DiscriminationElement } from "../types/machine-schema";
+import EstimationResultDisplay from "../components/dynamic-ui/EstimationResultDisplay";
+import SettingProbabilityChart from "../components/dynamic-ui/SettingProbabilityChart";
+import ProbabilityMetricCard from "../components/dynamic-ui/ProbabilityMetricCard";
+import {
+  calculateEstimation,
+  calculateGrapeWeight,
+  calculateMultinomialEstimation,
+} from "../logic/bayes-estimator";
+import type {
+  DiscriminationElement,
+  EstimationResult,
+  UserInputs,
+} from "../types/machine-schema";
 import {
   PREVIOUS_DATA_INITIAL,
   previousDataStorageKey,
@@ -66,11 +79,79 @@ export default function PreviousDataPage() {
     removePrevData();
   };
 
-  const bonusTotal = bigCount + regCount;
-  const canCalc = totalGames > 0 && bonusTotal > 0;
-  const bigProb = totalGames > 0 && bigCount > 0 ? totalGames / bigCount : null;
-  const regProb = totalGames > 0 && regCount > 0 ? totalGames / regCount : null;
-  const combined = canCalc ? totalGames / bonusTotal : null;
+  const settings = config?.specs?.settings ?? [1, 2, 3, 4, 5, 6];
+
+  // 総ゲーム数・BIG・REG の3つだけで設定推定する。
+  // ジャグラーの通常判別は多項分布モデルだが、そのまま渡すとハズレ確率から
+  // ぶどう確率が差し引かれ「全ハズレでぶどうが0回」という偽情報になるため、
+  // ignoreGrape でぶどう・チェリーを観測対象から外した3項モデルへ切り替える。
+  // ハナハナは元々カウント0の要素をスキップする二項モデルなのでそのまま使える。
+  const estimationResults = useMemo<EstimationResult[] | null>(() => {
+    if (!config || totalGames === 0) return null;
+    const inputs: UserInputs = {
+      "total-games": totalGames,
+      "big-count": bigCount,
+      "reg-count": regCount,
+    };
+    try {
+      return isHana
+        ? calculateEstimation(config, inputs)
+        : calculateMultinomialEstimation(config, inputs, { ignoreGrape: true });
+    } catch {
+      return null;
+    }
+  }, [config, totalGames, bigCount, regCount, isHana]);
+
+  // 信頼度は小役カウンター・逆算ページと完全に同一の計算（総ゲーム数のみを見る）。
+  // ぶどう未計測の分だけ実際の判別力は落ちるが、それはグラフ下の注記で伝える。
+  // ページ間で同じ名前・同じ数字になることを優先した（2026-09-11決定）。
+  // 詳細判別カードに出す確率指標。ぶどう未計測なので BIG / REG / 合算 の3つだけ
+  // （単独REG・チェリーREG・ぶどう確率は出さない）。
+  const metrics = useMemo(() => {
+    const allElements = config?.sections.flatMap((sec) => sec.elements) ?? [];
+    const bigEl = allElements.find((e) => e.id === "big-count");
+    const regEl = allElements.find((e) => e.id === "reg-count");
+    const bonusTotal = bigCount + regCount;
+
+    // 合算の理論値は BIG と REG の確率を足して逆数に戻す
+    const combinedValues: Record<number, number> = {};
+    if (bigEl?.settingValues && regEl?.settingValues) {
+      settings.forEach((st) => {
+        const b = bigEl.settingValues![st];
+        const r = regEl.settingValues![st];
+        if (b && r) combinedValues[st] = 1 / (1 / b + 1 / r);
+      });
+    }
+
+    return [
+      {
+        label: "BIG確率",
+        val: bigCount > 0 ? totalGames / bigCount : 0,
+        settingValues: bigEl?.settingValues,
+      },
+      {
+        label: "REG確率",
+        val: regCount > 0 ? totalGames / regCount : 0,
+        settingValues: regEl?.settingValues,
+      },
+      {
+        label: "合算確率",
+        val: bonusTotal > 0 ? totalGames / bonusTotal : 0,
+        settingValues: Object.keys(combinedValues).length
+          ? combinedValues
+          : undefined,
+      },
+    ];
+  }, [config, totalGames, bigCount, regCount, settings]);
+
+  const grapeReliability = useMemo(
+    () =>
+      calculateGrapeWeight(
+        totalGames,
+        config?.specs?.judgmentWeights?.grapeWeightMap,
+      ),
+    [totalGames, config],
+  );
 
   if (!machineInfo) {
     return (
@@ -214,48 +295,42 @@ export default function PreviousDataPage() {
           </div>
         </div>
 
-        {/* 合算確率 */}
+        {/* 詳細判別（前任者データのみで推定） */}
         <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 shadow-lg ring-1 ring-slate-200 dark:ring-slate-800 sm:p-6">
-          <h2 className="mb-3 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
-            前任者データの確率
+          <h2 className="mb-2 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
+            詳細判別
           </h2>
 
-          <div className="rounded-xl bg-amber-50 px-3 py-4 text-center dark:bg-amber-950/40">
-            <div className="text-[10px] font-medium tracking-widest text-amber-700 dark:text-amber-400">
-              合算確率
-            </div>
-            <div className="text-4xl font-black tabular-nums text-amber-700 dark:text-amber-300">
-              {combined != null ? `1/${combined.toFixed(1)}` : "—"}
-            </div>
-            <div className="mt-1 text-[11px] text-amber-700/80 dark:text-amber-400/80">
-              {canCalc
-                ? `${totalGames.toLocaleString()}G ÷ BIG${bigCount} + REG${regCount}`
-                : "総ゲーム数とBIG・REGを入力すると表示されます"}
-            </div>
+          <div className="mt-4">
+            <EstimationResultDisplay
+              results={
+                estimationResults ||
+                settings.map((setting) => ({ setting, probability: 0 }))
+              }
+              config={config ?? undefined}
+              grapeReliability={grapeReliability}
+            />
           </div>
 
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <div className="rounded-xl bg-slate-50 px-2 py-3 text-center dark:bg-slate-800/60">
-              <div className="text-[10px] font-medium tracking-widest text-slate-500 dark:text-slate-400">
-                BIG確率
-              </div>
-              <div className="text-xl font-black tabular-nums text-slate-800 dark:text-slate-100">
-                {bigProb != null ? `1/${bigProb.toFixed(1)}` : "—"}
-              </div>
-            </div>
-            <div className="rounded-xl bg-slate-50 px-2 py-3 text-center dark:bg-slate-800/60">
-              <div className="text-[10px] font-medium tracking-widest text-slate-500 dark:text-slate-400">
-                REG確率
-              </div>
-              <div className="text-xl font-black tabular-nums text-slate-800 dark:text-slate-100">
-                {regProb != null ? `1/${regProb.toFixed(1)}` : "—"}
-              </div>
-            </div>
+          {/* BIG確率・REG確率・合算確率（近似設定ラベル付き） */}
+          <div className="mb-4 mt-4 grid grid-cols-2 gap-2">
+            {metrics.map((m, idx) => (
+              <ProbabilityMetricCard
+                key={idx}
+                label={m.label}
+                val={m.val}
+                format={(v) => v.toFixed(1)}
+                settingValues={m.settingValues}
+                config={config ?? undefined}
+              />
+            ))}
           </div>
 
-          <p className="mt-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-            この数値は前任者の実績です。設定判別（設定別期待度・AIアドバイス）には使いません。
-          </p>
+          <SettingProbabilityChart
+            results={estimationResults}
+            settings={settings}
+            note="※ぶどう未計測のため、精度は下がります"
+          />
         </div>
       </div>
     </div>
