@@ -81,9 +81,7 @@ async function generateSitemap() {
       urls.push(
         urlElement(`${BASE_URL}/${id}/specs`, undefined, "weekly", "0.7"),
       );
-      urls.push(
-        urlElement(`${BASE_URL}/${id}/prev`, undefined, "weekly", "0.6"),
-      );
+      // /prev（前任者データページ）はnoindexのためsitemapに含めない（2026-09-12）
     });
   }
 

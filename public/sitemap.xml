@@ -284,6 +284,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://grape-reverse.com/columns/bancho-banzuke-spec-settei5-113percent</loc>
+    <lastmod>2026-09-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://grape-reverse.com/columns/bokuto-aori-unten-pachinko-arrest</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>monthly</changefreq>
@@ -296,8 +302,32 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://grape-reverse.com/columns/chusen-seiki-hakengensyo-gyokai-hatsugen</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://grape-reverse.com/columns/combattler-v-pachinko-gattai-scene</loc>
     <lastmod>2026-07-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/daiuchi-mouka-risou-tobu</loc>
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/dakan-ichiban-ii-dai-oohanabi-stopoto</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/dynam-hokuriku-gouu-gienkin-houdou</loc>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -314,6 +344,18 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://grape-reverse.com/columns/eigyo-tenpo-genshou-16kishu-dounyu</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/enja-touta-hasso-genten-kachu</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://grape-reverse.com/columns/evening-juggler-strategy</loc>
     <lastmod>2026-03-24</lastmod>
     <changefreq>monthly</changefreq>
@@ -326,8 +368,20 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://grape-reverse.com/columns/ganmen-hensachi-shitazara-manner</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://grape-reverse.com/columns/garizo-yuisho2-ai-zendaikei</loc>
     <lastmod>2026-08-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/gifu-89ten-saigaiji-kyoutei</loc>
+    <lastmod>2026-09-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -344,8 +398,32 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://grape-reverse.com/columns/gunma-hall-solar-carport-dekyu</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://grape-reverse.com/columns/hajimete-utta-dai-omoide-thread</loc>
     <lastmod>2026-08-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/hall-keiei-houjin-hangen-kasenka</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/hall-tencho-spray-shuugeki-kinsen-youkyu-nashi</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/hall-toilet-daikagi-okiwasure</loc>
+    <lastmod>2026-08-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -374,14 +452,50 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://grape-reverse.com/columns/helper-nakanuke-pachinko-houchi</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://grape-reverse.com/columns/himeji-leon-heiten-rush-data</loc>
     <lastmod>2026-08-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://grape-reverse.com/columns/hisashiburi-pachinko-terechau-suwatta-mama</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/ic-card-chakufuku-buchoukyu-koutei</loc>
+    <lastmod>2026-08-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/ic-card-seisan-wasure-7000yen</loc>
+    <lastmod>2026-08-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://grape-reverse.com/columns/imjuggler-setting4-behavior</loc>
     <lastmod>2026-02-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/island-ashikaga-souzamai-15man</loc>
+    <lastmod>2026-09-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/jinsei-keiken-ittemitai-yametoke</loc>
+    <lastmod>2026-08-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -404,6 +518,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://grape-reverse.com/columns/kanetsushiki-tabako-play-area-40percent</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://grape-reverse.com/columns/kinemai-hito-hodo-hamaru-data</loc>
     <lastmod>2026-08-10</lastmod>
     <changefreq>monthly</changefreq>
@@ -422,14 +542,44 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://grape-reverse.com/columns/kugi-tamaarari-rougai-hatsugen-suitai</loc>
+    <lastmod>2026-08-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/kyoichi-minami-crane-game-tenkan</loc>
+    <lastmod>2026-09-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/kyouyou-sake-pachinko-ron-yokeinaosewa</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://grape-reverse.com/columns/lego-pachinko-kanban-hachigatsu-yoka</loc>
     <lastmod>2026-08-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://grape-reverse.com/columns/makete-zekkyou-mukashi-futsuu-ima-mezurashii</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://grape-reverse.com/columns/megaface1180-zama-chusen-uchikiri</loc>
     <lastmod>2026-08-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/miyazaki-hall-bousai-helmet-shinpai</loc>
+    <lastmod>2026-09-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -500,6 +650,24 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://grape-reverse.com/columns/online-casino-reaslo-taiho-tanoshii</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/osaka-pachinko-hoka-satsujin-shikei-shikkou</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/p-anpanman-quality-densetsu</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://grape-reverse.com/columns/pachi-chokin-sando-nayami</loc>
     <lastmod>2026-08-15</lastmod>
     <changefreq>monthly</changefreq>
@@ -508,6 +676,24 @@
   <url>
     <loc>https://grape-reverse.com/columns/pachinko-4en-out-record-low-2026</loc>
     <lastmod>2026-08-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/pachinko-anime-iriguchi-9wari-setsu</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/pachinko-control-dekiru-makeru-kingaku</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/pachinko-costume-av-boshu-ronten</loc>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -536,6 +722,18 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://grape-reverse.com/columns/pachinko-tsujoji-flag-4category</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/pachinko-utteru-onna-kirawaresou</loc>
+    <lastmod>2026-09-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://grape-reverse.com/columns/pachinko-vs-slot-market-2026</loc>
     <lastmod>2026-04-17</lastmod>
     <changefreq>monthly</changefreq>
@@ -556,6 +754,18 @@
   <url>
     <loc>https://grape-reverse.com/columns/pachislot-day-yurai-2026</loc>
     <lastmod>2026-07-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/pachislot-kasegu-uchi-chochiku-toushi</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/pachislot-katashiki-shiken-tekigouritsu-10percent-ware</loc>
+    <lastmod>2026-09-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -596,8 +806,32 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://grape-reverse.com/columns/seikatsuhogo-pachinko-uchikiri-jieisaku</loc>
+    <lastmod>2026-08-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/seitoushi-seiya-yokoryo-47oku-kenri-business</loc>
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://grape-reverse.com/columns/sf6-slot-mottainai-review</loc>
     <lastmod>2026-08-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/shikei-shikkou-eikoku-taishikan-hantai</loc>
+    <lastmod>2026-08-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/shinsui-pachinko-horitsu-anzenhairyo</loc>
+    <lastmod>2026-08-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -608,8 +842,32 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://grape-reverse.com/columns/slot-shindai-pachinko-ware-8gatsu</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/smart-yugiki-share-43percent-riyu</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://grape-reverse.com/columns/sumapachi-display-data-hidden-issue</loc>
     <lastmod>2026-08-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/tama-ni-kaketenaide-jinsei-ni-kakero</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/toujou-rio-777league-pachislot-namae</loc>
+    <lastmod>2026-08-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -622,6 +880,18 @@
   <url>
     <loc>https://grape-reverse.com/columns/toyomaru-pachinko-farewell-message</loc>
     <lastmod>2026-07-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/tsujoji-flag-11gatsu-uchite-hannou</loc>
+    <lastmod>2026-09-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/uttedai-seikaku-wakaru-setsu</loc>
+    <lastmod>2026-09-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

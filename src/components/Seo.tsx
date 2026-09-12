@@ -12,6 +12,8 @@ interface SeoProps {
   pagePath: string;
   pageImg?: string;
   articleMeta?: ArticleMeta;
+  /** true の場合 <meta name="robots" content="noindex"> を出力する。コンテンツが薄いページ用 */
+  noindex?: boolean;
 }
 
 /**
@@ -24,6 +26,7 @@ const Seo = ({
   pagePath,
   pageImg,
   articleMeta,
+  noindex,
 }: SeoProps) => {
   useEffect(() => {
     // 1. タイトルの更新
@@ -50,6 +53,20 @@ const Seo = ({
 
     // 標準メタタグ
     updateMeta("description", pageDescription);
+
+    // robots (noindex): コンテンツが薄いページのみ付与
+    const robotsSelector = 'meta[name="robots"]';
+    let robotsEl = document.querySelector(robotsSelector);
+    if (noindex) {
+      if (!robotsEl) {
+        robotsEl = document.createElement("meta");
+        robotsEl.setAttribute("name", "robots");
+        document.head.appendChild(robotsEl);
+      }
+      robotsEl.setAttribute("content", "noindex");
+    } else if (robotsEl) {
+      robotsEl.remove();
+    }
 
     // Open Graph
     updateMeta("og:title", pageTitle, "property");
@@ -97,7 +114,7 @@ const Seo = ({
     } else if (jsonLdScript) {
       jsonLdScript.remove();
     }
-  }, [pageTitle, pageDescription, pagePath, pageImg, articleMeta]);
+  }, [pageTitle, pageDescription, pagePath, pageImg, articleMeta, noindex]);
 
   return null;
 };

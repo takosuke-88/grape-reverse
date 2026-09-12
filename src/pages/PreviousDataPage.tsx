@@ -167,6 +167,7 @@ export default function PreviousDataPage() {
         pageTitle={`${machineName} 前任者データ｜GrapeReverse`}
         pageDescription={`${machineName}の前任者が回した総ゲーム数・BIG・REGを入力して、BIG確率・REG確率・合算確率を確認できます。台に途中から座ったときの判断材料に。`}
         pagePath={`/${machineId}/prev`}
+        noindex
       />
 
       {/* タイトルバー（スクロールアウト） */}
