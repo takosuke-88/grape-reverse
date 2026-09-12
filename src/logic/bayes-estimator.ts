@@ -298,6 +298,29 @@ export function calculateMultinomialEstimation(
     : undefined;
   const c = !hasBell && !ignoreGrape ? (Number(inputs["cherry-count"]) || 0) : 0;
 
+  // --- REG の契機内訳（単独REG / チェリーREG）を判別に使う（2026-09-13追加） ---
+  // ジャグラーで最も設定差が大きいのは単独REG（例: マイジャグラーV 設定1→6 で確率2.00倍。
+  // REG合計は1.68倍、BIG合計は1.21倍）。内訳を数えている人はその情報を活かす。
+  //
+  // 【重要】REG合計に内訳を「足す」と同じREG 1回を二重計上して尤度が壊れる。
+  // そのため合計を内訳へ「分解」する。さらに内訳の生確率をそのまま使うのではなく、
+  // **公表REG合計を基準にして単独:チェリーの比率だけを内訳データから使う**。
+  // 理由: ミスタージャグラーは 1/単独REG + 1/チェリーREG が公表REGと最大4.53%ずれており、
+  // 生値だとREG確率自体が公表スペックから外れてしまう。比率のみ使えば単独REGの判別力は
+  // そのまま活き、ハズレ確率（pOther）も一切変化しない＝純粋に情報が増えるだけになる。
+  const regSoloEl = allElements.find((e) => e.id === "reg-solo-count");
+  const regCherryEl = allElements.find((e) => e.id === "reg-cherry-count");
+  const rSolo = Number(inputs["reg-solo-count"]) || 0;
+  const rCherry = Number(inputs["reg-cherry-count"]) || 0;
+  const rUnknown = Number(inputs["reg-unknown-count"]) || 0;
+  // 内訳の合計がREG合計と一致する時だけ使う（REG回数を直接入力した場合は不一致になる）。
+  // 全て契機不明なら分解しても結果は REG合計のみの場合と数学的に同一。
+  const useRegSplit =
+    !!regSoloEl &&
+    !!regCherryEl &&
+    rSolo + rCherry > 0 &&
+    rSolo + rCherry + rUnknown === r;
+
   // 各設定の多項分布対数尤度を計算
   const logLikelihoods = settings.map((setting) => {
     const denomBig = bigEl.settingValues[setting];
@@ -311,8 +334,15 @@ export function calculateMultinomialEstimation(
 
     const pBig   = 1 / denomBig;
     const pReg   = 1 / denomReg;
-    // ignoreGrape 時はぶどうを観測対象から外すため、ハズレ確率から差し引かない
-    const pGrape = ignoreGrape || !denomGrape ? 0 : 1 / denomGrape;
+    // ぶどう(ベル)を観測対象から外す条件（外すとハズレ確率から差し引かれない）:
+    //   1. ignoreGrape 指定時（前任者ページ。ぶどうを数えようがない）
+    //   2. k === 0、つまり未計測時（2026-09-13 追加）
+    // 2 が無いと「ぶどうが1回も出ていない n ゲーム」という偽の観測になり、
+    // ぶどう確率が最も低い設定1へ強烈に張り付く（ボーナスがどれだけ良くても覆らない）。
+    // 実測: ファンキージャグラー2 2500G/BIG14/REG15（合算1/86.2＝設定6の1/119.6より遥かに上）
+    // でも設定1=72.1%。除外すれば設定6=62.5%。
+    // チェリーは元から `c > 0 &&` で同じガードを持っており、その形に揃えたもの。
+    const pGrape = ignoreGrape || !denomGrape || k === 0 ? 0 : 1 / denomGrape;
 
     // 4軸: チェリーの確率（ジャグラー + cherry-count > 0 + settingValues 有効時のみ）
     const denomCherry = cherryEl?.settingValues[setting];
@@ -328,8 +358,22 @@ export function calculateMultinomialEstimation(
       if (pBig <= 0) return { setting, logLikelihood: -Infinity };
       logL += b * Math.log(pBig);
     }
-    // r*log(P_REG)
-    if (r > 0) {
+    // REG項: 内訳（単独/チェリー）が揃っていれば分解して尤度に加える。
+    // 揃っていなければ従来どおり REG合計だけを使う。
+    const denomRegSolo = regSoloEl?.settingValues[setting];
+    const denomRegCherry = regCherryEl?.settingValues[setting];
+    if (useRegSplit && denomRegSolo && denomRegCherry) {
+      if (pReg <= 0) return { setting, logLikelihood: -Infinity };
+      // 公表REG合計を、内訳データ由来の比率で単独/チェリーへ配分する
+      const soloShare =
+        1 / denomRegSolo / (1 / denomRegSolo + 1 / denomRegCherry);
+      const pRegSolo = pReg * soloShare;
+      const pRegCherry = pReg * (1 - soloShare);
+      if (rSolo > 0) logL += rSolo * Math.log(pRegSolo);
+      if (rCherry > 0) logL += rCherry * Math.log(pRegCherry);
+      // 契機不明REGは「単独かチェリーのどちらか」＝ REG合計の確率で評価する
+      if (rUnknown > 0) logL += rUnknown * Math.log(pReg);
+    } else if (r > 0) {
       if (pReg <= 0) return { setting, logLikelihood: -Infinity };
       logL += r * Math.log(pReg);
     }
