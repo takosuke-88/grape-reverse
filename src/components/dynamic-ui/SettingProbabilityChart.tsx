@@ -34,7 +34,9 @@ export default function SettingProbabilityChart({
   return (
     <>
       {/* グラフ描画エリア（縦棒グラフ） - h-48に拡大して視認性向上 */}
-      <div className="flex items-end justify-around gap-2 h-48 border-b border-slate-200 pb-1 dark:border-slate-700 mt-6">
+      {/* mt-8: 期待度が95%超のとき「最有力」バッジがグラフ上端より約30px上へ出るため、
+          上の要素（AI判定アドバイス）と接触しないよう余白を確保している（2026-09-13） */}
+      <div className="flex items-end justify-around gap-2 h-48 border-b border-slate-200 pb-1 dark:border-slate-700 mt-8">
         {data.map((result, index, arr) => {
           const colorObj = COLORS[index] || COLORS[0];
           const maxResult = arr.reduce((max, current) =>
@@ -56,7 +58,7 @@ export default function SettingProbabilityChart({
                     style={{ bottom: `calc(${percentage}% + 18px)` }}
                   >
                     <span
-                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap shadow-sm ${
+                      className={`text-xs font-bold px-2 py-0.5 rounded whitespace-nowrap shadow-sm ${
                         result.probability === 100 && result.setting === 6
                           ? "bg-gradient-to-r from-red-500 via-yellow-500 to-blue-500 text-white animate-pulse"
                           : "bg-blue-100 text-blue-600"

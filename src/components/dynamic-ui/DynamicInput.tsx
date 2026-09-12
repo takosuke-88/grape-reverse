@@ -28,6 +28,14 @@ interface DynamicInputProps {
   compactLayout?: boolean;
   /** 確率テキストを強制上書き（例: total-games の合算確率表示） */
   overrideProbText?: string;
+  /**
+   * 確率テキストの「上」に重ねる小さな一行（例: total-games の「設定5かも？」）。
+   * probText（absolute right-2 bottom-1.5）の座標・スタイルには一切触れず、
+   * 独立した absolute 要素として置く。バーの行高76pxは変わらない。
+   * 位置が right-2 top-1.5（上端）なのは、バー上下中央にある ＋ グリフ
+   * （text-2xl）と重なるため。bottom 側へ寄せると ＋ の上に文字が乗る。
+   */
+  aboveProbText?: string;
 }
 
 interface ElementTheme {
@@ -152,6 +160,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   onDirectInput,
   compactLayout = false,
   overrideProbText,
+  aboveProbText,
 }) => {
   // 「＋1」「−1」の飛び出し演出。dir: 1 = 上へ（加算）/ -1 = 下へ（減算）
   const [floats, setFloats] = useState<{ id: number; dir: 1 | -1 }[]>([]);
@@ -333,6 +342,19 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                   ＋
                 </span>
               </div>
+              {aboveProbText && (
+                <span
+                  className="absolute right-2 top-1 text-sm font-bold pointer-events-none select-none whitespace-nowrap"
+                  style={{
+                    color: theme.textColor
+                      ? `${theme.textColor}cc`
+                      : "rgba(255,255,255,0.78)",
+                    fontFamily: "'Urbanist', -apple-system, sans-serif",
+                  }}
+                >
+                  {aboveProbText}
+                </span>
+              )}
               {probText && (
                 <span
                   className="absolute right-2 bottom-1.5 text-lg italic font-black tabular-nums pointer-events-none select-none"

@@ -7,21 +7,6 @@ export const newKingVConfig: MachineConfig = {
   themeColor: "bg-purple-600",
   sections: [
     {
-      id: "normal-role-section",
-      title: "通常時小役",
-      elements: [
-        {
-          id: "bell-count",
-          label: "ベル回数",
-          type: "counter",
-          context: { description: "ベル（10枚役）の成立回数" },
-          settingValues: { 1: 7.628, 2: 7.502, 3: 7.474, 4: 7.379, 6: 7.266 },
-          isDiscriminationFactor: true,
-          discriminationWeight: 1.2,
-        },
-      ],
-    },
-    {
       id: "basic-data",
       title: "基本データ",
       elements: [
@@ -60,6 +45,21 @@ export const newKingVConfig: MachineConfig = {
           settingValues: { 1: 496, 2: 464, 3: 434, 4: 404, 6: 372 },
           isDiscriminationFactor: true,
           discriminationWeight: 2.0,
+        },
+      ],
+    },
+    {
+      id: "normal-role-section",
+      title: "通常時小役",
+      elements: [
+        {
+          id: "bell-count",
+          label: "ベル回数",
+          type: "counter",
+          context: { description: "ベル（10枚役）の成立回数" },
+          settingValues: { 1: 7.628, 2: 7.502, 3: 7.474, 4: 7.379, 6: 7.266 },
+          isDiscriminationFactor: true,
+          discriminationWeight: 1.2,
         },
       ],
     },

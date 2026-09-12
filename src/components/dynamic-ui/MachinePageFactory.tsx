@@ -20,7 +20,11 @@ import CurrentPreviousToggle from "../machine/CurrentPreviousToggle";
 import SettingProbabilityChart from "./SettingProbabilityChart";
 import ProbabilityMetricCard from "./ProbabilityMetricCard";
 import DynamicInput from "./DynamicInput";
-import { isGridOnlyCompactCounterId } from "./counter-layout";
+import {
+  isGridOnlyCompactCounterId,
+  COUNTER_HINT_TEXT,
+  COUNTER_HINT_CLASS,
+} from "./counter-layout";
 
 // ファーストビューの表示件数を増やすため、見出し（カード名）を省略し
 // 上下の余白を詰めるカード（2026-09-12）。対象は「通常時小役」「基本データ」
@@ -171,6 +175,17 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   const themeColor = config.themeColor || "bg-blue-600";
   const totalGames = Number(currentInputs["total-games"]) || 0;
 
+  // 総ゲーム数バーの右下に出す BIG+REG 合算確率（2026-09-13）。
+  // 逆算ページ（GrapeReversePage）の総ゲーム数バーと同じ表記・同じ計算に揃えている。
+  // total-games は showProb が false のため、専用の overrideProbText で渡す。
+  const bonusTotalCount =
+    (Number(currentInputs["big-count"]) || 0) +
+    (Number(currentInputs["reg-count"]) || 0);
+  const bonusProbText =
+    bonusTotalCount > 0 && totalGames > 0
+      ? `1/${(totalGames / bonusTotalCount).toFixed(1)}`
+      : undefined;
+
   /* 自動計算: 入力値が変更されたら自動的に計算を実行 */
   // ボーナス内訳の自動合算 (Total = Solo + Cherry + Unknown)
   useEffect(() => {
@@ -289,10 +304,13 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     isDiscriminationFactor: false,
   };
 
-  // 通常小役セクションをボーナスセクションより前に移動した表示順を生成
-  // さらに、normal-role-section に cherry-count がなければ grape-count の前に注入する
+  // 表示順は機種設定（config.sections）の並びをそのまま使う（2026-09-13）。
+  // 以前はここで「通常時小役をボーナス回数より前へ移動する」ハードコードを
+  // 持っていたが、設定ファイル側で並べ替えても描画時に戻されてしまうため撤去した。
+  // カードの並びを変える場合は src/data/machines/*.ts の sections を並べ替えること。
+  // ここで行うのは、normal-role-section に cherry-count が無い機種への注入のみ。
   const orderedSections = useMemo(() => {
-    const sections = config.sections.map((section) => {
+    return config.sections.map((section) => {
       if (section.id !== "normal-role-section") return section;
       if (section.elements.some((e) => e.id === "cherry-count")) return section;
 
@@ -301,15 +319,6 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
       newElements.splice(grapeIdx >= 0 ? grapeIdx : 0, 0, CHERRY_ELEMENT);
       return { ...section, layout: "grid" as const, elements: newElements };
     });
-
-    const normalIdx = sections.findIndex((s) => s.id === "normal-role-section");
-    const bonusIdx = sections.findIndex((s) => s.id === "bonus-section");
-    if (normalIdx !== -1 && bonusIdx !== -1 && normalIdx > bonusIdx) {
-      const [normalSection] = sections.splice(normalIdx, 1);
-      const newBonusIdx = sections.findIndex((s) => s.id === "bonus-section");
-      sections.splice(newBonusIdx, 0, normalSection);
-    }
-    return sections;
   }, [config.sections]);
 
   // ブドウ信頼度の計算
@@ -327,6 +336,17 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
       current.probability > max.probability ? current : max,
     );
   }, [estimationResults]);
+
+  // 総ゲーム数バーで合算確率の上に出す「設定Nかも？」（2026-09-13）。
+  // 詳細判別カードの最有力設定と同じ値を使う。設定ラベルの特例
+  // （ニューキングハナハナV-30 の「設定V」等）にも追従させる。
+  const mostLikelySettingText = useMemo(() => {
+    if (!mostLikelySetting) return undefined;
+    const label =
+      config.specs?.settingLabels?.[mostLikelySetting.setting] ??
+      mostLikelySetting.setting;
+    return `設定${label}かも？`;
+  }, [mostLikelySetting, config.specs?.settingLabels]);
 
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-clip bg-slate-50 dark:bg-slate-950">
@@ -527,6 +547,16 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                           onChange={(value: number | string | boolean) => handleValueChange(element.id, value)}
                           totalGames={totalGames}
                           vibrationEnabled={vibrationEnabled}
+                          overrideProbText={
+                            element.id === "total-games" && bonusProbText
+                              ? `合算 ${bonusProbText}`
+                              : undefined
+                          }
+                          aboveProbText={
+                            element.id === "total-games" && bonusProbText
+                              ? mostLikelySettingText
+                              : undefined
+                          }
                           onIncrement={(() => {
                             const m = element.id.match(/^(big|reg)-(solo|cherry|unknown)-count$/);
                             if (!m) return undefined;
@@ -553,13 +583,12 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 </div>
                 )}
 
-                {/* 操作ヒント文は一番上の子役カード（通常時小役）にのみ表示。
-                    以降のカードは操作方法が同じなので繰り返さず、
-                    余白（mt）ごと省略してファーストビューの表示件数を稼ぐ（2026-09-12）。 */}
-                {section.id === "normal-role-section" && (
-                  <p className="mt-3 text-center text-xs text-slate-400 dark:text-slate-500">
-                    － タップで減算　数字タップで直接入力　＋ タップで加算
-                  </p>
+                {/* 操作ヒント文は一番上のカード（基本データ）にのみ表示。
+                    以降のカードは操作方法が同じなので繰り返さず、余白（mt）ごと
+                    省略してファーストビューの表示件数を稼ぐ。文言は逆算ページと
+                    共通の定数（COUNTER_HINT_TEXT）から引く（2026-09-13）。 */}
+                {section.id === "basic-data" && (
+                  <p className={COUNTER_HINT_CLASS}>{COUNTER_HINT_TEXT}</p>
                 )}
 
               </div>

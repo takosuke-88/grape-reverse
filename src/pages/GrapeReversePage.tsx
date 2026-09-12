@@ -9,6 +9,10 @@ import type { DiscriminationElement, EstimationResult, MachineConfig, UserInputs
 import { calculateMultinomialEstimation } from "../logic/bayes-estimator";
 import GrapeReverseEstimationPanel from "../components/grape/GrapeReverseEstimationPanel";
 import DynamicInput from "../components/dynamic-ui/DynamicInput";
+import {
+  COUNTER_HINT_TEXT,
+  COUNTER_HINT_CLASS,
+} from "../components/dynamic-ui/counter-layout";
 import DiffSignToggle, { DIFF_SIGN_KEY } from "../components/grape/DiffSignToggle";
 import type { DiffSign } from "../components/grape/DiffSignToggle";
 
@@ -337,6 +341,9 @@ export default function GrapeReversePage() {
               vibrationEnabled={vibrationEnabled}
               overrideProbText={bonusProbText ? `合算 ${bonusProbText}` : undefined}
             />
+            {/* 操作ヒント文は一番上のこのカードにのみ表示（小役カウンターページと同じ方針）。
+                文言・クラスは COUNTER_HINT_TEXT / COUNTER_HINT_CLASS で共通化している。 */}
+            <p className={COUNTER_HINT_CLASS}>{COUNTER_HINT_TEXT}</p>
           </div>
 
           {/* 差枚数（台メーター）

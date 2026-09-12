@@ -7,28 +7,6 @@ export const kingHanahanaConfig: MachineConfig = {
   themeColor: "bg-red-600",
   sections: [
     {
-      id: "normal-role-section",
-      title: "通常時小役",
-      elements: [
-        {
-          id: "bell-count",
-          label: "ベル回数",
-          type: "counter",
-          context: { description: "ベル（10枚役）の成立回数" },
-          settingValues: {
-            1: 7.149,
-            2: 7.140,
-            3: 7.139,
-            4: 7.002,
-            5: 6.946,
-            6: 6.910,
-          },
-          isDiscriminationFactor: true,
-          discriminationWeight: 1.2,
-        },
-      ],
-    },
-    {
       id: "basic-data",
       title: "基本データ",
       elements: [
@@ -67,6 +45,28 @@ export const kingHanahanaConfig: MachineConfig = {
           settingValues: { 1: 489, 2: 442, 3: 409, 4: 378, 5: 350, 6: 332 },
           isDiscriminationFactor: true,
           discriminationWeight: 2.0,
+        },
+      ],
+    },
+    {
+      id: "normal-role-section",
+      title: "通常時小役",
+      elements: [
+        {
+          id: "bell-count",
+          label: "ベル回数",
+          type: "counter",
+          context: { description: "ベル（10枚役）の成立回数" },
+          settingValues: {
+            1: 7.149,
+            2: 7.140,
+            3: 7.139,
+            4: 7.002,
+            5: 6.946,
+            6: 6.910,
+          },
+          isDiscriminationFactor: true,
+          discriminationWeight: 1.2,
         },
       ],
     },

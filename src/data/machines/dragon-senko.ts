@@ -7,28 +7,6 @@ export const dragonSenkoConfig: MachineConfig = {
   themeColor: "bg-red-700",
   sections: [
     {
-      id: "normal-role-section",
-      title: "通常時小役",
-      elements: [
-        {
-          id: "bell-count",
-          label: "ベル回数",
-          type: "counter",
-          context: { description: "ベル（10枚役）の成立回数" },
-          settingValues: {
-            1: 7.131,
-            2: 7.093,
-            3: 7.090,
-            4: 7.016,
-            5: 6.973,
-            6: 6.970,
-          },
-          isDiscriminationFactor: true,
-          discriminationWeight: 1.2,
-        },
-      ],
-    },
-    {
       id: "basic-data",
       title: "基本データ",
       elements: [
@@ -67,6 +45,28 @@ export const dragonSenkoConfig: MachineConfig = {
           settingValues: { 1: 642, 2: 595, 3: 546, 4: 496, 5: 442, 6: 399 },
           isDiscriminationFactor: true,
           discriminationWeight: 2.0,
+        },
+      ],
+    },
+    {
+      id: "normal-role-section",
+      title: "通常時小役",
+      elements: [
+        {
+          id: "bell-count",
+          label: "ベル回数",
+          type: "counter",
+          context: { description: "ベル（10枚役）の成立回数" },
+          settingValues: {
+            1: 7.131,
+            2: 7.093,
+            3: 7.090,
+            4: 7.016,
+            5: 6.973,
+            6: 6.970,
+          },
+          isDiscriminationFactor: true,
+          discriminationWeight: 1.2,
         },
       ],
     },

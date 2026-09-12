@@ -42,7 +42,7 @@ export default function ProbabilityMetricCard({
 
   return (
     <div className="flex flex-col items-center justify-center rounded-lg border border-slate-100 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-800">
-      <div className="text-xs text-slate-500 dark:text-slate-400">
+      <div className="text-sm text-slate-500 dark:text-slate-400">
         {formatBonusText(label)}
       </div>
       <div className="text-xl font-bold text-slate-800 dark:text-white">
