@@ -22,6 +22,28 @@ import ProbabilityMetricCard from "./ProbabilityMetricCard";
 import DynamicInput from "./DynamicInput";
 import { isGridOnlyCompactCounterId } from "./counter-layout";
 
+// ファーストビューの表示件数を増やすため、見出し（カード名）を省略し
+// 上下の余白を詰めるカード（2026-09-12）。対象は「通常時小役」「基本データ」
+// 「ボーナス回数」の3枚（他カード・ボーナス詳細内訳・その他等は対象外）。
+// 「基本データ」カードは見出しを消す代わりに pt-10/pt-12 を入れている。これは
+// 見出し（h2 16px + mb-2 8px = 24px）＋元の p-4/p-6 と同じ位置にバーを置くための
+// 値で、トグル（top-3 から 52px ＝ 下端64px）とバー上端（66px）が隣接する元の
+// 関係をそのまま維持する。逆算ページの「台メーター」カード（GrapeReversePage.tsx）
+// も同じ pt-10/pt-12 で揃えている。CurrentPreviousToggle/DiffSignToggleは
+// 「大きさ」だけでなく「高さ（縦位置）」も統一する必要があるため（decisions-log
+// 2026-09-11/12）、この2枚は常にセットで変更すること。
+const COMPACT_CARD_IDS = new Set([
+  "normal-role-section",
+  "basic-data",
+  "bonus-section",
+]);
+
+// 見出しをタップで折り畳めるカード（2026-09-13）。▼の向き・開閉の見せ方・
+// 開閉状態をlocalStorageへ機種ごとに保存する点は、機種スペックページ
+// （MachineSpecPage.tsx の AccordionHeader）と同じ方式に揃えている。
+// 未保存時は開いた状態で開始する（`?? true`）。
+const COLLAPSIBLE_CARD_IDS = new Set(["bonus-breakdown-section"]);
+
 interface MachinePageFactoryProps {
   config: MachineConfig;
 }
@@ -34,6 +56,19 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     "grape-reverse-vibration",
     true
   );
+
+  // 折り畳み可能カードの開閉状態（機種ごとに保存。未保存なら開いた状態で開始）。
+  // 機種スペックページの `spec_page_block_states_${machineId}` と同じ役割・同じ命名。
+  const [cardOpenState, setCardOpenState] = useLocalStorage<
+    Record<string, boolean>
+  >(`counter_page_block_states_${config.id}`, {});
+
+  const toggleCard = (sectionId: string) => {
+    setCardOpenState((prev) => ({
+      ...prev,
+      [sectionId]: !(prev[sectionId] ?? true),
+    }));
+  };
 
   // ボーナス入力履歴（LIFO スタック）
   const [bigHistory, setBigHistory] = useLocalStorage<string[]>(
@@ -396,28 +431,71 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
           if (visibleElements.length === 0) return null;
 
+          const isCompactCard = COMPACT_CARD_IDS.has(section.id);
+          const isCollapsible = COLLAPSIBLE_CARD_IDS.has(section.id);
+          const isOpen = cardOpenState[section.id] ?? true;
+
           return (
             <React.Fragment key={section.id}>
-              <div className="relative rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
-                <h2 className="mb-2 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
-                  {section.title}
-                </h2>
+              <div
+                className={`relative rounded-2xl bg-white shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 ${
+                  isCollapsible
+                    ? "overflow-hidden"
+                    : isCompactCard
+                      ? section.id === "basic-data"
+                        ? "px-4 pb-3 pt-10 sm:px-6 sm:pb-4 sm:pt-12"
+                        : "px-4 py-3 sm:px-6 sm:py-4"
+                      : "p-4 sm:p-6"
+                }`}
+              >
+                {isCollapsible ? (
+                  <button
+                    type="button"
+                    onClick={() => toggleCard(section.id)}
+                    aria-expanded={isOpen}
+                    className="flex w-full touch-manipulation items-center justify-between bg-slate-100 px-4 py-3 text-left transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 sm:px-6 sm:py-4"
+                  >
+                    <span className="text-sm font-extrabold tracking-wide text-slate-700 dark:text-slate-200">
+                      {section.title}
+                    </span>
+                    <span
+                      className={`text-base font-bold text-slate-600 transition-transform duration-200 dark:text-slate-300 ${
+                        isOpen ? "rotate-180" : ""
+                      }`}
+                    >
+                      ▼
+                    </span>
+                  </button>
+                ) : (
+                  !isCompactCard && (
+                    <h2 className="mb-2 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
+                      {section.title}
+                    </h2>
+                  )
+                )}
 
-                {/* 基本データのカードだけ、見出し右の余白へ 現在／前任者 トグルを重ねる。
-                    absolute で通常フローから外すため、カードの高さは増えない
-                    （行として置くと 52px 分だけ縦に伸びる）。 */}
+                {/* 基本データのカードだけ、カード右上へ 現在／前任者 トグルを重ねる。
+                    absolute で通常フローから外すため、カードの高さは増えない。
+                    見出しを省略した分、pt-10/pt-12 でバー位置を元のまま保っている
+                    （トグル下端64px・バー上端66px）。逆算ページの「台メーター」カード
+                    （GrapeReversePage.tsx）も同じ pt-10/pt-12 で統一しているため、
+                    トグルの大きさ・高さとも両カードで一致する
+                    （decisions-log 2026-09-11/12。この2枚は常にセットで変更）。 */}
                 {section.id === "basic-data" && (
                   <div className="absolute right-4 top-3 sm:right-6 sm:top-4">
                     <CurrentPreviousToggle machineId={config.id} active="current" />
                   </div>
                 )}
 
+                {(!isCollapsible || isOpen) && (
                 <div
-                  className={
+                  className={`${
+                    isCollapsible ? "px-4 pb-4 sm:px-6 sm:pb-6 " : ""
+                  }${
                     section.layout === "grid" && visibleElements.length > 1
                       ? "grid min-w-0 grid-cols-2 gap-4"
                       : "space-y-4"
-                  }
+                  }`}
                 >
                   {visibleElements.map((element) => {
                     const sectionUsesGrid =
@@ -473,10 +551,16 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                     );
                   })}
                 </div>
+                )}
 
-                <p className="mt-3 text-center text-xs text-slate-400 dark:text-slate-500">
-                  － タップで減算　数字タップで直接入力　＋ タップで加算
-                </p>
+                {/* 操作ヒント文は一番上の子役カード（通常時小役）にのみ表示。
+                    以降のカードは操作方法が同じなので繰り返さず、
+                    余白（mt）ごと省略してファーストビューの表示件数を稼ぐ（2026-09-12）。 */}
+                {section.id === "normal-role-section" && (
+                  <p className="mt-3 text-center text-xs text-slate-400 dark:text-slate-500">
+                    － タップで減算　数字タップで直接入力　＋ タップで加算
+                  </p>
+                )}
 
               </div>
 

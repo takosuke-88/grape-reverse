@@ -9,6 +9,45 @@ export const funkyJuggler2Config: MachineConfig = {
   themeColor: "bg-purple-600",
   sections: [
     {
+      id: "normal-role-section",
+      title: "通常時小役",
+      layout: "grid",
+      elements: [
+        {
+          id: "cherry-count",
+          label: "角チェリー",
+          type: "counter",
+          context: {},
+          settingValues: {
+            1: 35.62,
+            2: 35.62,
+            3: 35.62,
+            4: 35.62,
+            5: 35.62,
+            6: 35.62,
+          },
+          isDiscriminationFactor: false,
+          discriminationWeight: 0,
+        },
+        {
+          id: "grape-count",
+          label: "ブドウ",
+          type: "counter",
+          context: {},
+          settingValues: {
+            1: 5.94,
+            2: 5.92,
+            3: 5.88,
+            4: 5.83,
+            5: 5.76,
+            6: 5.67,
+          },
+          isDiscriminationFactor: true,
+          discriminationWeight: 1.5,
+        },
+      ],
+    },
+    {
       id: "basic-data",
       title: "基本データ",
       elements: [
@@ -26,6 +65,7 @@ export const funkyJuggler2Config: MachineConfig = {
     {
       id: "bonus-section",
       title: "ボーナス回数",
+      layout: "grid",
       elements: [
         {
           id: "big-count",
@@ -168,45 +208,6 @@ export const funkyJuggler2Config: MachineConfig = {
           settingValues: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
           isDiscriminationFactor: false,
           discriminationWeight: 0,
-        },
-      ],
-    },
-    {
-      id: "normal-role-section",
-      title: "通常時小役",
-      layout: "grid",
-      elements: [
-        {
-          id: "cherry-count",
-          label: "角チェリー",
-          type: "counter",
-          context: {},
-          settingValues: {
-            1: 35.62,
-            2: 35.62,
-            3: 35.62,
-            4: 35.62,
-            5: 35.62,
-            6: 35.62,
-          },
-          isDiscriminationFactor: false,
-          discriminationWeight: 0,
-        },
-        {
-          id: "grape-count",
-          label: "ブドウ",
-          type: "counter",
-          context: {},
-          settingValues: {
-            1: 5.94,
-            2: 5.92,
-            3: 5.88,
-            4: 5.83,
-            5: 5.76,
-            6: 5.67,
-          },
-          isDiscriminationFactor: true,
-          discriminationWeight: 1.5,
         },
       ],
     },

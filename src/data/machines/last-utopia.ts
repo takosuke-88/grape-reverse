@@ -24,6 +24,7 @@ export const lastUtopiaConfig: MachineConfig = {
     {
       id: "bonus-section",
       title: "ボーナス確率",
+      layout: "grid",
       elements: [
         {
           id: "big-count",

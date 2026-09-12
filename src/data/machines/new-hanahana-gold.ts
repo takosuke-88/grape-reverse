@@ -7,6 +7,28 @@ export const newHanahanaGoldConfig: MachineConfig = {
   themeColor: "bg-yellow-500", // "Gold" theme
   sections: [
     {
+      id: "normal-role-section",
+      title: "通常時小役",
+      elements: [
+        {
+          id: "bell-count",
+          label: "ベル回数",
+          type: "counter",
+          context: { description: "ベル（10枚役）の成立回数" },
+          settingValues: {
+            1: 7.3,
+            2: 7.3,
+            3: 7.2,
+            4: 7.1,
+            5: 7.0,
+            6: 6.9,
+          },
+          isDiscriminationFactor: true,
+          discriminationWeight: 1.2,
+        },
+      ],
+    },
+    {
       id: "basic-data",
       title: "基本データ",
       elements: [
@@ -24,6 +46,7 @@ export const newHanahanaGoldConfig: MachineConfig = {
     {
       id: "bonus-section",
       title: "ボーナス確率",
+      layout: "grid",
       elements: [
         {
           id: "big-count",
@@ -60,28 +83,6 @@ export const newHanahanaGoldConfig: MachineConfig = {
           settingValues: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
           isDiscriminationFactor: false,
           discriminationWeight: 0,
-        },
-      ],
-    },
-    {
-      id: "normal-role-section",
-      title: "通常時小役",
-      elements: [
-        {
-          id: "bell-count",
-          label: "ベル回数",
-          type: "counter",
-          context: { description: "ベル（10枚役）の成立回数" },
-          settingValues: {
-            1: 7.3,
-            2: 7.3,
-            3: 7.2,
-            4: 7.1,
-            5: 7.0,
-            6: 6.9,
-          },
-          isDiscriminationFactor: true,
-          discriminationWeight: 1.2,
         },
       ],
     },

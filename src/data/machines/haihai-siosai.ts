@@ -7,6 +7,27 @@ export const haihaiSiosaiConfig: MachineConfig = {
   themeColor: "bg-teal-700",
   sections: [
     {
+      id: "normal-role-section",
+      title: "通常時小役",
+      elements: [
+        {
+          id: "bell-count",
+          label: "ベル回数",
+          type: "counter",
+          context: { description: "ベル（10枚役）の成立回数" },
+          settingValues: {
+            1: 7.350,
+            2: 7.150,
+            3: 7.050,
+            5: 6.950,
+            6: 6.950,
+          },
+          isDiscriminationFactor: true,
+          discriminationWeight: 1.2,
+        },
+      ],
+    },
+    {
       id: "basic-data",
       title: "基本データ",
       elements: [
@@ -24,6 +45,7 @@ export const haihaiSiosaiConfig: MachineConfig = {
     {
       id: "bonus-section",
       title: "ボーナス確率",
+      layout: "grid",
       elements: [
         {
           id: "big-count",
@@ -60,27 +82,6 @@ export const haihaiSiosaiConfig: MachineConfig = {
           settingValues: { 1: 0, 2: 0, 3: 0, 5: 0, 6: 0 },
           isDiscriminationFactor: false,
           discriminationWeight: 0,
-        },
-      ],
-    },
-    {
-      id: "normal-role-section",
-      title: "通常時小役",
-      elements: [
-        {
-          id: "bell-count",
-          label: "ベル回数",
-          type: "counter",
-          context: { description: "ベル（10枚役）の成立回数" },
-          settingValues: {
-            1: 7.350,
-            2: 7.150,
-            3: 7.050,
-            5: 6.950,
-            6: 6.950,
-          },
-          isDiscriminationFactor: true,
-          discriminationWeight: 1.2,
         },
       ],
     },

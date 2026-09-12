@@ -324,11 +324,11 @@ export default function GrapeReversePage() {
         {/* カードエリア */}
         <div className="mx-auto w-full max-w-md space-y-4 p-4">
 
-          {/* 基本データ：総ゲーム数 */}
-          <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 shadow-lg ring-1 ring-slate-200 dark:ring-slate-800 sm:p-6">
-            <h2 className="mb-2 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
-              基本データ
-            </h2>
+          {/* 基本データ：総ゲーム数
+              見出しは省略し上下の余白を詰めている（2026-09-13）。DynamicInputが
+              element.label（総ゲーム数）をバー上に出すため見出しは重複だった。
+              トグルが乗らないカードなので上余白のクリアランスは不要。 */}
+          <div className="rounded-2xl bg-white dark:bg-slate-900 px-4 py-3 shadow-lg ring-1 ring-slate-200 dark:ring-slate-800 sm:px-6 sm:py-4">
             <DynamicInput
               element={ELEM_TOTAL_GAMES}
               value={totalGames}
@@ -339,13 +339,16 @@ export default function GrapeReversePage() {
             />
           </div>
 
-          {/* 差枚数（台メーター） */}
-          <div className="relative rounded-2xl bg-white dark:bg-slate-900 p-4 shadow-lg ring-1 ring-slate-200 dark:ring-slate-800 sm:p-6">
-            <h2 className="mb-2 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
-              台メーター
-            </h2>
-            {/* 小役カウンターページの 現在／前任者 トグルと同じ寸法・同じ縦位置。
-                absolute で重ねるため、カードの高さは増えない。 */}
+          {/* 差枚数（台メーター）
+              見出し「台メーター」は省略し上下の余白を詰めている（2026-09-12）。
+              DynamicInput自体が element.label（差枚数（プラス/マイナス）表記）を
+              バー上に表示するため、見出しが無くても何のカードか判別できる。 */}
+          <div className="relative rounded-2xl bg-white dark:bg-slate-900 px-4 pb-3 pt-10 shadow-lg ring-1 ring-slate-200 dark:ring-slate-800 sm:px-6 sm:pb-4 sm:pt-12">
+            {/* 小役カウンターページの 現在／前任者 トグル（基本データカード）と
+                同じ寸法・同じ縦位置（pt-10/pt-12 で揃えている）。absolute で重ねる
+                ため、カードの高さは増えない。トグルの大きさだけでなく高さ（縦位置）
+                も両カードで統一する必要があるため、この2枚は常にセットで変更する
+                こと（decisions-log 2026-09-11／2026-09-12参照）。 */}
             <div className="absolute right-4 top-3 sm:right-6 sm:top-4">
               <DiffSignToggle
                 sign={diffSign}
@@ -360,11 +363,8 @@ export default function GrapeReversePage() {
             />
           </div>
 
-          {/* ボーナス回数 */}
-          <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 shadow-lg ring-1 ring-slate-200 dark:ring-slate-800 sm:p-6">
-            <h2 className="mb-2 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
-              ボーナス回数
-            </h2>
+          {/* ボーナス回数（見出し省略・余白を詰める。2026-09-13） */}
+          <div className="rounded-2xl bg-white dark:bg-slate-900 px-4 py-3 shadow-lg ring-1 ring-slate-200 dark:ring-slate-800 sm:px-6 sm:py-4">
             <div className="grid min-w-0 grid-cols-2 gap-4">
               <DynamicInput
                 element={ELEM_BIG}
