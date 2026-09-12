@@ -226,7 +226,7 @@ export default function PreviousDataPage() {
               }`}
               title={vibrationEnabled ? "バイブON（タップでOFF）" : "バイブOFF（タップでON）"}
             >
-              {vibrationEnabled ? "📳 ON" : "🔇 OFF"}
+              {vibrationEnabled ? "📳 ON" : "📴 OFF"}
             </button>
           </div>
 
