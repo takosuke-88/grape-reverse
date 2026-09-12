@@ -548,6 +548,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://grape-reverse.com/columns/kyoichi-2400dai-heiten-uriage-zou</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://grape-reverse.com/columns/kyoichi-minami-crane-game-tenkan</loc>
     <lastmod>2026-09-12</lastmod>
     <changefreq>monthly</changefreq>
@@ -862,6 +868,12 @@
   <url>
     <loc>https://grape-reverse.com/columns/tama-ni-kaketenaide-jinsei-ni-kakero</loc>
     <lastmod>2026-08-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://grape-reverse.com/columns/tencho-kono-hito-tsuyoi-omotta</loc>
+    <lastmod>2026-09-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
