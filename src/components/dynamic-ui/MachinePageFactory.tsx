@@ -66,6 +66,17 @@ const COLLAPSIBLE_CARD_IDS = new Set(["bonus-breakdown-section"]);
 // 「低設定を高設定と誤表示する害が許容範囲まで下がる線」として決めている。
 const MIN_GAMES_FOR_SETTING_HINT = 3000;
 
+/** 詳細判別カード内の指標カード1枚分のデータ */
+interface MetricItem {
+  label: string;
+  /** ラベル横に出す実測回数。0 なら出さない */
+  count?: number;
+  /** 実測の確率分母（1/x の x）。0 なら「---」 */
+  val: number;
+  format: (v: number) => string;
+  settingValues?: Record<number, number>;
+}
+
 interface MachinePageFactoryProps {
   config: MachineConfig;
 }
@@ -844,7 +855,52 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             ラベルを元の文言（`合成フェザー 000回` 126.0px）に戻すと収まらない。
           */}
           <div ref={metricGridRef} className="mb-4 grid grid-cols-3 gap-1 mt-4">
-            {[
+            {((metricItems: MetricItem[]) => {
+              // 並び順（2026-09-23）。意味のまとまりで行を分ける。
+              //   1行目: ボーナスの合計（BIG / REG / 合成）
+              //   2行目: 通常時小役（角チェ / ブドウ・ベル）
+              //   3行目: BIG内訳（単BIG / チェBIG）※ジャグラーのみ
+              //   4行目: REG内訳（単REG / チェREG）※ジャグラーのみ
+              // null は空きマス。2行目以降は2枚しかないので、3つ目を空けて
+              // 列を縦に揃える（詰めると左右がガタつく）。
+              // ハナハナは3行目がBIG中の要素（スイカ / フェザー）になる。
+              const layout: (string | null)[] =
+                currentCategory === "hana"
+                  ? ["BIG", "REG", "合成", "角チェ", "ベル", null, "スイカ", "フェザー", null]
+                  : [
+                      "BIG",
+                      "REG",
+                      "合成",
+                      "角チェ",
+                      "ブドウ",
+                      null,
+                      "単BIG",
+                      "チェBIG",
+                      null,
+                      "単REG",
+                      "チェREG",
+                      null,
+                    ];
+
+              return layout.map((name, idx) => {
+                if (name === null) return <div key={idx} aria-hidden="true" />;
+                const item = metricItems.find((m) => m.label === name);
+                if (!item) return null;
+                return (
+                  <ProbabilityMetricCard
+                    key={idx}
+                    label={item.label}
+                    val={item.val}
+                    count={item.count}
+                    format={item.format}
+                    settingValues={item.settingValues}
+                    config={config}
+                    dense
+                    compactLabel={compactMetricLabels}
+                  />
+                );
+              });
+            })([
               {
                 label: "BIG",
                 count: Number(judgmentInputs["big-count"]) || 0,
@@ -1093,19 +1149,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   return el?.settingValues;
                 })(),
               },
-            ].map((item, idx) => (
-              <ProbabilityMetricCard
-                key={idx}
-                label={item.label}
-                val={item.val}
-                count={item.count}
-                format={item.format}
-                settingValues={item.settingValues}
-                config={config}
-                dense
-                compactLabel={compactMetricLabels}
-              />
-            ))}
+            ])}
           </div>
 
           {/* 設定別期待度見出しとAIアドバイス */}
