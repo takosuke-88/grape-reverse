@@ -2,10 +2,14 @@
 //
 // 小役カウンターページの「基本データ」カード見出し行の余白に置く。
 // 逆算ページの台メーターにある DiffSignToggle と同じ見た目・同じ寸法・同じ位置
-// （右端揃え）に合わせてある。実測: 全体 204px × 52px、ボタン高44px。
-//   - container : p-1 (4px×2) + gap-1 (4px) → ボタン2つで 192px
-//   - button    : w-24 (96px) × 2 = 192px  →  合計 204px
+// （右端揃え）に合わせてある。実測: 全体 140px × 48px、ボタン 64px × 40px。
+//   - container : p-1 (4px×2) + gap-1 (4px) → ボタン2つで 128px
+//   - button    : w-16 (64px) × 2 = 128px  →  合計 140px
 // 幅を変える場合は DiffSignToggle 側の実測値と合わせること。
+//
+// 2026-09-22に 204×52px（ボタン w-24 96px × 44px）から縮小した。総ゲーム数ラベルへ
+// 「（差分 N回）」を入れる幅（カード左端からトグル左端まで107.3px → 161.7px必要）を
+// 確保するため。トグルは141.6px以下である必要があり、140pxで満たしている。
 //
 // 現在＝このページ、前任者＝前任者タブ（/:machineId/prev）への遷移。
 // 色は前任者タブのナビボタン（amber-600）と揃えている。
@@ -19,7 +23,7 @@ interface CurrentPreviousToggleProps {
 }
 
 const BUTTON_BASE =
-  "flex w-24 min-h-[44px] items-center justify-center rounded-lg text-sm touch-manipulation transition-all active:scale-95";
+  "flex w-16 min-h-[40px] items-center justify-center rounded-lg text-sm touch-manipulation transition-all active:scale-95";
 const ACTIVE_TEXT = "font-black text-white shadow-md";
 const INACTIVE_TEXT = "font-bold text-slate-400 dark:text-slate-500";
 

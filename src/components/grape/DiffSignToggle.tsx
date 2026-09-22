@@ -7,12 +7,17 @@
 // 【レイアウト】このコンポーネントはトグル本体だけを返す。見出し（h2）と配置は
 // ページ側が持ち、カードを relative にして absolute right-4 top-3 で見出し右の
 // 余白へ重ねる。行として置くとカードが52px縦に伸びるため（2026-09-10変更）。
-// 寸法は小役カウンターページの CurrentPreviousToggle と統一: 全体204x52px、
-// ボタンは w-24 (96px) x 44px。片方を変えるならもう片方も合わせること。
+// 寸法は設定判別ページの CurrentPreviousToggle と統一: 全体140x48px、
+// ボタンは w-16 (64px) x 40px。片方を変えるならもう片方も合わせること。
+//
+// 2026-09-22に 204×52px から縮小。あわせて「＋プラス／−マイナス」の記号を落とし
+// 「プラス／マイナス」の語のみにした。記号＋語だと中身が「−マイナス」で75.8pxあり、
+// 64pxのボタンに収まらないため（語のみなら55.7px）。符号は選択中の側の塗りつぶしと
+// 配色（プラス=emerald / マイナス=blue）が示す。
 //
 // 【あとから変更する場合の勘所】
-//  - 配色・文言・記号 → SIGN_OPTIONS の1行を書き換える
-//  - 寸法            → BUTTON の w-24 / min-h-[44px]（CurrentPreviousToggle と共通）
+//  - 配色・文言 → SIGN_OPTIONS の1行を書き換える
+//  - 寸法       → BUTTON の w-16 / min-h-[40px]（CurrentPreviousToggle と共通）
 
 export type DiffSign = 1 | -1;
 
@@ -26,12 +31,11 @@ export const DIFF_SIGN_KEY = "diff-coins-sign";
  */
 const SIGN_OPTIONS: ReadonlyArray<{
   sign: DiffSign;
-  glyph: string;
   label: string;
   activeClass: string;
 }> = [
-  { sign: 1, glyph: "＋", label: "プラス", activeClass: "bg-emerald-600" },
-  { sign: -1, glyph: "−", label: "マイナス", activeClass: "bg-blue-600" },
+  { sign: 1, label: "プラス", activeClass: "bg-emerald-600" },
+  { sign: -1, label: "マイナス", activeClass: "bg-blue-600" },
 ];
 
 interface DiffSignToggleProps {
@@ -54,14 +58,13 @@ export default function DiffSignToggle({ sign, onChange }: DiffSignToggleProps) 
             type="button"
             onClick={() => onChange(opt.sign)}
             aria-pressed={isActive}
-            className={`flex w-24 min-h-[44px] items-center justify-center gap-1.5 rounded-lg touch-manipulation transition-all active:scale-95 ${
+            className={`flex w-16 min-h-[40px] items-center justify-center rounded-lg text-sm touch-manipulation transition-all active:scale-95 ${
               isActive
                 ? `${opt.activeClass} font-black text-white shadow-md`
                 : "font-bold text-slate-400 dark:text-slate-500"
             }`}
           >
-            <span className="text-xl leading-none">{opt.glyph}</span>
-            <span className="text-sm">{opt.label}</span>
+            {opt.label}
           </button>
         );
       })}

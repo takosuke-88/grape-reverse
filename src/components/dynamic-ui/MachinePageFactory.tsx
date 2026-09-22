@@ -34,8 +34,8 @@ import {
 // 「ボーナス回数」の3枚（他カード・ボーナス詳細内訳・その他等は対象外）。
 // 「基本データ」カードは見出しを消す代わりに pt-10/pt-12 を入れている。これは
 // 見出し（h2 16px + mb-2 8px = 24px）＋元の p-4/p-6 と同じ位置にバーを置くための
-// 値で、トグル（top-3 から 52px ＝ 下端64px）とバー上端（66px）が隣接する元の
-// 関係をそのまま維持する。逆算ページの「台メーター」カード（GrapeReversePage.tsx）
+// 値で、トグル（top-3 から 48px ＝ 下端60px。2026-09-22に52px→48pxへ縮小）と
+// バー上端（66px）の関係をそのまま維持する。逆算ページの「台メーター」カード（GrapeReversePage.tsx）
 // も同じ pt-10/pt-12 で揃えている。CurrentPreviousToggle/DiffSignToggleは
 // 「大きさ」だけでなく「高さ（縦位置）」も統一する必要があるため（decisions-log
 // 2026-09-11/12）、この2枚は常にセットで変更すること。
@@ -278,13 +278,20 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   // ラベルを「BIG差分」に置き換えないのは、バーに出ている数字が差分ではないから。
   // 差し引きが成立している mode==="diff" のときだけ出す（現在ページ未入力で前任者の
   // 生データを使っている場合や、矛盾入力で判別を止めている場合は差分ではない）。
-  const DIFF_LABEL_IDS = new Set(["big-count", "reg-count"]);
+  // 差分を添える要素と単位。総ゲーム数は「回」ではなく「G」で数える。
+  // 括弧を使わないのは幅のため。実測（375px）で `総ゲーム数（差分 12000G）` は
+  // 179.7px あり、ラベルに使える 171.3px に入らないが、括弧を外した
+  // `総ゲーム数 差分 12000G` は155.5pxで収まる。BIG/REGも括弧なしなら3桁まで入る。
+  const DIFF_LABEL_UNITS: Record<string, string> = {
+    "total-games": "G",
+    "big-count": "回",
+    "reg-count": "回",
+  };
   const labelWithDiff = (element: DiscriminationElement) => {
-    if (judgment.mode !== "diff" || !DIFF_LABEL_IDS.has(element.id)) {
-      return element.label;
-    }
+    const unit = DIFF_LABEL_UNITS[element.id];
+    if (judgment.mode !== "diff" || !unit) return element.label;
     const diff = Number(judgmentInputs[element.id]) || 0;
-    return `${element.label}（差分 ${diff}回）`;
+    return `${element.label} 差分 ${diff}${unit}`;
   };
 
   // 総ゲーム数バーの右下に出す BIG+REG 合成確率（2026-09-13）。
