@@ -1,4 +1,10 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import { useNavigate, Link } from "react-router-dom";
 import type {
   MachineConfig,
@@ -453,6 +459,57 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     });
   }, [config.sections]);
 
+  // 指標カードのラベルを14pxのままにできるか、実際の描画幅で判定する。
+  //
+  // 3列にするとカード内側は375pxで92.0pxしかなく、`フェザー 000回`(98.0px)や
+  // `チェREG 000回`(95.0px)は14pxでは入らない。一方 `BIG 52回` は55.0pxで余裕が
+  // あるので、桁数で一律に12pxへ落とすと縮める必要のないカードまで小さくなる。
+  //
+  // かといってカードごとに判定すると、`ブドウ`だけが14pxの枠ちょうど(92.0px)で、
+  // 端末のフォント差でそこだけ12pxへ落ちて他8枚と食い違う。そこで判定はグリッド
+  // 単位で行い、**1枚でも入らなければ全枚数そろって12pxへ落とす**。
+  // 設定6相当の出方で15,000Gまで当てても14pxで全枚数収まることは実測済み。
+  const metricGridRef = useRef<HTMLDivElement>(null);
+  const [compactMetricLabels, setCompactMetricLabels] = useState(false);
+  const measuredLabelKey = useRef("");
+
+  useLayoutEffect(() => {
+    const grid = metricGridRef.current;
+    if (!grid) return;
+    const labels = Array.from(
+      grid.querySelectorAll<HTMLElement>("[data-metric-label]"),
+    );
+    if (labels.length === 0) return;
+
+    // 表示中の文言が変わったら必ず14pxから測り直す（回数が減って入るように
+    // なったのに12pxのままになるのを防ぐ）。
+    const key = labels.map((el) => el.textContent ?? "").join("|");
+    const keyChanged = key !== measuredLabelKey.current;
+    if (keyChanged) measuredLabelKey.current = key;
+    if (keyChanged && compactMetricLabels) {
+      setCompactMetricLabels(false);
+      return;
+    }
+
+    // 14pxで描画されている間だけ測る。12pxのときに測っても「14pxなら入るか」は
+    // 分からないため、縮める方向にしか動かさない（無限ループの防止）。
+    if (compactMetricLabels) return;
+    const overflows = labels.some(
+      (el) => el.scrollWidth > el.clientWidth + 0.5,
+    );
+    if (overflows) setCompactMetricLabels(true);
+  });
+
+  // 画面幅が変わったら（回転など）14pxから測り直す
+  useEffect(() => {
+    const handleResize = () => {
+      measuredLabelKey.current = "";
+      setCompactMetricLabels(false);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   // ブドウ信頼度の計算（詳細判別カード内の表示なので判別用ゲーム数を使う）
   const grapeReliability = useMemo(() => {
     return calculateGrapeWeight(
@@ -778,10 +835,18 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           </div>
 
           {/* 4大指標 (現在確率) */}
-          <div className="mb-4 grid grid-cols-2 gap-2 mt-4">
+          {/*
+            指標カードは3列（2026-09-23。従来は2列）。375pxでカード内側は
+            126.0px→92.0pxまで狭まるため、ラベルを短縮形にし、カードは dense
+            （ラベル12px・値18px・左右の内余白4px）で描画する。
+            ラベルの文字サイズは14pxを既定とし、1枚でも入らないときだけ
+            9枚そろって12pxへ落とす（上の useLayoutEffect で実測して判定）。
+            ラベルを元の文言（`合成フェザー 000回` 126.0px）に戻すと収まらない。
+          */}
+          <div ref={metricGridRef} className="mb-4 grid grid-cols-3 gap-1 mt-4">
             {[
               {
-                label: "BIG確率",
+                label: "BIG",
                 count: Number(judgmentInputs["big-count"]) || 0,
                 val: (() => {
                   const count = Number(judgmentInputs["big-count"]) || 0;
@@ -796,7 +861,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 })(),
               },
               {
-                label: "REG確率",
+                label: "REG",
                 count: Number(judgmentInputs["reg-count"]) || 0,
                 val: (() => {
                   const count = Number(judgmentInputs["reg-count"]) || 0;
@@ -813,7 +878,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
               ...(currentCategory === "hana"
                 ? [
                     {
-                      label: "BIG中スイカ",
+                      label: "スイカ",
                       count: Number(judgmentInputs["big-suika-count"]) || 0,
                         val: (() => {
                           const bCount =
@@ -842,7 +907,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         })(),
                       },
                       {
-                        label: "合成フェザー",
+                        label: "フェザー",
                         count: Number(judgmentInputs["feather-lamp-count"]) || 0,
                         val: (() => {
                           const bCount =
@@ -875,7 +940,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                       // 公表BIG合計と14〜19%ずれるため）。あくまで自分が目撃した
                       // 内訳の確率を見せるだけの指標。
                       {
-                        label: "単独BIG",
+                        label: "単BIG",
                         count: Number(judgmentInputs["big-solo-count"]) || 0,
                         val: (() => {
                           const count =
@@ -891,7 +956,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         })(),
                       },
                       {
-                        label: "チェリーBIG",
+                        label: "チェBIG",
                         count: Number(judgmentInputs["big-cherry-count"]) || 0,
                         val: (() => {
                           const count =
@@ -907,7 +972,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         })(),
                       },
                       {
-                        label: "単独REG",
+                        label: "単REG",
                         count: Number(judgmentInputs["reg-solo-count"]) || 0,
                         val: (() => {
                           const count =
@@ -923,7 +988,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         })(),
                       },
                       {
-                        label: "チェリーREG",
+                        label: "チェREG",
                         count: Number(judgmentInputs["reg-cherry-count"]) || 0,
                         val: (() => {
                           const count =
@@ -941,7 +1006,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                     ]
               ),
               {
-                label: "合成確率",
+                label: "合成",
                 count: (Number(judgmentInputs["big-count"]) || 0) + (Number(judgmentInputs["reg-count"]) || 0),
                 val: (() => {
                   const big = Number(judgmentInputs["big-count"]) || 0;
@@ -982,7 +1047,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 })(),
               },
               {
-                label: currentCategory === "hana" ? "ベル確率" : "ブドウ確率",
+                label: currentCategory === "hana" ? "ベル" : "ブドウ",
                 count:
                   Number(
                     judgmentInputs[
@@ -1011,12 +1076,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 // （settingValues なし＝全設定1/48.01で設定差がない）ため、
                 // 確率だけが出て「(設定N近似)」は付かない。
                 //
-                // ラベルが「チェリー確率」ではなく「角チェリー」なのは幅の都合。
-                // 375pxでカード内側は126.0pxしかなく、`チェリー確率 337回` が
-                // ちょうど126.0px（余白0）で、4桁になると折り返して行の高さが
-                // 89→109pxに伸びる。`角チェリー 337回` は112.0pxで、4桁でも
-                // 120.0pxに収まる。カウンターバー側のラベルとも一致する。
-                label: "角チェリー",
+                // ラベルはカウンターバー側の「角チェリー」の短縮形。3列化で枠が
+                // 92.0pxになり、`角チェリー 0000回` は101.0pxで入らない
+                // （`角チェ 0000回` は80.0px）。
+                label: "角チェ",
                 count: Number(judgmentInputs["cherry-count"]) || 0,
                 val: (() => {
                   const count = Number(judgmentInputs["cherry-count"]) || 0;
@@ -1039,6 +1102,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 format={item.format}
                 settingValues={item.settingValues}
                 config={config}
+                dense
+                compactLabel={compactMetricLabels}
               />
             ))}
           </div>
