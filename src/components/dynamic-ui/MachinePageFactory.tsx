@@ -782,6 +782,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             {[
               {
                 label: "BIG確率",
+                count: Number(judgmentInputs["big-count"]) || 0,
                 val: (() => {
                   const count = Number(judgmentInputs["big-count"]) || 0;
                   return count > 0 ? judgmentTotalGames / count : 0;
@@ -796,6 +797,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
               },
               {
                 label: "REG確率",
+                count: Number(judgmentInputs["reg-count"]) || 0,
                 val: (() => {
                   const count = Number(judgmentInputs["reg-count"]) || 0;
                   return count > 0 ? judgmentTotalGames / count : 0;
@@ -812,6 +814,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 ? [
                     {
                       label: "BIG中スイカ",
+                      count: Number(judgmentInputs["big-suika-count"]) || 0,
                         val: (() => {
                           const bCount =
                             Number(judgmentInputs["big-count"]) || 0;
@@ -840,6 +843,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                       },
                       {
                         label: "合成フェザー",
+                        count: Number(judgmentInputs["feather-lamp-count"]) || 0,
                         val: (() => {
                           const bCount =
                             Number(judgmentInputs["big-count"]) || 0;
@@ -868,6 +872,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   : [
                       {
                         label: "単独REG",
+                        count: Number(judgmentInputs["reg-solo-count"]) || 0,
                         val: (() => {
                           const count =
                             Number(judgmentInputs["reg-solo-count"]) || 0;
@@ -883,6 +888,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                       },
                       {
                         label: "チェリーREG",
+                        count: Number(judgmentInputs["reg-cherry-count"]) || 0,
                         val: (() => {
                           const count =
                             Number(judgmentInputs["reg-cherry-count"]) || 0;
@@ -900,6 +906,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
               ),
               {
                 label: "合成確率",
+                count: (Number(judgmentInputs["big-count"]) || 0) + (Number(judgmentInputs["reg-count"]) || 0),
                 val: (() => {
                   const big = Number(judgmentInputs["big-count"]) || 0;
                   const reg = Number(judgmentInputs["reg-count"]) || 0;
@@ -940,6 +947,12 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
               },
               {
                 label: currentCategory === "hana" ? "ベル確率" : "ブドウ確率",
+                count:
+                  Number(
+                    judgmentInputs[
+                      currentCategory === "hana" ? "bell-count" : "grape-count"
+                    ],
+                  ) || 0,
                 val: (() => {
                   const countId =
                     currentCategory === "hana" ? "bell-count" : "grape-count";
@@ -961,6 +974,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 key={idx}
                 label={item.label}
                 val={item.val}
+                count={item.count}
                 format={item.format}
                 settingValues={item.settingValues}
                 config={config}

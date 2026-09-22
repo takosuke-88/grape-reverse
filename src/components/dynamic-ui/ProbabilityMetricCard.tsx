@@ -11,6 +11,13 @@ interface ProbabilityMetricCardProps {
   label: string;
   /** 実測の確率分母（1/x の x）。0 のときは「---」表示 */
   val: number;
+  /**
+   * この確率の母数になっている実測回数。ラベル横に「◯◯回」と出す。
+   * 前任者分を差し引いている場合はその差し引き後の回数が渡る（カード内の確率と
+   * 同じ基準）。カウンターバーのラベルと違い「差分」の語は付けない。
+   * 0（未計測）のときは何も出さない。
+   */
+  count?: number;
   format: (v: number) => string;
   /** 設定別の理論値。与えると最も近い設定を「(設定N近似)」として出す */
   settingValues?: Record<number, number>;
@@ -20,6 +27,7 @@ interface ProbabilityMetricCardProps {
 export default function ProbabilityMetricCard({
   label,
   val,
+  count,
   format,
   settingValues,
   config,
@@ -44,6 +52,11 @@ export default function ProbabilityMetricCard({
     <div className="flex flex-col items-center justify-center rounded-lg border border-slate-100 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-800">
       <div className="text-sm text-slate-500 dark:text-slate-400">
         {formatBonusText(label)}
+        {count != null && count > 0 && (
+          <span className="ml-1 font-bold text-slate-600 dark:text-slate-300">
+            {count}回
+          </span>
+        )}
       </div>
       <div className="text-xl font-bold text-slate-800 dark:text-white">
         {val > 0 ? `1/${format(val)}` : "---"}

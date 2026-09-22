@@ -141,16 +141,19 @@ export default function PreviousDataPage() {
     return [
       {
         label: "BIG確率",
+        count: bigCount,
         val: bigCount > 0 ? totalGames / bigCount : 0,
         settingValues: bigEl?.settingValues,
       },
       {
         label: "REG確率",
+        count: regCount,
         val: regCount > 0 ? totalGames / regCount : 0,
         settingValues: regEl?.settingValues,
       },
       {
         label: "合成確率",
+        count: bonusTotal,
         val: bonusTotal > 0 ? totalGames / bonusTotal : 0,
         settingValues: Object.keys(combinedValues).length
           ? combinedValues
@@ -339,6 +342,7 @@ export default function PreviousDataPage() {
                 key={idx}
                 label={m.label}
                 val={m.val}
+                count={m.count}
                 format={(v) => v.toFixed(1)}
                 settingValues={m.settingValues}
                 config={config ?? undefined}
