@@ -870,6 +870,42 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                       },
                     ]
                   : [
+                      // 単独BIG・チェリーBIG は表示専用。判別モデル（観測）へは
+                      // 入れていない（2026-09-13: 1/単独BIG + 1/チェリーBIG が
+                      // 公表BIG合計と14〜19%ずれるため）。あくまで自分が目撃した
+                      // 内訳の確率を見せるだけの指標。
+                      {
+                        label: "単独BIG",
+                        count: Number(judgmentInputs["big-solo-count"]) || 0,
+                        val: (() => {
+                          const count =
+                            Number(judgmentInputs["big-solo-count"]) || 0;
+                          return count > 0 ? judgmentTotalGames / count : 0;
+                        })(),
+                        format: (v: number) => v.toFixed(1),
+                        settingValues: (() => {
+                          const el = config.sections
+                            .flatMap((s) => s.elements)
+                            .find((e) => e.id === "big-solo-count");
+                          return el?.settingValues;
+                        })(),
+                      },
+                      {
+                        label: "チェリーBIG",
+                        count: Number(judgmentInputs["big-cherry-count"]) || 0,
+                        val: (() => {
+                          const count =
+                            Number(judgmentInputs["big-cherry-count"]) || 0;
+                          return count > 0 ? judgmentTotalGames / count : 0;
+                        })(),
+                        format: (v: number) => v.toFixed(1),
+                        settingValues: (() => {
+                          const el = config.sections
+                            .flatMap((s) => s.elements)
+                            .find((e) => e.id === "big-cherry-count");
+                          return el?.settingValues;
+                        })(),
+                      },
                       {
                         label: "単独REG",
                         count: Number(judgmentInputs["reg-solo-count"]) || 0,
@@ -966,6 +1002,31 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   const el = config.sections
                     .flatMap((s) => s.elements)
                     .find((e) => e.id === countId);
+                  return el?.settingValues;
+                })(),
+              },
+              {
+                // 角チェリーはジャグラー・ハナハナ共通で出す。ハナハナは
+                // config に cherry-count を持たず orderedSections が注入している
+                // （settingValues なし＝全設定1/48.01で設定差がない）ため、
+                // 確率だけが出て「(設定N近似)」は付かない。
+                //
+                // ラベルが「チェリー確率」ではなく「角チェリー」なのは幅の都合。
+                // 375pxでカード内側は126.0pxしかなく、`チェリー確率 337回` が
+                // ちょうど126.0px（余白0）で、4桁になると折り返して行の高さが
+                // 89→109pxに伸びる。`角チェリー 337回` は112.0pxで、4桁でも
+                // 120.0pxに収まる。カウンターバー側のラベルとも一致する。
+                label: "角チェリー",
+                count: Number(judgmentInputs["cherry-count"]) || 0,
+                val: (() => {
+                  const count = Number(judgmentInputs["cherry-count"]) || 0;
+                  return count > 0 ? judgmentTotalGames / count : 0;
+                })(),
+                format: (v: number) => v.toFixed(2),
+                settingValues: (() => {
+                  const el = config.sections
+                    .flatMap((s) => s.elements)
+                    .find((e) => e.id === "cherry-count");
                   return el?.settingValues;
                 })(),
               },
