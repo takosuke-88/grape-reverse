@@ -25,7 +25,7 @@ interface CurrentPreviousToggleProps {
 const BUTTON_BASE =
   "flex w-16 min-h-[40px] items-center justify-center rounded-lg text-sm touch-manipulation transition-all active:scale-95";
 const ACTIVE_TEXT = "font-black text-white shadow-md";
-const INACTIVE_TEXT = "font-bold text-slate-400 dark:text-slate-500";
+const INACTIVE_TEXT = "font-bold text-slate-600 dark:text-slate-300";
 
 export default function CurrentPreviousToggle({
   machineId,
