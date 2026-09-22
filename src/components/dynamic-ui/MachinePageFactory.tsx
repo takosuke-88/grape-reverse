@@ -17,6 +17,8 @@ import EstimationResultDisplay from "./EstimationResultDisplay";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import {
   PREVIOUS_DATA_INITIAL,
+  bonusHistoryStorageKeys,
+  counterDataStorageKey,
   previousDataStorageKey,
 } from "../../data/previous-data-storage";
 import CurrentPreviousToggle from "../machine/CurrentPreviousToggle";
@@ -84,12 +86,13 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   };
 
   // ボーナス入力履歴（LIFO スタック）
+  const [bigHistoryKey, regHistoryKey] = bonusHistoryStorageKeys(config.id);
   const [bigHistory, setBigHistory] = useLocalStorage<string[]>(
-    `grape-reverse-big-history-${config.id}`,
+    bigHistoryKey,
     []
   );
   const [regHistory, setRegHistory] = useLocalStorage<string[]>(
-    `grape-reverse-reg-history-${config.id}`,
+    regHistoryKey,
     []
   );
 
@@ -124,7 +127,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   // ユーザー入力State (通常・詳細)
   const [inputValues, setInputValues, removeInputValues] = useLocalStorage<
     Record<string, number | boolean | string>
-  >(`grape-reverse-data-${config.id}`, () => initializeValues());
+  >(counterDataStorageKey(config.id), () => initializeValues());
 
   // 前任者データ（/:machineId/prev で記録したデータランプの残り）。
   // 詳細判別で「現在 − 前任者」を求めるために読み出す（書き込みは前任者ページ側）。
@@ -368,10 +371,16 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   }, [judgmentInputs, judgmentTotalGames, config, currentCategory]);
 
   const handleReset = () => {
-    if (!window.confirm("これまでのカウントデータを全てリセットしますか？")) return;
+    // 前任者データも消えることを明記する。判別が「現在 − 前任者」で連動しており、
+    // 片方だけ残すと判別の前提が崩れるため、この2つは常にセットで消す。
+    if (
+      !window.confirm(
+        "このページの入力を全てリセットしますか？\n\n前任者ページに入力した内容も一緒に削除されます。",
+      )
+    )
+      return;
     removeInputValues();
-    // 前任者タブのデータも一緒に消す（台を移れば両方不要になるため）。
-    // 詳細判別が前任者データを参照するようになったため、localStorage を直接消すのではなく
+    // 詳細判別が前任者データを参照するため、localStorage を直接消すのではなく
     // フック経由で消して画面上のstateも同時に更新する。
     removePreviousData();
     setBigHistory([]);

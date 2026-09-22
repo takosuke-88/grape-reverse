@@ -32,6 +32,8 @@ import type {
 } from "../types/machine-schema";
 import {
   PREVIOUS_DATA_INITIAL,
+  bonusHistoryStorageKeys,
+  counterDataStorageKey,
   previousDataStorageKey,
 } from "../data/previous-data-storage";
 
@@ -76,9 +78,21 @@ export default function PreviousDataPage() {
   const update = (key: string, v: number) =>
     setPrevData((prev) => ({ ...prev, [key]: v }));
 
+  // 設定判別ページの入力も一緒に消す。判別が「現在 − 前任者」で連動しているため、
+  // 前任者だけ消すと残った現在の入力が別基準で判定されることになる（2026-09-22決定）。
+  // 逆算ページは判別に関与しない独立したページなので触らない。
   const handleReset = () => {
-    if (!window.confirm("前任者データをリセットしますか？")) return;
+    if (
+      !window.confirm(
+        "前任者データをリセットしますか？\n\n設定判別ページに入力した内容も一緒に削除されます。",
+      )
+    )
+      return;
     removePrevData();
+    const id = machineId ?? "";
+    [counterDataStorageKey(id), ...bonusHistoryStorageKeys(id)].forEach((key) =>
+      window.localStorage.removeItem(key),
+    );
   };
 
   const settings = config?.specs?.settings ?? [1, 2, 3, 4, 5, 6];

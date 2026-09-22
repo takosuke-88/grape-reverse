@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useLocalStorage } from "../hooks/useLocalStorage";
-import { previousDataStorageKey } from "../data/previous-data-storage";
 import { AVAILABLE_MACHINES } from "../data/machine-list";
 import Seo from "../components/Seo";
 import { CONFIG_MAP } from "../data/machine-config-map";
@@ -143,9 +142,9 @@ export default function GrapeReversePage() {
 
   const handleReset = () => {
     if (!window.confirm(`${roleLabel}逆算の入力を全てリセットしますか？`)) return;
+    // このページは設定判別・前任者データとは独立しているため、自分の入力だけを消す
+    // （2026-09-22決定。以前は前任者データも消していた）。
     setGrapeData({});
-    // 前任者タブのデータも一緒に消す（台を移れば両方不要になるため）
-    window.localStorage.removeItem(previousDataStorageKey(machineId ?? ""));
   };
 
   // ─── 逆算計算（チェリー狙い / フリー打ち） ───
