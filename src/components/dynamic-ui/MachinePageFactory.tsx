@@ -376,9 +376,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     // 前任者データも消えることを明記する。判別が「現在 − 前任者」で連動しており、
     // 片方だけ残すと判別の前提が崩れるため、この2つは常にセットで消す。
     const ok = await confirm({
-      title: "入力をリセットします",
-      message: "このページに入力した内容を全て削除します。元に戻せません。",
-      warning: "前任者ページに入力した内容も一緒に削除されます。",
+      message: "設定判別ページと前任者ページの内容を全て削除します。",
+      highlights: ["設定判別ページ", "前任者ページ"],
       confirmLabel: "リセット",
     });
     if (!ok) return;

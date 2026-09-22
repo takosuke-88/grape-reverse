@@ -146,8 +146,8 @@ export default function GrapeReversePage() {
   // （2026-09-22決定。以前は前任者データも消していた）。
   const handleReset = async () => {
     const ok = await confirm({
-      title: `${roleLabel}逆算をリセットします`,
-      message: "このページに入力した内容を全て削除します。元に戻せません。",
+      message: `${roleLabel}逆算ページの内容を全て削除します。`,
+      highlights: [`${roleLabel}逆算ページ`],
       confirmLabel: "リセット",
     });
     if (!ok) return;

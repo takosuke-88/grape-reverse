@@ -85,9 +85,8 @@ export default function PreviousDataPage() {
   // 逆算ページは判別に関与しない独立したページなので触らない。
   const handleReset = async () => {
     const ok = await confirm({
-      title: "前任者データをリセットします",
-      message: "このページに入力した内容を全て削除します。元に戻せません。",
-      warning: "設定判別ページに入力した内容も一緒に削除されます。",
+      message: "前任者ページと設定判別ページの内容を全て削除します。",
+      highlights: ["前任者ページ", "設定判別ページ"],
       confirmLabel: "リセット",
     });
     if (!ok) return;

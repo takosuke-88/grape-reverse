@@ -18,12 +18,38 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface ConfirmOptions {
-  title: string;
+  /** 何が消えるかを1文で。例: 設定判別ページと前任者ページの内容を全て削除します。 */
   message: string;
-  /** 見落とすと困る副作用（例: 別ページのデータも消える）。任意 */
-  warning?: string;
+  /**
+   * message 内で強調表示したい語（例: ページ名）。どこまで消えるのかを一目で
+   * 掴ませるための指定。message は文字列のままなので、showModal 非対応端末で
+   * window.confirm へ落ちたときも同じ文面がそのまま使える。
+   */
+  highlights?: string[];
   /** 実行側ボタンの文言（例: リセット） */
   confirmLabel: string;
+}
+
+/** message を highlights で分割し、一致部分だけ強調した ReactNode にする */
+function renderMessage(message: string, highlights?: string[]) {
+  if (!highlights?.length) return message;
+  const escaped = highlights
+    .filter(Boolean)
+    .map((h) => h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  if (!escaped.length) return message;
+  const parts = message.split(new RegExp(`(${escaped.join("|")})`, "g"));
+  return parts.map((part, i) =>
+    highlights.includes(part) ? (
+      <strong
+        key={i}
+        className="font-black text-amber-700 dark:text-amber-300"
+      >
+        {part}
+      </strong>
+    ) : (
+      part
+    ),
+  );
 }
 
 function supportsDialog(): boolean {
@@ -53,12 +79,9 @@ export function useConfirmDialog() {
   }, []);
 
   const confirm = useCallback((opts: ConfirmOptions): Promise<boolean> => {
-    // 非対応端末はネイティブへフォールバック（警告文は改行で連結する）
+    // 非対応端末はネイティブへフォールバック（強調は失われるが文面は同じ）
     if (!supportsDialog()) {
-      const text = opts.warning
-        ? `${opts.message}\n\n${opts.warning}`
-        : opts.message;
-      return Promise.resolve(window.confirm(text));
+      return Promise.resolve(window.confirm(opts.message));
     }
     setOptions(opts);
     return new Promise<boolean>((resolve) => {
@@ -93,26 +116,14 @@ export function useConfirmDialog() {
       onClose={handleClose}
       onCancel={handleClose}
       onClick={handleBackdropClick}
-      aria-labelledby="confirm-dialog-title"
+      aria-label="操作の確認"
       className="m-auto w-[calc(100vw-2rem)] max-w-sm rounded-2xl bg-transparent p-0 backdrop:bg-black/50"
     >
       {options && (
         <div className="rounded-2xl bg-white p-5 shadow-xl ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700">
-          <h2
-            id="confirm-dialog-title"
-            className="mb-2 text-base font-extrabold text-slate-900 dark:text-white"
-          >
-            {options.title}
-          </h2>
-          <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">
-            {options.message}
+          <p className="text-base font-bold leading-relaxed text-slate-800 dark:text-slate-100">
+            {renderMessage(options.message, options.highlights)}
           </p>
-
-          {options.warning && (
-            <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm font-bold leading-relaxed text-amber-800 dark:bg-amber-900/25 dark:text-amber-200">
-              {options.warning}
-            </p>
-          )}
 
           <div className="mt-5 flex gap-3">
             <button
