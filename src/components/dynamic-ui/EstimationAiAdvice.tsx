@@ -55,21 +55,21 @@ export default function EstimationAiAdvice({
               <>
                 序盤戦です。この機種は
                 <span className="font-bold underline decoration-indigo-400 decoration-2">
-                  ボーナス合算確率の維持
+                  ボーナス合成確率の維持
                 </span>
                 が最重要になります。
                 {highSettingProb >= 50 &&
-                  "現在の合算は非常に優秀です。このペースを維持できるか注目しましょう。"}
+                  "現在の合成は非常に優秀です。このペースを維持できるか注目しましょう。"}
                 {highSettingProb < 30 &&
-                  "ボーナスが重い立ち上がりです。合算が回復しない場合は深追い禁物です。"}
+                  "ボーナスが重い立ち上がりです。合成が回復しない場合は深追い禁物です。"}
               </>
             )}
             {totalGames > 2000 && totalGames <= 4000 && (
               <>
                 中盤戦に差し掛かりました。
                 {highSettingProb >= 50
-                  ? "ボーナス合算がしっかり引けており、高設定の期待が持てる展開です。引き続き数値を注視しましょう。"
-                  : "合算確率が落ちてきています。周囲の状況等も踏まえ、設定の見切り時を探る必要があります。"}
+                  ? "ボーナス合成がしっかり引けており、高設定の期待が持てる展開です。引き続き数値を注視しましょう。"
+                  : "合成確率が落ちてきています。周囲の状況等も踏まえ、設定の見切り時を探る必要があります。"}
               </>
             )}
             {totalGames > 4000 && (
@@ -77,12 +77,12 @@ export default function EstimationAiAdvice({
                 終盤戦です。サンプルは十分に集まりました。
                 {highSettingProb >= 70 && (
                   <span className="font-bold text-purple-600 dark:text-purple-400">
-                    圧巻のボーナス合算です。間違いなく高設定挙動ですので、閉店まで回し切りましょう！
+                    圧巻のボーナス合成です。間違いなく高設定挙動ですので、閉店まで回し切りましょう！
                   </span>
                 )}
                 {highSettingProb >= 50 && highSettingProb < 70 && (
                   <span className="font-bold text-red-600 dark:text-red-400">
-                    合算確率は良好な水準をキープしています。設定5・6の可能性を意識して続行を推奨します。
+                    合成確率は良好な水準をキープしています。設定5・6の可能性を意識して続行を推奨します。
                   </span>
                 )}
                 {highSettingProb >= 30 && highSettingProb < 50 && (
@@ -92,7 +92,7 @@ export default function EstimationAiAdvice({
                 )}
                 {highSettingProb < 30 && (
                   <span className="font-bold text-slate-500">
-                    ボーナス合算が設定1以下の数値です。これ以上の投資は危険が高いと言えます。
+                    ボーナス合成が設定1以下の数値です。これ以上の投資は危険が高いと言えます。
                   </span>
                 )}
               </>
@@ -102,7 +102,7 @@ export default function EstimationAiAdvice({
           <>
             {totalGames <= 1500 && (
               <>
-                序盤戦です。ボーナス合算よりも
+                序盤戦です。ボーナス合成よりも
                 <span className="font-bold underline decoration-indigo-400 decoration-2">
                   BIG中のスイカ出現率や、REGサイドランプの色（奇遇判別）
                 </span>
@@ -115,7 +115,7 @@ export default function EstimationAiAdvice({
             {totalGames > 1500 && totalGames <= 3000 && (
               <>
                 中盤戦に差し掛かりました。
-                <span className="font-bold">ベル逆算値とボーナス合算</span>
+                <span className="font-bold">ベル逆算値とボーナス合成</span>
                 のバランスが重要になります。
                 {highSettingProb >= 50
                   ? "数値は設定4以上、あるいは高設定の塊を十分狙える挙動を示しています。"

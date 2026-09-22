@@ -228,7 +228,7 @@ export default function GrapeReversePage() {
     return () => clearTimeout(timer);
   }, [config, estimationInputs]);
 
-  // ゲーム数バーに表示する BIG+REG 合算確率
+  // ゲーム数バーに表示する BIG+REG 合成確率
   const bonusTotal = bigCount + regCount;
   const bonusProbText = bonusTotal > 0 && totalGames > 0
     ? `1/${(totalGames / bonusTotal).toFixed(1)}`
@@ -307,7 +307,7 @@ export default function GrapeReversePage() {
                 to={`/${machineId}`}
                 className="flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
               >
-                🎰 小役カウンター
+                🎰 設定判別
               </Link>
               <button
                 type="button"
@@ -339,7 +339,7 @@ export default function GrapeReversePage() {
               onChange={(v) => update("total-games", Number(v) || 0)}
               totalGames={totalGames}
               vibrationEnabled={vibrationEnabled}
-              overrideProbText={bonusProbText ? `合算 ${bonusProbText}` : undefined}
+              overrideProbText={bonusProbText ? `合成 ${bonusProbText}` : undefined}
             />
             {/* 操作ヒント文は一番上のこのカードにのみ表示（小役カウンターページと同じ方針）。
                 文言・クラスは COUNTER_HINT_TEXT / COUNTER_HINT_CLASS で共通化している。 */}

@@ -107,7 +107,7 @@ export default function GrapeReverseEstimationPanel({
                 : undefined,
             },
             {
-              label: "合算フェザー",
+              label: "合成フェザー",
               val: (() => {
                 const bCount = Number(inputs["big-count"]) || 0;
                 const count = Number(inputs["feather-lamp-count"]) || 0;
@@ -154,7 +154,7 @@ export default function GrapeReverseEstimationPanel({
       ...base,
       ...categoryExtras,
       {
-        label: "合算確率",
+        label: "合成確率",
         val: (() => {
           const big = Number(inputs["big-count"]) || 0;
           const reg = Number(inputs["reg-count"]) || 0;

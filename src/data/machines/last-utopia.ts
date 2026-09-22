@@ -80,15 +80,15 @@ export const lastUtopiaConfig: MachineConfig = {
       {
         maxGames: 2000,
         introHtml:
-          '序盤戦です。この機種は<span class="font-bold underline decoration-indigo-400 decoration-2">ボーナス合算確率の維持</span>が最重要になります。',
+          '序盤戦です。この機種は<span class="font-bold underline decoration-indigo-400 decoration-2">ボーナス合成確率の維持</span>が最重要になります。',
         brackets: [
           {
             minProb: 50,
-            html: "現在の合算は非常に優秀です。このペースを維持できるか注目しましょう。",
+            html: "現在の合成は非常に優秀です。このペースを維持できるか注目しましょう。",
           },
           {
             maxProb: 30,
-            html: "ボーナスが重い立ち上がりです。合算が回復しない場合は深追い禁物です。",
+            html: "ボーナスが重い立ち上がりです。合成が回復しない場合は深追い禁物です。",
           },
         ],
       },
@@ -98,10 +98,10 @@ export const lastUtopiaConfig: MachineConfig = {
         brackets: [
           {
             minProb: 50,
-            html: "ボーナス合算がしっかり引けており、高設定の期待が持てる展開です。引き続き数値を注視しましょう。",
+            html: "ボーナス合成がしっかり引けており、高設定の期待が持てる展開です。引き続き数値を注視しましょう。",
           },
           {
-            html: "合算確率が落ちてきています。周囲の状況等も踏まえ、設定の見切り時を探る必要があります。",
+            html: "合成確率が落ちてきています。周囲の状況等も踏まえ、設定の見切り時を探る必要があります。",
           },
         ],
       },
@@ -111,18 +111,18 @@ export const lastUtopiaConfig: MachineConfig = {
         brackets: [
           {
             minProb: 70,
-            html: '<span class="font-bold text-purple-600 dark:text-purple-400">圧巻のボーナス合算です。間違いなく高設定挙動ですので、閉店まで回し切りましょう！</span>',
+            html: '<span class="font-bold text-purple-600 dark:text-purple-400">圧巻のボーナス合成です。間違いなく高設定挙動ですので、閉店まで回し切りましょう！</span>',
           },
           {
             minProb: 50,
-            html: '<span class="font-bold text-red-600 dark:text-red-400">合算確率は良好な水準をキープしています。設定5・6の可能性を意識して続行を推奨します。</span>',
+            html: '<span class="font-bold text-red-600 dark:text-red-400">合成確率は良好な水準をキープしています。設定5・6の可能性を意識して続行を推奨します。</span>',
           },
           {
             minProb: 30,
             html: '<span class="font-bold text-yellow-600 dark:text-yellow-400">中間設定寄りの数値です。悪くはないですが、これ以上の伸び悩みが見えたら撤退も視野に。</span>',
           },
           {
-            html: '<span class="font-bold text-slate-500">ボーナス合算が設定1以下の数値です。これ以上の投資は危険が高いと言えます。</span>',
+            html: '<span class="font-bold text-slate-500">ボーナス合成が設定1以下の数値です。これ以上の投資は危険が高いと言えます。</span>',
           },
         ],
       },
@@ -138,11 +138,11 @@ export const lastUtopiaConfig: MachineConfig = {
       ]
     },
     {
-      title: "合算の罠と、ベル逆算による「中間設定の見切り」",
+      title: "合成の罠と、ベル逆算による「中間設定の見切り」",
       paragraphs: [
-        "合算だけ見ていると判断を誤るのがこの機種の特性だ。<strong>中間設定と高設定の壁は、ボーナス確率の表面だけでは見えてこない。</strong>設定3〜4水準でも合算がそれなりに軽く見えることがあり、「高設定かもしれない」という錯覚が追加投資を呼ぶ。",
+        "合成だけ見ていると判断を誤るのがこの機種の特性だ。<strong>中間設定と高設定の壁は、ボーナス確率の表面だけでは見えてこない。</strong>設定3〜4水準でも合成がそれなりに軽く見えることがあり、「高設定かもしれない」という錯覚が追加投資を呼ぶ。",
         "そこで機能するのが上部のベル逆算ツールだ。差枚・ゲーム数・ボーナス回数を入力してベル確率を数値化し、設定6水準に届いているかを確認する。この作業を序盤から積み上げることで「中間設定の上ブレ」と「本物の高設定」を見分ける根拠が生まれる。",
-        "ベルをカウントせず、合算とボーナス回数だけで追いかけている限り、中間設定に時間と金を溶かし続けるリスクは消えない。逆算ツールを使うかどうかが、この機種における収支の分かれ目になる。<strong>数値で見抜け。感覚で追うな。</strong>"
+        "ベルをカウントせず、合成とボーナス回数だけで追いかけている限り、中間設定に時間と金を溶かし続けるリスクは消えない。逆算ツールを使うかどうかが、この機種における収支の分かれ目になる。<strong>数値で見抜け。感覚で追うな。</strong>"
       ]
     }
   ],

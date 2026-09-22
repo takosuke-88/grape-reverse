@@ -1,11 +1,13 @@
 // 前任者タブ（/:machineId/prev）。
 //
 // 途中から座った台では、データランプに前の人が回した分のゲーム数・BIG・REGが
-// 残っている。それを自分のカウントとは完全に別の画面で記録し、合算確率を出す。
+// 残っている。それを自分のカウントとは完全に別の画面で記録し、合成確率を出す。
 //
-// 【ベイズ判別には混ぜない】ここの数値は設定別期待度・AIアドバイス・グラフへ
-//   一切渡さない。前任者のぶどう回数は数えようがないため、総ゲーム数だけ増えると
-//   ぶどう確率が実際の数倍悪く計算され、判別が壊れる。
+// 【判別での扱い】2026-09-22に方針変更。設定判別ページ（MachinePageFactory）は
+//   ここの数値を「現在 − 前任者」の形で差し引いて使い、自分が回した分だけで判別する
+//   （足し込むのではなく引く。詳細は decisions-log 2026-09-22）。
+//   ぶどう/ベル逆算ページは従来どおり前任者データを参照しない。
+//   このページ自身の判別は、前任者の生データだけを ignoreGrape で評価している。
 
 import { useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
@@ -102,7 +104,7 @@ export default function PreviousDataPage() {
     }
   }, [config, totalGames, bigCount, regCount, isHana]);
 
-  // 詳細判別カードに出す確率指標。ぶどう未計測なので BIG / REG / 合算 の3つだけ
+  // 詳細判別カードに出す確率指標。ぶどう未計測なので BIG / REG / 合成 の3つだけ
   // （単独REG・チェリーREG・ぶどう確率は出さない）。
   const metrics = useMemo(() => {
     const allElements = config?.sections.flatMap((sec) => sec.elements) ?? [];
@@ -110,7 +112,7 @@ export default function PreviousDataPage() {
     const regEl = allElements.find((e) => e.id === "reg-count");
     const bonusTotal = bigCount + regCount;
 
-    // 合算の理論値は BIG と REG の確率を足して逆数に戻す
+    // 合成の理論値は BIG と REG の確率を足して逆数に戻す
     const combinedValues: Record<number, number> = {};
     if (bigEl?.settingValues && regEl?.settingValues) {
       settings.forEach((st) => {
@@ -132,7 +134,7 @@ export default function PreviousDataPage() {
         settingValues: regEl?.settingValues,
       },
       {
-        label: "合算確率",
+        label: "合成確率",
         val: bonusTotal > 0 ? totalGames / bonusTotal : 0,
         settingValues: Object.keys(combinedValues).length
           ? combinedValues
@@ -165,7 +167,7 @@ export default function PreviousDataPage() {
     <div className="min-h-screen w-full max-w-full overflow-x-clip bg-slate-50 dark:bg-slate-950">
       <Seo
         pageTitle={`${machineName} 前任者データ｜GrapeReverse`}
-        pageDescription={`${machineName}の前任者が回した総ゲーム数・BIG・REGを入力して、BIG確率・REG確率・合算確率を確認できます。台に途中から座ったときの判断材料に。`}
+        pageDescription={`${machineName}の前任者が回した総ゲーム数・BIG・REGを入力して、BIG確率・REG確率・合成確率を確認できます。台に途中から座ったときの判断材料に。`}
         pagePath={`/${machineId}/prev`}
         noindex
       />
@@ -238,7 +240,7 @@ export default function PreviousDataPage() {
               to={`/${machineId}`}
               className="flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
             >
-              🎰 小役カウンター
+              🎰 設定判別
             </Link>
             <Link
               to={`/${machineId}/grape`}
@@ -313,7 +315,7 @@ export default function PreviousDataPage() {
             />
           </div>
 
-          {/* BIG確率・REG確率・合算確率（近似設定ラベル付き） */}
+          {/* BIG確率・REG確率・合成確率（近似設定ラベル付き） */}
           <div className="mb-4 mt-4 grid grid-cols-2 gap-2">
             {metrics.map((m, idx) => (
               <ProbabilityMetricCard

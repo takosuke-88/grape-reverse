@@ -288,7 +288,7 @@ export default function MachineSpecPage() {
               to={`/${machineId}`}
               className="flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
             >
-              🎰 小役カウンター
+              🎰 設定判別
             </Link>
             <Link
               to={`/${machineId}/grape`}
@@ -347,7 +347,7 @@ export default function MachineSpecPage() {
                       <th className={`${thCls} w-8`}>設定</th>
                       <th className={thCls}>BIG確率</th>
                       <th className={thCls}>REG確率</th>
-                      <th className={thCls}>合算</th>
+                      <th className={thCls}>合成</th>
                     </tr>
                   </thead>
                   <tbody>
