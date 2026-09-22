@@ -86,16 +86,9 @@ export interface MachineConfig {
     };
     settings?: number[]; // [1, 2, 3, 4, 5, 6] by default
     settingLabels?: Record<number, string>; // e.g. {6: "V"}
-    /**
-     * 4大指標カードの近似設定ラベル用の特例。
-     * 特定のsettingValueが複数設定で一致してしまう機種（アイムジャグラーEX等）向け。
-     * item.settingValues[approxSetting] が matchValue と一致した場合、通常の
-     * 「(設定X近似)」の代わりに label をそのまま表示する。
-     */
-    approximationLabelOverride?: {
-      matchValue: number;
-      label: string;
-    };
+    // 旧 approximationLabelOverride は廃止（2026-09-22）。
+    // 設定値が一致する設定をまとめて「(設定5-6近似)」と出す処理が
+    // src/utils/approximation-label.ts に入り、特例が不要になったため。
   };
   detailedProbabilities?: {
     // 各配列は [設定1, 設定2, 設定3, 設定4, 設定5, 設定6] の順

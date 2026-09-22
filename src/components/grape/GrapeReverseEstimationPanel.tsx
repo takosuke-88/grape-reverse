@@ -6,6 +6,7 @@ import type {
 } from "../../types/machine-schema";
 import { calculateGrapeWeight } from "../../logic/bayes-estimator";
 import { formatBonusText } from "../../utils/formatters";
+import { resolveApproximation } from "../../utils/approximation-label";
 import EstimationResultDisplay from "../dynamic-ui/EstimationResultDisplay";
 import EstimationAiAdvice from "../dynamic-ui/EstimationAiAdvice";
 
@@ -221,22 +222,15 @@ export default function GrapeReverseEstimationPanel({
 
         <div className="mb-4 grid grid-cols-2 gap-2 mt-4">
           {metricItems.map((item, idx) => {
-            let approxSetting: number | null = null;
-            if (item.val > 0 && item.settingValues) {
-              let minDiff = Infinity;
-              settings.forEach((setting) => {
-                const settingVal = (
-                  item.settingValues as Record<number, number>
-                )[setting];
-                if (settingVal) {
-                  const diff = Math.abs(item.val - settingVal);
-                  if (diff < minDiff) {
-                    minDiff = diff;
-                    approxSetting = setting;
-                  }
-                }
-              });
-            }
+            // 設定判別ページの指標カードと同じ共通処理を使う。
+            // 以前はここに同じ判定が別実装で置かれ、アイムジャグラーEXの特例が
+            // `config.id === "aimex"` のベタ書きになっていた（architecture.md §5
+            // が禁じている書き方）。同値の設定はラベル側でまとめて出る。
+            const approximation = resolveApproximation(
+              item.val,
+              item.settingValues as Record<number, number> | undefined,
+              config,
+            );
 
             return (
               <div
@@ -249,18 +243,15 @@ export default function GrapeReverseEstimationPanel({
                 <div className="text-xl font-bold text-slate-800 dark:text-white">
                   {item.val > 0 ? `1/${item.format(item.val)}` : "---"}
                 </div>
-                {approxSetting && (
+                {approximation && (
                   <div
                     className={`text-xs font-bold ${
-                      approxSetting >= 5
+                      approximation.settings[0] >= 5
                         ? "text-red-500 dark:text-red-400"
                         : "text-blue-500 dark:text-blue-400"
                     }`}
                   >
-                    {config.id === "aimex" &&
-                    item.settingValues![approxSetting] === 255.0
-                      ? "(設定5・6近似)"
-                      : `(設定${config.specs?.settingLabels?.[approxSetting] || approxSetting}近似)`}
+                    {approximation.label}
                   </div>
                 )}
               </div>

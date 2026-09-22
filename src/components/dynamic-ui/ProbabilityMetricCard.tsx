@@ -2,10 +2,12 @@
 //
 // 小役カウンターページ（MachinePageFactory）の「4大指標」グリッドに
 // ベタ書きされていたものを、前任者ページからも使えるよう切り出したもの。
-// DOM構造・クラス・近似設定ラベルの判定ロジックは元の実装と同一。
+// DOM構造・クラスは元の実装と同一。近似設定ラベルの判定だけは 2026-09-22 に
+// approximation-label.ts へ移し、逆算ページの指標カードと共通化した。
 
 import type { MachineConfig } from "../../types/machine-schema";
 import { formatBonusText } from "../../utils/formatters";
+import { resolveApproximation } from "../../utils/approximation-label";
 
 interface ProbabilityMetricCardProps {
   label: string;
@@ -32,21 +34,9 @@ export default function ProbabilityMetricCard({
   settingValues,
   config,
 }: ProbabilityMetricCardProps) {
-  let approxSetting: number | null = null;
-  if (val > 0 && settingValues) {
-    let minDiff = Infinity;
-    const settings = config?.specs?.settings || [1, 2, 3, 4, 5, 6];
-    settings.forEach((setting) => {
-      const settingVal = settingValues[setting];
-      if (settingVal) {
-        const diff = Math.abs(val - settingVal);
-        if (diff < minDiff) {
-          minDiff = diff;
-          approxSetting = setting;
-        }
-      }
-    });
-  }
+  // 設定値が一致している設定は「(設定4-6近似)」のようにまとめて出す。
+  // 色分けは同値グループの最小設定を基準にする（approximation-label.ts 参照）。
+  const approximation = resolveApproximation(val, settingValues, config);
 
   return (
     <div className="flex flex-col items-center justify-center rounded-lg border border-slate-100 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-800">
@@ -61,19 +51,15 @@ export default function ProbabilityMetricCard({
       <div className="text-xl font-bold text-slate-800 dark:text-white">
         {val > 0 ? `1/${format(val)}` : "---"}
       </div>
-      {approxSetting && (
+      {approximation && (
         <div
           className={`text-xs font-bold ${
-            approxSetting >= 5
+            approximation.settings[0] >= 5
               ? "text-red-500 dark:text-red-400"
               : "text-blue-500 dark:text-blue-400"
           }`}
         >
-          {config?.specs?.approximationLabelOverride &&
-          settingValues![approxSetting] ===
-            config.specs.approximationLabelOverride.matchValue
-            ? config.specs.approximationLabelOverride.label
-            : `(設定${config?.specs?.settingLabels?.[approxSetting] || approxSetting}近似)`}
+          {approximation.label}
         </div>
       )}
     </div>
