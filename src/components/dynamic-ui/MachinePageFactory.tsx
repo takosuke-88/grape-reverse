@@ -25,6 +25,7 @@ import CurrentPreviousToggle from "../machine/CurrentPreviousToggle";
 import SettingProbabilityChart from "./SettingProbabilityChart";
 import ProbabilityMetricCard from "./ProbabilityMetricCard";
 import DynamicInput from "./DynamicInput";
+import { useConfirmDialog } from "../ui/ConfirmDialog";
 import {
   isGridOnlyCompactCounterId,
   COUNTER_HINT_TEXT,
@@ -65,6 +66,7 @@ interface MachinePageFactoryProps {
 
 const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   const navigate = useNavigate();
+  const { confirm, confirmDialog } = useConfirmDialog();
 
   // バイブレーションON/OFF
   const [vibrationEnabled, setVibrationEnabled] = useLocalStorage<boolean>(
@@ -370,15 +372,16 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     return () => clearTimeout(timer);
   }, [judgmentInputs, judgmentTotalGames, config, currentCategory]);
 
-  const handleReset = () => {
+  const handleReset = async () => {
     // 前任者データも消えることを明記する。判別が「現在 − 前任者」で連動しており、
     // 片方だけ残すと判別の前提が崩れるため、この2つは常にセットで消す。
-    if (
-      !window.confirm(
-        "このページの入力を全てリセットしますか？\n\n前任者ページに入力した内容も一緒に削除されます。",
-      )
-    )
-      return;
+    const ok = await confirm({
+      title: "入力をリセットします",
+      message: "このページに入力した内容を全て削除します。元に戻せません。",
+      warning: "前任者ページに入力した内容も一緒に削除されます。",
+      confirmLabel: "リセット",
+    });
+    if (!ok) return;
     removeInputValues();
     // 詳細判別が前任者データを参照するため、localStorage を直接消すのではなく
     // フック経由で消して画面上のstateも同時に更新する。
@@ -487,6 +490,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-clip bg-slate-50 dark:bg-slate-950">
+      {confirmDialog}
       {/* タイトルバー（スクロールアウトする・固定しない） */}
       <div
         className={`${themeColor} py-3 px-4 text-white shadow-lg transition-colors duration-500`}

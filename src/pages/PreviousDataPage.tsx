@@ -15,6 +15,7 @@ import { useLocalStorage } from "../hooks/useLocalStorage";
 import { AVAILABLE_MACHINES } from "../data/machine-list";
 import { CONFIG_MAP } from "../data/machine-config-map";
 import Seo from "../components/Seo";
+import { useConfirmDialog } from "../components/ui/ConfirmDialog";
 import DynamicInput from "../components/dynamic-ui/DynamicInput";
 import CurrentPreviousToggle from "../components/machine/CurrentPreviousToggle";
 import EstimationResultDisplay from "../components/dynamic-ui/EstimationResultDisplay";
@@ -53,6 +54,7 @@ const ELEM_REG: DiscriminationElement = {
 export default function PreviousDataPage() {
   const { machineId } = useParams<{ machineId: string }>();
   const navigate = useNavigate();
+  const { confirm, confirmDialog } = useConfirmDialog();
 
   const config = machineId ? CONFIG_MAP[machineId] : null;
   const machineInfo = AVAILABLE_MACHINES.find((m) => m.id === machineId);
@@ -81,13 +83,14 @@ export default function PreviousDataPage() {
   // 設定判別ページの入力も一緒に消す。判別が「現在 − 前任者」で連動しているため、
   // 前任者だけ消すと残った現在の入力が別基準で判定されることになる（2026-09-22決定）。
   // 逆算ページは判別に関与しない独立したページなので触らない。
-  const handleReset = () => {
-    if (
-      !window.confirm(
-        "前任者データをリセットしますか？\n\n設定判別ページに入力した内容も一緒に削除されます。",
-      )
-    )
-      return;
+  const handleReset = async () => {
+    const ok = await confirm({
+      title: "前任者データをリセットします",
+      message: "このページに入力した内容を全て削除します。元に戻せません。",
+      warning: "設定判別ページに入力した内容も一緒に削除されます。",
+      confirmLabel: "リセット",
+    });
+    if (!ok) return;
     removePrevData();
     const id = machineId ?? "";
     [counterDataStorageKey(id), ...bonusHistoryStorageKeys(id)].forEach((key) =>
@@ -179,6 +182,7 @@ export default function PreviousDataPage() {
 
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-clip bg-slate-50 dark:bg-slate-950">
+      {confirmDialog}
       <Seo
         pageTitle={`${machineName} 前任者データ｜GrapeReverse`}
         pageDescription={`${machineName}の前任者が回した総ゲーム数・BIG・REGを入力して、BIG確率・REG確率・合成確率を確認できます。台に途中から座ったときの判断材料に。`}

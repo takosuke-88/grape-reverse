@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { AVAILABLE_MACHINES } from "../data/machine-list";
 import Seo from "../components/Seo";
+import { useConfirmDialog } from "../components/ui/ConfirmDialog";
 import { CONFIG_MAP } from "../data/machine-config-map";
 import type { DiscriminationElement, EstimationResult, MachineConfig, UserInputs } from "../types/machine-schema";
 import { calculateMultinomialEstimation } from "../logic/bayes-estimator";
@@ -105,6 +106,7 @@ const ELEM_REG: DiscriminationElement = {
 export default function GrapeReversePage() {
   const { machineId } = useParams<{ machineId: string }>();
   const navigate = useNavigate();
+  const { confirm, confirmDialog } = useConfirmDialog();
 
   const config = machineId ? CONFIG_MAP[machineId] : null;
   const machineInfo = AVAILABLE_MACHINES.find((m) => m.id === machineId);
@@ -140,10 +142,15 @@ export default function GrapeReversePage() {
   const update = (key: string, v: number) =>
     setGrapeData((prev) => ({ ...prev, [key]: v }));
 
-  const handleReset = () => {
-    if (!window.confirm(`${roleLabel}逆算の入力を全てリセットしますか？`)) return;
-    // このページは設定判別・前任者データとは独立しているため、自分の入力だけを消す
-    // （2026-09-22決定。以前は前任者データも消していた）。
+  // このページは設定判別・前任者データとは独立しているため、自分の入力だけを消す
+  // （2026-09-22決定。以前は前任者データも消していた）。
+  const handleReset = async () => {
+    const ok = await confirm({
+      title: `${roleLabel}逆算をリセットします`,
+      message: "このページに入力した内容を全て削除します。元に戻せません。",
+      confirmLabel: "リセット",
+    });
+    if (!ok) return;
     setGrapeData({});
   };
 
@@ -242,6 +249,7 @@ export default function GrapeReversePage() {
       />
 
       <div className="min-h-screen w-full max-w-full overflow-x-clip bg-slate-50 dark:bg-slate-950">
+        {confirmDialog}
 
         {/* タイトルバー（スクロールアウト） ─ MachinePageFactoryと同一 */}
         <div
