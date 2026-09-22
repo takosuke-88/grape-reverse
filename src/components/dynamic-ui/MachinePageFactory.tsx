@@ -15,7 +15,10 @@ import { ALL_COLUMNS, type ColumnEntry } from "../../data/column-content";
 import { formatBonusText } from "../../utils/formatters";
 import EstimationResultDisplay from "./EstimationResultDisplay";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
-import { previousDataStorageKey } from "../../data/previous-data-storage";
+import {
+  PREVIOUS_DATA_INITIAL,
+  previousDataStorageKey,
+} from "../../data/previous-data-storage";
 import CurrentPreviousToggle from "../machine/CurrentPreviousToggle";
 import SettingProbabilityChart from "./SettingProbabilityChart";
 import ProbabilityMetricCard from "./ProbabilityMetricCard";
@@ -47,6 +50,12 @@ const COMPACT_CARD_IDS = new Set([
 // （MachineSpecPage.tsx の AccordionHeader）と同じ方式に揃えている。
 // 未保存時は開いた状態で開始する（`?? true`）。
 const COLLAPSIBLE_CARD_IDS = new Set(["bonus-breakdown-section"]);
+
+// 総ゲーム数バーに「設定Nかも？」を出し始めるゲーム数（2026-09-21）。
+// 根拠はシミュレーション実測（decisions-log 参照）。的中率自体は8000G回しても
+// 38%程度にしかならないため、この閾値は「当たるようになる線」ではなく
+// 「低設定を高設定と誤表示する害が許容範囲まで下がる線」として決めている。
+const MIN_GAMES_FOR_SETTING_HINT = 3000;
 
 interface MachinePageFactoryProps {
   config: MachineConfig;
@@ -117,6 +126,12 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     Record<string, number | boolean | string>
   >(`grape-reverse-data-${config.id}`, () => initializeValues());
 
+  // 前任者データ（/:machineId/prev で記録したデータランプの残り）。
+  // 詳細判別で「現在 − 前任者」を求めるために読み出す（書き込みは前任者ページ側）。
+  const [previousData, , removePreviousData] = useLocalStorage<
+    Record<string, number>
+  >(previousDataStorageKey(config.id), PREVIOUS_DATA_INITIAL);
+
   // ルーティングで機種が切り替わった時にステートを再初期化する
   useEffect(() => {
     setEstimationResults(null);
@@ -175,15 +190,112 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   const themeColor = config.themeColor || "bg-blue-600";
   const totalGames = Number(currentInputs["total-games"]) || 0;
 
-  // 総ゲーム数バーの右下に出す BIG+REG 合算確率（2026-09-13）。
+  // ── 詳細判別に渡す入力値（現在 − 前任者）──────────────────────────
+  // 前任者ページ（/:machineId/prev）に記録があるとき、詳細判別は「自分が回した分」
+  // だけで判定する。カウンターバーに表示される数字そのものは一切変えない。
+  //
+  // BIG/REG は合計からではなく「契機不明」から引く。前任者のボーナスは契機を目撃
+  // できないため必ず契機不明バケットに入っており（合計を直接入力すると差分が契機
+  // 不明へ自動で吸収される handleValueChange 参照）、単独/チェリーは自分が目撃した
+  // 分だけだから。この引き方なら「単独＋チェリー＋契機不明＝合計」の不変条件が保たれ、
+  // REG内訳を使った判別（bayes-estimator の useRegSplit）が無効化されずに済む。
+  const judgment = useMemo<{
+    inputs: Record<string, number | boolean | string>;
+    totalGames: number;
+    /** raw=前任者なし / prevOnly=現在未入力で前任者の生データを使用 / invalid=矛盾入力 / diff=差し引き成立 */
+    mode: "raw" | "prevOnly" | "invalid" | "diff";
+  }>(() => {
+    const prevTotal = Math.max(0, Number(previousData["total-games"]) || 0);
+    const prevBig = Math.max(0, Number(previousData["big-count"]) || 0);
+    const prevReg = Math.max(0, Number(previousData["reg-count"]) || 0);
+    const hasPrev = prevTotal > 0 || prevBig > 0 || prevReg > 0;
+
+    // 現在ページが未入力なら、前任者の生データをそのまま判別に使う
+    if (totalGames === 0) {
+      if (!hasPrev)
+        return { inputs: currentInputs, totalGames: 0, mode: "raw" };
+      return {
+        inputs: {
+          ...currentInputs,
+          "total-games": prevTotal,
+          "big-count": prevBig,
+          "reg-count": prevReg,
+        },
+        totalGames: prevTotal,
+        mode: "prevOnly",
+      };
+    }
+
+    if (!hasPrev)
+      return { inputs: currentInputs, totalGames, mode: "raw" };
+
+    const bigUnknown = Number(currentInputs["big-unknown-count"]) || 0;
+    const regUnknown = Number(currentInputs["reg-unknown-count"]) || 0;
+
+    // 「現在 < 前任者」は起こり得ない矛盾（入力ミス等）。マイナスのまま計算すると
+    // 逆向きの証拠として効いて低設定へ強く倒れた結果が正常な見た目で出てしまうため、
+    // 判別不能として未入力時と同じ表示に倒す。
+    if (totalGames < prevTotal || bigUnknown < prevBig || regUnknown < prevReg) {
+      return {
+        inputs: {
+          ...currentInputs,
+          "total-games": 0,
+          "big-count": 0,
+          "reg-count": 0,
+        },
+        totalGames: 0,
+        mode: "invalid",
+      };
+    }
+
+    const adjBigUnknown = bigUnknown - prevBig;
+    const adjRegUnknown = regUnknown - prevReg;
+    const bigSolo = Number(currentInputs["big-solo-count"]) || 0;
+    const bigCherry = Number(currentInputs["big-cherry-count"]) || 0;
+    const regSolo = Number(currentInputs["reg-solo-count"]) || 0;
+    const regCherry = Number(currentInputs["reg-cherry-count"]) || 0;
+
+    return {
+      inputs: {
+        ...currentInputs,
+        "total-games": totalGames - prevTotal,
+        "big-unknown-count": adjBigUnknown,
+        "big-count": bigSolo + bigCherry + adjBigUnknown,
+        "reg-unknown-count": adjRegUnknown,
+        "reg-count": regSolo + regCherry + adjRegUnknown,
+      },
+      totalGames: totalGames - prevTotal,
+      mode: "diff",
+    };
+  }, [currentInputs, totalGames, previousData]);
+
+  const judgmentInputs = judgment.inputs;
+  const judgmentTotalGames = judgment.totalGames;
+
+  // 前任者分を差し引いて判別している間は、BIG/REGのラベルに自分の分を添える
+  // （例: `BIG回数（差分 7）`）。バーの数字はデータランプの累積値のままなので、
+  // 「今自分が何回引いたか」を前任者ページと往復せず確認できるようにするため。
+  // ラベルを「BIG差分」に置き換えないのは、バーに出ている数字が差分ではないから。
+  // 差し引きが成立している mode==="diff" のときだけ出す（現在ページ未入力で前任者の
+  // 生データを使っている場合や、矛盾入力で判別を止めている場合は差分ではない）。
+  const DIFF_LABEL_IDS = new Set(["big-count", "reg-count"]);
+  const labelWithDiff = (element: DiscriminationElement) => {
+    if (judgment.mode !== "diff" || !DIFF_LABEL_IDS.has(element.id)) {
+      return element.label;
+    }
+    const diff = Number(judgmentInputs[element.id]) || 0;
+    return `${element.label}（差分 ${diff}回）`;
+  };
+
+  // 総ゲーム数バーの右下に出す BIG+REG 合成確率（2026-09-13）。
   // 逆算ページ（GrapeReversePage）の総ゲーム数バーと同じ表記・同じ計算に揃えている。
   // total-games は showProb が false のため、専用の overrideProbText で渡す。
   const bonusTotalCount =
-    (Number(currentInputs["big-count"]) || 0) +
-    (Number(currentInputs["reg-count"]) || 0);
+    (Number(judgmentInputs["big-count"]) || 0) +
+    (Number(judgmentInputs["reg-count"]) || 0);
   const bonusProbText =
-    bonusTotalCount > 0 && totalGames > 0
-      ? `1/${(totalGames / bonusTotalCount).toFixed(1)}`
+    bonusTotalCount > 0 && judgmentTotalGames > 0
+      ? `1/${(judgmentTotalGames / bonusTotalCount).toFixed(1)}`
       : undefined;
 
   /* 自動計算: 入力値が変更されたら自動的に計算を実行 */
@@ -223,16 +335,16 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   useEffect(() => {
     // デバウンス用のタイマー
     const timer = setTimeout(() => {
-      // 総ゲーム数が入力されている場合のみ自動計算
-      if (totalGames > 0) {
+      // 総ゲーム数（現在 − 前任者）が入力されている場合のみ自動計算
+      if (judgmentTotalGames > 0) {
         setError(null);
         try {
           // ジャグラー: 多項分布モデル（cherry > 0 なら4軸、0なら3軸に自動切替）
           // ハナハナ: 既存の重み付きモデル（ランプ・フェザー等の多要素判別を維持）
           const isJuggler = currentCategory === "juggler";
           const results = isJuggler
-            ? calculateMultinomialEstimation(config, currentInputs)
-            : calculateEstimation(config, currentInputs);
+            ? calculateMultinomialEstimation(config, judgmentInputs)
+            : calculateEstimation(config, judgmentInputs);
           setEstimationResults(results);
         } catch (err) {
           console.error("❌ 自動計算エラー:", err);
@@ -240,19 +352,21 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           setEstimationResults(null);
         }
       } else {
-        // 総ゲーム数が0の場合は結果をクリア
+        // 総ゲーム数が0（未入力、または現在＜前任者の矛盾）の場合は結果をクリア
         setEstimationResults(null);
       }
     }, 500); // 500ms のデバウンス
 
     return () => clearTimeout(timer);
-  }, [currentInputs, totalGames, config, currentCategory]);
+  }, [judgmentInputs, judgmentTotalGames, config, currentCategory]);
 
   const handleReset = () => {
     if (!window.confirm("これまでのカウントデータを全てリセットしますか？")) return;
     removeInputValues();
-    // 前任者タブのデータも一緒に消す（台を移れば両方不要になるため）
-    window.localStorage.removeItem(previousDataStorageKey(config.id));
+    // 前任者タブのデータも一緒に消す（台を移れば両方不要になるため）。
+    // 詳細判別が前任者データを参照するようになったため、localStorage を直接消すのではなく
+    // フック経由で消して画面上のstateも同時に更新する。
+    removePreviousData();
     setBigHistory([]);
     setRegHistory([]);
     setEstimationResults(null);
@@ -321,13 +435,13 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     });
   }, [config.sections]);
 
-  // ブドウ信頼度の計算
+  // ブドウ信頼度の計算（詳細判別カード内の表示なので判別用ゲーム数を使う）
   const grapeReliability = useMemo(() => {
     return calculateGrapeWeight(
-      totalGames,
+      judgmentTotalGames,
       config.specs?.judgmentWeights?.grapeWeightMap,
     );
-  }, [totalGames, config]);
+  }, [judgmentTotalGames, config]);
 
   // 最有力設定を計算
   const mostLikelySetting = useMemo(() => {
@@ -337,16 +451,23 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     );
   }, [estimationResults]);
 
-  // 総ゲーム数バーで合算確率の上に出す「設定Nかも？」（2026-09-13）。
+  // 総ゲーム数バーで合成確率の上に出す「設定Nかも？」（2026-09-13）。
   // 詳細判別カードの最有力設定と同じ値を使う。設定ラベルの特例
   // （ニューキングハナハナV-30 の「設定V」等）にも追従させる。
+  //
+  // 判別に使えるゲーム数（現在 − 前任者）が MIN_GAMES_FOR_SETTING_HINT 未満の
+  // 間は表示しない。マイジャグラーVで設定既知の台を18,000台シミュレートした
+  // 結果、「実は設定1-2なのに設定5-6と表示」する率が 500G で29.3%（約4台に1台）
+  // あり、3000Gで13.4%まで下がる。ここが誤表示の落ち方の節目で、ジャグラーの
+  // AI判定アドバイスが中盤戦の境目にしている3000Gとも一致する。
   const mostLikelySettingText = useMemo(() => {
     if (!mostLikelySetting) return undefined;
+    if (judgmentTotalGames < MIN_GAMES_FOR_SETTING_HINT) return undefined;
     const label =
       config.specs?.settingLabels?.[mostLikelySetting.setting] ??
       mostLikelySetting.setting;
     return `設定${label}かも？`;
-  }, [mostLikelySetting, config.specs?.settingLabels]);
+  }, [mostLikelySetting, judgmentTotalGames, config.specs?.settingLabels]);
 
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-clip bg-slate-50 dark:bg-slate-950">
@@ -418,7 +539,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
               className={`flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs`}
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             >
-              🎰 小役カウンター
+              🎰 設定判別
             </button>
             <Link
               to={`/${config.id}/grape`}
@@ -537,6 +658,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                           compactLayout={compactLayout}
                           element={{
                             ...element,
+                            label: labelWithDiff(element),
                             // BIG/REG回数は直接入力可能にする（詳細内訳と自動同期）
                             isReadOnly:
                               element.id === "big-count" || element.id === "reg-count"
@@ -545,11 +667,14 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                           }}
                           value={currentInputs[element.id]}
                           onChange={(value: number | string | boolean) => handleValueChange(element.id, value)}
-                          totalGames={totalGames}
+                          // バー右下の確率も詳細判別と同じ基準（現在 − 前任者）に揃える。
+                          // バーに表示する数字は生の入力値（value）のまま変えない。
+                          totalGames={judgmentTotalGames}
+                          probCount={Number(judgmentInputs[element.id]) || 0}
                           vibrationEnabled={vibrationEnabled}
                           overrideProbText={
                             element.id === "total-games" && bonusProbText
-                              ? `合算 ${bonusProbText}`
+                              ? `合成 ${bonusProbText}`
                               : undefined
                           }
                           aboveProbText={
@@ -627,7 +752,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   probability: 0,
                 }))
               }
-              inputs={currentInputs}
+              inputs={judgmentInputs}
               grapeReliability={grapeReliability}
               config={config}
             />
@@ -639,8 +764,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
               {
                 label: "BIG確率",
                 val: (() => {
-                  const count = Number(currentInputs["big-count"]) || 0;
-                  return count > 0 ? totalGames / count : 0;
+                  const count = Number(judgmentInputs["big-count"]) || 0;
+                  return count > 0 ? judgmentTotalGames / count : 0;
                 })(),
                 format: (v: number) => v.toFixed(1),
                 settingValues: (() => {
@@ -653,8 +778,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
               {
                 label: "REG確率",
                 val: (() => {
-                  const count = Number(currentInputs["reg-count"]) || 0;
-                  return count > 0 ? totalGames / count : 0;
+                  const count = Number(judgmentInputs["reg-count"]) || 0;
+                  return count > 0 ? judgmentTotalGames / count : 0;
                 })(),
                 format: (v: number) => v.toFixed(1),
                 settingValues: (() => {
@@ -670,9 +795,9 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                       label: "BIG中スイカ",
                         val: (() => {
                           const bCount =
-                            Number(currentInputs["big-count"]) || 0;
+                            Number(judgmentInputs["big-count"]) || 0;
                           const count =
-                            Number(currentInputs["big-suika-count"]) || 0;
+                            Number(judgmentInputs["big-suika-count"]) || 0;
                           return bCount > 0 && count > 0
                             ? (bCount * 24) / count
                             : 0;
@@ -695,12 +820,12 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         })(),
                       },
                       {
-                        label: "合算フェザー",
+                        label: "合成フェザー",
                         val: (() => {
                           const bCount =
-                            Number(currentInputs["big-count"]) || 0;
+                            Number(judgmentInputs["big-count"]) || 0;
                           const count =
-                            Number(currentInputs["feather-lamp-count"]) || 0;
+                            Number(judgmentInputs["feather-lamp-count"]) || 0;
                           return bCount > 0 && count > 0 ? bCount / count : 0;
                         })(),
                         format: (v: number) => v.toFixed(1),
@@ -726,8 +851,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         label: "単独REG",
                         val: (() => {
                           const count =
-                            Number(currentInputs["reg-solo-count"]) || 0;
-                          return count > 0 ? totalGames / count : 0;
+                            Number(judgmentInputs["reg-solo-count"]) || 0;
+                          return count > 0 ? judgmentTotalGames / count : 0;
                         })(),
                         format: (v: number) => v.toFixed(1),
                         settingValues: (() => {
@@ -741,8 +866,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         label: "チェリーREG",
                         val: (() => {
                           const count =
-                            Number(currentInputs["reg-cherry-count"]) || 0;
-                          return count > 0 ? totalGames / count : 0;
+                            Number(judgmentInputs["reg-cherry-count"]) || 0;
+                          return count > 0 ? judgmentTotalGames / count : 0;
                         })(),
                         format: (v: number) => v.toFixed(1),
                         settingValues: (() => {
@@ -755,12 +880,12 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                     ]
               ),
               {
-                label: "合算確率",
+                label: "合成確率",
                 val: (() => {
-                  const big = Number(currentInputs["big-count"]) || 0;
-                  const reg = Number(currentInputs["reg-count"]) || 0;
+                  const big = Number(judgmentInputs["big-count"]) || 0;
+                  const reg = Number(judgmentInputs["reg-count"]) || 0;
                   const total = big + reg;
-                  return total > 0 ? totalGames / total : 0;
+                  return total > 0 ? judgmentTotalGames / total : 0;
                 })(),
                 format: (v: number) => v.toFixed(1),
                 settingValues: (() => {
@@ -771,7 +896,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                     .flatMap((s) => s.elements)
                     .find((e) => e.id === "reg-count");
 
-                  // BIG・REG両方の確率設定があれば、合算確率を計算して返す
+                  // BIG・REG両方の確率設定があれば、合成確率を計算して返す
                   if (bigEl?.settingValues && regEl?.settingValues) {
                     const combined: Record<number, number> = {};
                     const settings = config.specs?.settings || [
@@ -799,8 +924,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 val: (() => {
                   const countId =
                     currentCategory === "hana" ? "bell-count" : "grape-count";
-                  const count = Number(currentInputs[countId]) || 0;
-                  return count > 0 ? totalGames / count : 0;
+                  const count = Number(judgmentInputs[countId]) || 0;
+                  return count > 0 ? judgmentTotalGames / count : 0;
                 })(),
                 format: (v: number) => v.toFixed(2),
                 settingValues: (() => {
@@ -830,6 +955,11 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           </h3>
 
           {(() => {
+            // このブロック（AI判定アドバイス）は詳細判別カードの一部なので、
+            // 段階判定・文言分岐・見出しの「◯◯G時点」すべてで判別用
+            // （現在 − 前任者）のゲーム数を使う。
+            const totalGames = judgmentTotalGames;
+
             // 高設定（設定5・6）の合算確率を計算
             const highSettingProb = (estimationResults || [])
               .filter((r) => r.setting >= 5)
@@ -898,7 +1028,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                     <>
                       {totalGames <= 1500 && (
                         <>
-                          序盤戦です。ボーナス合算よりも
+                          序盤戦です。ボーナス合成よりも
                           <span className="font-bold underline decoration-indigo-400 decoration-2">
                             BIG中のスイカ出現率や、REGサイドランプの色（奇遇判別）
                           </span>
@@ -913,7 +1043,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         <>
                           中盤戦に差し掛かりました。
                           <span className="font-bold">
-                            ベル逆算値とボーナス合算
+                            ベル逆算値とボーナス合成
                           </span>
                           のバランスが重要になります。
                           {highSettingProb >= 50
@@ -1082,7 +1212,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                               const cells = [];
 
                               let currentValue =
-                                Number(currentInputs[element.id]) || 0;
+                                Number(judgmentInputs[element.id]) || 0;
 
                               // 合成確率計算のための特例処理 (既存ロジック維持)
                               if (
@@ -1091,15 +1221,15 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                                 element.label.includes("合算")
                               ) {
                                 const big =
-                                  Number(currentInputs["big-count"]) || 0;
+                                  Number(judgmentInputs["big-count"]) || 0;
                                 const reg =
-                                  Number(currentInputs["reg-count"]) || 0;
+                                  Number(judgmentInputs["reg-count"]) || 0;
                                 currentValue = big + reg;
                               }
 
                               const currentProb =
-                                totalGames > 0 && currentValue > 0
-                                  ? totalGames / currentValue
+                                judgmentTotalGames > 0 && currentValue > 0
+                                  ? judgmentTotalGames / currentValue
                                   : null;
                               const expectedValue =
                                 element.settingValues[setting];
@@ -1177,13 +1307,13 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                                   combinedExpected.toFixed(1);
 
                                 const bigCount =
-                                  Number(currentInputs["big-count"]) || 0;
+                                  Number(judgmentInputs["big-count"]) || 0;
                                 const regCount =
-                                  Number(currentInputs["reg-count"]) || 0;
+                                  Number(judgmentInputs["reg-count"]) || 0;
                                 const totalCount = bigCount + regCount;
                                 const combinedProb =
-                                  totalGames > 0 && totalCount > 0
-                                    ? totalGames / totalCount
+                                  judgmentTotalGames > 0 && totalCount > 0
+                                    ? judgmentTotalGames / totalCount
                                     : null;
 
                                 let isCombinedClosest = false;

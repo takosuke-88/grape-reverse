@@ -26,8 +26,14 @@ interface DynamicInputProps {
   onDirectInput?: () => void;
   /** 2列グリッド内のカウンター（ぶどう・内訳など） */
   compactLayout?: boolean;
-  /** 確率テキストを強制上書き（例: total-games の合算確率表示） */
+  /** 確率テキストを強制上書き（例: total-games の合成確率表示） */
   overrideProbText?: string;
+  /**
+   * 確率計算に使う回数（未指定ならバーに表示中の値をそのまま使う）。
+   * 設定判別ページで前任者分を差し引いた回数を渡すための口。バーに表示する
+   * 数字（生の入力値）は変えずに、確率だけ詳細判別と同じ基準に揃える。
+   */
+  probCount?: number;
   /**
    * 確率テキストの「上」に重ねる小さな一行（例: total-games の「設定5かも？」）。
    * probText（absolute right-2 bottom-1.5）の座標・スタイルには一切触れず、
@@ -160,6 +166,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   onDirectInput,
   compactLayout = false,
   overrideProbText,
+  probCount,
   aboveProbText,
 }) => {
   // 「＋1」「−1」の飛び出し演出。dir: 1 = 上へ（加算）/ -1 = 下へ（減算）
@@ -229,13 +236,16 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
     switch (element.type) {
       case "counter": {
         const displayValue = Number(value) || 0;
+        // 確率の分母に使う回数。probCount が来ていればそれを優先する
+        // （前任者分を差し引いた回数。バーに出る displayValue は変えない）。
+        const probValue = probCount ?? displayValue;
         const showProb =
           element.id !== "total-games" &&
           totalGames != null &&
           totalGames > 0 &&
-          displayValue > 0;
+          probValue > 0;
         const autoProbText = showProb
-          ? `1/${(totalGames! / displayValue).toFixed(1)}`
+          ? `1/${(totalGames! / probValue).toFixed(1)}`
           : null;
         const probText = overrideProbText ?? autoProbText;
         const useCompact =
