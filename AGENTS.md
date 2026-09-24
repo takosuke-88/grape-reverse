@@ -14,6 +14,7 @@
 - `.claude/rules/architecture.md`: SPA、ルーティング、GA4、SEO、データ永続化（localStorage）。
 - `.claude/rules/coding-style.md`: TypeScript, Tailwind CSS, 30:70スプリットUI、コンポーネント設計。
 - `.claude/rules/decisions-log.md`: 過去の重要な意思決定、仕様変更、廃止機能の記録（先祖返り防止）。
+- `docs/decisions-archive.md`（**必要時のみ参照・自動読み込み対象外**）: decisions-log.md から退避した2026年7〜8月の詳細エントリ（SEO・プリレンダリング・sitemap・404・AdSense・コラム書式・カウンターの見た目など）。ルールは decisions-log.md の禁止テーブルに残っているので、該当領域を触るときに詳細を読む。
 - `.claude/rules/spec-master.md`: ジャグラー・ハナハナ全機種のスペックマスターデータ（BIG/REG確率・機械割・ぶどう/ベル確率）。スペック表UI実装時・数値参照時に使用すること。
 
 ## 3. エージェントのコアルール（行動指針）
