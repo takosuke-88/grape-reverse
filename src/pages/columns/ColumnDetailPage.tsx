@@ -6,7 +6,12 @@ import ColumnNavigation from "../../components/ColumnNavigation";
 import RelatedColumns from "../../components/RelatedColumns";
 import ColumnRenderErrorBoundary from "../../components/ColumnRenderErrorBoundary";
 import ColumnShareButtons from "../../components/ColumnShareButtons";
+import ColumnAdUnit from "../../components/ads/ColumnAdUnit";
 import { getColumnBySlug } from "../../data/column-content";
+import {
+  COLUMN_AD_SLOT_TAG,
+  rehypeColumnAdSlot,
+} from "../../utils/column-ad-placement";
 
 const InternalLinkAwareAnchor: Components["a"] = ({ href, children, ...rest }) => {
   if (href && href.startsWith("/") && !href.startsWith("//")) {
@@ -23,9 +28,14 @@ const InternalLinkAwareAnchor: Components["a"] = ({ href, children, ...rest }) =
   );
 };
 
-const markdownComponents: Components = {
+// 広告枠のプレースホルダー要素（rehypeColumnAdSlot が本文中に最大1つ差し込む）は
+// HTMLの標準要素ではないため Components の型に無く、キャストして登録する
+const markdownComponents = {
   a: InternalLinkAwareAnchor,
-};
+  [COLUMN_AD_SLOT_TAG]: ColumnAdUnit,
+} as Components;
+
+const rehypePlugins = [rehypeRaw, rehypeColumnAdSlot];
 
 const formatJaDate = (dateStr: string): string => {
   const [y, m, d] = dateStr.split("-");
@@ -67,10 +77,14 @@ const ColumnDetailPage = () => {
           title={frontmatter.title}
           path={`/columns/${entry.slug}`}
         />
-        <div className="column-article prose dark:prose-invert max-w-none">
+        {/* key: 記事A→Bへ移動したとき本文を作り直し、旧記事の広告枠を使い回さない */}
+        <div
+          key={entry.slug}
+          className="column-article prose dark:prose-invert max-w-none"
+        >
           <ColumnRenderErrorBoundary>
             <ReactMarkdown
-              rehypePlugins={[rehypeRaw]}
+              rehypePlugins={rehypePlugins}
               components={markdownComponents}
             >
               {body}

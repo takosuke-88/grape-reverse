@@ -133,6 +133,14 @@ async function main() {
     (route) => route.abort(),
   );
 
+  // 手動広告枠（src/components/ads/ColumnAdUnit.tsx）に「ビルド中」であることを伝える。
+  // このフラグはビルド用ブラウザのページにだけ注入され、本番の閲覧者には届かない。
+  // ColumnAdUnit はフラグがあると <ins> を出力せず adsbygoogle.push() も呼ばない。
+  // 下の混入検査（AD_DOM_MARKERS）は弱めずにそのまま効かせる。
+  await page.addInitScript(() => {
+    window.__GR_PRERENDER__ = true;
+  });
+
   // 全ルートの出力をメモリ上に集めてから最後に一括で書き込む。
   // 途中で dist/index.html を上書きすると、SPAフォールバックで配信されている
   // 未処理ルートの検証結果が壊れるため。

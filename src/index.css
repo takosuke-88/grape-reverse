@@ -134,6 +134,33 @@ body {
   @apply bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-white;
 }
 
+/* コラム本文中盤の手動広告枠（src/components/ads/ColumnAdUnit.tsx）
+   - 前後の本文・リンクと誤タップしないよう上下に余白を取る
+   - 広告リクエスト中（status=done かつ ad-status 未確定）だけ高さを予約し、
+     配信が決まった後は広告自身の高さに任せる
+   - 在庫なし（unfilled）のときは枠ごと畳み、本文中に空白を残さない
+   - 広告ブロック等で処理されなかった枠は高さ0のまま（予約しない） */
+.column-ad-slot {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 2.5rem 0;
+}
+
+.column-ad-slot:has(
+    ins.adsbygoogle[data-adsbygoogle-status="done"]:not([data-ad-status])
+  ) {
+  min-height: 250px;
+}
+
+.column-ad-slot ins.adsbygoogle[data-ad-status="unfilled"] {
+  display: none !important;
+}
+
+.column-ad-slot:has(ins.adsbygoogle[data-ad-status="unfilled"]) {
+  margin: 0;
+}
+
 /* スクロールバーのスタイリング（Webkit） */
 ::-webkit-scrollbar {
   width: 10px;
