@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, Navigate } from "react-router-dom";
 import { useLocalStorage } from "../hooks/useLocalStorage";
-import { AVAILABLE_MACHINES } from "../data/machine-list";
+import { AVAILABLE_MACHINES, hasReverseCalcPage } from "../data/machine-list";
 import Seo from "../components/Seo";
 import { useConfirmDialog } from "../components/ui/ConfirmDialog";
 import { CONFIG_MAP } from "../data/machine-config-map";
@@ -239,6 +239,12 @@ export default function GrapeReversePage() {
   const bonusProbText = bonusTotal > 0 && totalGames > 0
     ? `1/${(totalGames / bonusTotal).toFixed(1)}`
     : undefined;
+
+  // 逆算ページを持たない機種（スマスロ ハナビ等）は設定判別ページへ転送する。
+  // 静的HTMLは生成していないため直接アクセスは本番で404になり、ここに来るのはSPA内遷移のみ。
+  if (!hasReverseCalcPage(machineId)) {
+    return <Navigate to={`/${machineId}`} replace />;
+  }
 
   return (
     <>

@@ -1,19 +1,23 @@
 import React from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useLocalStorage } from "../hooks/useLocalStorage";
-import { AVAILABLE_MACHINES } from "../data/machine-list";
+import { AVAILABLE_MACHINES, hasReverseCalcPage } from "../data/machine-list";
+import type { SpecBlock } from "../types/machine-schema";
 import Seo from "../components/Seo";
 import { JUGGLER_PAYOUT_RATIOS_3MODE } from "../data/juggler-spec-data";
 import { JUGGLER_SPEC_ADVICE } from "../data/juggler-spec-advice";
 import { HANAHANA_SPEC_ADVICE } from "../data/hanahana-spec-advice";
 import { CONFIG_MAP } from "../data/machine-config-map";
 
+// 汎用カード（config.specPage.cards。2026-10-05）の開閉状態も同じオブジェクトに
+// カードIDをキーとして保存するため、任意のキーを許す。
 interface AccordionState {
   strategy: boolean;
   bonusProb: boolean;
   payoutRatio: boolean;
   smallRole: boolean;
   bonusDetail: boolean;
+  [cardId: string]: boolean;
 }
 
 const DEFAULT_ACCORDION: AccordionState = {
@@ -146,9 +150,13 @@ export default function MachineSpecPage() {
 
   const currentCategory = machineInfo.category;
   const isHana = currentCategory === "hana";
-  const hasSpec = isJuggler || isHana;
+  // ジャグラー・ハナハナ以外は、機種設定に specPage（汎用の表データ）がある場合だけ表示する
+  const specPage = config.specPage;
+  const hasSpec = isJuggler || isHana || !!specPage;
+  const showReverseCalc = hasReverseCalcPage(machineId);
   const hanaPayout = config.specs?.payoutRatio;
-  const strategyText = advice?.strategy;
+  const strategyText = advice?.strategy ?? specPage?.strategy;
+  const bonusProbAdvice = advice?.bonusProb ?? specPage?.bonusProbAdvice;
   const roleLabel = currentCategory === "hana" ? "ベル" : "ぶどう";
   const roleIcon  = currentCategory === "hana" ? "🔔" : "🍇";
 
@@ -290,18 +298,22 @@ export default function MachineSpecPage() {
             >
               🎰 設定判別
             </Link>
-            <Link
-              to={`/${machineId}/grape`}
-              className="flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
-            >
-              {roleIcon} {roleLabel}逆算
-            </Link>
+            {showReverseCalc && (
+              <Link
+                to={`/${machineId}/grape`}
+                className="flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
+              >
+                {roleIcon} {roleLabel}逆算
+              </Link>
+            )}
             <button
               type="button"
               className="flex-1 rounded-lg bg-indigo-500 text-white py-2 text-xs font-bold ring-2 ring-indigo-300 dark:ring-indigo-600"
             >
               📊 機種スペック
             </button>
+            {/* 逆算ボタンが無い機種も、ボタン幅は3つ並びのときと同じに保ち左寄せにする */}
+            {!showReverseCalc && <div className="flex-1" aria-hidden="true" />}
           </div>
         </div>
       </div>
@@ -345,8 +357,8 @@ export default function MachineSpecPage() {
                   <thead>
                     <tr>
                       <th className={`${thCls} w-8`}>設定</th>
-                      <th className={thCls}>BIG確率</th>
-                      <th className={thCls}>REG確率</th>
+                      <th className={thCls}>{config.bonusLabels?.big ?? "BIG"}確率</th>
+                      <th className={thCls}>{config.bonusLabels?.reg ?? "REG"}確率</th>
                       <th className={thCls}>合成</th>
                     </tr>
                   </thead>
@@ -370,8 +382,8 @@ export default function MachineSpecPage() {
                     })}
                   </tbody>
                 </table>
-                {advice?.bonusProb && (
-                  <p className={adviceCls}>{advice.bonusProb}</p>
+                {bonusProbAdvice && (
+                  <p className={adviceCls}>{bonusProbAdvice}</p>
                 )}
               </div>
             )}
@@ -542,9 +554,189 @@ export default function MachineSpecPage() {
             </div>
           )}
 
+          {/* 汎用カード（ジャグラー・ハナハナ以外。機種設定の specPage.cards をそのまま描画） */}
+          {specPage?.cards.map((card) => {
+            const isOpen = openState[card.id] ?? true;
+            return (
+              <div
+                key={card.id}
+                className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800"
+              >
+                <AccordionHeader
+                  title={card.title}
+                  icon={card.icon}
+                  isOpen={isOpen}
+                  onToggle={() =>
+                    setOpenState((prev) => ({ ...prev, [card.id]: !(prev[card.id] ?? true) }))
+                  }
+                />
+                {isOpen && (
+                  <div className="overflow-x-clip pb-2">
+                    {card.blocks.map((block, i) => (
+                      <SpecBlockView
+                        key={i}
+                        block={block}
+                        settings={settings}
+                        topSetting={topSetting}
+                        settingLabel={settingLabel}
+                        rowBg={rowBg}
+                        thCls={thCls}
+                        tdCls={tdCls}
+                      />
+                    ))}
+                    {card.advice && <p className={adviceCls}>{card.advice}</p>}
+                    {card.note && (
+                      <p className="px-4 pt-1 pb-1 text-xs text-slate-400 dark:text-slate-500">
+                        {card.note}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
         </div>
       )}
       </div>
     </div>
   );
 }
+
+interface SpecBlockViewProps {
+  block: SpecBlock;
+  settings: number[];
+  topSetting: number;
+  settingLabel: (s: number) => string;
+  rowBg: (s: number) => string;
+  thCls: string;
+  tdCls: (s: number) => string;
+}
+
+/**
+ * 汎用スペック表の1ブロック（2026-10-05）。
+ * bySetting は既存のジャグラー・ハナハナの表と同じ見た目（行＝設定、最高設定の行をアンバー）。
+ * byItem は行＝項目・列＝設定で、最高設定の列をアンバーにする。列が設定の数だけ並ぶため、
+ * 値は bySetting より小さい文字にして `1/16384.0` まで375pxで収める。
+ */
+const SpecBlockView: React.FC<SpecBlockViewProps> = ({
+  block,
+  settings,
+  topSetting,
+  settingLabel,
+  rowBg,
+  thCls,
+  tdCls,
+}) => {
+  const caption = block.caption && (
+    <p className="px-4 pt-3 pb-1 text-xs font-bold tracking-wide text-slate-500 dark:text-slate-400">
+      {block.caption}
+    </p>
+  );
+
+  if (block.kind === "bySetting") {
+    return (
+      <>
+        {caption}
+        <table className="table-fixed w-full">
+          <thead>
+            <tr>
+              <th className={`${thCls} w-8`}>設定</th>
+              {block.columns.map((col) => (
+                <th key={col.label} className={thCls}>
+                  {col.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {settings.map((s) => (
+              <tr key={s} className={rowBg(s)}>
+                <td className={`${tdCls(s)} font-extrabold`}>{settingLabel(s)}</td>
+                {block.columns.map((col) => (
+                  <td key={col.label} className={tdCls(s)}>
+                    {col.values[s] ?? "---"}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </>
+    );
+  }
+
+  if (block.kind === "byItem") {
+    const headCls =
+      "py-2 px-0.5 text-center text-xs font-bold text-slate-500 dark:text-slate-400 border-b-2 border-slate-300 dark:border-slate-600";
+    const valueCls = (s: number) =>
+      `py-2.5 px-0.5 text-center text-xs tabular-nums border-b border-slate-200 dark:border-slate-700 ${
+        s === topSetting
+          ? "bg-amber-50 text-amber-700 font-extrabold dark:bg-amber-950/50 dark:text-amber-400"
+          : "text-slate-800 font-bold dark:text-slate-100"
+      }`;
+    return (
+      <>
+        {caption}
+        <table className="table-fixed w-full">
+          <thead>
+            <tr>
+              <th className={`${headCls} w-24 text-left pl-3`}>項目</th>
+              {settings.map((s) => (
+                <th key={s} className={headCls}>
+                  設定{settingLabel(s)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {block.rows.map((row) => (
+              <tr key={row.label}>
+                <td className="py-2.5 pl-3 pr-1 text-left text-xs font-bold text-slate-700 border-b border-slate-200 dark:text-slate-200 dark:border-slate-700">
+                  {row.label}
+                  {row.note && (
+                    <span className="block text-[10px] font-medium leading-tight text-slate-500 dark:text-slate-400">
+                      {row.note}
+                    </span>
+                  )}
+                </td>
+                {settings.map((s) => (
+                  <td key={s} className={valueCls(s)}>
+                    {row.values[s] ?? "---"}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </>
+    );
+  }
+
+  return (
+    <>
+      {caption}
+      <div className="space-y-3 px-4 pt-2 pb-2">
+        {block.items.map((item) => (
+          <div key={item.title}>
+            <p className="text-sm font-extrabold text-slate-700 dark:text-slate-200">
+              {item.title}
+            </p>
+            <dl className="mt-1 space-y-1">
+              {item.lines.map((line) => (
+                <div key={line.label} className="flex gap-2 text-sm leading-relaxed">
+                  <dt className="w-16 shrink-0 font-bold text-slate-500 dark:text-slate-400">
+                    {line.label}
+                  </dt>
+                  <dd className="min-w-0 font-medium text-slate-700 dark:text-slate-200">
+                    {line.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+};

@@ -1,4 +1,5 @@
-export type MachineCategory = "juggler" | "hana" | "other";
+/** btrt: ジャグラー・ハナハナ以外のBT/RT機（トップページの「BT/RT」見出し。2026-10-05） */
+export type MachineCategory = "juggler" | "hana" | "btrt" | "other";
 
 export interface MachineInfo {
   id: string;
@@ -6,6 +7,12 @@ export interface MachineInfo {
   title?: string;
   category: MachineCategory;
   color: string;
+  /**
+   * ぶどう/ベル逆算ページ（/:machineId/grape）を持つか（未指定時 true）。
+   * false の機種はナビの逆算ボタンを出さず、sitemap と静的HTML生成からも外す
+   * （scripts/generate-sitemap.js / generate-seo-shells.mjs がこの記述を読む）。
+   */
+  reverseCalc?: boolean;
 }
 
 /**
@@ -131,4 +138,18 @@ export const AVAILABLE_MACHINES: MachineInfo[] = [
     category: "hana",
     color: "#1976D2",
   },
+  {
+    id: "hanabi",
+    name: "スマスロ ハナビ",
+    title: "スマスロ ハナビの攻略・設定判別｜GrapeReverse",
+    category: "btrt",
+    color: "#283593",
+    reverseCalc: false,
+  },
 ];
+
+/** ぶどう/ベル逆算ページを持つ機種か */
+export function hasReverseCalcPage(machineId: string | undefined): boolean {
+  const info = AVAILABLE_MACHINES.find((m) => m.id === machineId);
+  return info?.reverseCalc !== false;
+}

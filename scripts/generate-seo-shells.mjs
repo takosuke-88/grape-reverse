@@ -51,6 +51,14 @@ function getMachineIds() {
   return extractIdsFromFile(MACHINE_LIST_PATH, /id:\s*["']([^"']+)["']/g);
 }
 
+// reverseCalc: false の機種（スマスロ ハナビ等）は逆算ページを持たない（2026-10-05）
+function getNoReverseCalcIds() {
+  return extractIdsFromFile(
+    MACHINE_LIST_PATH,
+    /\{[^{}]*?\bid:\s*["']([^"']+)["'][^{}]*?reverseCalc:\s*false[^{}]*?\}/g,
+  );
+}
+
 function getColumnSlugs() {
   const frontmatterBlockRegex = /^---\r?\n([\s\S]*?)\r?\n---/;
   return fs
@@ -70,11 +78,12 @@ function getColumnSlugs() {
 
 function buildRouteList() {
   const machineIds = getMachineIds();
+  const noReverseCalcIds = getNoReverseCalcIds();
   const columnSlugs = getColumnSlugs();
   const routes = ["/"];
   machineIds.forEach((id) => {
     routes.push(`/${id}`);
-    routes.push(`/${id}/grape`);
+    if (!noReverseCalcIds.includes(id)) routes.push(`/${id}/grape`);
     routes.push(`/${id}/specs`);
     routes.push(`/${id}/prev`);
   });

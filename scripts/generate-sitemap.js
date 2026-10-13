@@ -66,6 +66,11 @@ async function generateSitemap() {
   // Regex looks for: id: "something" or id: 'something'
   const machineIdRegex = /id:\s*["']([^"']+)["']/g;
   const machineIds = extractIdsFromFile(MACHINE_LIST_PATH, machineIdRegex);
+  // reverseCalc: false の機種（スマスロ ハナビ等）は逆算ページを持たないため /grape を出さない（2026-10-05）
+  const noReverseCalcIds = extractIdsFromFile(
+    MACHINE_LIST_PATH,
+    /\{[^{}]*?\bid:\s*["']([^"']+)["'][^{}]*?reverseCalc:\s*false[^{}]*?\}/g,
+  );
 
   if (machineIds.length === 0) {
     console.warn(
@@ -75,9 +80,11 @@ async function generateSitemap() {
     console.log(`✅ Found ${machineIds.length} machines`);
     machineIds.forEach((id) => {
       urls.push(urlElement(`${BASE_URL}/${id}`, undefined, "weekly", "0.8"));
-      urls.push(
-        urlElement(`${BASE_URL}/${id}/grape`, undefined, "weekly", "0.7"),
-      );
+      if (!noReverseCalcIds.includes(id)) {
+        urls.push(
+          urlElement(`${BASE_URL}/${id}/grape`, undefined, "weekly", "0.7"),
+        );
+      }
       urls.push(
         urlElement(`${BASE_URL}/${id}/specs`, undefined, "weekly", "0.7"),
       );

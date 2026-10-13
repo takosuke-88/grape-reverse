@@ -75,6 +75,7 @@ export function getCounterMaxDigits(elementId: string): number | undefined {
   if (
     elementId === "grape-count" ||
     elementId === "bell-count" ||
+    elementId === "furin-count" ||
     elementId === "cherry-count"
   ) {
     return 4;

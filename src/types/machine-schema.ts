@@ -36,6 +36,16 @@ export interface DiscriminationElement {
   conflictsWith?: string[]; // 他の要素と競合する場合（例: REG詳細入力時はREGトータルを除外）
   isReadOnly?: boolean; // ユーザー編集不可（自動計算項目など）
   colSpan?: number; // UI表示時のカラムスパン（例: 2）
+  /**
+   * 設定示唆カウンター用（2026-10-05、スマスロ ハナビで導入）。
+   * 1回でも数えられたら、ここに列挙した設定以外を判別から除外する
+   * （例: ピース花火＝[2, 5, 6]で設定1を除外）。指定した要素は確率の表示もしない。
+   * ハナハナの虹ランプ等は従来どおり hana-lamp-hints.ts の固定IDで扱っており、
+   * こちらは設定ファイルだけで示唆を足せるようにするための汎用版。
+   */
+  impliedSettings?: number[];
+  /** カウンター名の後ろに括弧書きで添える示唆の文言（例: "設定5・6濃厚"） */
+  hintLabel?: string;
 }
 
 /**
@@ -85,6 +95,16 @@ export interface MachineConfig {
       cherryFreePlayRate?: number;
     };
     settings?: number[]; // [1, 2, 3, 4, 5, 6] by default
+    /**
+     * 詳細判別の計算方式。未指定時は従来どおりカテゴリで決まる
+     * （ジャグラー＝多項分布 / それ以外＝重み付き）。機種IDでの分岐を避けるため設定ファイルで指定する。
+     */
+    estimationModel?: "multinomial" | "weighted";
+    /**
+     * 通常時小役カードへ「角チェリー」カウンターを自動で差し込むか（未指定時 true）。
+     * 角チェリーという呼び方が当てはまらない機種（スマスロ ハナビ等）は false にする。
+     */
+    injectCherryCounter?: boolean;
     settingLabels?: Record<number, string>; // e.g. {6: "V"}
     // 旧 approximationLabelOverride は廃止（2026-09-22）。
     // 設定値が一致する設定をまとめて「(設定5-6近似)」と出す処理が
@@ -109,7 +129,18 @@ export interface MachineConfig {
     condition: string;
     description: string;
   }[];
+  /**
+   * ボーナス名の表記（未指定時 BIG / REG）。スマスロ ハナビは BB / RB（2026-10-13 ユーザー決定）。
+   * 共通部品が固定で書いている「BIG」「REG」（指標カード・前任者ページ・スペックページの
+   * ボーナス確率表）をこの値に置き換える。カウンターのラベルは各要素の label で指定する。
+   */
+  bonusLabels?: { big: string; reg: string };
   seoContent?: SEOSection[];
+  /**
+   * 機種スペックページの内容を設定ファイルから汎用の表として描画する機種向け
+   * （ジャグラー・ハナハナ以外。2026-10-05、スマスロ ハナビで導入）。
+   */
+  specPage?: SpecPageContent;
   /**
    * 標準（ジャグラー/ハナハナ）と異なる進行のAIアドバイス文言を持つ機種向け。
    * 指定があれば MachinePageFactory はこちらを優先表示する。
@@ -142,6 +173,53 @@ export interface SpecialAdviceBracket {
   /** マッチ時に表示するHTML（dangerouslySetInnerHTMLで描画） */
   html: string;
 }
+
+/**
+ * 機種スペックページの汎用表示データ。
+ * 値は表示用の文字列で持つ（"1/297.9"・"98.6%"・"なし" 等、表ごとに書式が違うため）。
+ */
+export interface SpecPageContent {
+  /** 冒頭の攻略アドバイス */
+  strategy?: string;
+  /** 「ボーナス確率」カード（BIG/REG/合成。big-count/reg-count から自動生成）の解説文 */
+  bonusProbAdvice?: string;
+  /** ボーナス確率カードの後ろに並べるカード */
+  cards: SpecCard[];
+}
+
+export interface SpecCard {
+  /** 開閉状態の保存キー（spec_page_block_states_${machineId} 内） */
+  id: string;
+  title: string;
+  icon: string;
+  blocks: SpecBlock[];
+  /** 表の下に出す解説文 */
+  advice?: string;
+  /** 解説文の下に小さく出す注記 */
+  note?: string;
+}
+
+/**
+ * bySetting: 行＝設定、列＝項目（列は4つまで。375pxで収まる上限）
+ * byItem:    行＝項目、列＝設定（項目が多い表向け。設定が4段階以下の機種で使う）
+ * info:      設定に関係しない文章の一覧（ボーナス仕様・示唆演出など）
+ */
+export type SpecBlock =
+  | {
+      kind: "bySetting";
+      caption?: string;
+      columns: { label: string; values: Record<number, string> }[];
+    }
+  | {
+      kind: "byItem";
+      caption?: string;
+      rows: { label: string; note?: string; values: Record<number, string> }[];
+    }
+  | {
+      kind: "info";
+      caption?: string;
+      items: { title: string; lines: { label: string; value: string }[] }[];
+    };
 
 /**
  * SEO・解説用セクション

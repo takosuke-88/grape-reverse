@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import MachinePageFactory from "../components/dynamic-ui/MachinePageFactory";
 import Seo from "../components/Seo";
-import { AVAILABLE_MACHINES } from "../data/machine-list";
+import { AVAILABLE_MACHINES, hasReverseCalcPage } from "../data/machine-list";
 import { CONFIG_MAP as configMap } from "../data/machine-config-map";
 
 /**
@@ -49,8 +49,14 @@ export default function MachinePagePreview() {
   const isJuggler = machineInfo?.category === "juggler";
   const roleName = isJuggler ? "ぶどう" : "ベル";
 
-  const seoTitle = `【${config.name}】設定判別・小役逆算ツール｜GrapeReverse`;
-  const seoDescription = `${config.name}の${roleName}確率を差枚数とボーナス回数から逆算！設定6の挙動や勝つための立ち回りポイントも徹底解説。スマホでサクサク使える完全無料の設定推測ツールです。`;
+  // 逆算ページを持たない機種（スマスロ ハナビ等）は「逆算」をうたわない
+  const hasReverseCalc = hasReverseCalcPage(config.id);
+  const seoTitle = hasReverseCalc
+    ? `【${config.name}】設定判別・小役逆算ツール｜GrapeReverse`
+    : `【${config.name}】設定判別ツール｜GrapeReverse`;
+  const seoDescription = hasReverseCalc
+    ? `${config.name}の${roleName}確率を差枚数とボーナス回数から逆算！設定6の挙動や勝つための立ち回りポイントも徹底解説。スマホでサクサク使える完全無料の設定推測ツールです。`
+    : `${config.name}の設定判別ツール。総ゲーム数・ボーナス回数・小役回数を数えるだけで高設定の可能性を自動計算。設定示唆の反映にも対応した、スマホでサクサク使える完全無料の設定推測ツールです。`;
 
   return (
     <>

@@ -25,6 +25,7 @@
 ## 3b. カウンター配色（`getElementTheme`）
 - **`bell-count`（ハナベル）**: アンバー `#f59e0b`（緑に戻さない）。
 - **`grape` を含むID（ジャグラーぶどう）**: 緑 `#15803d`。
+- **`furin-count`（スマスロ ハナビの風鈴）**: 水色 `#0284c7`。**`hint-` で始まるID（設定示唆カウンター）**: 紫 `#6d28d9`（IDに big/reg を含んでも赤・青にならないよう、それらより先にマッチ）。
 - **ランプ suffix**（`-white` / `-blue` / `-yellow` / `-green` / `-red` / `-rainbow`）: suffix を big/reg より**先に**マッチ。白背景ランプは `textColor: #1e293b`。
 - **BIG / REG / cherry**: 赤・青・ピンク系は従来どおり。
 

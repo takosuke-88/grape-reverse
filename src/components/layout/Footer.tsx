@@ -8,6 +8,9 @@ export default function Footer() {
   const hanahanaMachines = AVAILABLE_MACHINES.filter(
     (m) => m.category === "hana",
   );
+  const btrtMachines = AVAILABLE_MACHINES.filter(
+    (m) => m.category === "btrt",
+  );
 
   return (
     <footer className="bg-slate-950 text-slate-300 py-12 border-t border-white/10 mt-auto">
@@ -25,7 +28,8 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* カラム2: 機種一覧 */}
+          {/* カラム2: 機種一覧。スマホでは機種名を2列に並べて縦の長さを抑える（2026-10-13）。
+              PC（md以上）はこの列自体が3分の1幅なので従来どおり1列 */}
           <div>
             <h3 className="text-white font-bold mb-4 border-b border-white/10 pb-2">
               機種一覧
@@ -36,7 +40,7 @@ export default function Footer() {
                   <span className="w-2 h-2 rounded-full bg-pink-500 block"></span>{" "}
                   ジャグラーシリーズ
                 </h4>
-                <ul className="flex flex-col gap-1.5 pl-3">
+                <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5 pl-3 md:grid-cols-1">
                   {jugglerMachines.map((m) => (
                     <li key={m.id}>
                       <Link
@@ -54,8 +58,26 @@ export default function Footer() {
                   <span className="w-2 h-2 rounded-full bg-red-500 block"></span>{" "}
                   ハナハナシリーズ
                 </h4>
-                <ul className="flex flex-col gap-1.5 pl-3">
+                <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5 pl-3 md:grid-cols-1">
                   {hanahanaMachines.map((m) => (
+                    <li key={m.id}>
+                      <Link
+                        to={`/${m.id}`}
+                        className="hover:text-white transition-colors block"
+                      >
+                        {m.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-indigo-300 font-bold mb-2 mt-2 flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-indigo-400 block"></span>{" "}
+                  BT/RT
+                </h4>
+                <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5 pl-3 md:grid-cols-1">
+                  {btrtMachines.map((m) => (
                     <li key={m.id}>
                       <Link
                         to={`/${m.id}`}

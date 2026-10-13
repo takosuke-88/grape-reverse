@@ -66,17 +66,31 @@ export default function App() {
                     <h1 className="text-3xl font-bold text-slate-800 mb-4">
                       GrapeReverse
                     </h1>
-                    <p className="text-slate-600 mb-6">
+                    <p className="text-slate-600 mb-4">
                       ジャグラー・ハナハナ・Aタイプ設定判別ツール
                     </p>
 
+                    {/* シリーズ見出しへのジャンプ（2026-10-13）。機種ボタンが縦に並んで
+                        ハナハナ・BT/RTが画面の2〜3枚先になるため、最上部から一気に飛べるようにする */}
+                    <nav aria-label="シリーズへ移動" className="mb-4 grid grid-cols-3 gap-2">
+                      <a href="#juggler" className="rounded-full bg-pink-500 py-2 text-sm font-bold text-white shadow-md transition-opacity hover:opacity-90">
+                        ジャグラー
+                      </a>
+                      <a href="#hana" className="rounded-full bg-red-600 py-2 text-sm font-bold text-white shadow-md transition-opacity hover:opacity-90">
+                        ハナハナ
+                      </a>
+                      <a href="#btrt" className="rounded-full bg-indigo-700 py-2 text-sm font-bold text-white shadow-md transition-opacity hover:opacity-90">
+                        BT/RT
+                      </a>
+                    </nav>
+
                     {/* 攻略コラム一覧へのリンク */}
-                    <div className="mb-10 flex justify-center">
+                    <div className="mb-8 flex justify-center">
                       <a
                         href="/columns"
                         className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-full shadow-md transition-transform hover:scale-105"
                       >
-                        <span>📚</span> パチスロ攻略コラム一覧を見る
+                        <span>📚</span> パチスロ攻略コラム
                       </a>
                     </div>
 
@@ -84,21 +98,21 @@ export default function App() {
                     <div id="juggler" className="mb-12 scroll-mt-24">
                       <h2 className="text-xl font-bold text-slate-700 mb-6 flex items-center justify-center gap-2">
                         <span className="w-8 h-1 bg-pink-500 rounded-full"></span>
-                        ジャグラーシリーズ
+                        ジャグラー攻略・設定判別
                         <span className="w-8 h-1 bg-pink-500 rounded-full"></span>
                       </h2>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         {AVAILABLE_MACHINES.filter(
                           (m) => m.category === "juggler",
                         ).map((machine) => (
                           <a
                             key={machine.id}
                             href={`/${machine.id}`}
-                            className="block px-6 py-4 text-white font-bold rounded-xl transition-transform hover:scale-105 shadow-md hover:shadow-xl relative overflow-hidden group"
+                            className="flex min-h-14 items-center justify-center px-2 py-2 sm:px-6 sm:py-4 text-white font-bold rounded-xl transition-transform hover:scale-105 shadow-md hover:shadow-xl relative overflow-hidden group"
                             style={{ backgroundColor: machine.color }}
                           >
                             <div className="relative z-10 flex items-center justify-center gap-2">
-                              <span className="text-lg">{machine.name}</span>
+                              <span className="text-sm leading-tight sm:text-lg">{machine.name}</span>
                             </div>
                             <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
                           </a>
@@ -110,23 +124,49 @@ export default function App() {
                     <div id="hana" className="mb-12 scroll-mt-24">
                       <h2 className="text-xl font-bold text-slate-700 mb-6 flex items-center justify-center gap-2">
                         <span className="w-8 h-1 bg-red-600 rounded-full"></span>
-                        ハナハナ・シオサイシリーズ
+                        ハナハナ攻略・設定判別
                         <span className="w-8 h-1 bg-red-600 rounded-full"></span>
                       </h2>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         {AVAILABLE_MACHINES.filter(
                           (m) => m.category === "hana",
                         ).map((machine) => (
                           <a
                             key={machine.id}
                             href={`/${machine.id}`}
-                            className="block px-6 py-4 text-white font-bold rounded-xl transition-transform hover:scale-105 shadow-md hover:shadow-xl relative overflow-hidden group"
+                            className="flex min-h-14 items-center justify-center px-2 py-2 sm:px-6 sm:py-4 text-white font-bold rounded-xl transition-transform hover:scale-105 shadow-md hover:shadow-xl relative overflow-hidden group"
                             style={{ backgroundColor: machine.color }}
                           >
                             <div className="relative z-10 flex items-center justify-center gap-2">
-                              <span className="text-2xl">🌺</span>
-                              <span className="text-lg">{machine.name}</span>
-                              <span className="text-2xl">🌺</span>
+                              <span className="hidden text-2xl sm:inline">🌺</span>
+                              <span className="text-sm leading-tight sm:text-lg">{machine.name}</span>
+                              <span className="hidden text-2xl sm:inline">🌺</span>
+                            </div>
+                            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* BT/RT（ジャグラー・ハナハナ以外。2026-10-05、スマスロ ハナビで新設） */}
+                    <div id="btrt" className="mb-12 scroll-mt-24">
+                      <h2 className="text-xl font-bold text-slate-700 mb-6 flex items-center justify-center gap-2">
+                        <span className="w-8 h-1 bg-indigo-700 rounded-full"></span>
+                        BT/RT攻略・設定判別
+                        <span className="w-8 h-1 bg-indigo-700 rounded-full"></span>
+                      </h2>
+                      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                        {AVAILABLE_MACHINES.filter(
+                          (m) => m.category === "btrt",
+                        ).map((machine) => (
+                          <a
+                            key={machine.id}
+                            href={`/${machine.id}`}
+                            className="flex min-h-14 items-center justify-center px-2 py-2 sm:px-6 sm:py-4 text-white font-bold rounded-xl transition-transform hover:scale-105 shadow-md hover:shadow-xl relative overflow-hidden group"
+                            style={{ backgroundColor: machine.color }}
+                          >
+                            <div className="relative z-10 flex items-center justify-center gap-2">
+                              <span className="text-sm leading-tight sm:text-lg">{machine.name}</span>
                             </div>
                             <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
                           </a>

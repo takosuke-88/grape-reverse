@@ -113,6 +113,23 @@ function getElementTheme(id: string): ElementTheme {
       textColor: "#ffffff",
     };
   }
+  // スマスロ ハナビの風鈴（2026-10-05）。ぶどう（緑）・ベル（アンバー）と被らない水色
+  if (id === "furin-count") {
+    return {
+      bg: "#0284c7",
+      minusBg: "linear-gradient(145deg, #0369a1, #075985)",
+      accent: "#e0f2fe",
+    };
+  }
+  // 設定示唆カウンター（hint-*。2026-10-05）。ID に big/reg を含んでも
+  // ボーナスの赤・青にならないよう、それらより先にマッチさせる
+  if (id.startsWith("hint-")) {
+    return {
+      bg: "#6d28d9",
+      minusBg: "linear-gradient(145deg, #5b21b6, #4c1d95)",
+      accent: "#ede9fe",
+    };
+  }
   if (id.includes("grape")) {
     return {
       bg: "#15803d",
@@ -239,8 +256,11 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
         // 確率の分母に使う回数。probCount が来ていればそれを優先する
         // （前任者分を差し引いた回数。バーに出る displayValue は変えない）。
         const probValue = probCount ?? displayValue;
+        // 設定示唆カウンター（impliedSettings 付き）は「出たか否か」が意味を持つ
+        // 項目で、ゲーム数に対する確率は判別に使わないため出さない
         const showProb =
           element.id !== "total-games" &&
+          !element.impliedSettings &&
           totalGames != null &&
           totalGames > 0 &&
           probValue > 0;
@@ -468,9 +488,14 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
     }
   };
 
-  const lampHint = getHanaFeatherLampHint(element.id);
+  const lampHint = getHanaFeatherLampHint(element.id) ?? element.hintLabel;
   const isSetting6RainbowLamp =
     isHanaSetting6GuaranteeElementId(element.id) && Number(value) > 0;
+  // 設定示唆カウンター（2026-10-05）。数えられている間は判別へ反映していることを示す
+  const impliedNotice =
+    element.impliedSettings && element.hintLabel && Number(value) > 0
+      ? `※${element.hintLabel}として計算されます`
+      : null;
 
   return (
     <div className="space-y-1.5">
@@ -479,9 +504,11 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
           element.type === "counter" ? "block" : "block text-center"
         }`}
       >
-        {lampHint
-          ? `${formatBonusText(element.label)} (${lampHint})`
-          : formatBonusText(element.label)}
+        {/* formatBonusText は配列（React要素）を返すため、テンプレート文字列に入れると
+            「,[object Object],後 虹」のように崩れる。JSXのまま並べる（2026-10-05修正。
+            ラベルにBIG/REGを含むランプ要素＝ドラゴンハナハナの「BIG後 虹」等で発生していた） */}
+        {formatBonusText(element.label)}
+        {lampHint && ` (${lampHint})`}
       </label>
 
       <div className={element.type === "counter" ? "w-full" : "flex justify-center"}>
@@ -491,6 +518,11 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
       {isSetting6RainbowLamp && (
         <div className="text-center text-xs font-bold text-red-500 animate-pulse mt-1">
           ※設定6濃厚として計算されます
+        </div>
+      )}
+      {impliedNotice && (
+        <div className="text-center text-xs font-bold text-red-500 mt-1">
+          {impliedNotice}
         </div>
       )}
     </div>

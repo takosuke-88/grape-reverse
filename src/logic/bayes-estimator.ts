@@ -6,6 +6,41 @@ import type {
 import { isHanaSetting6GuaranteeInput } from "../components/dynamic-ui/hana-lamp-hints";
 
 /**
+ * 判別の主軸にする通常時小役のカウンターID。
+ * ハナハナ＝ベル、スマスロ ハナビ＝風鈴、それ以外（ジャグラー）＝ぶどう。
+ * 既存機種は bell-count / grape-count のどちらかしか持たないため、従来の判定と結果は同じ。
+ */
+export function resolveSmallRoleId(config: MachineConfig): string {
+  const ids = new Set(
+    config.sections.flatMap((s) => s.elements).map((e) => e.id),
+  );
+  if (ids.has("bell-count")) return "bell-count";
+  if (ids.has("furin-count")) return "furin-count";
+  return "grape-count";
+}
+
+/**
+ * 設定示唆カウンター（impliedSettings 付きの要素。2026-10-05）で否定された設定を集める。
+ * 1回でも数えられた要素について、impliedSettings に含まれない設定を否定する。
+ */
+function collectImpliedDenials(
+  config: MachineConfig,
+  inputs: UserInputs,
+  settings: number[],
+  denied: Set<number>,
+): void {
+  config.sections
+    .flatMap((s) => s.elements)
+    .forEach((e) => {
+      if (!e.impliedSettings) return;
+      if ((Number(inputs[e.id]) || 0) <= 0) return;
+      settings.forEach((s) => {
+        if (!e.impliedSettings!.includes(s)) denied.add(s);
+      });
+    });
+}
+
+/**
  * 回転数に応じたブドウのウェイト（信頼度）を計算（線形補間）
  */
 export function calculateGrapeWeight(
@@ -182,6 +217,7 @@ export function calculateEstimation(
     deniedSettings.add(4);
     deniedSettings.add(5);
   }
+  collectImpliedDenials(config, inputs, settings, deniedSettings);
 
   // 否定された設定の対数尤度を -Infinity にする（尤度に変換した際に0になる）
   logLikelihoods.forEach((item) => {
@@ -262,10 +298,10 @@ export function calculateMultinomialEstimation(
     }));
   }
 
-  // ハナハナ（bell-count）かジャグラー（grape-count）かを判定
+  // 判別の主軸にする小役（ハナハナ＝ベル / ハナビ＝風鈴 / ジャグラー＝ぶどう）
   const allElements = config.sections.flatMap((s) => s.elements);
   const hasBell = allElements.some((e) => e.id === "bell-count");
-  const grapeKey = hasBell ? "bell-count" : "grape-count";
+  const grapeKey = resolveSmallRoleId(config);
   const k = ignoreGrape ? 0 : Number(inputs[grapeKey]) || 0;
 
   // BIG / REG / ぶどう(ベル) の settingValues を取得
@@ -423,6 +459,7 @@ export function calculateMultinomialEstimation(
     deniedSettings.add(4);
     deniedSettings.add(5);
   }
+  collectImpliedDenials(config, inputs, settings, deniedSettings);
 
   logLikelihoods.forEach((item) => {
     if (deniedSettings.has(item.setting)) {

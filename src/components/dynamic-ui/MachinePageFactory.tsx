@@ -15,8 +15,9 @@ import {
   calculateEstimation,
   calculateMultinomialEstimation,
   calculateGrapeWeight,
+  resolveSmallRoleId,
 } from "../../logic/bayes-estimator";
-import { AVAILABLE_MACHINES } from "../../data/machine-list";
+import { AVAILABLE_MACHINES, hasReverseCalcPage } from "../../data/machine-list";
 import { ALL_COLUMNS, type ColumnEntry } from "../../data/column-content";
 import { formatBonusText } from "../../utils/formatters";
 import EstimationResultDisplay from "./EstimationResultDisplay";
@@ -58,7 +59,8 @@ const COMPACT_CARD_IDS = new Set([
 // 開閉状態をlocalStorageへ機種ごとに保存する点は、機種スペックページ
 // （MachineSpecPage.tsx の AccordionHeader）と同じ方式に揃えている。
 // 未保存時は開いた状態で開始する（`?? true`）。
-const COLLAPSIBLE_CARD_IDS = new Set(["bonus-breakdown-section"]);
+// hint-section は設定示唆カウンター（スマスロ ハナビ。2026-10-05）。
+const COLLAPSIBLE_CARD_IDS = new Set(["bonus-breakdown-section", "hint-section"]);
 
 // 総ゲーム数バーに「設定Nかも？」を出し始めるゲーム数（2026-09-21）。
 // 根拠はシミュレーション実測（decisions-log 参照）。的中率自体は8000G回しても
@@ -124,7 +126,21 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   const currentCategory = currentMachineInfo?.category || "juggler";
   const brandColor = currentMachineInfo?.color; // ブランドカラー
   const toolNameSuffix = currentCategory === "hana" ? "ベル逆算ツール" : "ぶどう逆算ツール";
-  const toolLabel = `設定判別・${toolNameSuffix}`;
+  // 逆算ページを持たない機種（スマスロ ハナビ等）はナビの逆算ボタンも出さない
+  const showReverseCalc = hasReverseCalcPage(config.id);
+  const toolLabel = showReverseCalc
+    ? `設定判別・${toolNameSuffix}`
+    : "設定判別ツール";
+  // 指標カードのボーナス名（未指定時 BIG / REG。スマスロ ハナビは BB / RB）
+  const bigName = config.bonusLabels?.big ?? "BIG";
+  const regName = config.bonusLabels?.reg ?? "REG";
+  // 詳細判別の指標カードに出す通常時小役（ハナハナ＝ベル / BT/RT＝機種設定の小役 / ジャグラー＝ぶどう）
+  const smallRoleId =
+    currentCategory === "hana"
+      ? "bell-count"
+      : currentCategory === "btrt"
+        ? resolveSmallRoleId(config)
+        : "grape-count";
 
   // 初期化ロジックを関数化
   const initializeValues = () => {
@@ -370,8 +386,11 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
         try {
           // ジャグラー: 多項分布モデル（cherry > 0 なら4軸、0なら3軸に自動切替）
           // ハナハナ: 既存の重み付きモデル（ランプ・フェザー等の多要素判別を維持）
-          const isJuggler = currentCategory === "juggler";
-          const results = isJuggler
+          // 機種設定で計算方式が指定されていればそれに従う（BT/RT機など。2026-10-05）
+          const useMultinomial = config.specs?.estimationModel
+            ? config.specs.estimationModel === "multinomial"
+            : currentCategory === "juggler";
+          const results = useMultinomial
             ? calculateMultinomialEstimation(config, judgmentInputs)
             : calculateEstimation(config, judgmentInputs);
           setEstimationResults(results);
@@ -461,6 +480,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   const orderedSections = useMemo(() => {
     return config.sections.map((section) => {
       if (section.id !== "normal-role-section") return section;
+      if (config.specs?.injectCherryCounter === false) return section;
       if (section.elements.some((e) => e.id === "cherry-count")) return section;
 
       const grapeIdx = section.elements.findIndex((e) => e.id === "grape-count");
@@ -628,18 +648,22 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             >
               🎰 設定判別
             </button>
-            <Link
-              to={`/${config.id}/grape`}
-              className="flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
-            >
-              {currentCategory === "hana" ? "🔔 ベル逆算" : "🍇 ぶどう逆算"}
-            </Link>
+            {showReverseCalc && (
+              <Link
+                to={`/${config.id}/grape`}
+                className="flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
+              >
+                {currentCategory === "hana" ? "🔔 ベル逆算" : "🍇 ぶどう逆算"}
+              </Link>
+            )}
             <Link
               to={`/${config.id}/specs`}
               className="flex-1 rounded-lg bg-indigo-700 text-white py-2 text-xs font-bold transition-opacity hover:opacity-90 active:opacity-80 text-center"
             >
               📊 機種スペック
             </Link>
+            {/* 逆算ボタンが無い機種も、ボタン幅は3つ並びのときと同じに保ち左寄せにする */}
+            {!showReverseCalc && <div className="flex-1" aria-hidden="true" />}
           </div>
         </div>
       </div>{/* end sticky nav */}
@@ -864,12 +888,15 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
               // null は空きマス。2行目以降は2枚しかないので、3つ目を空けて
               // 列を縦に揃える（詰めると左右がガタつく）。
               // ハナハナは3行目がBIG中の要素（スイカ / フェザー）になる。
+              // BT/RT（スマスロ ハナビ）は2行目が風鈴のみ、3行目がREG内訳（単独/重複）。
               const layout: (string | null)[] =
                 currentCategory === "hana"
-                  ? ["BIG", "REG", "合成", "角チェ", "ベル", null, "スイカ", "フェザー", null]
+                  ? [bigName, regName, "合成", "角チェ", "ベル", null, "スイカ", "フェザー", null]
+                  : currentCategory === "btrt"
+                  ? [bigName, regName, "合成", "風鈴", null, null, `単${regName}`, `重複${regName}`, null]
                   : [
-                      "BIG",
-                      "REG",
+                      bigName,
+                      regName,
                       "合成",
                       "角チェ",
                       "ブドウ",
@@ -877,7 +904,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                       "単BIG",
                       "チェBIG",
                       null,
-                      "単REG",
+                      `単${regName}`,
                       "チェREG",
                       null,
                     ];
@@ -902,7 +929,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
               });
             })([
               {
-                label: "BIG",
+                label: bigName,
                 count: Number(judgmentInputs["big-count"]) || 0,
                 val: (() => {
                   const count = Number(judgmentInputs["big-count"]) || 0;
@@ -917,7 +944,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 })(),
               },
               {
-                label: "REG",
+                label: regName,
                 count: Number(judgmentInputs["reg-count"]) || 0,
                 val: (() => {
                   const count = Number(judgmentInputs["reg-count"]) || 0;
@@ -1028,7 +1055,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         })(),
                       },
                       {
-                        label: "単REG",
+                        label: `単${regName}`,
                         count: Number(judgmentInputs["reg-solo-count"]) || 0,
                         val: (() => {
                           const count =
@@ -1044,7 +1071,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         })(),
                       },
                       {
-                        label: "チェREG",
+                        // BT/RT（スマスロ ハナビ）は reg-cherry-count を「重複REG」として使う
+                        label: currentCategory === "btrt" ? `重複${regName}` : "チェREG",
                         count: Number(judgmentInputs["reg-cherry-count"]) || 0,
                         val: (() => {
                           const count =
@@ -1103,23 +1131,20 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 })(),
               },
               {
-                label: currentCategory === "hana" ? "ベル" : "ブドウ",
-                count:
-                  Number(
-                    judgmentInputs[
-                      currentCategory === "hana" ? "bell-count" : "grape-count"
-                    ],
-                  ) || 0,
+                label:
+                  currentCategory === "hana"
+                    ? "ベル"
+                    : currentCategory === "btrt"
+                      ? "風鈴"
+                      : "ブドウ",
+                count: Number(judgmentInputs[smallRoleId]) || 0,
                 val: (() => {
-                  const countId =
-                    currentCategory === "hana" ? "bell-count" : "grape-count";
-                  const count = Number(judgmentInputs[countId]) || 0;
+                  const count = Number(judgmentInputs[smallRoleId]) || 0;
                   return count > 0 ? judgmentTotalGames / count : 0;
                 })(),
                 format: (v: number) => v.toFixed(2),
                 settingValues: (() => {
-                  const countId =
-                    currentCategory === "hana" ? "bell-count" : "grape-count";
+                  const countId = smallRoleId;
                   const el = config.sections
                     .flatMap((s) => s.elements)
                     .find((e) => e.id === countId);
@@ -1172,17 +1197,35 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
             let rankStyle = "";
             let rankIcon = "🤖";
 
-            if (highSettingProb >= 70) {
+            // 色・アイコンの判定だけは、設定の段階数の違いを補正した値で行う（2026-10-13）。
+            // 判別材料が無いときの「設定5・6の可能性」は 高設定の数 ÷ 設定の数 で決まり、
+            // 6段階なら33.3%（黄）だが、4段階のスマスロ ハナビは50%で最初から赤🔥になってしまう。
+            // そこでオッズ比を保ったまま「6段階機種の目盛り」（材料なし＝33.3%）へ換算してから
+            // 70/50/30 の境目に当てる。6段階の機種は換算しても値が変わらない。
+            // AIアドバイスの文言（specialAdvice の minProb/maxProb 等）は換算前の値のまま判定する。
+            const rankProb = (() => {
+              const settings = config.specs?.settings || [1, 2, 3, 4, 5, 6];
+              const highCount = settings.filter((s) => s >= 5).length;
+              if (highCount === 0 || highCount === settings.length) return highSettingProb;
+              if (highCount * 3 === settings.length) return highSettingProb;
+              const base = highCount / settings.length;
+              const p = Math.min(Math.max(highSettingProb / 100, 1e-9), 1 - 1e-9);
+              const oddsRatio = p / (1 - p) / (base / (1 - base));
+              const sixStepOdds = oddsRatio * 0.5; // 6段階の材料なし時のオッズ = 2:4
+              return (sixStepOdds / (1 + sixStepOdds)) * 100;
+            })();
+
+            if (rankProb >= 70) {
               // Rank S: 超・高設定圏内
               rankStyle =
                 "border-purple-200 bg-purple-50 dark:border-purple-800 dark:bg-purple-900/20";
               rankIcon = "👑";
-            } else if (highSettingProb >= 50) {
+            } else if (rankProb >= 50) {
               // Rank A: 高設定の期待大
               rankStyle =
                 "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20";
               rankIcon = "🔥";
-            } else if (highSettingProb >= 30) {
+            } else if (rankProb >= 30) {
               // Rank B: 判断保留・様子見
               rankStyle =
                 "border-yellow-200 bg-yellow-50 dark:border-yellow-800/50 dark:bg-yellow-900/10";
@@ -1467,7 +1510,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                                 formattedValue = "---";
                               } else if (
                                 element.label.includes("ベル") ||
-                                element.label.includes("ブドウ")
+                                element.label.includes("ブドウ") ||
+                                element.label.includes("風鈴")
                               ) {
                                 formattedValue =
                                   "1/" + expectedValue.toFixed(2);

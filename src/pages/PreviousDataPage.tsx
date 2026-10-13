@@ -12,7 +12,7 @@
 import { useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useLocalStorage } from "../hooks/useLocalStorage";
-import { AVAILABLE_MACHINES } from "../data/machine-list";
+import { AVAILABLE_MACHINES, hasReverseCalcPage } from "../data/machine-list";
 import { CONFIG_MAP } from "../data/machine-config-map";
 import Seo from "../components/Seo";
 import { useConfirmDialog } from "../components/ui/ConfirmDialog";
@@ -138,15 +138,18 @@ export default function PreviousDataPage() {
       });
     }
 
+    // ボーナス名の表記は機種設定に従う（スマスロ ハナビは BB / RB）
+    const bigName = config?.bonusLabels?.big ?? "BIG";
+    const regName = config?.bonusLabels?.reg ?? "REG";
     return [
       {
-        label: "BIG確率",
+        label: `${bigName}確率`,
         count: bigCount,
         val: bigCount > 0 ? totalGames / bigCount : 0,
         settingValues: bigEl?.settingValues,
       },
       {
-        label: "REG確率",
+        label: `${regName}確率`,
         count: regCount,
         val: regCount > 0 ? totalGames / regCount : 0,
         settingValues: regEl?.settingValues,
@@ -262,18 +265,22 @@ export default function PreviousDataPage() {
             >
               🎰 設定判別
             </Link>
-            <Link
-              to={`/${machineId}/grape`}
-              className="flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
-            >
-              {roleIcon} {roleLabel}逆算
-            </Link>
+            {hasReverseCalcPage(machineId) && (
+              <Link
+                to={`/${machineId}/grape`}
+                className="flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
+              >
+                {roleIcon} {roleLabel}逆算
+              </Link>
+            )}
             <Link
               to={`/${machineId}/specs`}
               className="flex-1 rounded-lg bg-indigo-700 text-white py-2 text-xs font-bold transition-opacity hover:opacity-90 active:opacity-80 text-center"
             >
               📊 機種スペック
             </Link>
+            {/* 逆算ボタンが無い機種も、ボタン幅は3つ並びのときと同じに保ち左寄せにする */}
+            {!hasReverseCalcPage(machineId) && <div className="flex-1" aria-hidden="true" />}
           </div>
         </div>
       </div>
@@ -299,7 +306,11 @@ export default function PreviousDataPage() {
             />
             <div className="grid min-w-0 grid-cols-2 gap-4">
               <DynamicInput
-                element={ELEM_BIG}
+                element={{
+                  ...ELEM_BIG,
+                  // ボーナス名の表記は機種設定に従う（スマスロ ハナビは BB / RB）
+                  label: `${config?.bonusLabels?.big ?? "BIG"}回数`,
+                }}
                 value={bigCount}
                 onChange={(v) => update("big-count", Number(v) || 0)}
                 totalGames={totalGames}
@@ -307,7 +318,11 @@ export default function PreviousDataPage() {
                 compactLayout
               />
               <DynamicInput
-                element={ELEM_REG}
+                element={{
+                  ...ELEM_REG,
+                  // ボーナス名の表記は機種設定に従う（スマスロ ハナビは BB / RB）
+                  label: `${config?.bonusLabels?.reg ?? "REG"}回数`,
+                }}
                 value={regCount}
                 onChange={(v) => update("reg-count", Number(v) || 0)}
                 totalGames={totalGames}
