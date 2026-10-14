@@ -46,6 +46,20 @@ export interface DiscriminationElement {
   impliedSettings?: number[];
   /** カウンター名の後ろに括弧書きで添える示唆の文言（例: "設定5・6濃厚"） */
   hintLabel?: string;
+  /**
+   * カウンター名に添える文言だけを短くしたいとき（2列のセルで折り返す場合）。
+   * 「※〇〇として計算されます」の注記は hintLabel のまま。
+   */
+  hintLabelShort?: string;
+  /** 数えたときの注記の文言を差し替える（未指定なら「※{hintLabel}として計算されます」） */
+  hintNotice?: string;
+  /**
+   * バー右下の確率の母数にする要素ID（未指定なら総ゲーム数）。
+   * ボーナス中・RT中の役は、その状態のゲーム数を母数にする（2026-10-14）。
+   */
+  probBase?: string;
+  /** バー右下の確率を出さない（ゲーム数のカウンター等） */
+  hideProb?: boolean;
 }
 
 /**
@@ -55,7 +69,47 @@ export interface ConfigSection {
   id: string;
   title: string;
   layout?: "grid" | "list";
+  /** 見出しをタップで折り畳めるカードにする（開閉状態は機種ごとに保存） */
+  collapsible?: boolean;
+  /**
+   * カード内の全バーの配色を上書きする（2026-10-14、スマスロ ハナビの詳細判別で導入）。
+   * 要素IDによる自動配色（getElementTheme）より優先。RBの契機などIDが他機種と共通の
+   * カードで、他機種の色を変えずにそのカードだけ色を変えるための口。
+   */
+  barTheme?: BarThemeName;
   elements: DiscriminationElement[];
+}
+
+/** ConfigSection.barTheme で指定できる配色（定義は DynamicInput の BAR_THEMES） */
+export type BarThemeName = "darkBlue" | "darkRed" | "blueYellow" | "gray";
+
+/**
+ * 合計カウンターと内訳カウンターの関係（2026-10-14、スマスロ ハナビの詳細判別で導入）。
+ * 合計は常に内訳の和に揃える。合計を直接入力・＋した分は unknownId（区別なし）へ入る。
+ * unknownId が無い合計（ボーナス中のゲーム数など）は内訳の和の表示専用。
+ */
+export interface SumGroup {
+  totalId: string;
+  partIds: string[];
+  unknownId?: string;
+}
+
+/**
+ * 詳細判別の計算モデル（estimationModel: "detailed"）。確率は各要素の settingValues（分母）を使う。
+ */
+export interface DetailedModel {
+  /** ボーナス合計を契機ごとに分解する。合計の確率は totalId の settingValues を基準にする */
+  bonusSplits: { totalId: string; unknownId: string; parts: DetailedPart[] }[];
+  /** 通常時の小役グループ。総ゲーム数を母数とする多項分布に、入力のあるグループだけ入れる */
+  normalGroups: { parts: DetailedPart[] }[];
+  /** ボーナス中・RT中。gamesId（その状態のゲーム数）を母数に judgedIds を評価する */
+  stateGroups: { gamesId: string; judgedIds: string[] }[];
+}
+
+/** members がある部品は「members のどれか（区別できなかった分）」として評価する */
+export interface DetailedPart {
+  id: string;
+  members?: string[];
 }
 
 /**
@@ -99,7 +153,7 @@ export interface MachineConfig {
      * 詳細判別の計算方式。未指定時は従来どおりカテゴリで決まる
      * （ジャグラー＝多項分布 / それ以外＝重み付き）。機種IDでの分岐を避けるため設定ファイルで指定する。
      */
-    estimationModel?: "multinomial" | "weighted";
+    estimationModel?: "multinomial" | "weighted" | "detailed";
     /**
      * 通常時小役カードへ「角チェリー」カウンターを自動で差し込むか（未指定時 true）。
      * 角チェリーという呼び方が当てはまらない機種（スマスロ ハナビ等）は false にする。
@@ -135,6 +189,15 @@ export interface MachineConfig {
    * ボーナス確率表）をこの値に置き換える。カウンターのラベルは各要素の label で指定する。
    */
   bonusLabels?: { big: string; reg: string };
+  /**
+   * 詳細判別ページ（/:machineId/detail）のカード。入力データは設定判別ページと共有する
+   * （同じ localStorage キー）。machine-list.ts の detailPage: true とセットで使う。
+   */
+  detailSections?: ConfigSection[];
+  /** 合計と内訳の関係。指定時は MachinePageFactory の自動合算をこの定義で行う */
+  sumGroups?: SumGroup[];
+  /** estimationModel: "detailed" のときの計算モデル */
+  detailModel?: DetailedModel;
   seoContent?: SEOSection[];
   /**
    * 機種スペックページの内容を設定ファイルから汎用の表として描画する機種向け

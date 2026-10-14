@@ -29,7 +29,7 @@ function collectImpliedDenials(
   settings: number[],
   denied: Set<number>,
 ): void {
-  config.sections
+  [...config.sections, ...(config.detailSections ?? [])]
     .flatMap((s) => s.elements)
     .forEach((e) => {
       if (!e.impliedSettings) return;
@@ -486,6 +486,146 @@ export function calculateMultinomialEstimation(
     }));
   }
 
+  return likelihoods.map(({ setting, likelihood }) => ({
+    setting,
+    probability: (likelihood / totalLikelihood) * 100,
+  }));
+}
+
+/**
+ * 詳細判別モデル（estimationModel: "detailed"。2026-10-14、スマスロ ハナビで導入）。
+ *
+ * 1. 通常時: 総ゲーム数を母数とする多項分布。観測はボーナス合計（BB/RB）と、
+ *    入力のある小役グループの各項目。ハズレ等は「1 − 観測した役の確率の和」。
+ *    - グループ単位で判別に入れる。グループ内のどれか1つでも入力があれば、
+ *      そのグループの0回の項目も「数えた結果0回」として扱う（ハズレ確率から差し引く）。
+ *      丸ごと0のグループは外す（数えていない項目を「0回出た」と扱わないため。2026-09-13の
+ *      ぶどう未計測と同じ理由）。項目ごとに0を外すと、出たときだけ証拠にして出なかったときの
+ *      証拠を捨てることになり、項目が多いほど判別が高設定側へ偏る。
+ *    - members を持つ部品（風鈴の区別なし等）は「members のどれか」として確率の和で評価する。
+ * 2. ボーナスの契機: ボーナス合計を契機へ「分解」する（足すと同じ当選を二重に数える）。
+ *    公表のボーナス合計確率を基準に、契機ごとの比率だけ内訳の確率から使う（2026-09-13の
+ *    REG内訳と同じ考え方。ハズレ確率が変わらない）。契機を記録していなければ合計だけで評価。
+ * 3. ボーナス中・RT中: その状態のゲーム数を母数に、judgedIds の項目と「それ以外」で評価する。
+ *    judgedIds の確率の和が1を超える組み合わせ（資料の値が粗い BB中の風鈴A 等）は入れない。
+ * 4. 設定示唆（impliedSettings）による除外は他のモデルと共通。
+ */
+export function calculateDetailedEstimation(
+  config: MachineConfig,
+  inputs: UserInputs,
+): EstimationResult[] {
+  const settings = config.specs?.settings || [1, 2, 3, 4, 5, 6];
+  const model = config.detailModel;
+  const n = Number(inputs["total-games"]) || 0;
+  const uniform = () =>
+    settings.map((setting) => ({ setting, probability: 100 / settings.length }));
+  if (n <= 0 || !model) return uniform();
+
+  const elements = new Map(
+    [...config.sections, ...(config.detailSections ?? [])]
+      .flatMap((s) => s.elements)
+      .map((e) => [e.id, e] as const),
+  );
+  const count = (id: string) => Math.max(0, Number(inputs[id]) || 0);
+  const prob = (id: string, s: number) => {
+    const denom = elements.get(id)?.settingValues[s];
+    return denom ? 1 / denom : 0;
+  };
+  const partProb = (part: { id: string; members?: string[] }, s: number) =>
+    part.members
+      ? part.members.reduce((sum, m) => sum + prob(m, s), 0)
+      : prob(part.id, s);
+
+  const logLikelihoods = settings.map((setting) => {
+    let logL = 0;
+    let observed = 0; // 通常時の観測回数（ボーナス＋小役）
+    let pObserved = 0; // 通常時に観測対象とした確率の和
+
+    for (const split of model.bonusSplits) {
+      const total = count(split.totalId);
+      const pTotal = prob(split.totalId, setting);
+      if (!pTotal) return { setting, logLikelihood: -Infinity };
+      observed += total;
+      pObserved += pTotal;
+      const classified = split.parts.filter((p) => p.id !== split.unknownId);
+      if (!classified.some((p) => count(p.id) > 0)) {
+        if (total > 0) logL += total * Math.log(pTotal);
+        continue;
+      }
+      const leafSum = classified
+        .filter((p) => !p.members)
+        .reduce((sum, p) => sum + prob(p.id, setting), 0);
+      if (leafSum <= 0) return { setting, logLikelihood: -Infinity };
+      const scale = pTotal / leafSum;
+      let classifiedCount = 0;
+      for (const part of classified) {
+        const k = count(part.id);
+        if (k === 0) continue;
+        const p = partProb(part, setting) * scale;
+        if (p <= 0) return { setting, logLikelihood: -Infinity };
+        classifiedCount += k;
+        logL += k * Math.log(p);
+      }
+      const unknown = total - classifiedCount;
+      if (unknown > 0) logL += unknown * Math.log(pTotal);
+    }
+
+    for (const group of model.normalGroups) {
+      if (!group.parts.some((p) => count(p.id) > 0)) continue;
+      for (const part of group.parts) {
+        if (!part.members) pObserved += prob(part.id, setting);
+        const k = count(part.id);
+        if (k === 0) continue;
+        const p = partProb(part, setting);
+        if (p <= 0) return { setting, logLikelihood: -Infinity };
+        observed += k;
+        logL += k * Math.log(p);
+      }
+    }
+
+    const otherCount = n - observed;
+    if (otherCount > 0) {
+      const pOther = 1 - pObserved;
+      if (pOther <= 0) return { setting, logLikelihood: -Infinity };
+      logL += otherCount * Math.log(pOther);
+    }
+
+    for (const state of model.stateGroups) {
+      const games = count(state.gamesId);
+      if (games <= 0) continue;
+      let judgedCount = 0;
+      let pJudged = 0;
+      for (const id of state.judgedIds) {
+        const p = prob(id, setting);
+        if (!p) continue;
+        const k = count(id);
+        pJudged += p;
+        judgedCount += k;
+        if (k > 0) logL += k * Math.log(p);
+      }
+      const rest = games - judgedCount;
+      if (rest > 0) {
+        if (1 - pJudged <= 0) return { setting, logLikelihood: -Infinity };
+        logL += rest * Math.log(1 - pJudged);
+      }
+    }
+
+    return { setting, logLikelihood: logL };
+  });
+
+  const deniedSettings = new Set<number>();
+  collectImpliedDenials(config, inputs, settings, deniedSettings);
+  logLikelihoods.forEach((item) => {
+    if (deniedSettings.has(item.setting)) item.logLikelihood = -Infinity;
+  });
+
+  const maxLogLikelihood = Math.max(...logLikelihoods.map((l) => l.logLikelihood));
+  if (!Number.isFinite(maxLogLikelihood)) return uniform();
+  const likelihoods = logLikelihoods.map(({ setting, logLikelihood }) => ({
+    setting,
+    likelihood: Math.exp(logLikelihood - maxLogLikelihood),
+  }));
+  const totalLikelihood = likelihoods.reduce((sum, l) => sum + l.likelihood, 0);
   return likelihoods.map(({ setting, likelihood }) => ({
     setting,
     probability: (likelihood / totalLikelihood) * 100,

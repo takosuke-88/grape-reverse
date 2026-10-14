@@ -1,15 +1,263 @@
-import type { MachineConfig } from "../../types/machine-schema";
+import type {
+  ConfigSection,
+  DiscriminationElement,
+  MachineConfig,
+} from "../../types/machine-schema";
 
 // スマスロ ハナビ（ユニバーサルエンターテインメント／アクロスブランド）
 // 出典: ユーザー提供のスペック表（2026-10-05）。重複内訳・同時成立期待度は解析値。
 // 設定は1・2・5・6の4段階。
 //
-// 判別に使う項目（2026-10-05 ユーザー決定）:
-//   総ゲーム数・BIG・REG・風鈴（合成）・単独REG（REG合計を単独/重複に分解）
-//   ＋設定示唆（ピース花火・BIG中バラケ目・REG中バラケ目）
+// 判別に使う項目:
+//   設定判別ページ（2026-10-05）: 総ゲーム数・BB・RB・風鈴（合計）＋設定示唆3種
+//   詳細判別ページ（2026-10-14 ユーザー決定）: 資料の全項目。通常時の小役（風鈴A/B・チェリー・
+//   氷・リプレイ）、BB/RBの契機、BB中・RB中・花火チャレンジ・花火GAMEの役とゲーム数。
+//   入力データは2ページで共有し、判別は calculateDetailedEstimation が全項目で行う。
 // 特殊リプレイはスペック表のみ（判別には使わない）。設定5・6の値は資料に無いため、
 // ボーナス重複内訳（ドンBB 1/4369.1 ＋ 赤7BB 1/6553.6）からの算出値 1/2621.4 を使う。
 // 設定1・2は同じ計算で資料の値と一致する（特殊リプレイは必ずボーナスを伴う）。
+// ─── 詳細判別ページ（/hanabi/detail。2026-10-14）────────────────────────
+// 設定判別ページと入力データを共有する。設定判別ページの「風鈴」「BB回数」「RB回数」は
+// ここで数える内訳の合計（sumGroups）。合計を直接＋した分は「区別なし」「契機不明」へ入る。
+// 確率の値はスプレッドシート／解析資料のまま（settingValues は分母）。
+
+/** 設定1・2・5・6の分母 */
+const S = (s1: number, s2: number, s5: number, s6: number) => ({
+  1: s1,
+  2: s2,
+  5: s5,
+  6: s6,
+});
+
+/** 詳細判別ページ用のカウンター（判別は detailModel が行うので isDiscriminationFactor は false） */
+const counter = (
+  id: string,
+  label: string,
+  settingValues: Record<number, number> = {},
+  extra: Partial<DiscriminationElement> = {},
+): DiscriminationElement => ({
+  id,
+  label,
+  type: "counter",
+  unit: "回",
+  settingValues,
+  isDiscriminationFactor: false,
+  visibility: "detail",
+  ...extra,
+});
+
+// 設定示唆（設定判別ページと詳細判別ページの両方に出す。同じIDなので数字は共通）
+const HINT_PEACE = counter("hint-peace-hanabi", "RB終了画面ピース花火", {}, {
+  impliedSettings: [2, 5, 6],
+  hintLabel: "設定2以上濃厚",
+});
+const HINT_BB_BARAKE = counter("hint-big-barake", "BB中バラケ目", {}, {
+  impliedSettings: [5, 6],
+  hintLabel: "設定5・6濃厚",
+  probBase: "inbb-games",
+});
+const HINT_RB_BARAKE = counter("hint-reg-barake", "RB中バラケ目", {}, {
+  impliedSettings: [6],
+  hintLabel: "設定6濃厚",
+  probBase: "inrb-games",
+});
+
+// BBの契機（ドンBB）
+const DON_LEAVES = [
+  counter("big-don-solo-count", "単独", S(1724.6, 1680.4, 1680.4, 1598.4)),
+  counter("big-don-replay-count", "リプレイ", S(5461.3, 5461.3, 5041.2, 5041.2)),
+  counter("big-don-sreplay-count", "特殊リプ", S(4681.1, 4369.1, 4369.1, 4369.1)),
+  counter("big-don-furin-count", "風鈴A", S(16384.0, 16384.0, 13107.2, 13107.2)),
+  counter("big-don-cherryb-count", "チェリーB", S(13107.2, 13107.2, 10922.7, 10922.7)),
+  counter("big-don-reacha-count", "リーチ目役A", S(8192.0, 8192.0, 8192.0, 7281.8)),
+  counter("big-don-reachd-count", "リーチ目役D", S(2849.4, 2849.4, 2849.4, 2730.7)),
+  counter("big-don-reache-count", "リーチ目役E", S(10922.7, 10922.7, 10922.7, 9362.3)),
+];
+// BBの契機（赤7BB）
+const AKA_LEAVES = [
+  counter("big-aka-solo-count", "単独", S(2184.5, 2114.1, 2114.1, 2048.0)),
+  counter("big-aka-replay-count", "リプレイ", S(5461.3, 5461.3, 5461.3, 5041.2)),
+  counter("big-aka-sreplay-count", "特殊リプ", S(7281.8, 7281.8, 6553.6, 6553.6)),
+  counter("big-aka-cherrya1-count", "チェリーA1", S(16384.0, 16384.0, 16384.0, 13107.2)),
+  counter("big-aka-cherryb-count", "チェリーB", S(10922.7, 10922.7, 9362.3, 9362.3)),
+  counter("big-aka-reacha-count", "リーチ目役A", S(9362.3, 9362.3, 9362.3, 8192.0)),
+  counter("big-aka-reachc-count", "リーチ目役C", S(1872.5, 1820.4, 1771.2, 1771.2)),
+  counter("big-aka-reachd-count", "リーチ目役D", S(9362.3, 9362.3, 9362.3, 8192.0)),
+];
+const DON_IDS = DON_LEAVES.map((e) => e.id);
+const AKA_IDS = AKA_LEAVES.map((e) => e.id);
+
+// RBの契機。reg-solo-count / reg-cherry-count は 2026-10-05 版の「単独RB」「重複RB」と同じID
+// （保存済みのデータをそのまま引き継ぐため）。reg-cherry-count は「重複だが契機の役は不明」の扱い。
+const RB_DUP_IDS = [
+  "reg-replay-count",
+  "reg-cherryb-count",
+  "reg-reachb-count",
+  "reg-reachd-count",
+];
+const RB_ELEMENTS = [
+  counter("reg-solo-count", "単独", S(1149.8, 1040.3, 936.2, 851.1)),
+  counter("reg-replay-count", "リプレイ", S(3276.8, 2978.9, 2520.6, 2184.5)),
+  counter("reg-cherryb-count", "チェリーB", S(9362.3, 8192.0, 6553.6, 5461.3)),
+  counter("reg-reachb-count", "リーチ目役B", S(1598.4, 1424.7, 1236.5, 1129.9)),
+  counter("reg-reachd-count", "リーチ目役D", S(1598.4, 1489.5, 1310.7, 1191.6)),
+  counter("reg-cherry-count", "重複（役は不明）", S(601.2, 546.1, 471.5, 422.8)),
+  counter("reg-unknown-count", "契機不明", {}, { colSpan: 2 }),
+];
+
+/** ボーナス中・RT中のゲーム数（その状態のボタンの合計。直接は増減しない） */
+const games = (id: string, label: string) =>
+  counter(id, label, {}, { unit: "G", isReadOnly: true, hideProb: true, colSpan: 2 });
+/** ボーナス中・RT中の役（確率の母数はその状態のゲーム数） */
+const stateRole = (
+  id: string,
+  label: string,
+  gamesId: string,
+  settingValues: Record<number, number> = {},
+  extra: Partial<DiscriminationElement> = {},
+) => counter(id, label, settingValues, { probBase: gamesId, ...extra });
+
+const DETAIL_SECTIONS: ConfigSection[] = [
+  {
+    id: "basic-data",
+    title: "基本データ",
+    elements: [
+      {
+        id: "total-games",
+        label: "総ゲーム数",
+        type: "counter",
+        context: {},
+        settingValues: { 1: 0, 2: 0, 5: 0, 6: 0 },
+        isDiscriminationFactor: false,
+        discriminationWeight: 0,
+      },
+    ],
+  },
+  {
+    id: "detail-furin",
+    title: "通常時 風鈴",
+    layout: "grid",
+    elements: [
+      counter("furin-a-count", "風鈴A", S(12.9, 12.5, 12.1, 11.5)),
+      counter("furin-b-count", "風鈴B", S(38.39, 38.71, 36.21, 34.49)),
+      counter("furin-unknown-count", "風鈴（A・B区別なし）", {}, { colSpan: 2 }),
+    ],
+  },
+  {
+    id: "detail-cherry",
+    title: "通常時 チェリー",
+    layout: "grid",
+    elements: [
+      counter("cherry-a1-count", "チェリーA1", S(99.45, 99.45, 99.45, 99.3)),
+      counter("cherry-a2-count", "チェリーA2", S(20.99, 19.4, 20.5, 19.6)),
+      counter("cherry-b-count", "チェリーB", S(307.68, 306.24, 300.62, 297.89)),
+    ],
+  },
+  {
+    id: "detail-ice",
+    title: "通常時 氷・リプレイ",
+    layout: "grid",
+    elements: [
+      counter("ice-a-count", "氷A", S(46.32, 47.28, 46.18, 47.39)),
+      counter("ice-b-count", "氷B", S(1560.4, 1560.4, 1560.4, 1560.4)),
+      counter("replay-count", "リプレイ", S(7.3, 7.3, 7.3, 7.3)),
+    ],
+  },
+  {
+    id: "detail-bb-don",
+    title: "BBの契機（ドンBB）",
+    barTheme: "blueYellow",
+    layout: "grid",
+    collapsible: true,
+    elements: [
+      ...DON_LEAVES,
+      counter("big-don-unknown-count", "ドンBB・契機不明"),
+    ],
+  },
+  {
+    id: "detail-bb-aka",
+    title: "BBの契機（赤7BB）",
+    layout: "grid",
+    collapsible: true,
+    elements: [
+      ...AKA_LEAVES,
+      counter("big-aka-unknown-count", "赤7BB・契機不明"),
+      counter("big-unknown-count", "BB（種類・契機とも不明）"),
+    ],
+  },
+  {
+    id: "detail-rb",
+    title: "RBの契機",
+    barTheme: "gray",
+    layout: "grid",
+    collapsible: true,
+    elements: RB_ELEMENTS,
+  },
+  {
+    id: "detail-inbb",
+    title: "BB中",
+    layout: "grid",
+    collapsible: true,
+    elements: [
+      games("inbb-games", "BB中ゲーム数"),
+      stateRole("inbb-furin-a-count", "風鈴A", "inbb-games", S(1.1, 1.2, 1.1, 1.2)),
+      stateRole("inbb-furin-b-count", "風鈴B", "inbb-games", S(10.0, 7.0, 10.0, 7.0)),
+      // 「BB中バラケ目 (設定5・6濃厚)」は375pxの2列セル（148px）で2行に折り返すため、カード内では
+      // 「バラケ目 (5・6濃厚)」と短くする。数えたときの注記も同じ理由で短くする（ユーザー決定）。
+      // 設定判別ページの設定示唆カード（全幅）は元の表記のまま
+      { ...HINT_BB_BARAKE, label: "バラケ目", hintLabelShort: "5・6濃厚", hintNotice: "※設定5・6濃厚で計算" },
+      stateRole("inbb-other-count", "その他（枚数調整等）", "inbb-games", {}, { hideProb: true }),
+    ],
+  },
+  {
+    id: "detail-inrb",
+    title: "RB中",
+    layout: "grid",
+    collapsible: true,
+    elements: [
+      games("inrb-games", "RB中ゲーム数"),
+      stateRole("inrb-furin-a-count", "風鈴A", "inrb-games", S(1.2, 1.2, 1.2, 1.2)),
+      stateRole("inrb-one-count", "1枚役", "inrb-games", S(8.0, 8.0, 7.0, 7.0)),
+      stateRole("inrb-15-count", "共通15枚役", "inrb-games", S(32.8, 32.8, 32.8, 32.8)),
+      { ...HINT_RB_BARAKE, label: "バラケ目", hintLabelShort: "6濃厚", hintNotice: "※設定6濃厚で計算" },
+      stateRole("inrb-other-count", "その他（枚数調整等）", "inrb-games", {}, { hideProb: true, colSpan: 2 }),
+    ],
+  },
+  {
+    id: "detail-hc",
+    title: "花火チャレンジ",
+    barTheme: "darkBlue",
+    layout: "grid",
+    collapsible: true,
+    elements: [
+      games("hc-games", "花火チャレンジ ゲーム数"),
+      stateRole("hc-miss-count", "ハズレ", "hc-games", S(4.7, 4.5, 4.3, 4.2)),
+      stateRole("hc-replay-count", "通常リプレイ", "hc-games", S(3.2, 3.4, 3.6, 3.7)),
+      stateRole("hc-move-count", "移行リプレイ", "hc-games", S(3.5, 3.5, 3.5, 3.5)),
+      stateRole("hc-other-count", "その他", "hc-games", {}, { hideProb: true }),
+    ],
+  },
+  {
+    id: "detail-hg",
+    title: "花火GAME",
+    barTheme: "darkRed",
+    layout: "grid",
+    collapsible: true,
+    elements: [
+      games("hg-games", "花火GAME ゲーム数"),
+      stateRole("hg-miss-count", "ハズレ", "hg-games", S(6.4, 6.0, 5.4, 5.4)),
+      stateRole("hg-rtreplay-count", "RTリプレイ", "hg-games", S(1.9, 2.0, 2.1, 2.1)),
+      stateRole("hg-replay-count", "通常リプレイ", "hg-games", S(7.3, 7.3, 7.3, 7.3)),
+      stateRole("hg-other-count", "その他", "hg-games", {}, { hideProb: true }),
+    ],
+  },
+  {
+    id: "detail-hint",
+    title: "設定示唆",
+    elements: [HINT_PEACE],
+  },
+];
+
 export const hanabiConfig: MachineConfig = {
   id: "hanabi",
   name: "スマスロ ハナビ",
@@ -18,6 +266,73 @@ export const hanabiConfig: MachineConfig = {
   themeColor: "bg-indigo-800",
   // ボーナス名はユーザー決定で BB / RB に統一（2026-10-13）
   bonusLabels: { big: "BB", reg: "RB" },
+  detailSections: DETAIL_SECTIONS,
+  // 合計＝内訳の和。設定判別ページで合計を＋した分は「区別なし」「契機不明」へ入る
+  sumGroups: [
+    {
+      totalId: "big-count",
+      partIds: [...DON_IDS, "big-don-unknown-count", ...AKA_IDS, "big-aka-unknown-count", "big-unknown-count"],
+      unknownId: "big-unknown-count",
+    },
+    {
+      totalId: "reg-count",
+      partIds: ["reg-solo-count", ...RB_DUP_IDS, "reg-cherry-count", "reg-unknown-count"],
+      unknownId: "reg-unknown-count",
+    },
+    {
+      totalId: "furin-count",
+      partIds: ["furin-a-count", "furin-b-count", "furin-unknown-count"],
+      unknownId: "furin-unknown-count",
+    },
+    { totalId: "inbb-games", partIds: ["inbb-furin-a-count", "inbb-furin-b-count", "hint-big-barake", "inbb-other-count"] },
+    { totalId: "inrb-games", partIds: ["inrb-furin-a-count", "inrb-one-count", "inrb-15-count", "hint-reg-barake", "inrb-other-count"] },
+    { totalId: "hc-games", partIds: ["hc-miss-count", "hc-replay-count", "hc-move-count", "hc-other-count"] },
+    { totalId: "hg-games", partIds: ["hg-miss-count", "hg-rtreplay-count", "hg-replay-count", "hg-other-count"] },
+  ],
+  detailModel: {
+    bonusSplits: [
+      {
+        totalId: "big-count",
+        unknownId: "big-unknown-count",
+        parts: [
+          ...DON_IDS.map((id) => ({ id })),
+          { id: "big-don-unknown-count", members: DON_IDS },
+          ...AKA_IDS.map((id) => ({ id })),
+          { id: "big-aka-unknown-count", members: AKA_IDS },
+        ],
+      },
+      {
+        totalId: "reg-count",
+        unknownId: "reg-unknown-count",
+        parts: [
+          { id: "reg-solo-count" },
+          ...RB_DUP_IDS.map((id) => ({ id })),
+          { id: "reg-cherry-count", members: RB_DUP_IDS },
+        ],
+      },
+    ],
+    normalGroups: [
+      {
+        parts: [
+          { id: "furin-a-count" },
+          { id: "furin-b-count" },
+          { id: "furin-unknown-count", members: ["furin-a-count", "furin-b-count"] },
+        ],
+      },
+      { parts: [{ id: "cherry-a1-count" }, { id: "cherry-a2-count" }, { id: "cherry-b-count" }] },
+      { parts: [{ id: "ice-a-count" }, { id: "ice-b-count" }] },
+      { parts: [{ id: "replay-count" }] },
+    ],
+    // BB中の風鈴A（1/1.1・1/1.2）とRB中の風鈴A・15枚役は、資料の値が粗い／設定差が無いうえ、
+    // 入れると確率の和が1を超える設定がある（BB中 設定1: 1/1.1+1/10 > 1）ため判別には使わない。
+    // これらのボタンはゲーム数を正しく進めるためのもの（2026-10-14 ユーザー合意）。
+    stateGroups: [
+      { gamesId: "inbb-games", judgedIds: ["inbb-furin-b-count"] },
+      { gamesId: "inrb-games", judgedIds: ["inrb-one-count"] },
+      { gamesId: "hc-games", judgedIds: ["hc-miss-count", "hc-replay-count", "hc-move-count"] },
+      { gamesId: "hg-games", judgedIds: ["hg-miss-count", "hg-rtreplay-count", "hg-replay-count"] },
+    ],
+  },
   sections: [
     {
       id: "basic-data",
@@ -74,89 +389,17 @@ export const hanabiConfig: MachineConfig = {
         },
       ],
     },
-    {
-      id: "bonus-breakdown-section",
-      title: "RB詳細内訳",
-      layout: "grid",
-      elements: [
-        // REG合計を単独／重複へ分解して判別に使う（ジャグラーの単独REG/チェリーREGと同じ仕組み）。
-        // reg-cherry-count は「チェリー」ではなく「重複REG」（リプレイ・チェリーB・リーチ目役B/D との同時成立）
-        // として使う。値は重複合算（1/601.2 等）。1/単独 + 1/重複 は公表REG合計と一致する。
-        // ※ジャグラーと違い、REGに占める単独の割合が設定でほぼ変わらない（設定1 34.3%／設定6 33.2%）。
-        //   シミュレーション（2026-10-05）でも、内訳を分けて数えた場合の正答率はREG合計のみと誤差の範囲。
-        {
-          id: "reg-solo-count",
-          label: "単独RB",
-          type: "counter",
-          unit: "回",
-          settingValues: { 1: 1149.8, 2: 1040.3, 5: 936.2, 6: 851.1 },
-          isDiscriminationFactor: true,
-          visibility: "detail",
-        },
-        {
-          id: "reg-cherry-count",
-          label: "重複RB",
-          type: "counter",
-          unit: "回",
-          settingValues: { 1: 601.2, 2: 546.1, 5: 471.5, 6: 422.8 },
-          isDiscriminationFactor: true,
-          visibility: "detail",
-        },
-        {
-          id: "reg-unknown-count",
-          label: "契機不明RB",
-          type: "counter",
-          unit: "回",
-          settingValues: {},
-          isDiscriminationFactor: false,
-          visibility: "detail",
-          colSpan: 2,
-        },
-      ],
-    },
+    // RBの契機（単独／重複／契機不明）は詳細判別ページへ一本化した（2026-10-14 ユーザー決定）
     {
       id: "hint-section",
       title: "設定示唆",
-      elements: [
-        {
-          id: "hint-peace-hanabi",
-          label: "RB終了画面ピース花火",
-          type: "counter",
-          unit: "回",
-          settingValues: {},
-          isDiscriminationFactor: false,
-          visibility: "detail",
-          impliedSettings: [2, 5, 6],
-          hintLabel: "設定2以上濃厚",
-        },
-        {
-          id: "hint-big-barake",
-          label: "BB中バラケ目",
-          type: "counter",
-          unit: "回",
-          settingValues: {},
-          isDiscriminationFactor: false,
-          visibility: "detail",
-          impliedSettings: [5, 6],
-          hintLabel: "設定5・6濃厚",
-        },
-        {
-          id: "hint-reg-barake",
-          label: "RB中バラケ目",
-          type: "counter",
-          unit: "回",
-          settingValues: {},
-          isDiscriminationFactor: false,
-          visibility: "detail",
-          impliedSettings: [6],
-          hintLabel: "設定6濃厚",
-        },
-      ],
+      elements: [HINT_PEACE, HINT_BB_BARAKE, HINT_RB_BARAKE],
     },
   ],
   specs: {
     settings: [1, 2, 5, 6],
-    estimationModel: "multinomial",
+    // 詳細判別ページの全項目を使う計算（bayes-estimator.ts の calculateDetailedEstimation）
+    estimationModel: "detailed",
     injectCherryCounter: false,
     baseGamesPerMedal: 42.3,
     // 市場想定の出玉率（完全攻略時はスペックページに併記）

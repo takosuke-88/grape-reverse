@@ -15,9 +15,14 @@ import {
   calculateEstimation,
   calculateMultinomialEstimation,
   calculateGrapeWeight,
+  calculateDetailedEstimation,
   resolveSmallRoleId,
 } from "../../logic/bayes-estimator";
-import { AVAILABLE_MACHINES, hasReverseCalcPage } from "../../data/machine-list";
+import {
+  AVAILABLE_MACHINES,
+  hasDetailPage,
+  hasReverseCalcPage,
+} from "../../data/machine-list";
 import { ALL_COLUMNS, type ColumnEntry } from "../../data/column-content";
 import { formatBonusText } from "../../utils/formatters";
 import EstimationResultDisplay from "./EstimationResultDisplay";
@@ -81,9 +86,28 @@ interface MetricItem {
 
 interface MachinePageFactoryProps {
   config: MachineConfig;
+  /**
+   * "detail" は詳細判別ページ（/:machineId/detail。2026-10-14）。config.detailSections の
+   * カードを並べる。入力データ・判別結果は設定判別ページと共有（同じ localStorage キー）。
+   */
+  pageMode?: "main" | "detail";
 }
 
-const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
+const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({
+  config,
+  pageMode = "main",
+}) => {
+  const isDetailPage = pageMode === "detail";
+  // 設定判別ページと詳細判別ページの両方の要素（確率の参照・合計の計算用）
+  const allConfigElements = useMemo(
+    () =>
+      [...config.sections, ...(config.detailSections ?? [])].flatMap(
+        (s) => s.elements,
+      ),
+    [config.sections, config.detailSections],
+  );
+  // 合計カウンターと内訳の関係（指定がある機種だけ、汎用の自動合算を使う）
+  const sumGroups = config.sumGroups;
   const navigate = useNavigate();
   const { confirm, confirmDialog } = useConfirmDialog();
 
@@ -128,9 +152,12 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   const toolNameSuffix = currentCategory === "hana" ? "ベル逆算ツール" : "ぶどう逆算ツール";
   // 逆算ページを持たない機種（スマスロ ハナビ等）はナビの逆算ボタンも出さない
   const showReverseCalc = hasReverseCalcPage(config.id);
-  const toolLabel = showReverseCalc
-    ? `設定判別・${toolNameSuffix}`
-    : "設定判別ツール";
+  const showDetailPage = hasDetailPage(config.id);
+  const toolLabel = isDetailPage
+    ? "詳細判別ツール"
+    : showReverseCalc
+      ? `設定判別・${toolNameSuffix}`
+      : "設定判別ツール";
   // 指標カードのボーナス名（未指定時 BIG / REG。スマスロ ハナビは BB / RB）
   const bigName = config.bonusLabels?.big ?? "BIG";
   const regName = config.bonusLabels?.reg ?? "REG";
@@ -175,13 +202,15 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
     setEstimationResults(null);
 
     // 機種名（または専用に設定されたtitle）をドキュメントタイトルにセット
-    if (config.title) {
+    if (isDetailPage) {
+      document.title = `${config.name} 詳細判別｜GrapeReverse`;
+    } else if (config.title) {
       document.title = config.title;
     } else {
       const categoryLiteral = currentCategory === "hana" ? "ベル逆算" : currentCategory === "juggler" ? "ぶどう逆算" : "ぶどう/ベル逆算";
       document.title = `【即計算】${config.name} ${categoryLiteral}・設定判別｜GrapeReverse`;
     }
-  }, [config.id, config.name, currentCategory]);
+  }, [config.id, config.name, currentCategory, isDetailPage]);
 
   const [estimationResults, setEstimationResults] = useState<
     EstimationResult[] | null
@@ -189,10 +218,51 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
   const currentInputs = inputValues;
 
+  // sumGroups 指定機種: 内訳を書き換えるときは、その合計も同じ更新で揃える。
+  // 合計の更新を自動合算の useEffect に任せると、内訳を最後の1回まで−した瞬間に
+  // 「内訳が全部0で合計だけある古いデータ」と見分けがつかず、合計が「区別なし」へ
+  // 移ってしまう（2026-10-14 実機確認で発覚）。
+  const withSyncedTotals = (
+    prev: Record<string, number | boolean | string>,
+    changes: Record<string, number | boolean | string>,
+  ) => {
+    const next = { ...prev, ...changes };
+    for (const group of sumGroups ?? []) {
+      if (!group.partIds.some((id) => id in changes)) continue;
+      next[group.totalId] = group.partIds.reduce(
+        (sum, id) => sum + (Number(next[id]) || 0),
+        0,
+      );
+    }
+    return next;
+  };
+
   const handleValueChange = (
     elementId: string,
     value: number | boolean | string,
   ) => {
+    // 内訳カウンター（sumGroups 指定機種）: 合計も同時に更新する
+    if (sumGroups?.some((g) => g.partIds.includes(elementId))) {
+      setInputValues((prev) => withSyncedTotals(prev, { [elementId]: value }));
+      return;
+    }
+
+    // 合計カウンターの直接入力・＋−（sumGroups 指定機種）: 内訳との差を「区別なし」へ入れる
+    const sumGroup = sumGroups?.find((g) => g.totalId === elementId);
+    if (sumGroup) {
+      if (!sumGroup.unknownId) return; // ゲーム数など、内訳の和の表示専用
+      const unknownId = sumGroup.unknownId;
+      const others = sumGroup.partIds
+        .filter((id) => id !== unknownId)
+        .reduce((sum, id) => sum + (Number(inputValues[id]) || 0), 0);
+      setInputValues((prev) => ({
+        ...prev,
+        [elementId]: value,
+        [unknownId]: Math.max(0, Number(value) - others),
+      }));
+      return;
+    }
+
     // ボーナス合計直接入力時の同期処理:
     // Total - (Solo + Cherry) の差分を「契機不明」要素に自動反映する
     if (elementId === "big-count" || elementId === "reg-count") {
@@ -203,8 +273,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
       const newUnknown = Math.max(0, numValue - (solo + cherry));
 
       // 機種定義から「契機不明」要素IDを動的に探索する
-      const unknownElement = config.sections
-        .flatMap((s) => s.elements)
+      const unknownElement = allConfigElements
         .find((e) => e.id.startsWith(prefix) && e.id.includes("unknown"));
       const unknownId = unknownElement?.id ?? `${prefix}-unknown-count`;
 
@@ -288,24 +357,36 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
     const adjBigUnknown = bigUnknown - prevBig;
     const adjRegUnknown = regUnknown - prevReg;
-    const bigSolo = Number(currentInputs["big-solo-count"]) || 0;
-    const bigCherry = Number(currentInputs["big-cherry-count"]) || 0;
-    const regSolo = Number(currentInputs["reg-solo-count"]) || 0;
-    const regCherry = Number(currentInputs["reg-cherry-count"]) || 0;
+    // 契機が分かっているボーナスの合計（sumGroups 指定機種は定義の内訳から求める）
+    const classifiedSum = (totalId: string, legacy: string[]) => {
+      const group = sumGroups?.find((g) => g.totalId === totalId);
+      const ids = group
+        ? group.partIds.filter((id) => id !== group.unknownId)
+        : legacy;
+      return ids.reduce((sum, id) => sum + (Number(currentInputs[id]) || 0), 0);
+    };
+    const bigClassified = classifiedSum("big-count", [
+      "big-solo-count",
+      "big-cherry-count",
+    ]);
+    const regClassified = classifiedSum("reg-count", [
+      "reg-solo-count",
+      "reg-cherry-count",
+    ]);
 
     return {
       inputs: {
         ...currentInputs,
         "total-games": totalGames - prevTotal,
         "big-unknown-count": adjBigUnknown,
-        "big-count": bigSolo + bigCherry + adjBigUnknown,
+        "big-count": bigClassified + adjBigUnknown,
         "reg-unknown-count": adjRegUnknown,
-        "reg-count": regSolo + regCherry + adjRegUnknown,
+        "reg-count": regClassified + adjRegUnknown,
       },
       totalGames: totalGames - prevTotal,
       mode: "diff",
     };
-  }, [currentInputs, totalGames, previousData]);
+  }, [currentInputs, totalGames, previousData, sumGroups]);
 
   const judgmentInputs = judgment.inputs;
   const judgmentTotalGames = judgment.totalGames;
@@ -345,7 +426,31 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
   /* 自動計算: 入力値が変更されたら自動的に計算を実行 */
   // ボーナス内訳の自動合算 (Total = Solo + Cherry + Unknown)
+  // sumGroups 指定機種: 合計＝内訳の和に揃える。内訳が全て0で合計だけある古いデータ
+  // （内訳を数える前に保存された値）は、合計を0に潰さず「区別なし」へ移す。
   useEffect(() => {
+    if (!sumGroups) return;
+    const updates: Record<string, number> = {};
+    for (const group of sumGroups) {
+      const partSum = group.partIds.reduce(
+        (sum, id) => sum + (Number(currentInputs[id]) || 0),
+        0,
+      );
+      const total = Number(currentInputs[group.totalId]) || 0;
+      if (partSum === total) continue;
+      if (partSum === 0 && total > 0 && group.unknownId) {
+        updates[group.unknownId] = total;
+      } else {
+        updates[group.totalId] = partSum;
+      }
+    }
+    if (Object.keys(updates).length > 0) {
+      setInputValues((prev) => ({ ...prev, ...updates }));
+    }
+  }, [currentInputs, sumGroups]);
+
+  useEffect(() => {
+    if (sumGroups) return; // 上の汎用版が担当する
     const calculateTotal = (prefix: "big" | "reg") => {
       const solo = Number(currentInputs[`${prefix}-solo-count`]) || 0;
       const cherry = Number(currentInputs[`${prefix}-cherry-count`]) || 0;
@@ -387,12 +492,16 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           // ジャグラー: 多項分布モデル（cherry > 0 なら4軸、0なら3軸に自動切替）
           // ハナハナ: 既存の重み付きモデル（ランプ・フェザー等の多要素判別を維持）
           // 機種設定で計算方式が指定されていればそれに従う（BT/RT機など。2026-10-05）
-          const useMultinomial = config.specs?.estimationModel
-            ? config.specs.estimationModel === "multinomial"
+          const model = config.specs?.estimationModel;
+          const useMultinomial = model
+            ? model === "multinomial"
             : currentCategory === "juggler";
-          const results = useMultinomial
-            ? calculateMultinomialEstimation(config, judgmentInputs)
-            : calculateEstimation(config, judgmentInputs);
+          const results =
+            model === "detailed"
+              ? calculateDetailedEstimation(config, judgmentInputs)
+              : useMultinomial
+                ? calculateMultinomialEstimation(config, judgmentInputs)
+                : calculateEstimation(config, judgmentInputs);
           setEstimationResults(results);
         } catch (err) {
           console.error("❌ 自動計算エラー:", err);
@@ -439,18 +548,25 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
       const key = `${prefix}-${type}-count`;
       const val = Number(inputValues[key]) || 0;
       if (val > 0) {
-        setInputValues((prev) => ({ ...prev, [key]: val - 1 }));
+        setInputValues((prev) => withSyncedTotals(prev, { [key]: val - 1 }));
         setHistory((prev) => prev.slice(0, -1));
         return;
       }
     }
 
     // フォールバック: unknown → cherry → solo の順で非ゼロを減算
-    for (const type of ["unknown", "cherry", "solo"]) {
-      const key = `${prefix}-${type}-count`;
+    // （sumGroups 指定機種は「区別なし」→ 内訳を後ろから順に）
+    const group = sumGroups?.find((g) => g.totalId === `${prefix}-count`);
+    const fallbackKeys = group
+      ? [
+          ...(group.unknownId ? [group.unknownId] : []),
+          ...group.partIds.filter((id) => id !== group.unknownId).reverse(),
+        ]
+      : ["unknown", "cherry", "solo"].map((type) => `${prefix}-${type}-count`);
+    for (const key of fallbackKeys) {
       const val = Number(inputValues[key]) || 0;
       if (val > 0) {
-        setInputValues((prev) => ({ ...prev, [key]: val - 1 }));
+        setInputValues((prev) => withSyncedTotals(prev, { [key]: val - 1 }));
         return;
       }
     }
@@ -478,6 +594,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
   // カードの並びを変える場合は src/data/machines/*.ts の sections を並べ替えること。
   // ここで行うのは、normal-role-section に cherry-count が無い機種への注入のみ。
   const orderedSections = useMemo(() => {
+    if (isDetailPage) return config.detailSections ?? [];
     return config.sections.map((section) => {
       if (section.id !== "normal-role-section") return section;
       if (config.specs?.injectCherryCounter === false) return section;
@@ -488,7 +605,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
       newElements.splice(grapeIdx >= 0 ? grapeIdx : 0, 0, CHERRY_ELEMENT);
       return { ...section, layout: "grid" as const, elements: newElements };
     });
-  }, [config.sections]);
+  }, [config.sections, config.detailSections, isDetailPage]);
 
   // 指標カードのラベルを14pxのままにできるか、実際の描画幅で判定する。
   //
@@ -641,13 +758,41 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           </div>
           {/* ナビゲーションボタン */}
           <div className="flex gap-2">
-            <button
-              type="button"
-              className={`flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs`}
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            >
-              🎰 設定判別
-            </button>
+            {isDetailPage ? (
+              <Link
+                to={`/${config.id}`}
+                className="flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
+              >
+                🎰 設定判別
+              </Link>
+            ) : (
+              <button
+                type="button"
+                className={`flex-1 rounded-lg bg-slate-700 dark:bg-slate-600 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs`}
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              >
+                🎰 設定判別
+              </button>
+            )}
+            {/* 逆算ページを持たず詳細判別ページを持つ機種は、逆算ボタンの位置に詳細判別を置く */}
+            {!showReverseCalc && showDetailPage && (
+              isDetailPage ? (
+                <button
+                  type="button"
+                  className="flex-1 rounded-lg bg-teal-600 text-white py-2 text-xs font-bold ring-2 ring-teal-300 dark:ring-teal-600"
+                  onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                >
+                  🔍 詳細判別
+                </button>
+              ) : (
+                <Link
+                  to={`/${config.id}/detail`}
+                  className="flex-1 rounded-lg bg-teal-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
+                >
+                  🔍 詳細判別
+                </Link>
+              )
+            )}
             {showReverseCalc && (
               <Link
                 to={`/${config.id}/grape`}
@@ -663,7 +808,9 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
               📊 機種スペック
             </Link>
             {/* 逆算ボタンが無い機種も、ボタン幅は3つ並びのときと同じに保ち左寄せにする */}
-            {!showReverseCalc && <div className="flex-1" aria-hidden="true" />}
+            {!showReverseCalc && !showDetailPage && (
+              <div className="flex-1" aria-hidden="true" />
+            )}
           </div>
         </div>
       </div>{/* end sticky nav */}
@@ -684,7 +831,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
           if (visibleElements.length === 0) return null;
 
           const isCompactCard = COMPACT_CARD_IDS.has(section.id);
-          const isCollapsible = COLLAPSIBLE_CARD_IDS.has(section.id);
+          const isCollapsible =
+            COLLAPSIBLE_CARD_IDS.has(section.id) || !!section.collapsible;
           const isOpen = cardOpenState[section.id] ?? true;
 
           return (
@@ -767,6 +915,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                       <div className={element.colSpan === 2 ? "col-start-1" : ""}>
                         <DynamicInput
                           compactLayout={compactLayout}
+                          barTheme={section.barTheme}
                           element={{
                             ...element,
                             label: labelWithDiff(element),
@@ -780,7 +929,12 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                           onChange={(value: number | string | boolean) => handleValueChange(element.id, value)}
                           // バー右下の確率も詳細判別と同じ基準（現在 − 前任者）に揃える。
                           // バーに表示する数字は生の入力値（value）のまま変えない。
-                          totalGames={judgmentTotalGames}
+                          // ボーナス中・RT中の役は、その状態のゲーム数を母数にする（probBase）。
+                          totalGames={
+                            element.probBase
+                              ? Number(currentInputs[element.probBase]) || 0
+                              : judgmentTotalGames
+                          }
                           probCount={Number(judgmentInputs[element.id]) || 0}
                           vibrationEnabled={vibrationEnabled}
                           overrideProbText={
@@ -794,6 +948,19 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                               : undefined
                           }
                           onIncrement={(() => {
+                            // sumGroups 指定機種: BB/RB の内訳を＋したら、−ボタンで戻せるよう履歴へ積む
+                            if (sumGroups) {
+                              const group = sumGroups.find(
+                                (g) =>
+                                  (g.totalId === "big-count" || g.totalId === "reg-count") &&
+                                  g.partIds.includes(element.id),
+                              );
+                              if (!group) return undefined;
+                              const type = element.id.replace(/^(big|reg)-/, "").replace(/-count$/, "");
+                              return group.totalId === "big-count"
+                                ? () => setBigHistory((prev) => [...prev, type])
+                                : () => setRegHistory((prev) => [...prev, type]);
+                            }
                             const m = element.id.match(/^(big|reg)-(solo|cherry|unknown)-count$/);
                             if (!m) return undefined;
                             const [, bonus, type] = m;
@@ -807,6 +974,15 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                             undefined
                           }
                           onDirectInput={(() => {
+                            if (sumGroups) {
+                              const group = sumGroups.find(
+                                (g) =>
+                                  g.totalId === element.id || g.partIds.includes(element.id),
+                              );
+                              if (group?.totalId === "big-count") return () => setBigHistory([]);
+                              if (group?.totalId === "reg-count") return () => setRegHistory([]);
+                              return undefined;
+                            }
                             if (/^big(-\w+)?-count$/.test(element.id)) return () => setBigHistory([]);
                             if (/^reg(-\w+)?-count$/.test(element.id)) return () => setRegHistory([]);
                             return undefined;
@@ -849,8 +1025,9 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
 
         {/* 結果表示（常時表示） */}
         <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
+          {/* 2026-10-14「詳細判別」→「設定判別」（スマスロ ハナビの詳細判別ページと紛らわしいため。全機種） */}
           <h2 className="mb-2 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
-            詳細判別
+            設定判別
           </h2>
 
           {/* 設定別期待度の詳細表示 */}
@@ -937,8 +1114,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 })(),
                 format: (v: number) => v.toFixed(1),
                 settingValues: (() => {
-                  const el = config.sections
-                    .flatMap((s) => s.elements)
+                  const el = allConfigElements
                     .find((e) => e.id === "big-count");
                   return el?.settingValues;
                 })(),
@@ -952,8 +1128,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 })(),
                 format: (v: number) => v.toFixed(1),
                 settingValues: (() => {
-                  const el = config.sections
-                    .flatMap((s) => s.elements)
+                  const el = allConfigElements
                     .find((e) => e.id === "reg-count");
                   return el?.settingValues;
                 })(),
@@ -1032,8 +1207,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         })(),
                         format: (v: number) => v.toFixed(1),
                         settingValues: (() => {
-                          const el = config.sections
-                            .flatMap((s) => s.elements)
+                          const el = allConfigElements
                             .find((e) => e.id === "big-solo-count");
                           return el?.settingValues;
                         })(),
@@ -1048,8 +1222,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         })(),
                         format: (v: number) => v.toFixed(1),
                         settingValues: (() => {
-                          const el = config.sections
-                            .flatMap((s) => s.elements)
+                          const el = allConfigElements
                             .find((e) => e.id === "big-cherry-count");
                           return el?.settingValues;
                         })(),
@@ -1064,25 +1237,40 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                         })(),
                         format: (v: number) => v.toFixed(1),
                         settingValues: (() => {
-                          const el = config.sections
-                            .flatMap((s) => s.elements)
+                          const el = allConfigElements
                             .find((e) => e.id === "reg-solo-count");
                           return el?.settingValues;
                         })(),
                       },
                       {
-                        // BT/RT（スマスロ ハナビ）は reg-cherry-count を「重複REG」として使う
+                        // BT/RT（スマスロ ハナビ）は「重複RB」＝ RB合計 − 単独 − 契機不明
+                        // （詳細判別ページで重複の契機を細かく数えるため、その和）
                         label: currentCategory === "btrt" ? `重複${regName}` : "チェREG",
-                        count: Number(judgmentInputs["reg-cherry-count"]) || 0,
+                        count: (() => {
+                          if (currentCategory !== "btrt")
+                            return Number(judgmentInputs["reg-cherry-count"]) || 0;
+                          return Math.max(
+                            0,
+                            (Number(judgmentInputs["reg-count"]) || 0) -
+                              (Number(judgmentInputs["reg-solo-count"]) || 0) -
+                              (Number(judgmentInputs["reg-unknown-count"]) || 0),
+                          );
+                        })(),
                         val: (() => {
                           const count =
-                            Number(judgmentInputs["reg-cherry-count"]) || 0;
+                            currentCategory !== "btrt"
+                              ? Number(judgmentInputs["reg-cherry-count"]) || 0
+                              : Math.max(
+                                  0,
+                                  (Number(judgmentInputs["reg-count"]) || 0) -
+                                    (Number(judgmentInputs["reg-solo-count"]) || 0) -
+                                    (Number(judgmentInputs["reg-unknown-count"]) || 0),
+                                );
                           return count > 0 ? judgmentTotalGames / count : 0;
                         })(),
                         format: (v: number) => v.toFixed(1),
                         settingValues: (() => {
-                          const el = config.sections
-                            .flatMap((s) => s.elements)
+                          const el = allConfigElements
                             .find((e) => e.id === "reg-cherry-count");
                           return el?.settingValues;
                         })(),
@@ -1100,11 +1288,9 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 })(),
                 format: (v: number) => v.toFixed(1),
                 settingValues: (() => {
-                  const bigEl = config.sections
-                    .flatMap((s) => s.elements)
+                  const bigEl = allConfigElements
                     .find((e) => e.id === "big-count");
-                  const regEl = config.sections
-                    .flatMap((s) => s.elements)
+                  const regEl = allConfigElements
                     .find((e) => e.id === "reg-count");
 
                   // BIG・REG両方の確率設定があれば、合成確率を計算して返す
@@ -1124,8 +1310,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                   }
 
                   // 事前定義要素があればそちらをフォールバックとして使う
-                  const combinedEl = config.sections
-                    .flatMap((s) => s.elements)
+                  const combinedEl = allConfigElements
                     .find((e) => e.id === "bonus-combined");
                   return combinedEl?.settingValues;
                 })(),
@@ -1145,8 +1330,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 format: (v: number) => v.toFixed(2),
                 settingValues: (() => {
                   const countId = smallRoleId;
-                  const el = config.sections
-                    .flatMap((s) => s.elements)
+                  const el = allConfigElements
                     .find((e) => e.id === countId);
                   return el?.settingValues;
                 })(),
@@ -1168,8 +1352,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
                 })(),
                 format: (v: number) => v.toFixed(2),
                 settingValues: (() => {
-                  const el = config.sections
-                    .flatMap((s) => s.elements)
+                  const el = allConfigElements
                     .find((e) => e.id === "cherry-count");
                   return el?.settingValues;
                 })(),
@@ -1638,7 +1821,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({ config }) => {
         </div>
 
         {/* SEOコンテンツ・独自解説テキスト */}
-        {config.seoContent && config.seoContent.length > 0 && (
+        {/* 解説文は設定判別ページだけに出す（詳細判別ページは noindex の入力ページ） */}
+        {!isDetailPage && config.seoContent && config.seoContent.length > 0 && (
           <div className="mt-8 mb-12 space-y-12 px-2">
             {config.seoContent.map((section, idx) => (
               <section key={idx} className="space-y-6">

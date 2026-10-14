@@ -1,7 +1,11 @@
 import React from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useLocalStorage } from "../hooks/useLocalStorage";
-import { AVAILABLE_MACHINES, hasReverseCalcPage } from "../data/machine-list";
+import {
+  AVAILABLE_MACHINES,
+  hasDetailPage,
+  hasReverseCalcPage,
+} from "../data/machine-list";
 import type { SpecBlock } from "../types/machine-schema";
 import Seo from "../components/Seo";
 import { JUGGLER_PAYOUT_RATIOS_3MODE } from "../data/juggler-spec-data";
@@ -306,6 +310,14 @@ export default function MachineSpecPage() {
                 {roleIcon} {roleLabel}逆算
               </Link>
             )}
+            {!showReverseCalc && hasDetailPage(machineId) && (
+              <Link
+                to={`/${machineId}/detail`}
+                className="flex-1 rounded-lg bg-teal-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
+              >
+                🔍 詳細判別
+              </Link>
+            )}
             <button
               type="button"
               className="flex-1 rounded-lg bg-indigo-500 text-white py-2 text-xs font-bold ring-2 ring-indigo-300 dark:ring-indigo-600"
@@ -313,7 +325,9 @@ export default function MachineSpecPage() {
               📊 機種スペック
             </button>
             {/* 逆算ボタンが無い機種も、ボタン幅は3つ並びのときと同じに保ち左寄せにする */}
-            {!showReverseCalc && <div className="flex-1" aria-hidden="true" />}
+            {!showReverseCalc && !hasDetailPage(machineId) && (
+              <div className="flex-1" aria-hidden="true" />
+            )}
           </div>
         </div>
       </div>

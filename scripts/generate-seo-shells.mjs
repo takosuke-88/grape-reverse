@@ -51,6 +51,14 @@ function getMachineIds() {
   return extractIdsFromFile(MACHINE_LIST_PATH, /id:\s*["']([^"']+)["']/g);
 }
 
+// detailPage: true の機種は詳細判別ページ（/:id/detail）を持つ（2026-10-14）
+function getDetailPageIds() {
+  return extractIdsFromFile(
+    MACHINE_LIST_PATH,
+    /\{[^{}]*?\bid:\s*["']([^"']+)["'][^{}]*?detailPage:\s*true[^{}]*?\}/g,
+  );
+}
+
 // reverseCalc: false の機種（スマスロ ハナビ等）は逆算ページを持たない（2026-10-05）
 function getNoReverseCalcIds() {
   return extractIdsFromFile(
@@ -79,11 +87,14 @@ function getColumnSlugs() {
 function buildRouteList() {
   const machineIds = getMachineIds();
   const noReverseCalcIds = getNoReverseCalcIds();
+  const detailPageIds = getDetailPageIds();
   const columnSlugs = getColumnSlugs();
   const routes = ["/"];
   machineIds.forEach((id) => {
     routes.push(`/${id}`);
     if (!noReverseCalcIds.includes(id)) routes.push(`/${id}/grape`);
+    // 詳細判別ページ（noindex。sitemap には載せないが、直接アクセスで404にしないため生成する）
+    if (detailPageIds.includes(id)) routes.push(`/${id}/detail`);
     routes.push(`/${id}/specs`);
     routes.push(`/${id}/prev`);
   });

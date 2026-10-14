@@ -12,7 +12,11 @@
 import { useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useLocalStorage } from "../hooks/useLocalStorage";
-import { AVAILABLE_MACHINES, hasReverseCalcPage } from "../data/machine-list";
+import {
+  AVAILABLE_MACHINES,
+  hasDetailPage,
+  hasReverseCalcPage,
+} from "../data/machine-list";
 import { CONFIG_MAP } from "../data/machine-config-map";
 import Seo from "../components/Seo";
 import { useConfirmDialog } from "../components/ui/ConfirmDialog";
@@ -273,6 +277,14 @@ export default function PreviousDataPage() {
                 {roleIcon} {roleLabel}逆算
               </Link>
             )}
+            {!hasReverseCalcPage(machineId) && hasDetailPage(machineId) && (
+              <Link
+                to={`/${machineId}/detail`}
+                className="flex-1 rounded-lg bg-teal-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
+              >
+                🔍 詳細判別
+              </Link>
+            )}
             <Link
               to={`/${machineId}/specs`}
               className="flex-1 rounded-lg bg-indigo-700 text-white py-2 text-xs font-bold transition-opacity hover:opacity-90 active:opacity-80 text-center"
@@ -280,7 +292,9 @@ export default function PreviousDataPage() {
               📊 機種スペック
             </Link>
             {/* 逆算ボタンが無い機種も、ボタン幅は3つ並びのときと同じに保ち左寄せにする */}
-            {!hasReverseCalcPage(machineId) && <div className="flex-1" aria-hidden="true" />}
+            {!hasReverseCalcPage(machineId) && !hasDetailPage(machineId) && (
+              <div className="flex-1" aria-hidden="true" />
+            )}
           </div>
         </div>
       </div>
@@ -336,7 +350,7 @@ export default function PreviousDataPage() {
         {/* 詳細判別（前任者データのみで推定） */}
         <div className="rounded-2xl bg-white dark:bg-slate-900 p-4 shadow-lg ring-1 ring-slate-200 dark:ring-slate-800 sm:p-6">
           <h2 className="mb-2 text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
-            詳細判別
+            設定判別
           </h2>
 
           <div className="mt-4">

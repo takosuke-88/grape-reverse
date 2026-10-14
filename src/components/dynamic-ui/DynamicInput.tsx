@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import type { DiscriminationElement } from "../../types/machine-schema";
+import type { BarThemeName, DiscriminationElement } from "../../types/machine-schema";
 import { formatBonusText } from "../../utils/formatters";
 import CounterDirectInputZone from "./CounterDirectInputZone";
 import {
@@ -42,6 +42,8 @@ interface DynamicInputProps {
    * （text-2xl）と重なるため。bottom 側へ寄せると ＋ の上に文字が乗る。
    */
   aboveProbText?: string;
+  /** カード単位の配色の上書き（ConfigSection.barTheme） */
+  barTheme?: BarThemeName;
 }
 
 interface ElementTheme {
@@ -52,7 +54,41 @@ interface ElementTheme {
   textColor?: string;
   /** 虹グラデーション用のbgはinlineスタイルで上書き */
   bgStyle?: React.CSSProperties;
+  /** ＋エリアの文字（＋・確率）の色。＋エリアだけ明るい色のとき用。未指定なら textColor */
+  plusTextColor?: string;
 }
+
+/**
+ * カード単位の配色（ConfigSection.barTheme。2026-10-14、スマスロ ハナビの詳細判別）。
+ * minusBg は＋エリアの背景（歴史的経緯の名前。−側は透明）。
+ */
+const BAR_THEMES: Record<BarThemeName, ElementTheme> = {
+  // 花火チャレンジ: RB（#1d4ed8）より暗く、紺寄りの青
+  darkBlue: {
+    bg: "#1e3a8a",
+    minusBg: "linear-gradient(145deg, #172f6e, #0f1f4d)",
+    accent: "#bfdbfe",
+  },
+  // 花火GAME: BB（#b91c1c）より暗い赤
+  darkRed: {
+    bg: "#7f1d1d",
+    minusBg: "linear-gradient(145deg, #651717, #4a1010)",
+    accent: "#fecaca",
+  },
+  // BBの契機（ドンBB）: 青と黄色のツートン（バー全体が青、＋が黄色）
+  blueYellow: {
+    bg: "#1d4ed8",
+    minusBg: "linear-gradient(145deg, #facc15, #eab308)",
+    accent: "#fef08a",
+    plusTextColor: "#422006",
+  },
+  // RBの契機: 灰色
+  gray: {
+    bg: "#64748b",
+    minusBg: "linear-gradient(145deg, #4b5563, #374151)",
+    accent: "#e2e8f0",
+  },
+};
 
 function getElementTheme(id: string): ElementTheme {
   // ─── ランプ色テーマ（big/reg より先にマッチさせる） ───
@@ -113,14 +149,7 @@ function getElementTheme(id: string): ElementTheme {
       textColor: "#ffffff",
     };
   }
-  // スマスロ ハナビの風鈴（2026-10-05）。ぶどう（緑）・ベル（アンバー）と被らない水色
-  if (id === "furin-count") {
-    return {
-      bg: "#0284c7",
-      minusBg: "linear-gradient(145deg, #0369a1, #075985)",
-      accent: "#e0f2fe",
-    };
-  }
+
   // 設定示唆カウンター（hint-*。2026-10-05）。ID に big/reg を含んでも
   // ボーナスの赤・青にならないよう、それらより先にマッチさせる
   if (id.startsWith("hint-")) {
@@ -149,6 +178,27 @@ function getElementTheme(id: string): ElementTheme {
       bg: "#1d4ed8",
       minusBg: "linear-gradient(145deg, #1840c0, #112c9a)",
       accent: "#bfdbfe",
+    };
+  }
+  // スマスロ ハナビの風鈴（設定判別ページの合計・詳細判別ページの内訳とも。2026-10-14）は
+  // 明るい黄色。白い数字では読めないため数字は濃い茶色。BBの契機「風鈴A」
+  // （big-don-furin-count）は上の big 判定で赤になる。
+  if (id.includes("furin")) {
+    return {
+      bg: "#facc15",
+      minusBg: "linear-gradient(145deg, #eab308, #ca8a04)",
+      accent: "#713f12",
+      textColor: "#422006",
+    };
+  }
+  // スマスロ ハナビの氷（2026-10-14、ユーザー指定）: 緑の単色。
+  // （上半分白・下半分緑のグラデーション＋赤線も試したが、ユーザー判断で単色に戻した）
+  if (id.startsWith("ice-")) {
+    return {
+      bg: "#22c55e",
+      minusBg: "linear-gradient(145deg, #16a34a, #15803d)",
+      accent: "#14532d",
+      textColor: "#14532d",
     };
   }
   if (id.includes("cherry")) {
@@ -184,6 +234,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   compactLayout = false,
   overrideProbText,
   probCount,
+  barTheme,
   aboveProbText,
 }) => {
   // 「＋1」「−1」の飛び出し演出。dir: 1 = 上へ（加算）/ -1 = 下へ（減算）
@@ -247,7 +298,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
     pushFloat(-1);
   };
 
-  const theme = getElementTheme(element.id);
+  const theme = barTheme ? BAR_THEMES[barTheme] : getElementTheme(element.id);
 
   const renderInput = () => {
     switch (element.type) {
@@ -261,6 +312,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
         const showProb =
           element.id !== "total-games" &&
           !element.impliedSettings &&
+          !element.hideProb &&
           totalGames != null &&
           totalGames > 0 &&
           probValue > 0;
@@ -277,9 +329,19 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
         const clampCounter = (n: number) =>
           clampCounterValueByElementId(element.id, n);
 
-        const dynamicGlow = showGlow
-          ? `0 0 20px ${theme.accent}, 0 0 40px ${theme.accent}, 0 0 60px ${theme.accent}`
-          : `0 0 10px ${theme.accent}cc, 0 0 22px ${theme.accent}88`;
+        // 数字が濃い色のバー（ハナハナの白ランプ・ハナビの風鈴/氷）は、濃い色の発光だと
+        // 数字の周りが黒く滲んで見える（2026-10-14 ユーザー指摘）。普段は発光させず、
+        // ＋で加算した瞬間だけ白く光らせる（加算フィードバックは textShadow が担う設計のため残す）。
+        // ＋エリアの文字色（＋・確率）。＋エリアだけ明るいツートン配色では別の色にする
+        const plusTextColor = theme.plusTextColor ?? theme.textColor;
+        const darkDigits = !!theme.textColor && theme.textColor !== "#ffffff";
+        const dynamicGlow = darkDigits
+          ? showGlow
+            ? "0 0 12px #ffffff, 0 0 24px #ffffff"
+            : "none"
+          : showGlow
+            ? `0 0 20px ${theme.accent}, 0 0 40px ${theme.accent}, 0 0 60px ${theme.accent}`
+            : `0 0 10px ${theme.accent}cc, 0 0 22px ${theme.accent}88`;
 
         return (
           // 外側はoverflow-hiddenを持たない。「+1」は枠外（画面上方向）まで
@@ -367,7 +429,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
               >
                 <span
                   className="text-2xl pointer-events-none select-none"
-                  style={{ color: theme.textColor ? `${theme.textColor}cc` : "rgba(255,255,255,0.8)" }}
+                  style={{ color: plusTextColor ? `${plusTextColor}cc` : "rgba(255,255,255,0.8)" }}
                 >
                   ＋
                 </span>
@@ -376,8 +438,8 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 <span
                   className="absolute right-2 top-1 text-sm font-bold pointer-events-none select-none whitespace-nowrap"
                   style={{
-                    color: theme.textColor
-                      ? `${theme.textColor}cc`
+                    color: plusTextColor
+                      ? `${plusTextColor}cc`
                       : "rgba(255,255,255,0.78)",
                     fontFamily: "'Urbanist', -apple-system, sans-serif",
                   }}
@@ -389,7 +451,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 <span
                   className="absolute right-2 bottom-1.5 text-lg italic font-black tabular-nums pointer-events-none select-none"
                   style={{
-                    color: theme.textColor ? `${theme.textColor}ee` : "rgba(255,255,255,0.92)",
+                    color: plusTextColor ? `${plusTextColor}ee` : "rgba(255,255,255,0.92)",
                     fontFamily: "'Urbanist', -apple-system, sans-serif",
                     letterSpacing: "-0.01em",
                   }}
@@ -488,13 +550,14 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
     }
   };
 
-  const lampHint = getHanaFeatherLampHint(element.id) ?? element.hintLabel;
+  const lampHint =
+    getHanaFeatherLampHint(element.id) ?? element.hintLabelShort ?? element.hintLabel;
   const isSetting6RainbowLamp =
     isHanaSetting6GuaranteeElementId(element.id) && Number(value) > 0;
   // 設定示唆カウンター（2026-10-05）。数えられている間は判別へ反映していることを示す
   const impliedNotice =
     element.impliedSettings && element.hintLabel && Number(value) > 0
-      ? `※${element.hintLabel}として計算されます`
+      ? (element.hintNotice ?? `※${element.hintLabel}として計算されます`)
       : null;
 
   return (

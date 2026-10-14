@@ -13,6 +13,12 @@ export interface MachineInfo {
    * （scripts/generate-sitemap.js / generate-seo-shells.mjs がこの記述を読む）。
    */
   reverseCalc?: boolean;
+  /**
+   * 詳細判別ページ（/:machineId/detail）を持つか（未指定時 false。2026-10-14）。
+   * true の機種はナビの2番目（逆算ボタンの位置）に「詳細判別」を出し、静的HTMLも生成する。
+   * noindex のため sitemap には載せない。機種設定に detailSections が必要。
+   */
+  detailPage?: boolean;
 }
 
 /**
@@ -145,6 +151,7 @@ export const AVAILABLE_MACHINES: MachineInfo[] = [
     category: "btrt",
     color: "#283593",
     reverseCalc: false,
+    detailPage: true,
   },
 ];
 
@@ -152,4 +159,10 @@ export const AVAILABLE_MACHINES: MachineInfo[] = [
 export function hasReverseCalcPage(machineId: string | undefined): boolean {
   const info = AVAILABLE_MACHINES.find((m) => m.id === machineId);
   return info?.reverseCalc !== false;
+}
+
+/** 詳細判別ページを持つ機種か */
+export function hasDetailPage(machineId: string | undefined): boolean {
+  const info = AVAILABLE_MACHINES.find((m) => m.id === machineId);
+  return info?.detailPage === true;
 }

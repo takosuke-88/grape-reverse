@@ -9,6 +9,7 @@ import MachinePagePreview from "./pages/MachinePagePreview";
 import GrapeReversePage from "./pages/GrapeReversePage";
 import MachineSpecPage from "./pages/MachineSpecPage";
 import PreviousDataPage from "./pages/PreviousDataPage";
+import MachineDetailPage from "./pages/MachineDetailPage";
 import { AVAILABLE_MACHINES } from "./data/machine-list";
 import { ALL_COLUMNS } from "./data/column-content";
 import ColumnIndexPage from "./pages/columns/index";
@@ -44,6 +45,9 @@ export default function App() {
 
             {/* 前任者データページ: /:machineId/prev */}
             <Route path="/:machineId/prev" element={<PreviousDataPage />} />
+
+            {/* 詳細判別（全項目を数えるページ。detailPage: true の機種のみ。2026-10-14） */}
+            <Route path="/:machineId/detail" element={<MachineDetailPage />} />
 
             {/* 本番用ルート: /myjuggler5 など */}
             <Route path="/:machineId" element={<MachinePagePreview />} />

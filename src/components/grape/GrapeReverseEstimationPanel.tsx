@@ -202,7 +202,7 @@ export default function GrapeReverseEstimationPanel({
 
       <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
         <h2 className="mb-4 border-b border-slate-100 pb-3 text-lg font-bold text-slate-800 dark:border-slate-800 dark:text-white">
-          詳細判別
+          設定判別
         </h2>
 
         {estimationError && (
