@@ -153,6 +153,15 @@ export const AVAILABLE_MACHINES: MachineInfo[] = [
     reverseCalc: false,
     detailPage: true,
   },
+  {
+    id: "takoslo",
+    name: "スマスロ タコスロ",
+    title: "スマスロ タコスロの攻略・設定判別｜GrapeReverse",
+    category: "btrt",
+    color: "#9F1239",
+    reverseCalc: false,
+    detailPage: true,
+  },
 ];
 
 /** ぶどう/ベル逆算ページを持つ機種か */

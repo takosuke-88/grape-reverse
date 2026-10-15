@@ -81,7 +81,14 @@ export interface ConfigSection {
 }
 
 /** ConfigSection.barTheme で指定できる配色（定義は DynamicInput の BAR_THEMES） */
-export type BarThemeName = "darkBlue" | "darkRed" | "blueYellow" | "gray";
+export type BarThemeName = "darkBlue" | "darkRed" | "blueYellow" | "gray" | "whiteRed";
+
+/** 指標グリッドのカード1枚（MachineConfig.metricRows） */
+export interface MetricRowItem {
+  label: string;
+  /** 回数を取る要素ID（確率の基準値もこの要素の settingValues） */
+  id: string;
+}
 
 /**
  * 合計カウンターと内訳カウンターの関係（2026-10-14、スマスロ ハナビの詳細判別で導入）。
@@ -189,6 +196,13 @@ export interface MachineConfig {
    * ボーナス確率表）をこの値に置き換える。カウンターのラベルは各要素の label で指定する。
    */
   bonusLabels?: { big: string; reg: string };
+  /**
+   * 設定判別カードの指標グリッド（3列）の2行目以降（2026-10-15、スマスロ タコスロで導入）。
+   * 1行目（BIG / REG / 合成）は共通。null は空きマス。指定時はカテゴリ別の既定の並びより優先。
+   * 確率は「総ゲーム数（判別用）÷ 回数」。要素に probBase があればそのゲーム数を母数にする。
+   * ラベルは全角3文字までが目安（3列の枠は92px。decisions-log 2026-09-23）。
+   */
+  metricRows?: (MetricRowItem | null)[];
   /**
    * 詳細判別ページ（/:machineId/detail）のカード。入力データは設定判別ページと共有する
    * （同じ localStorage キー）。machine-list.ts の detailPage: true とセットで使う。

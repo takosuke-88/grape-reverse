@@ -56,6 +56,8 @@ interface ElementTheme {
   bgStyle?: React.CSSProperties;
   /** ＋エリアの文字（＋・確率）の色。＋エリアだけ明るい色のとき用。未指定なら textColor */
   plusTextColor?: string;
+  /** 数字だけの色。−・＋と別の色にしたいとき用。未指定なら textColor */
+  digitColor?: string;
 }
 
 /**
@@ -82,11 +84,21 @@ const BAR_THEMES: Record<BarThemeName, ElementTheme> = {
     accent: "#fef08a",
     plusTextColor: "#422006",
   },
-  // RBの契機: 灰色
+  // RBの契機（スマスロ ハナビ）・REGの契機（スマスロ タコスロ）: 灰色
   gray: {
     bg: "#64748b",
     minusBg: "linear-gradient(145deg, #4b5563, #374151)",
     accent: "#e2e8f0",
+  },
+  // スマスロ タコスロのBIGの契機（白7BB）: 白地に赤い＋・−、数字は濃いグレー（2026-10-15 ユーザー指定）。
+  // 白はハナハナの白ランプと同じ slate-200（真っ白だとライトモードのカード背景に溶ける）
+  whiteRed: {
+    bg: "#e2e8f0",
+    minusBg: "linear-gradient(145deg, #cbd5e1, #94a3b8)",
+    accent: "#fecaca",
+    textColor: "#dc2626",
+    // 赤い数字は毒々しいため、数字だけハナハナの白ランプと同じ濃いグレー（ユーザー指定）
+    digitColor: "#1e293b",
   },
 };
 
@@ -199,6 +211,22 @@ function getElementTheme(id: string): ElementTheme {
       minusBg: "linear-gradient(145deg, #16a34a, #15803d)",
       accent: "#14532d",
       textColor: "#14532d",
+    };
+  }
+  // スマスロ タコスロの通常時小役（2026-10-15）。BIG/REGの契機（big-w7-plum-count 等）は
+  // 上の big/reg 判定が先に当たるので赤・青のまま
+  if (id.includes("plum")) {
+    return {
+      bg: "#a21caf",
+      minusBg: "linear-gradient(145deg, #86198f, #701a75)",
+      accent: "#f5d0fe",
+    };
+  }
+  if (id.includes("suika")) {
+    return {
+      bg: "#15803d",
+      minusBg: "linear-gradient(145deg, #0f6030, #0a4a24)",
+      accent: "#bbf7d0",
     };
   }
   if (id.includes("cherry")) {
@@ -401,7 +429,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
                 variant={useCompact ? "compact" : "default"}
                 maxDigits={maxDigits}
                 digitCapacity={digitCapacity}
-                textColor={theme.textColor ?? "#ffffff"}
+                textColor={theme.digitColor ?? theme.textColor ?? "#ffffff"}
               />
             </div>
 

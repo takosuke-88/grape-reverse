@@ -1066,8 +1066,9 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({
               // 列を縦に揃える（詰めると左右がガタつく）。
               // ハナハナは3行目がBIG中の要素（スイカ / フェザー）になる。
               // BT/RT（スマスロ ハナビ）は2行目が風鈴のみ、3行目がREG内訳（単独/重複）。
-              const layout: (string | null)[] =
-                currentCategory === "hana"
+              const layout: (string | null)[] = config.metricRows
+                ? [bigName, regName, "合成", ...config.metricRows.map((m) => m?.label ?? null)]
+                : currentCategory === "hana"
                   ? [bigName, regName, "合成", "角チェ", "ベル", null, "スイカ", "フェザー", null]
                   : currentCategory === "btrt"
                   ? [bigName, regName, "合成", "風鈴", null, null, `単${regName}`, `重複${regName}`, null]
@@ -1357,6 +1358,24 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({
                   return el?.settingValues;
                 })(),
               },
+              // 機種設定で並びを指定した指標（config.metricRows）
+              ...(config.metricRows ?? []).flatMap((m) => {
+                if (!m) return [];
+                const el = allConfigElements.find((e) => e.id === m.id);
+                const count = Number(judgmentInputs[m.id]) || 0;
+                const base = el?.probBase
+                  ? Number(judgmentInputs[el.probBase]) || 0
+                  : judgmentTotalGames;
+                return [
+                  {
+                    label: m.label,
+                    count,
+                    val: count > 0 && base > 0 ? base / count : 0,
+                    format: (v: number) => v.toFixed(1),
+                    settingValues: el?.settingValues,
+                  },
+                ];
+              }),
             ])}
           </div>
 
