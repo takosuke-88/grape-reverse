@@ -4,7 +4,7 @@ import type { MachineConfig } from "../../types/machine-schema";
 // 最終更新: 2026-02-19
 export const myJuggler5Config: MachineConfig = {
   id: "myjuggler5",
-  name: "マイジャグラーV",
+  name: "マイジャグラーⅥ(V)",
   type: "A-type",
   themeColor: "bg-pink-500",
   sections: [
@@ -238,7 +238,7 @@ export const myJuggler5Config: MachineConfig = {
   },
   seoContent: [
     {
-      title: "マイジャグラーVネタ 知っておくとちょっと楽しくなれるかも？",
+      title: "マイジャグラーⅥ(V)ネタ 知っておくとちょっと楽しくなれるかも？",
       paragraphs: [
         "マイジャグVには、ホール実戦中に見つけると少しだけ気分が上がる小ネタがいくつか仕込まれている。代表的なのは液晶のトラっぴタッチ(肉球タッチ)で、何度か押すと画面の背景色が変化する。さらに777G、1111Gといった特定のゲーム数到達時には、軍艦マーチなどのプレミアムBGMが流れる演出もあり、ちょっとした箸休め的な楽しみにはなる。",
         "だがここで現実を直視しておくべきだ。<strong>こうしたプレミアム演出を心から楽しめるのは、高設定に座っている時だけである。</strong>低設定で延々とハマりを食らいながら肉球タッチをしても、虚しさが増すだけだ。小ネタを笑って楽しむ余裕は、勝てる台に座ってこそ生まれる。",

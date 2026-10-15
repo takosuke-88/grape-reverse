@@ -28,8 +28,8 @@ export interface MachineInfo {
 export const AVAILABLE_MACHINES: MachineInfo[] = [
   {
     id: "myjuggler5",
-    name: "マイジャグラーV",
-    title: "マイジャグラーVの攻略・設定判別 ぶどう逆算｜GrapeReverse",
+    name: "マイジャグラーⅥ(V)",
+    title: "マイジャグラーⅥ(V)の攻略・設定判別 ぶどう逆算｜GrapeReverse",
     category: "juggler",
     color: "#D81B60",
   },
