@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { useParams, Navigate, Link } from "react-router-dom";
 import ReactMarkdown, { type Components } from "react-markdown";
 import rehypeRaw from "rehype-raw";
@@ -37,6 +38,43 @@ const markdownComponents = {
 
 const rehypePlugins = [rehypeRaw, rehypeColumnAdSlot];
 
+declare global {
+  interface Window {
+    twttr?: { widgets?: { load: (el?: Element) => void } };
+  }
+}
+
+const TWITTER_WIDGETS_SRC = "https://platform.twitter.com/widgets.js";
+
+// 本文に <blockquote class="twitter-tweet"> がある記事だけ、閲覧者のブラウザで widgets.js を読む。
+// ビルド用ブラウザ（__GR_PRERENDER__）では読まない: 読むと埋め込み後のiframeが静的HTMLへ焼き込まれる
+const useTwitterEmbeds = (
+  container: React.RefObject<HTMLDivElement | null>,
+  enabled: boolean,
+) => {
+  useEffect(() => {
+    if (!enabled || !container.current) return;
+    if ((window as { __GR_PRERENDER__?: boolean }).__GR_PRERENDER__) return;
+    const el = container.current;
+    if (window.twttr?.widgets) {
+      window.twttr.widgets.load(el);
+      return;
+    }
+    let script = document.querySelector<HTMLScriptElement>(
+      `script[src="${TWITTER_WIDGETS_SRC}"]`,
+    );
+    if (!script) {
+      script = document.createElement("script");
+      script.src = TWITTER_WIDGETS_SRC;
+      script.async = true;
+      document.body.appendChild(script);
+    }
+    const onLoad = () => window.twttr?.widgets?.load(el);
+    script.addEventListener("load", onLoad);
+    return () => script?.removeEventListener("load", onLoad);
+  }, [container, enabled]);
+};
+
 const formatJaDate = (dateStr: string): string => {
   const [y, m, d] = dateStr.split("-");
   return `${y}年${parseInt(m, 10)}月${parseInt(d, 10)}日`;
@@ -45,6 +83,8 @@ const formatJaDate = (dateStr: string): string => {
 const ColumnDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const entry = slug ? getColumnBySlug(slug) : undefined;
+  const articleRef = useRef<HTMLDivElement>(null);
+  useTwitterEmbeds(articleRef, !!entry && entry.body.includes("twitter-tweet"));
 
   if (!entry) {
     return <Navigate to="/columns" replace />;
@@ -80,6 +120,7 @@ const ColumnDetailPage = () => {
         {/* key: 記事A→Bへ移動したとき本文を作り直し、旧記事の広告枠を使い回さない */}
         <div
           key={entry.slug}
+          ref={articleRef}
           className="column-article prose dark:prose-invert max-w-none"
         >
           <ColumnRenderErrorBoundary>
