@@ -51,6 +51,7 @@ const TWITTER_WIDGETS_SRC = "https://platform.twitter.com/widgets.js";
 const useTwitterEmbeds = (
   container: React.RefObject<HTMLDivElement | null>,
   enabled: boolean,
+  slug: string | undefined,
 ) => {
   useEffect(() => {
     if (!enabled || !container.current) return;
@@ -72,7 +73,8 @@ const useTwitterEmbeds = (
     const onLoad = () => window.twttr?.widgets?.load(el);
     script.addEventListener("load", onLoad);
     return () => script?.removeEventListener("load", onLoad);
-  }, [container, enabled]);
+    // slug: 記事A→Bの移動では本文divが作り直されるが ref も enabled も変わらないため、再実行のきっかけにする
+  }, [container, enabled, slug]);
 };
 
 const formatJaDate = (dateStr: string): string => {
@@ -84,7 +86,11 @@ const ColumnDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const entry = slug ? getColumnBySlug(slug) : undefined;
   const articleRef = useRef<HTMLDivElement>(null);
-  useTwitterEmbeds(articleRef, !!entry && entry.body.includes("twitter-tweet"));
+  useTwitterEmbeds(
+    articleRef,
+    !!entry && entry.body.includes("twitter-tweet"),
+    entry?.slug,
+  );
 
   if (!entry) {
     return <Navigate to="/columns" replace />;

@@ -118,6 +118,8 @@
 | BB中の風鈴A・RB中の風鈴A/15枚役を、ボーナス中の判別（`stateGroups.judgedIds`）に入れる | 禁止（2026-10-14）。資料の値が粗く（1/1.1・1/1.2）設定差も無いうえ、入れると確率の和が1を超える設定がある（BB中 設定1: 1/1.1＋1/10 > 1）。これらのボタンはゲーム数を正しく進めるためのもの |
 | スマスロ タコスロの「リプレイ＋TACO GAME」の分母を「リプレイがテンパイして手順を試したゲーム数」にする | 禁止（2026-10-15）。公表値（1/728.2〜1/242.7）はボーナスゲーム1回あたりの確率で、リプレイが出なかったゲームも分母に含む。分母を変えるなら比べる確率も条件付きに変える必要があるが、BT中のリプレイ確率は資料に無い。分母は「毎ゲーム手順を実行したボーナスゲーム数」 |
 | スマスロ タコスロの「ボーナスゲーム」「TACO GAME」の呼び方を資料（CSV）どおりにする | 禁止（2026-10-15）。CSVは逆になっていた。解析サイトの一般的な呼称（ボーナスゲーム＝ループの本体・抽選の場／TACO GAME＝1G完結で14枚・9枚）に合わせる（ユーザー確認済み） |
+| コラム記事に X の埋め込みコードの `<script src=".../widgets.js">` を書く | 禁止（2026-10-17）。React が描画した script は実行されず、静的HTMLに残ってちらつきの原因になる。記事には `<blockquote class="twitter-tweet">` だけを書き、読み込みは `ColumnDetailPage.tsx` の `useTwitterEmbeds` が行う（詳細は下記エントリ参照） |
+| `generate-seo-shells.mjs` の X ドメイン遮断（`page.route()`）・X埋め込みの混入検査（`X_EMBED_DOM_MARKERS`）を外す | 禁止（2026-10-17）。2026-09-03 の広告と同じ理由で、ビルド用ブラウザで widgets.js が実行されると埋め込み後のiframeが静的HTMLへ焼き込まれる |
 
 ## 2026-04以前: ボーナス履歴 LIFO
 - **現行仕様**: `bonusHistory` を `localStorage` に保持。「−」は直前の契機から `pop`。直接入力・全体リセット時はスタッククリア。
@@ -633,6 +635,15 @@
 
   ボーナスの設定差が小さく、ボーナスだけではほとんど判別できない（高低2択で8000Gでも64%）。小役を数えるのが主軸。高設定側への偏りは出ていない（高低の正答が低設定台・高設定台でほぼ対称）。資料の値が正確だという前提の数字。
 - **既存機種への影響**: 判別関数は無変更。`metricRows` は指定した機種だけ、配色は `plum`/`suika` を含むID（タコスロのみ）だけに効く。ビルドは205ページ。
+
+## 2026-10-17: コラム記事のX投稿埋め込みを widgets.js 方式で採用
+
+- **決定事項**: 記事本文の `<blockquote class="twitter-tweet">` を、閲覧者のブラウザで widgets.js によりカード表示する。読み込みは `ColumnDetailPage.tsx` の `useTwitterEmbeds`（本文に `twitter-tweet` を含む記事だけ・`__GR_PRERENDER__` 中は読まない）。commit `01ff611` で導入し、今回の修正で正式採用した。
+- **記事の書き方**: X の埋め込みコードのうち blockquote 部分だけを貼る。script 行は書かない。従来のリンクカード（`not-prose` の `<a href="https://x.com/...">` カード）は既存記事に残してよい。
+- **費用**: X API は使わないため無料。閲覧者のブラウザが X から直接読み込む（X側の読み込み・計測が発生する）。
+- **却下した案**: X API で投稿を取得・保存して自前カードで表示する方式。従量課金で、取得をPCで行う運用が必要になる。完全自動化はしないため不要と判断した。
+- **今回の修正**: ①SPA遷移時の再実行（`useEffect` の依存配列に `slug` を追加。記事A→Bの移動では本文divが `key={entry.slug}` で作り直されるが、ref も enabled も変わらず effect が再実行されなかった） ②ビルド時の X ドメイン遮断（`platform.twitter.com` / `platform.x.com` / `syndication.twitter.com` / `cdn.syndication.twimg.com`）と、X埋め込みの混入検査（`X_EMBED_DOM_MARKERS`: `twitter-tweet-rendered` / `twitter-widget-` / `platform.twitter.com/embed` / `platform.twitter.com/widgets.js`）。素の `<blockquote class="twitter-tweet">` は検出しないよう、`twitter-tweet` 単体はマーカーにしていない。
+- **未確認**: X 側の障害時や広告ブロッカー使用時は、素の引用文のまま表示される（リンクは機能する）。
 
 ## 参考（明示指示なき限り実施しない）
 

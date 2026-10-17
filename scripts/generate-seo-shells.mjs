@@ -37,6 +37,15 @@ const AD_DOM_MARKERS = [
   "recaptcha/api2/aframe",
 ];
 
+// X埋め込み（widgets.js）実行後DOMを示す固有文字列。記事本文の素の
+// <blockquote class="twitter-tweet"> はこれに該当しない（"twitter-tweet" 単体はマーカーにしない）。
+const X_EMBED_DOM_MARKERS = [
+  "twitter-tweet-rendered",
+  "twitter-widget-",
+  "platform.twitter.com/embed",
+  "platform.twitter.com/widgets.js",
+];
+
 function extractIdsFromFile(filePath, regex) {
   const content = fs.readFileSync(filePath, "utf-8");
   const ids = [];
@@ -148,8 +157,9 @@ async function main() {
   // page.content() はライブDOMをシリアライズするため、プリレンダリング中に
   // Auto adsが実行されると広告DOMが静的HTMLへ混入する。ビルド時のブラウザ内だけで
   // 遮断し、本番の閲覧者ブラウザは index.html の標準スクリプトから初回実行する。
+  // X埋め込み（widgets.js）も同じ理由で遮断する（埋め込み後のiframeが焼き込まれるため）。
   await page.route(
-    /googlesyndication\.com|doubleclick\.net|googletagservices\.com|adservice\.google\./,
+    /googlesyndication\.com|doubleclick\.net|googletagservices\.com|adservice\.google\.|platform\.twitter\.com|platform\.x\.com|syndication\.twitter\.com|cdn\.syndication\.twimg\.com/,
     (route) => route.abort(),
   );
 
@@ -178,6 +188,15 @@ async function main() {
       if (adHits.length > 0) {
         throw new Error(
           `AdSense実行後DOMが混入しています（${url}）: ${adHits.join(", ")}`,
+        );
+      }
+
+      const xHits = X_EMBED_DOM_MARKERS.filter((marker) =>
+        html.includes(marker),
+      );
+      if (xHits.length > 0) {
+        throw new Error(
+          `X埋め込みの実行後DOMが混入しています（${url}）: ${xHits.join(", ")}`,
         );
       }
 
