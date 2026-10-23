@@ -20,15 +20,7 @@ showRelatedColumns: false
 
 <p>Xで、こんな趣旨の投稿が話題になっていました。スマスロで離席するとき、非喫煙者は下皿に何を置いて台を確保すればいいのか——という疑問です。</p>
 
-<div class="not-prose my-6">
-<a href="https://x.com/bokuhikitsuyo1/status/2113257564821659904" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 hover:shadow-md transition-shadow">
-  <svg class="w-8 h-8 flex-shrink-0 text-slate-900 dark:text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-  <div>
-    <p class="text-sm font-bold text-slate-900 dark:text-white">@bokuhikitsuyo1 の投稿を見る</p>
-    <p class="text-xs text-slate-500 dark:text-slate-400">X（旧Twitter）で元の投稿を確認する</p>
-  </div>
-</a>
-</div>
+<blockquote class="twitter-tweet"><a href="https://x.com/bokuhikitsuyo1/status/2113257564821659904">@bokuhikitsuyo1 の投稿を見る</a></blockquote>
 
 <p><strong>いいね127、リプライ45、表示約10.1万。</strong> 派手なバズではありませんが、リプ欄には「自分も同じことで迷っている」という声が集まりました。</p>
 
