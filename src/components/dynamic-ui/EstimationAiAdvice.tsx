@@ -1,4 +1,5 @@
 import type { EstimationResult, MachineConfig } from "../../types/machine-schema";
+import { resolveSpecialAdviceHtml, toSixStepScale } from "../../utils/advice-rank";
 
 interface EstimationAiAdviceProps {
   config: MachineConfig;
@@ -20,15 +21,23 @@ export default function EstimationAiAdvice({
   let rankStyle = "";
   let rankIcon = "🤖";
 
-  if (highSettingProb >= 70) {
+  // 色・アイコンは設定の段階数を補正した値で判定する（設定判別ページと同じ。2026-10-26に逆算ページへも適用）
+  const rankProb = toSixStepScale(highSettingProb, config);
+  // 機種固有の文言（config.specialAdvice）。下のハイハイシオサイ・ラストユートピアの既存の文言は従来どおり優先
+  const legacyComboAdvice = config.id.includes("siosai") || config.id === "last-utopia";
+  const specialAdviceHtml = legacyComboAdvice
+    ? null
+    : resolveSpecialAdviceHtml(config, totalGames, highSettingProb);
+
+  if (rankProb >= 70) {
     rankStyle =
       "border-purple-200 bg-purple-50 dark:border-purple-800 dark:bg-purple-900/20";
     rankIcon = "👑";
-  } else if (highSettingProb >= 50) {
+  } else if (rankProb >= 50) {
     rankStyle =
       "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20";
     rankIcon = "🔥";
-  } else if (highSettingProb >= 30) {
+  } else if (rankProb >= 30) {
     rankStyle =
       "border-yellow-200 bg-yellow-50 dark:border-yellow-800/50 dark:bg-yellow-900/10";
     rankIcon = "🤔";
@@ -49,7 +58,9 @@ export default function EstimationAiAdvice({
         </div>
       </div>
       <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-        {config.id.includes("siosai") || config.id === "last-utopia" ? (
+        {specialAdviceHtml !== null ? (
+          <span dangerouslySetInnerHTML={{ __html: specialAdviceHtml }} />
+        ) : legacyComboAdvice ? (
           <>
             {totalGames <= 2000 && (
               <>

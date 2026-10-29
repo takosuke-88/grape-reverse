@@ -6,6 +6,7 @@ import {
   hasDetailPage,
   hasReverseCalcPage,
 } from "../data/machine-list";
+import { getReverseRole } from "../utils/reverse-role";
 import type { SpecBlock } from "../types/machine-schema";
 import Seo from "../components/Seo";
 import { JUGGLER_PAYOUT_RATIOS_3MODE } from "../data/juggler-spec-data";
@@ -52,7 +53,9 @@ const AccordionHeader: React.FC<AccordionHeaderProps> = ({
   >
     <span className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
       <span className="text-base">{icon}</span>
-      <span className="text-sm font-extrabold tracking-wide">{title}</span>
+      {/* 15px（2026-10-29。14pxから拡大）。375pxで最長の「マイジャグラーⅥ(V)の攻略アドバイス」が270px／使える幅約277px。
+          16pxだと288pxで入らない */}
+      <span className="text-[15px] font-extrabold tracking-wide">{title}</span>
     </span>
     <span
       className={`text-sm text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
@@ -161,8 +164,7 @@ export default function MachineSpecPage() {
   const hanaPayout = config.specs?.payoutRatio;
   const strategyText = advice?.strategy ?? specPage?.strategy;
   const bonusProbAdvice = advice?.bonusProb ?? specPage?.bonusProbAdvice;
-  const roleLabel = currentCategory === "hana" ? "ベル" : "ぶどう";
-  const roleIcon  = currentCategory === "hana" ? "🔔" : "🍇";
+  const { label: roleLabel, icon: roleIcon } = getReverseRole(config, currentCategory);
 
   const smallRoleBlock = (isJuggler || (isHana && bellEl)) && (
     <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
@@ -302,6 +304,14 @@ export default function MachineSpecPage() {
             >
               🎰 設定判別
             </Link>
+            {hasDetailPage(machineId) && (
+              <Link
+                to={`/${machineId}/detail`}
+                className="flex-1 rounded-lg bg-teal-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
+              >
+                🔍 詳細判別
+              </Link>
+            )}
             {showReverseCalc && (
               <Link
                 to={`/${machineId}/grape`}
@@ -310,19 +320,12 @@ export default function MachineSpecPage() {
                 {roleIcon} {roleLabel}逆算
               </Link>
             )}
-            {!showReverseCalc && hasDetailPage(machineId) && (
-              <Link
-                to={`/${machineId}/detail`}
-                className="flex-1 rounded-lg bg-teal-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
-              >
-                🔍 詳細判別
-              </Link>
-            )}
             <button
               type="button"
               className="flex-1 rounded-lg bg-indigo-500 text-white py-2 text-xs font-bold ring-2 ring-indigo-300 dark:ring-indigo-600"
             >
-              📊 機種スペック
+              {/* 4つ並び（詳細判別と逆算の両方を持つ機種）は375pxに収まるよう短縮（2026-10-26） */}
+              {showReverseCalc && hasDetailPage(machineId) ? "📊 スペック" : "📊 機種スペック"}
             </button>
             {/* 逆算ボタンが無い機種も、ボタン幅は3つ並びのときと同じに保ち左寄せにする */}
             {!showReverseCalc && !hasDetailPage(machineId) && (
@@ -515,7 +518,7 @@ export default function MachineSpecPage() {
                   {advice?.bonusDetail && (
                     <p className={adviceCls}>{advice.bonusDetail}</p>
                   )}
-                  <p className="px-4 pt-1 pb-1 text-xs text-slate-400 dark:text-slate-500">
+                  <p className="px-3 pt-1 pb-3 text-sm leading-relaxed font-medium text-slate-600 dark:text-slate-300">
                     ※重複確率は一部算出値を含みます
                   </p>
                 </div>
@@ -585,26 +588,31 @@ export default function MachineSpecPage() {
                   }
                 />
                 {isOpen && (
-                  <div className="overflow-x-clip pb-2">
-                    {card.blocks.map((block, i) => (
-                      <SpecBlockView
-                        key={i}
-                        block={block}
-                        settings={settings}
-                        topSetting={topSetting}
-                        settingLabel={settingLabel}
-                        rowBg={rowBg}
-                        thCls={thCls}
-                        tdCls={tdCls}
-                      />
-                    ))}
-                    {card.advice && <p className={adviceCls}>{card.advice}</p>}
-                    {card.note && (
-                      <p className="px-4 pt-1 pb-1 text-xs text-slate-400 dark:text-slate-500">
-                        {card.note}
-                      </p>
+                  <SpecCardBody>
+                    {(valueSize) => (
+                      <>
+                        {card.blocks.map((block, i) => (
+                          <SpecBlockView
+                            key={i}
+                            block={block}
+                            settings={settings}
+                            topSetting={topSetting}
+                            settingLabel={settingLabel}
+                            rowBg={rowBg}
+                            thCls={thCls}
+                            tdCls={tdCls}
+                            valueSize={valueSize}
+                          />
+                        ))}
+                        {card.advice && <p className={adviceCls}>{card.advice}</p>}
+                        {card.note && (
+                          <p className="px-3 pt-1 pb-3 text-sm leading-relaxed font-medium text-slate-600 dark:text-slate-300">
+                            {card.note}
+                          </p>
+                        )}
+                      </>
                     )}
-                  </div>
+                  </SpecCardBody>
                 )}
               </div>
             );
@@ -625,6 +633,8 @@ interface SpecBlockViewProps {
   rowBg: (s: number) => string;
   thCls: string;
   tdCls: (s: number) => string;
+  /** byItem の値の文字サイズ（カード単位で SpecCardBody が実測して決める） */
+  valueSize: string;
 }
 
 /**
@@ -641,9 +651,10 @@ const SpecBlockView: React.FC<SpecBlockViewProps> = ({
   rowBg,
   thCls,
   tdCls,
+  valueSize,
 }) => {
   const caption = block.caption && (
-    <p className="px-4 pt-3 pb-1 text-xs font-bold tracking-wide text-slate-500 dark:text-slate-400">
+    <p className="mx-3 mt-4 mb-1 border-l-4 border-indigo-500 pl-2 text-base font-extrabold leading-tight text-slate-800 dark:border-indigo-400 dark:text-slate-100">
       {block.caption}
     </p>
   );
@@ -681,48 +692,16 @@ const SpecBlockView: React.FC<SpecBlockViewProps> = ({
   }
 
   if (block.kind === "byItem") {
-    const headCls =
-      "py-2 px-0.5 text-center text-xs font-bold text-slate-500 dark:text-slate-400 border-b-2 border-slate-300 dark:border-slate-600";
-    const valueCls = (s: number) =>
-      `py-2.5 px-0.5 text-center text-xs tabular-nums border-b border-slate-200 dark:border-slate-700 ${
-        s === topSetting
-          ? "bg-amber-50 text-amber-700 font-extrabold dark:bg-amber-950/50 dark:text-amber-400"
-          : "text-slate-800 font-bold dark:text-slate-100"
-      }`;
     return (
       <>
         {caption}
-        <table className="table-fixed w-full">
-          <thead>
-            <tr>
-              <th className={`${headCls} w-24 text-left pl-3`}>項目</th>
-              {settings.map((s) => (
-                <th key={s} className={headCls}>
-                  設定{settingLabel(s)}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {block.rows.map((row) => (
-              <tr key={row.label}>
-                <td className="py-2.5 pl-3 pr-1 text-left text-xs font-bold text-slate-700 border-b border-slate-200 dark:text-slate-200 dark:border-slate-700">
-                  {row.label}
-                  {row.note && (
-                    <span className="block text-[10px] font-medium leading-tight text-slate-500 dark:text-slate-400">
-                      {row.note}
-                    </span>
-                  )}
-                </td>
-                {settings.map((s) => (
-                  <td key={s} className={valueCls(s)}>
-                    {row.values[s] ?? "---"}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <ByItemTable
+          block={block}
+          settings={settings}
+          topSetting={topSetting}
+          settingLabel={settingLabel}
+          valueSize={valueSize}
+        />
       </>
     );
   }
@@ -754,3 +733,99 @@ const SpecBlockView: React.FC<SpecBlockViewProps> = ({
     </>
   );
 };
+
+/** byItem の値の文字サイズ候補（大きい順）。入る最大のサイズをカードごとに実測で選ぶ */
+const BY_ITEM_VALUE_SIZES = ["text-sm", "text-[13px]", "text-xs"] as const;
+
+/**
+ * 汎用スペックカードの中身。byItem の表の値を14pxから試し、カード内の値が1つでもセルからはみ出したら
+ * カード全体を13px→12pxへ落とす（2026-10-29）。横スクロールを出さず、同じカードの表どうしで大きさをそろえる。
+ * 375pxで項目列90px・値の列は約65px（`1/10922.7` は13pxで61.6px、14pxで66.4px）。
+ */
+function SpecCardBody({ children }: { children: (valueSize: string) => React.ReactNode }) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const [sizeIdx, setSizeIdx] = React.useState(0);
+  const [width, setWidth] = React.useState(0);
+
+  // 画面幅が変わったら一番大きいサイズから測り直す
+  React.useEffect(() => {
+    const onResize = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  React.useLayoutEffect(() => {
+    setSizeIdx(0);
+  }, [width]);
+  React.useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || sizeIdx >= BY_ITEM_VALUE_SIZES.length - 1) return;
+    const overflow = [...el.querySelectorAll<HTMLElement>("[data-spec-value]")].some(
+      (cell) => cell.scrollWidth > cell.clientWidth,
+    );
+    if (overflow) setSizeIdx((i) => i + 1);
+  }, [sizeIdx, width]);
+
+  return (
+    <div ref={ref} className="overflow-x-clip pb-2">
+      {children(BY_ITEM_VALUE_SIZES[sizeIdx])}
+    </div>
+  );
+}
+
+/** 行＝項目・列＝設定の表（2026-10-05。値の文字サイズは SpecCardBody が決める） */
+function ByItemTable({
+  block,
+  settings,
+  topSetting,
+  settingLabel,
+  valueSize,
+}: {
+  block: Extract<SpecBlock, { kind: "byItem" }>;
+  settings: number[];
+  topSetting: number;
+  settingLabel: (s: number) => string;
+  valueSize: string;
+}) {
+  const headCls =
+    "py-2 px-0 text-center text-sm font-bold text-slate-600 dark:text-slate-300 border-b-2 border-slate-300 dark:border-slate-600";
+  const valueCls = (s: number) =>
+    `overflow-hidden whitespace-nowrap py-2.5 px-0 text-center ${valueSize} tabular-nums border-b border-slate-200 dark:border-slate-700 ${
+      s === topSetting
+        ? "bg-amber-50 text-amber-700 font-extrabold dark:bg-amber-950/50 dark:text-amber-400"
+        : "text-slate-900 font-bold dark:text-slate-50"
+    }`;
+  return (
+    <table className="table-fixed w-full">
+      <thead>
+        <tr>
+          {/* 項目列は「リーチ目役A」（13px・74.1px）＋左右の余白12pxが入る幅（86pxだと折り返した） */}
+          <th className={`${headCls} w-[90px] text-left pl-2`}>項目</th>
+          {settings.map((s) => (
+            <th key={s} className={headCls}>
+              設定{settingLabel(s)}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {block.rows.map((row) => (
+          <tr key={row.label}>
+            <td className="py-2.5 pl-2 pr-1 text-left text-[13px] font-bold text-slate-800 border-b border-slate-200 dark:text-slate-100 dark:border-slate-700">
+              {row.label}
+              {row.note && (
+                <span className="block text-xs font-medium leading-tight text-slate-600 dark:text-slate-300">
+                  {row.note}
+                </span>
+              )}
+            </td>
+            {settings.map((s) => (
+              <td key={s} data-spec-value className={valueCls(s)}>
+                {row.values[s] ?? "---"}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}

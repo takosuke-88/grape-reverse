@@ -18,6 +18,7 @@ import { haihaiSiosai2Config } from "./machines/haihai-siosai2";
 import { haihaiSiosaiConfig } from "./machines/haihai-siosai";
 import { hanabiConfig } from "./machines/hanabi";
 import { takosloConfig } from "./machines/takoslo";
+import { thunderVConfig } from "./machines/thunder-v";
 
 /**
  * 機種ID → MachineConfig の対応表。
@@ -44,4 +45,5 @@ export const CONFIG_MAP: Record<string, MachineConfig> = {
   "haihai-siosai": haihaiSiosaiConfig,
   hanabi: hanabiConfig,
   takoslo: takosloConfig,
+  "thunder-v": thunderVConfig,
 };

@@ -416,7 +416,6 @@ export const takosloConfig: MachineConfig = {
             kind: "byItem",
             caption: "設定差のない小役",
             rows: [
-              { label: "リプレイ", values: { 1: "1/7.3", 2: "1/7.3", 5: "1/7.3", 6: "1/7.3" } },
               { label: "チェリーA", values: { 1: "1/184.6", 2: "1/184.6", 5: "1/184.6", 6: "1/184.6" } },
             ],
           },

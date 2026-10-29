@@ -162,6 +162,15 @@ export const AVAILABLE_MACHINES: MachineInfo[] = [
     reverseCalc: false,
     detailPage: true,
   },
+  {
+    id: "thunder-v",
+    name: "スマスロ サンダーV",
+    title: "スマスロ サンダーVの攻略・設定判別 ベル逆算｜GrapeReverse",
+    category: "btrt",
+    color: "#92400E",
+    // BT/RTで初めて逆算ページ（ベル逆算）と詳細判別ページの両方を持つ機種（ナビは4つ並び）
+    detailPage: true,
+  },
 ];
 
 /** ぶどう/ベル逆算ページを持つ機種か */

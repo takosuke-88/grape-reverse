@@ -17,6 +17,7 @@ import {
   hasDetailPage,
   hasReverseCalcPage,
 } from "../data/machine-list";
+import { getReverseRole } from "../utils/reverse-role";
 import { CONFIG_MAP } from "../data/machine-config-map";
 import Seo from "../components/Seo";
 import { useConfirmDialog } from "../components/ui/ConfirmDialog";
@@ -65,8 +66,7 @@ export default function PreviousDataPage() {
   const brandColor = machineInfo?.color ?? "#334155";
   const machineName = machineInfo?.name ?? machineId ?? "機種不明";
   const isHana = machineInfo?.category === "hana";
-  const roleLabel = isHana ? "ベル" : "ぶどう";
-  const roleIcon = isHana ? "🔔" : "🍇";
+  const { label: roleLabel, icon: roleIcon } = getReverseRole(config, machineInfo?.category);
 
   const [vibrationEnabled, setVibrationEnabled] = useLocalStorage<boolean>(
     "grape-reverse-vibration",
@@ -269,6 +269,14 @@ export default function PreviousDataPage() {
             >
               🎰 設定判別
             </Link>
+            {hasDetailPage(machineId) && (
+              <Link
+                to={`/${machineId}/detail`}
+                className="flex-1 rounded-lg bg-teal-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
+              >
+                🔍 詳細判別
+              </Link>
+            )}
             {hasReverseCalcPage(machineId) && (
               <Link
                 to={`/${machineId}/grape`}
@@ -277,19 +285,12 @@ export default function PreviousDataPage() {
                 {roleIcon} {roleLabel}逆算
               </Link>
             )}
-            {!hasReverseCalcPage(machineId) && hasDetailPage(machineId) && (
-              <Link
-                to={`/${machineId}/detail`}
-                className="flex-1 rounded-lg bg-teal-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
-              >
-                🔍 詳細判別
-              </Link>
-            )}
             <Link
               to={`/${machineId}/specs`}
               className="flex-1 rounded-lg bg-indigo-700 text-white py-2 text-xs font-bold transition-opacity hover:opacity-90 active:opacity-80 text-center"
             >
-              📊 機種スペック
+              {/* 4つ並び（詳細判別と逆算の両方を持つ機種）は375pxに収まるよう短縮（2026-10-26） */}
+              {hasReverseCalcPage(machineId) && hasDetailPage(machineId) ? "📊 スペック" : "📊 機種スペック"}
             </Link>
             {/* 逆算ボタンが無い機種も、ボタン幅は3つ並びのときと同じに保ち左寄せにする */}
             {!hasReverseCalcPage(machineId) && !hasDetailPage(machineId) && (

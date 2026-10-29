@@ -81,7 +81,7 @@ export interface ConfigSection {
 }
 
 /** ConfigSection.barTheme で指定できる配色（定義は DynamicInput の BAR_THEMES） */
-export type BarThemeName = "darkBlue" | "darkRed" | "blueYellow" | "gray" | "whiteRed";
+export type BarThemeName = "darkBlue" | "darkRed" | "blueYellow" | "gray" | "whiteRed" | "blue";
 
 /** 指標グリッドのカード1枚（MachineConfig.metricRows） */
 export interface MetricRowItem {
@@ -140,6 +140,8 @@ export interface MachineConfig {
       bell?: number;
       /** 逆算用チェリー払出（未指定時: ジャグラー2枚 / ハナハナ4枚） */
       cherry?: number;
+      /** 逆算用スイカ払出（スマスロ サンダーV。reverseCalcCustomRates とセットで使う） */
+      suika?: number;
     };
     judgmentWeights?: {
       grapeWeightMap?: Record<number, number>;
@@ -154,6 +156,17 @@ export interface MachineConfig {
        * チェリー狙いは常に 1.0。リプレイは打ち方に依存しないため両モード同一補正。
        */
       cherryFreePlayRate?: number;
+      /** 逆算で差し引くスイカの分母（スマスロ サンダーV） */
+      suika?: number;
+    };
+    /**
+     * 逆算ページで、チェリー・スイカの取得率を利用者が入力する方式にする（2026-10-26、スマスロ サンダーV）。
+     * 指定時は「チェリー狙い／フリー打ち」の2つの結果ではなく、入力した取得率での結果を1つだけ出す。
+     * 値は入力欄の初期値（0〜1）。
+     */
+    reverseCalcCustomRates?: {
+      cherry: number;
+      suika: number;
     };
     settings?: number[]; // [1, 2, 3, 4, 5, 6] by default
     /**

@@ -7,6 +7,7 @@ import type {
 import { calculateGrapeWeight } from "../../logic/bayes-estimator";
 import { formatBonusText } from "../../utils/formatters";
 import { resolveApproximation } from "../../utils/approximation-label";
+import { getReverseRole } from "../../utils/reverse-role";
 import EstimationResultDisplay from "../dynamic-ui/EstimationResultDisplay";
 import EstimationAiAdvice from "../dynamic-ui/EstimationAiAdvice";
 
@@ -127,7 +128,9 @@ export default function GrapeReverseEstimationPanel({
                 : undefined,
             },
           ]
-        : [
+        : currentCategory !== "juggler"
+          ? [] // BT/RT（スマスロ サンダーV）は逆算ページにREG内訳の入力欄が無い
+          : [
             {
               label: "単独REG",
               val: (() => {
@@ -148,8 +151,9 @@ export default function GrapeReverseEstimationPanel({
             },
           ];
 
-    const grapeKey = currentCategory === "hana" ? "bell-count" : "grape-count";
-    const grapeLabel = currentCategory === "hana" ? "ベル確率" : "ブドウ確率";
+    const role = getReverseRole(config, currentCategory);
+    const grapeKey = role.id;
+    const grapeLabel = role.metricLabel;
 
     return [
       ...base,

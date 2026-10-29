@@ -38,6 +38,8 @@ import SettingProbabilityChart from "./SettingProbabilityChart";
 import ProbabilityMetricCard from "./ProbabilityMetricCard";
 import DynamicInput from "./DynamicInput";
 import { useConfirmDialog } from "../ui/ConfirmDialog";
+import { getReverseRole } from "../../utils/reverse-role";
+import { resolveSpecialAdviceHtml, toSixStepScale } from "../../utils/advice-rank";
 import {
   isGridOnlyCompactCounterId,
   COUNTER_HINT_TEXT,
@@ -149,10 +151,11 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({
 
   const currentCategory = currentMachineInfo?.category || "juggler";
   const brandColor = currentMachineInfo?.color; // ブランドカラー
-  const toolNameSuffix = currentCategory === "hana" ? "ベル逆算ツール" : "ぶどう逆算ツール";
   // 逆算ページを持たない機種（スマスロ ハナビ等）はナビの逆算ボタンも出さない
   const showReverseCalc = hasReverseCalcPage(config.id);
   const showDetailPage = hasDetailPage(config.id);
+  const reverseRole = getReverseRole(config, currentMachineInfo?.category);
+  const toolNameSuffix = `${reverseRole.label}逆算ツール`;
   const toolLabel = isDetailPage
     ? "詳細判別ツール"
     : showReverseCalc
@@ -774,8 +777,8 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({
                 🎰 設定判別
               </button>
             )}
-            {/* 逆算ページを持たず詳細判別ページを持つ機種は、逆算ボタンの位置に詳細判別を置く */}
-            {!showReverseCalc && showDetailPage && (
+            {/* 詳細判別ページを持つ機種は2番目に詳細判別を置く（逆算も持つ機種は4つ並び） */}
+            {showDetailPage && (
               isDetailPage ? (
                 <button
                   type="button"
@@ -798,14 +801,15 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({
                 to={`/${config.id}/grape`}
                 className="flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
               >
-                {currentCategory === "hana" ? "🔔 ベル逆算" : "🍇 ぶどう逆算"}
+                {reverseRole.icon} {reverseRole.label}逆算
               </Link>
             )}
             <Link
               to={`/${config.id}/specs`}
               className="flex-1 rounded-lg bg-indigo-700 text-white py-2 text-xs font-bold transition-opacity hover:opacity-90 active:opacity-80 text-center"
             >
-              📊 機種スペック
+              {/* 4つ並び（詳細判別と逆算の両方を持つ機種）は375pxに収まるよう短縮（2026-10-26） */}
+              {showReverseCalc && showDetailPage ? "📊 スペック" : "📊 機種スペック"}
             </Link>
             {/* 逆算ボタンが無い機種も、ボタン幅は3つ並びのときと同じに保ち左寄せにする */}
             {!showReverseCalc && !showDetailPage && (
@@ -1405,17 +1409,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({
             // そこでオッズ比を保ったまま「6段階機種の目盛り」（材料なし＝33.3%）へ換算してから
             // 70/50/30 の境目に当てる。6段階の機種は換算しても値が変わらない。
             // AIアドバイスの文言（specialAdvice の minProb/maxProb 等）は換算前の値のまま判定する。
-            const rankProb = (() => {
-              const settings = config.specs?.settings || [1, 2, 3, 4, 5, 6];
-              const highCount = settings.filter((s) => s >= 5).length;
-              if (highCount === 0 || highCount === settings.length) return highSettingProb;
-              if (highCount * 3 === settings.length) return highSettingProb;
-              const base = highCount / settings.length;
-              const p = Math.min(Math.max(highSettingProb / 100, 1e-9), 1 - 1e-9);
-              const oddsRatio = p / (1 - p) / (base / (1 - base));
-              const sixStepOdds = oddsRatio * 0.5; // 6段階の材料なし時のオッズ = 2:4
-              return (sixStepOdds / (1 + sixStepOdds)) * 100;
-            })();
+            const rankProb = toSixStepScale(highSettingProb, config);
 
             if (rankProb >= 70) {
               // Rank S: 超・高設定圏内
@@ -1441,20 +1435,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({
 
             // 機種固有のAIアドバイス（config.specialAdvice）が定義されていれば
             // 総ゲーム数のtierとhighSettingProbのbracketから該当HTMLを解決する
-            const specialAdviceHtml = (() => {
-              if (!config.specialAdvice) return null;
-              const { tiers } = config.specialAdvice;
-              const tier =
-                tiers.find(
-                  (t) => t.maxGames !== null && totalGames <= t.maxGames,
-                ) ?? tiers[tiers.length - 1];
-              const bracket = tier.brackets.find(
-                (b) =>
-                  (b.minProb === undefined || highSettingProb >= b.minProb) &&
-                  (b.maxProb === undefined || highSettingProb < b.maxProb),
-              );
-              return tier.introHtml + (bracket?.html ?? "");
-            })();
+            const specialAdviceHtml = resolveSpecialAdviceHtml(config, totalGames, highSettingProb);
 
             return (
               <div
@@ -1579,11 +1560,11 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({
         {discriminationElements.length > 0 && (
           <div className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-6">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-xs font-medium tracking-widest text-slate-500 dark:text-slate-400">
+              <h2 className="text-sm font-bold tracking-widest text-slate-700 dark:text-slate-200">
                 確率・設定差一覧
               </h2>
               {config.specs?.baseGamesPerMedal && (
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                <div className="text-xs text-slate-600 dark:text-slate-300">
                   ベース: {config.specs.baseGamesPerMedal}G / 50枚
                   {config.specs.payoutRatio && (
                     <>
@@ -1604,7 +1585,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 dark:border-slate-700">
-                    <th className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
+                    <th className="whitespace-nowrap px-2 py-2 text-center text-sm font-bold text-slate-600 dark:text-slate-300">
                       設定
                     </th>
                     {discriminationElements
@@ -1613,7 +1594,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({
                         const headers = [
                           <th
                             key={element.id}
-                            className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400"
+                            className="whitespace-nowrap px-2 py-2 text-center text-sm font-bold text-slate-600 dark:text-slate-300"
                           >
                             {formatBonusText(element.label.replace("回数", "確率"))}
                           </th>,
@@ -1623,7 +1604,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({
                           headers.push(
                             <th
                               key="bonus-combined"
-                              className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400"
+                              className="whitespace-nowrap px-2 py-2 text-center text-sm font-bold text-slate-600 dark:text-slate-300"
                             >
                               合成確率
                             </th>,
@@ -1633,7 +1614,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({
                         return headers;
                       })}
                     {config.specs?.payoutRatio && (
-                      <th className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
+                      <th className="whitespace-nowrap px-2 py-2 text-center text-sm font-bold text-slate-600 dark:text-slate-300">
                         機械割
                       </th>
                     )}
@@ -1651,7 +1632,7 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({
                               : "bg-white dark:bg-slate-900"
                           }
                         >
-                          <td className="px-2 py-2 text-center text-xs font-bold text-slate-700 dark:text-slate-300">
+                          <td className="whitespace-nowrap px-2 py-2 text-center text-base font-extrabold text-slate-800 dark:text-slate-100">
                             {config.specs?.settingLabels?.[setting] || setting}
                           </td>
                           {discriminationElements
@@ -1726,10 +1707,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({
                               cells.push(
                                 <td
                                   key={element.id}
-                                  className={`px-2 py-2 text-center text-xs tabular-nums ${
+                                  className={`whitespace-nowrap px-2 py-2 text-center text-base font-semibold tabular-nums ${
                                     isClosest
                                       ? "bg-red-100 font-extrabold text-red-600 dark:bg-red-900/30 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800"
-                                      : "text-slate-600 dark:text-slate-400"
+                                      : "text-slate-700 dark:text-slate-200"
                                   }`}
                                 >
                                   {formattedValue}
@@ -1793,10 +1774,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({
                                 cells.push(
                                   <td
                                     key="bonus-combined"
-                                    className={`px-2 py-2 text-center text-xs tabular-nums ${
+                                    className={`whitespace-nowrap px-2 py-2 text-center text-base font-semibold tabular-nums ${
                                       isCombinedClosest
                                         ? "bg-red-100 font-extrabold text-red-600 dark:bg-red-900/30 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800"
-                                        : "text-slate-600 dark:text-slate-400"
+                                        : "text-slate-700 dark:text-slate-200"
                                     }`}
                                   >
                                     1/{formattedCombined}
@@ -1809,10 +1790,10 @@ const MachinePageFactory: React.FC<MachinePageFactoryProps> = ({
                           {config.specs?.payoutRatio &&
                             config.specs.payoutRatio[idx] !== undefined && (
                               <td
-                                className={`px-2 py-2 text-center text-xs tabular-nums ${
+                                className={`whitespace-nowrap px-2 py-2 text-center text-base font-semibold tabular-nums ${
                                   mostLikelySetting?.setting === setting
                                     ? "bg-red-100 font-extrabold text-red-600 dark:bg-red-900/30 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800"
-                                    : "text-slate-600 dark:text-slate-400"
+                                    : "text-slate-700 dark:text-slate-200"
                                 }`}
                               >
                                 {config.specs.payoutRatio[idx].toFixed(1)}%

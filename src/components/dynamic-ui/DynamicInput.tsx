@@ -84,6 +84,12 @@ const BAR_THEMES: Record<BarThemeName, ElementTheme> = {
     accent: "#fef08a",
     plusTextColor: "#422006",
   },
+  // スマスロ サンダーVのBIGの契機（VBB）: 鮮やかな青（2026-10-29 ユーザー指定「真っ青」）
+  blue: {
+    bg: "#2563eb",
+    minusBg: "linear-gradient(145deg, #1d4ed8, #1e40af)",
+    accent: "#bfdbfe",
+  },
   // RBの契機（スマスロ ハナビ）・REGの契機（スマスロ タコスロ）: 灰色
   gray: {
     bg: "#64748b",
@@ -153,7 +159,8 @@ function getElementTheme(id: string): ElementTheme {
   }
 
   // ─── 既存テーマ ───
-  if (id === "bell-count") {
+  // bell-count（ハナベル・サンダーVのベル合計）と、サンダーVのベルA/B（bell-a-count 等。2026-10-26）
+  if (id === "bell-count" || id.startsWith("bell-")) {
     return {
       bg: "#f59e0b",
       minusBg: "linear-gradient(145deg, #d97706, #b45309)",

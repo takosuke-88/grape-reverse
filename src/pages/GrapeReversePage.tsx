@@ -1,7 +1,8 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link, Navigate } from "react-router-dom";
 import { useLocalStorage } from "../hooks/useLocalStorage";
-import { AVAILABLE_MACHINES, hasReverseCalcPage } from "../data/machine-list";
+import { AVAILABLE_MACHINES, hasDetailPage, hasReverseCalcPage } from "../data/machine-list";
+import { getReverseRole } from "../utils/reverse-role";
 import Seo from "../components/Seo";
 import { useConfirmDialog } from "../components/ui/ConfirmDialog";
 import { CONFIG_MAP } from "../data/machine-config-map";
@@ -67,7 +68,65 @@ type GrapeReverseModeResult = {
 type GrapeReverseCalcResult = {
   cherryAim: GrapeReverseModeResult | null;
   freePlay: GrapeReverseModeResult | null;
+  /** 取得率を入力する方式（specs.reverseCalcCustomRates）の結果。それ以外の機種は null */
+  custom: GrapeReverseModeResult | null;
 };
+
+/** 取得率の入力値を保存するキー（grapeData 内。値は%） */
+const RATE_KEYS = { cherry: "rate-cherry", suika: "rate-suika" } as const;
+
+/**
+ * 取得率（%）の入力欄。入力中の文字列は手元に持ち、数として読めたときだけ保存する。
+ * 空欄のまま離れたら初期値へ戻す。リセット等で外から値が変わったら表示も追従する。
+ */
+function RateInput({
+  label,
+  value,
+  onCommit,
+  fallback,
+}: {
+  label: string;
+  value: number;
+  onCommit: (v: number) => void;
+  fallback: number;
+}) {
+  const [text, setText] = useState(String(value));
+  const focused = useRef(false);
+  useEffect(() => {
+    if (!focused.current) setText(String(value));
+  }, [value]);
+  const clamp = (n: number) => Math.min(100, Math.max(0, n));
+  return (
+    <label className="flex min-w-0 flex-col gap-1">
+      <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{label}</span>
+      <span className="flex items-center gap-1">
+        <input
+          type="text"
+          inputMode="decimal"
+          value={text}
+          onFocus={() => {
+            focused.current = true;
+          }}
+          onChange={(e) => {
+            const t = e.target.value.replace(/[^0-9.]/g, "");
+            setText(t);
+            const n = parseFloat(t);
+            if (Number.isFinite(n)) onCommit(clamp(n));
+          }}
+          onBlur={() => {
+            focused.current = false;
+            const n = parseFloat(text);
+            const v = Number.isFinite(n) ? clamp(n) : fallback;
+            setText(String(v));
+            onCommit(v);
+          }}
+          className="w-full min-w-0 rounded-xl border-2 border-slate-300 bg-white px-3 py-3 text-right text-2xl font-black tabular-nums text-slate-800 focus:border-emerald-500 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+        />
+        <span className="shrink-0 text-lg font-bold text-slate-600 dark:text-slate-300">%</span>
+      </span>
+    </label>
+  );
+}
 
 function computeGrapeModeResult(
   grapeOut: number,
@@ -114,8 +173,13 @@ export default function GrapeReversePage() {
   const machineName = machineInfo?.name ?? machineId ?? "機種不明";
   const isHana = machineInfo?.category === "hana";
   const currentCategory = machineInfo?.category ?? "juggler";
-  const roleLabel = isHana ? "ベル" : "ぶどう";
-  const roleIcon = isHana ? "🔔" : "🍇";
+  // ベル/ぶどうはカテゴリだけでなく設定ファイルの小役でも決まる（スマスロ サンダーVはベル）
+  const role = getReverseRole(config, currentCategory);
+  const roleLabel = role.label;
+  const roleIcon = role.icon;
+  const showDetailPage = hasDetailPage(machineId);
+  // 取得率を入力する方式（スマスロ サンダーV）。初期値は設定ファイルの値（0〜1）
+  const customRates = config?.specs?.reverseCalcCustomRates;
 
   const [vibrationEnabled, setVibrationEnabled] = useLocalStorage<boolean>("grape-reverse-vibration", true);
   const [estimationResults, setEstimationResults] = useState<EstimationResult[] | null>(null);
@@ -134,6 +198,10 @@ export default function GrapeReversePage() {
   const diffAbs    = Math.max(0, grapeData["diff-coins"]  ?? 0);
   const diffSign: DiffSign = grapeData[DIFF_SIGN_KEY] === -1 ? -1 : 1;
   const diffCoins  = diffAbs * diffSign;
+  const defaultCherryRate = Math.round((customRates?.cherry ?? 1) * 1000) / 10;
+  const defaultSuikaRate = Math.round((customRates?.suika ?? 1) * 1000) / 10;
+  const cherryRate = grapeData[RATE_KEYS.cherry] ?? defaultCherryRate;
+  const suikaRate = grapeData[RATE_KEYS.suika] ?? defaultSuikaRate;
 
   // 符号は隣接する DiffSignToggle が示すため、ラベルは「差枚数」のまま。
   // かつて「差枚数（マイナス）」と連動させていたが、トグルを見出し右へ重ねる
@@ -170,6 +238,9 @@ export default function GrapeReversePage() {
     const CHERRY_DENOM =
       denoms?.cherry ?? (isHana ? 36.0 : REVERSE_CALC_FALLBACK.cherryDenom);
     const CHERRY_FREE_PLAY_RATE = resolveCherryFreePlayRate(denoms);
+    // スイカ（スマスロ サンダーV）。分母・払出の両方がある機種だけ差し引く
+    const SUIKA_DENOM = denoms?.suika;
+    const SUIKA_PAYOUT = payouts?.suika ?? 0;
 
     const coinIn = totalGames * 3;
     // 差枚 = 払出 − 投入（+なら勝ち）→ 総払出 = 総投入 + 差枚
@@ -184,6 +255,20 @@ export default function GrapeReversePage() {
 
     const roleOutBase = payout - bonusOut - replayCorrection;
 
+    if (customRates) {
+      // 取得率を入力する方式: チェリー・スイカとも「全部取れたときの払出 × 取得率」を差し引く
+      const suikaFull = SUIKA_DENOM ? (totalGames / SUIKA_DENOM) * SUIKA_PAYOUT : 0;
+      const custom = computeGrapeModeResult(
+        roleOutBase -
+          cherryCorrectionAim * (cherryRate / 100) -
+          suikaFull * (suikaRate / 100),
+        ROLE_PAYOUT,
+        totalGames,
+      );
+      if (!custom) return null;
+      return { cherryAim: null, freePlay: null, custom };
+    }
+
     const cherryAim = computeGrapeModeResult(
       roleOutBase - cherryCorrectionAim,
       ROLE_PAYOUT,
@@ -196,21 +281,21 @@ export default function GrapeReversePage() {
     );
 
     if (!cherryAim && !freePlay) return null;
-    return { cherryAim, freePlay };
-  }, [totalGames, bigCount, regCount, diffCoins, config, isHana]);
+    return { cherryAim, freePlay, custom: null };
+  }, [totalGames, bigCount, regCount, diffCoins, config, isHana, customRates, cherryRate, suikaRate]);
 
-  const cherryAimResult = calcResult?.cherryAim ?? null;
+  // 設定推定に使う結果（通常はチェリー狙い、取得率を入力する方式はその結果）
+  const cherryAimResult = calcResult?.custom ?? calcResult?.cherryAim ?? null;
 
   const estimationInputs = useMemo((): UserInputs | null => {
     if (!cherryAimResult || cherryAimResult.count <= 0 || totalGames <= 0) return null;
-    const grapeKey = isHana ? "bell-count" : "grape-count";
     return {
       "total-games": totalGames,
       "big-count": bigCount,
       "reg-count": regCount,
-      [grapeKey]: cherryAimResult.count,
+      [role.id]: cherryAimResult.count,
     };
-  }, [cherryAimResult, totalGames, bigCount, regCount, isHana]);
+  }, [cherryAimResult, totalGames, bigCount, regCount, role.id]);
 
   useEffect(() => {
     if (!config || !estimationInputs) {
@@ -286,7 +371,10 @@ export default function GrapeReversePage() {
                 onChange={(e) => { if (e.target.value) navigate(`/${e.target.value}/grape`); }}
                 className="min-w-0 flex-1 text-center font-bold text-base py-2.5 rounded-xl border-2 border-slate-300 bg-white text-slate-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"
               >
-                {AVAILABLE_MACHINES.filter((m) => m.category === (machineInfo?.category ?? "juggler")).map((m) => (
+                {/* 同じカテゴリで逆算ページを持つ機種だけ（BT/RTには逆算ページの無い機種がある） */}
+                {AVAILABLE_MACHINES.filter(
+                  (m) => m.category === (machineInfo?.category ?? "juggler") && hasReverseCalcPage(m.id),
+                ).map((m) => (
                   <option key={m.id} value={m.id}>{m.name}</option>
                 ))}
               </select>
@@ -322,6 +410,14 @@ export default function GrapeReversePage() {
               >
                 🎰 設定判別
               </Link>
+              {showDetailPage && (
+                <Link
+                  to={`/${machineId}/detail`}
+                  className="flex-1 rounded-lg bg-teal-700 text-white py-2 font-bold transition-opacity hover:opacity-90 active:opacity-80 text-xs text-center"
+                >
+                  🔍 詳細判別
+                </Link>
+              )}
               <button
                 type="button"
                 className="flex-1 rounded-lg bg-emerald-700 text-white py-2 font-bold text-xs"
@@ -332,7 +428,8 @@ export default function GrapeReversePage() {
                 to={`/${machineId}/specs`}
                 className="flex-1 rounded-lg bg-indigo-700 text-white py-2 text-xs font-bold transition-opacity hover:opacity-90 active:opacity-80 text-center"
               >
-                📊 機種スペック
+                {/* 4つ並び（詳細判別も持つ機種）は375pxに収まるよう短縮（2026-10-26） */}
+                {showDetailPage ? "📊 スペック" : "📊 機種スペック"}
               </Link>
             </div>
           </div>
@@ -405,6 +502,30 @@ export default function GrapeReversePage() {
             </div>
           </div>
 
+          {/* チェリー・スイカの取得率（取得率を入力する方式の機種だけ。スマスロ サンダーV） */}
+          {customRates && (
+            <div className="rounded-2xl bg-white dark:bg-slate-900 px-4 py-3 shadow-lg ring-1 ring-slate-200 dark:ring-slate-800 sm:px-6 sm:py-4">
+              <h2 className="mb-2 text-sm font-bold text-slate-700 dark:text-slate-200">小役の取得率</h2>
+              <div className="grid min-w-0 grid-cols-2 gap-4">
+                <RateInput
+                  label="チェリー"
+                  value={cherryRate}
+                  fallback={defaultCherryRate}
+                  onCommit={(v) => update(RATE_KEYS.cherry, v)}
+                />
+                <RateInput
+                  label="スイカ"
+                  value={suikaRate}
+                  fallback={defaultSuikaRate}
+                  onCommit={(v) => update(RATE_KEYS.suika, v)}
+                />
+              </div>
+              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                目押しの精度に合わせて入力してください。チェリーは狙えば100%、適当打ちで約66.7%。スイカは狙わないと約{defaultSuikaRate}%。
+              </p>
+            </div>
+          )}
+
           {/* ぶどう逆算結果 */}
           <div
             className={`rounded-2xl p-5 shadow-xl transition-all ${
@@ -423,6 +544,40 @@ export default function GrapeReversePage() {
                 <p className="text-sm text-slate-600 dark:text-slate-400">
                   総ゲーム数・差枚数を入力すると<br />リアルタイムで計算されます
                 </p>
+              </div>
+            ) : calcResult.custom ? (
+              <div className="space-y-3">
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800/40 dark:bg-emerald-950/50">
+                  <p className="mb-2 text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                    チェリー {cherryRate}%・スイカ {suikaRate}% で計算
+                  </p>
+                  <div
+                    className="text-center text-4xl font-black italic tabular-nums sm:text-5xl"
+                    style={{
+                      fontFamily: "'Urbanist', -apple-system, sans-serif",
+                      color: "#059669",
+                      textShadow:
+                        "0 0 16px rgba(52, 211, 153, 0.35), 0 0 32px rgba(52, 211, 153, 0.15)",
+                      letterSpacing: "-0.02em",
+                    }}
+                  >
+                    {`1/${calcResult.custom.prob.toFixed(2)}`}
+                  </div>
+                  <p
+                    className="mt-2 text-center text-base font-bold tabular-nums text-emerald-800 dark:text-emerald-300 sm:text-lg"
+                    style={{ fontFamily: "'Urbanist', -apple-system, sans-serif" }}
+                  >
+                    推計 {calcResult.custom.count.toLocaleString()} 回
+                  </p>
+                </div>
+                <p className="text-center text-xs text-slate-500 dark:text-slate-400">
+                  {totalGames.toLocaleString()} G
+                </p>
+                {totalGames < 1000 && (
+                  <p className="text-center text-xs text-amber-600/80 dark:text-amber-500/70">
+                    ⚠️ ゲーム数が少ないため参考値
+                  </p>
+                )}
               </div>
             ) : (
               <div className="space-y-3">
@@ -500,9 +655,7 @@ export default function GrapeReversePage() {
                 "total-games": totalGames,
                 "big-count": bigCount,
                 "reg-count": regCount,
-                ...(isHana
-                  ? { "bell-count": cherryAimResult?.count ?? 0 }
-                  : { "grape-count": cherryAimResult?.count ?? 0 }),
+                [role.id]: cherryAimResult?.count ?? 0,
               }}
               estimationResults={estimationResults}
               estimationError={estimationError}
